@@ -1,0 +1,46 @@
+#!/usr/bin/env -S -- bash -Eeu -O dotglob -O nullglob -O extglob -O failglob -O globstar
+
+set -o pipefail
+
+if ! (($#)); then
+  printf -- 'llm %s\n' request token
+  for F in "$0"*; do
+    F="${F##*/}"
+    F="${F/-/ }"
+    if [[ "$F" != 'llm' ]]; then
+      printf -- '%s\n' "$F"
+    fi
+  done
+  exit
+fi
+
+NETRC="$HOME/.netrc"
+edit() {
+  mkdir -v -p -- "${NETRC%/*}"
+  touch -- "$NETRC"
+  chmod 0600 "$NETRC"
+  # shellcheck disable=SC2154
+  exec -- $EDITOR "$NETRC"
+}
+
+if ! grep -F -- 'openai.com' "$NETRC" >/dev/null 2>&1; then
+  tee -- "$NETRC" <<-EOF
+machine api.openai.com
+password
+EOF
+  edit
+fi
+
+PROGRAM="${1:-""}"
+case "$PROGRAM" in
+r | request)
+  shift -- 1
+  ;;
+t | token)
+  edit
+  ;;
+*)
+  shift -- 1
+  exec -- "${0%'.sh'}-$PROGRAM.sh" "$@"
+  ;;
+esac
