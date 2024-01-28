@@ -17,12 +17,12 @@ MODEL="$(<"$BASE/etc/openai/model")"
 mkdir -v -p -- "$TMPDIR" >&2
 GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date --utc -Iseconds).json"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING
 
 while (($#)); do
   case "$1" in
   -s | --stream)
-    STREAMING=1
+    GPT_STREAMING="${GPT_STREAMING:-1}"
     shift -- 1
     ;;
   -t | --tee)
@@ -89,7 +89,9 @@ if [[ -t 0 ]]; then
   if [[ -z "$USR" ]]; then
     REEXEC=1
   fi
+
   read -r -- LINE <<<"$USR"
+  PRINT=1
   case "$LINE" in
   '>exit')
     exit 0
@@ -110,8 +112,21 @@ if [[ -t 0 ]]; then
     sed -E -e '$d' -i -- "$GPT_HISTORY"
     REEXEC=1
     ;;
-  *) ;;
+  '>buf')
+    GPT_STREAMING=0
+    REEXEC=1
+    ;;
+  '>unbuf')
+    GPT_STREAMING=1
+    REEXEC=1
+    ;;
+  *)
+    PRINT=0
+    ;;
   esac
+  if ((PRINT)); then
+    printf -- '%q\n' "$LINE" >&2
+  fi
 else
   USR="$(</dev/stdin)"
 fi
@@ -127,7 +142,7 @@ tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" | completion.sh "${STREAMING:-0}" "$RX"
+"${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
