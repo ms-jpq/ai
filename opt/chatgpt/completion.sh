@@ -6,12 +6,14 @@ TEE="$*"
 CURL=(
   curl.sh
   --data @-
+  --no-buffer
   -- 'https://api.openai.com/v1/chat/completions'
 )
 JQ=(
   jq
   --exit-status
   --join-output
+  --unbuffered
   '.choices[].delta.content // ""'
 )
 
@@ -24,6 +26,6 @@ hr() {
 }
 
 hr '?'
-"${CURL[@]}" | sed -E -n -e 's/data: (\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | glow
+"${CURL[@]}" | sed -E -n -u -e 's/data: (\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE"
 printf -- '\n' >&2
 hr '<'
