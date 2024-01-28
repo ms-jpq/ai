@@ -4,10 +4,10 @@ set -o pipefail
 
 PROMPT="$*"
 BASE="${0%/*}/.."
-MODEL="$(<"$BASE/etc/llmi-model")"
+MODEL="$(<"$BASE/etc/llm/image-model")"
 
 JSON="$(jq --exit-status --raw-input --arg model "$MODEL" '{ prompt: ., model: $model }' <<<"$PROMPT")"
-RESP="$("$BASE/libexec/llm-curl.sh" --data @- -- 'https://api.openai.com/v1/images/generations' <<<"$JSON")"
+RESP="$("$BASE/libexec/llm/curl.sh" --data @- -- 'https://api.openai.com/v1/images/generations' <<<"$JSON")"
 
 if jq --exit-status '.error' <<<"$RESP" >/dev/null; then
   jq <<<"$RESP" >&2

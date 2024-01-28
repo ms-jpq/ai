@@ -6,7 +6,7 @@ TMP="$1"
 TEE="${2:-"/dev/null"}"
 
 CURL=(
-  "${0%/*}/llm-curl.sh"
+  "${0%/*}/curl.sh"
   --write-out '%{http_code}'
   --output "$TMP"
   --data @-
