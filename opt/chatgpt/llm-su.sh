@@ -9,15 +9,9 @@ eval -- set -- "$GO"
 
 SELF="${0##*/}"
 BASE="${0%/*}/../.."
-TMPDIR="$BASE/var/chatgpt"
-
 ARGV=("$@")
+TMPDIR="$BASE/var/chatgpt"
 MODEL="$(<"$BASE/etc/openai/model")"
-
-mkdir -v -p -- "$TMPDIR" >&2
-GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date --utc -Iseconds).json"}"
-GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING
 
 while (($#)); do
   case "$1" in
@@ -31,10 +25,20 @@ while (($#)); do
     shift -- 2
     ;;
   -f | --file)
-    GPT_HISTORY="$TMPDIR/$2"
-    if ! [[ -f GPT_HISTORY ]]; then
-      set -x
-      exit 1
+    if [[ -z "${GPT_HISTORY:-""}" ]]; then
+      case "$2" in
+      !)
+        printf -v PREVIEW -- '%q ' jq --sort-keys --color-output .
+        GPT_HISTORY="$(printf -- '%s\0' "$TMPDIR"/*.json | fzf --read0 --preview="$PREVIEW {}")"
+        ;;
+      *)
+        GPT_HISTORY="$TMPDIR/$2"
+        if ! [[ -f GPT_HISTORY ]]; then
+          set -x
+          exit 1
+        fi
+        ;;
+      esac
     fi
     shift -- 2
     ;;
@@ -47,6 +51,11 @@ while (($#)); do
     ;;
   esac
 done
+
+mkdir -v -p -- "$TMPDIR" >&2
+GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- '+%Y-%m-%d %H:%M:%S').json"}"
+GPT_LVL="${GPT_LVL:-0}"
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING
 
 # shellcheck disable=SC2016
 JQ_APPEND=(
