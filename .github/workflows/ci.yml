@@ -1,0 +1,23 @@
+---
+on:
+  push:
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v3
+
+      - run: |-
+          gmake lint
+
+      - run: |-
+          gmake fmt
+          git diff --exit-code

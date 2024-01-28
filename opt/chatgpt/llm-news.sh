@@ -2,7 +2,9 @@
 
 set -o pipefail
 
-ETC="${0%/*}/../../etc"
+BASE="${0%/*}/../.."
+ENV="$BASE/.env"
+ETC="$BASE/etc"
 CURL=(
   curl
   --config "$ETC/curlrc"
@@ -13,5 +15,14 @@ if [[ -z "$*" ]]; then
   exec -- xargs -- "$0"
 fi
 
-printf -- '%s\n' "$*" >&2
-"${CURL[@]}" -- "$*" | read-html.js | llm-su.sh -- "$ETC/prompts/news.txt"
+touch -- "$ENV"
+set -a
+# shellcheck disable=SC1090
+source -- "$ENV"
+set +a
+
+URI="${NEWS_PROXY:-""}$*"
+
+printf -- '%s\n' "$URI" >&2
+
+"${CURL[@]}" -- "$URI" | read-html.js | llm-su.sh -- "$ETC/prompts/news.txt"
