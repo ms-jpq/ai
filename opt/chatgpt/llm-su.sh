@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-OPTS='s,t:'
-LONG_OPTS='stream,tee:'
+OPTS='s,t:,f:'
+LONG_OPTS='stream,tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -28,6 +28,14 @@ while (($#)); do
   -t | --tee)
     TEE="$2"
     mkdir -v -p -- "$TEE" >&2
+    shift -- 2
+    ;;
+  -f | --file)
+    GPT_HISTORY="$TMPDIR/$2"
+    if ! [[ -f GPT_HISTORY ]]; then
+      set -x
+      exit 1
+    fi
     shift -- 2
     ;;
   --)
