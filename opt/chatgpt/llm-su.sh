@@ -27,6 +27,7 @@ while (($#)); do
   -f | --file)
     if [[ -z "${GPT_HISTORY:-""}" ]]; then
       case "$2" in
+      -) ;;
       !)
         printf -v PREVIEW -- '%q ' jq --sort-keys --color-output .
         GPT_HISTORY="$(printf -- '%s\0' "$TMPDIR"/*.json | fzf --read0 --preview="$PREVIEW {}")"
@@ -57,10 +58,11 @@ while (($#)); do
   esac
 done
 
-mkdir -v -p -- "$TMPDIR" >&2
 GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- '+%Y-%m-%d %H:%M:%S').json"}"
 GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY GPT_LVL GPT_STREAMING
+mkdir -v -p -- "$TMPDIR" >&2
+touch -- "$GPT_HISTORY"
 
 # shellcheck disable=SC2016
 JQ_APPEND=(
