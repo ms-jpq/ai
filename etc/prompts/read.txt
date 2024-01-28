@@ -1,1 +1,1 @@
-What I am feeding you is an input
+Please summarize the user's text.

@@ -23,9 +23,6 @@ else
   ARGV=('read')
 fi
 
-while read -r -d '' -- LINE; do
-  URI="${NEWS_PROXY:-""}$LINE"
-  printf -- '%s\n' "$URI" >&2
-
-  "${CURL[@]}" -- "$URI" | read-html.js | llm-su.sh "${ARGV[@]}"
-done
+URI="${NEWS_PROXY:-""}$(</dev/stdin)"
+printf -- '%s\n' "$URI" >&2
+"${CURL[@]}" -- "$URI" | read-html.js | tee -- /dev/stderr | llm-su.sh "${ARGV[@]}"
