@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-OPTS='t:'
-LONG_OPTS='tee:'
+OPTS='s,t:'
+LONG_OPTS='stream,tee:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -21,14 +21,18 @@ export -- GPT_HISTORY GPT_LVL
 
 while (($#)); do
   case "$1" in
-  --)
+  -s | --stream)
+    STREAMING=1
     shift -- 1
-    break
     ;;
   -t | --tee)
     TEE="$2"
     mkdir -v -p -- "$TEE" >&2
     shift -- 2
+    ;;
+  --)
+    shift -- 1
+    break
     ;;
   *)
     exit 1
@@ -123,7 +127,7 @@ tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" | completion.sh "$RX"
+"${JQ_SEND[@]}" | completion.sh "${STREAMING:-0}" "$RX"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
