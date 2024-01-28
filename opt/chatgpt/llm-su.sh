@@ -31,6 +31,11 @@ while (($#)); do
         printf -v PREVIEW -- '%q ' jq --sort-keys --color-output .
         GPT_HISTORY="$(printf -- '%s\0' "$TMPDIR"/*.json | fzf --read0 --preview="$PREVIEW {}")"
         ;;
+      @)
+        FILES=("$TMPDIR"/*.json)
+        GPT_HISTORY="${FILES[-1]}"
+        jq --raw-output '.content' "$GPT_HISTORY" >&2
+        ;;
       *)
         GPT_HISTORY="$TMPDIR/$2"
         if ! [[ -f GPT_HISTORY ]]; then
