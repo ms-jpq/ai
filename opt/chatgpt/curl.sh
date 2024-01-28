@@ -2,10 +2,15 @@
 
 set -o pipefail
 
+BASE="${0%/*}/../.."
+COOKIE_JAR="$BASE/var/chatgpt.cookies"
+
 CURL=(
   curl
-  --config "${0%/*}/../../etc/curlrc"
+  --config "$BASE/etc/curlrc"
   --header 'Content-Type: application/json'
+  --cookie "$COOKIE_JAR"
+  --cookie-jar "$COOKIE_JAR"
   --no-progress-meter
   "$@"
 )

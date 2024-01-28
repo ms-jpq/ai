@@ -17,6 +17,15 @@ JQ=(
   '.choices[].delta.content // ""'
 )
 
+BAT=(
+  bat
+  --unbuffered
+  --style plain
+  --paging never
+  --language markdown
+  -- -
+)
+
 hr() {
   {
     printf -- '\n'
@@ -26,6 +35,6 @@ hr() {
 }
 
 hr '?'
-"${CURL[@]}" | sed -E -n -u -e 's/data: (\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE"
+"${CURL[@]}" | sed -E -n -u -e 's/data: (\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | "${BAT[@]}"
 printf -- '\n' >&2
 hr '<'
