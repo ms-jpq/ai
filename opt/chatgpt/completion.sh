@@ -2,13 +2,9 @@
 
 set -o pipefail
 
-TMP="$1"
-TEE="${2:-"/dev/null"}"
-
+TEE="$*"
 CURL=(
   curl.sh
-  --write-out '%{http_code}'
-  --output "$TMP"
   --data @-
   -- 'https://api.openai.com/v1/chat/completions'
 )
@@ -22,12 +18,12 @@ hr() {
 }
 
 hr '?'
-CODE="$("${CURL[@]}")"
-
-if ((CODE != 200)); then
-  jq <"$TMP" || cat -- "$TMP"
+if ! OUT="$("${CURL[@]}")"; then
+  {
+    jq <<<"$OUT" || printf -- '%s\n' "$OUT"
+  } >&2
 else
-  jq --exit-status --raw-output '.choices[].message.content' <"$TMP" | tee -- "$TEE" | glow
+  jq --exit-status --raw-output '.choices[].message.content' <<<"$OUT" | tee -- "$TEE" | glow
 fi
 printf -- '\n' >&2
 hr '^'

@@ -15,10 +15,9 @@ ARGV=("$@")
 MODEL="$(<"$BASE/etc/openai/model")"
 
 mkdir -v -p -- "$TMPDIR" >&2
-TMP="${TMP:-"$(mktemp)"}"
 GPT_HISTORY="${GPT_HISTORY:-"$(mktemp -p "$TMPDIR" XXXXXXXX.nl.json)"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- TMP GPT_HISTORY GPT_LVL
+export -- GPT_HISTORY GPT_LVL
 
 while (($#)); do
   case "$1" in
@@ -57,11 +56,7 @@ JQ_SEND=(
 )
 
 if ! [[ -s "$GPT_HISTORY" ]]; then
-  if [[ -t 0 ]] || [[ -z "$*" ]]; then
-    SYS="$(prompt.sh "$SELF-system" red "$*")"
-  else
-    SYS="$*"
-  fi
+  SYS="$(prompt.sh "$SELF-system" red "$*")"
 
   if [[ -v TEE ]]; then
     TX="$TEE/->.txt"
@@ -91,7 +86,7 @@ fi | tee -- "$TX" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" | completion.sh "$TMP" "$RX"
+"${JQ_SEND[@]}" | completion.sh "$RX"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))

@@ -7,14 +7,15 @@ COLOUR="$2"
 shift -- 2
 
 BASE=${0%/*}
-BANK="$BASE/../etc/prompts"
 EXT='txt'
+BANK="$BASE/../etc/prompts"
+mkdir -v -p -- "$BANK" >&2
 
 case "$*" in
--)
+'')
   exec -- "$BASE/readline.sh" "$COLOUR" "$NAME"
   ;;
-!)
+-)
   cd -- "$BANK"
   TXTS=(*."$EXT")
   printf -v PREVIEW -- '%q ' cat --
@@ -28,10 +29,15 @@ case "$*" in
   )
   for TXT in "${INPUT[@]}"; do
     if [[ -f "$TXT" ]]; then
-      break
+      exec -- cat -- "$TXT"
     fi
   done
   ;;
 esac
 
-exec -- cat -- "$TXT"
+if ! [[ -t 0 ]]; then
+  printf -- '%s' "$*"
+else
+  set -x
+  exit 1
+fi
