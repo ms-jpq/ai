@@ -2,9 +2,11 @@
 
 set -o pipefail
 
+BASE="$(realpath -- "$0")"
+
 if ! (($#)); then
   printf -- 'llm %s\n' request token
-  for F in "$0"*; do
+  for F in "$BASE-"*; do
     F="${F##*/}"
     F="${F/-/ }"
     if [[ "$F" != 'llm' ]]; then
@@ -41,6 +43,6 @@ t | token)
   ;;
 *)
   shift -- 1
-  exec -- "${0%'.sh'}-$PROGRAM.sh" "$@"
+  exec -- "${BASE%'.sh'}-$PROGRAM.sh" "$@"
   ;;
 esac

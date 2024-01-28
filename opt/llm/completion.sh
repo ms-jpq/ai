@@ -16,13 +16,13 @@ CURL=(
 hr() {
   {
     printf -- '\n'
-    "${0%/*}/hr.sh" "$@"
+    "${0%/*}/../../libexec/hr.sh" "$@"
     printf -- '\n'
   } >&2
 }
 
 hr '?'
-CODE="$(RECURSION=1 "${CURL[@]}")"
+CODE="$("${CURL[@]}")"
 
 if ((CODE != 200)); then
   jq <"$TMP" || cat -- "$TMP"

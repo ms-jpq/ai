@@ -14,9 +14,9 @@ GPT_HISTORY="${GPT_HISTORY:-"$(mktemp)"}"
 GPT_ROLE="${GPT_ROLE:-""}"
 export -- GPT_HISTORY TMP GPT_ROLE
 
-BASE="${0%/*}/.."
-LIBEXEC="$BASE/libexec"
-MODEL="$(<"$BASE/etc/llm/model")"
+BASE="${0%/*}"
+LIBEXEC="$BASE/../../libexec"
+MODEL="$(<"$BASE/../../etc/llm/model")"
 
 while (($#)); do
   case "$1" in
@@ -98,6 +98,6 @@ hr
 printf -v JQHIST -- '%q ' jq '.' "$GPT_HISTORY"
 printf -- '%s\n%s\n' "$JQHIST" "> $GPT_ROLE:" >&2
 
-"$LIBEXEC/llm/completion.sh" "$TMP" <<<"$QUERY"
+"$BASE/completion.sh" "$TMP" <<<"$QUERY"
 
 exec -- "$0" "${ARGV[@]}"

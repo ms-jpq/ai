@@ -14,9 +14,9 @@ GPT_HISTORY="${GPT_HISTORY:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY TMP GPT_LVL
 
-BASE="${0%/*}/.."
-LIBEXEC="$BASE/libexec"
-MODEL="$(<"$BASE/etc/llm/model")"
+BASE="${0%/*}"
+LIBEXEC="$BASE/../../libexec"
+MODEL="$(<"$BASE/../../etc/llm/model")"
 
 PROMPTS=()
 while (($#)); do
@@ -67,7 +67,7 @@ JQ2=(
   '{ model: $model, messages: . }'
   "$GPT_HISTORY"
 )
-EXEC=("$LIBEXEC/llm/completion.sh" "$TMP")
+EXEC=("$BASE/completion.sh" "$TMP")
 TEEF=(tee --)
 if [[ -v TEE ]]; then
   EXEC+=("$TEE/$GPT_LVL.rx.md")

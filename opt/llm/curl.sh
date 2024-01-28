@@ -4,8 +4,7 @@ set -o pipefail
 
 CURL=(
   curl
-  --fail-early
-  --location
+  --config "${0%/*}/../../etc/curlrc"
   --header 'Content-Type: application/json'
   --no-progress-meter
   "$@"
