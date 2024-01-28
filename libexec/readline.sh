@@ -4,6 +4,7 @@ set -o pipefail
 
 COLOUR="$1"
 shift -- 1
+NAME="$*"
 
 HIST="${0%/*}/../var/readline"
 mkdir -v -p -- "$HIST" >&2
@@ -14,7 +15,7 @@ ARGV=(
   --history-no-dupes 2
   --substitute-prompt '>: '
   --prompt-colour="$COLOUR"
-  --history-filename "$HIST/$*.history"
+  --history-filename "$HIST/$NAME.history"
   -- tee
 )
 

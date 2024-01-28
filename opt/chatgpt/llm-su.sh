@@ -15,7 +15,7 @@ ARGV=("$@")
 MODEL="$(<"$BASE/etc/openai/model")"
 
 mkdir -v -p -- "$TMPDIR" >&2
-GPT_HISTORY="${GPT_HISTORY:-"$(mktemp -p "$TMPDIR" XXXXXXXX.nl.json)"}"
+GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date --utc -Iseconds).json"}"
 GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY GPT_LVL
 

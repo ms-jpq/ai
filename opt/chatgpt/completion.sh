@@ -26,4 +26,4 @@ else
   jq --exit-status --raw-output '.choices[].message.content' <<<"$OUT" | tee -- "$TEE" | glow
 fi
 printf -- '\n' >&2
-hr '^'
+hr '<'
