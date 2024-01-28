@@ -17,9 +17,15 @@ set -a
 source -- "$ENV"
 set +a
 
+if (($#)); then
+  ARGV=("$@")
+else
+  ARGV=('read')
+fi
+
 while read -r -d '' -- LINE; do
   URI="${NEWS_PROXY:-""}$LINE"
   printf -- '%s\n' "$URI" >&2
 
-  "${CURL[@]}" -- "$URI" | read-html.js | llm-su.sh "$@"
+  "${CURL[@]}" -- "$URI" | read-html.js | llm-su.sh "${ARGV[@]}"
 done
