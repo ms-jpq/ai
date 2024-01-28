@@ -6,7 +6,7 @@ TMP="$1"
 TEE="${2:-"/dev/null"}"
 
 CURL=(
-  "${0%/*}/curl.sh"
+  curl.sh
   --write-out '%{http_code}'
   --output "$TMP"
   --data @-
@@ -16,7 +16,7 @@ CURL=(
 hr() {
   {
     printf -- '\n'
-    "${0%/*}/../../libexec/hr.sh" "$@"
+    hr.sh "$@"
     printf -- '\n'
   } >&2
 }

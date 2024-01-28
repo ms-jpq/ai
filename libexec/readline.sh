@@ -2,14 +2,20 @@
 
 set -o pipefail
 
+COLOUR="$1"
+shift -- 1
+
+HIST="${0%/*}/../var/readline"
+mkdir -v -p -- "$HIST" >&2
+
 ARGV=(
   rlwrap
   --one-shot
   --history-no-dupes 2
   --substitute-prompt '>: '
-  --prompt-colour=red
-  --command-name "${*##*/}"
-  -- cat
+  --prompt-colour="$COLOUR"
+  --history-filename "$HIST/$*.history"
+  -- tee
 )
 
 exec -- "${ARGV[@]}"

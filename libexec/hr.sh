@@ -14,4 +14,4 @@ done
 
 IFS='' RAW="${ACC[*]}"
 
-printf -- '%s\n' "${RAW:0:COLS}"
+printf -- '%s\n' "${RAW:0:COLS}" >&2

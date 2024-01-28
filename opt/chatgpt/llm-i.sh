@@ -3,11 +3,10 @@
 set -o pipefail
 
 PROMPT="$*"
-BASE="${0%/*}"
-MODEL="$(<"$BASE/../../etc/llm/image-model")"
+MODEL="$(<"${0%/*}/../../etc/llm/image-model")"
 
 JSON="$(jq --exit-status --raw-input --arg model "$MODEL" '{ prompt: ., model: $model }' <<<"$PROMPT")"
-RESP="$("$BASE/curl.sh" --data @- -- 'https://api.openai.com/v1/images/generations' <<<"$JSON")"
+RESP="$(curl.sh --data @- -- 'https://api.openai.com/v1/images/generations' <<<"$JSON")"
 
 if jq --exit-status '.error' <<<"$RESP" >/dev/null; then
   jq <<<"$RESP" >&2
