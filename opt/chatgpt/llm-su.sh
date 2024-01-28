@@ -62,7 +62,9 @@ if ! [[ -s "$GPT_HISTORY" ]]; then
     TX='/dev/null'
   fi
   SYS="$(prompt.sh "$SELF-system" red "$@")"
-  printf -- '%s\n' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >>"$GPT_HISTORY"
+  printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >>"$GPT_HISTORY"
+  printf -- '\n' >&2
+  hr.sh '>'
 fi
 
 if [[ -v TEE ]]; then
