@@ -11,15 +11,20 @@ EXT='txt'
 BANK="$BASE/../etc/prompts"
 mkdir -v -p -- "$BANK" >&2
 
-case "$*" in
+case "${1:-""}" in
 '')
   exec -- "$BASE/readline.sh" "$COLOUR" "$NAME"
   ;;
 -)
+  shift -- 1
+  printf -- '%s' "$*"
+  ;;
+@)
+  shift -- 1
   cd -- "$BANK"
   TXTS=(*."$EXT")
   printf -v PREVIEW -- '%q ' cat --
-  TXT="$(printf -- '%s\0' "${TXTS[@]}" | fzf --read0 --preview="$PREVIEW {}")"
+  TXT="$(printf -- '%s\0' "${TXTS[@]}" | fzf --read0 --preview="$PREVIEW {}" --query="$*")"
   ;;
 *)
   INPUT=(
@@ -32,12 +37,7 @@ case "$*" in
       exec -- cat -- "$TXT"
     fi
   done
-  ;;
-esac
-
-if ! [[ -t 0 ]]; then
-  printf -- '%s' "$*"
-else
   set -x
   exit 1
-fi
+  ;;
+esac

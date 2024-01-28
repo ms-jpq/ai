@@ -56,14 +56,12 @@ JQ_SEND=(
 )
 
 if ! [[ -s "$GPT_HISTORY" ]]; then
-  SYS="$(prompt.sh "$SELF-system" red "$*")"
-
   if [[ -v TEE ]]; then
     TX="$TEE/->.txt"
   else
     TX='/dev/null'
   fi
-
+  SYS="$(prompt.sh "$SELF-system" red "$@")"
   printf -- '%s\n' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >>"$GPT_HISTORY"
 fi
 
