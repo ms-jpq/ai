@@ -9,18 +9,28 @@ SHELL := bash
 .ONESHELL:
 .SHELLFLAGS := --norc --noprofile -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar -c
 
-.DEFAULT_GOAL := help
+.DEFAULT_GOAL := local
 
-.PHONY: clean clobber
+# TODO: gnumake 4.4 .WAIT
+.PHONY: clean clobber .WAIT
 
 clean:
 	shopt -u failglob
-	rm -v -rf --
+	rm -v -rf -- '$(TMP)' package-lock.json
 
 clobber: clean
 	shopt -u failglob
-	rm -v -rf --
+	rm -v -rf -- '$(VAR)' ./.venv/ ./node_modules/ ./tf/*/.terraform ./*.gpg ./facts/*.gpg
+
+
+CURL := curl --fail-with-body --location --no-progress-meter
+VAR := ./var
+TMP := $(VAR)/tmp
+
+$(VAR):
+	mkdir -v -p -- '$@'
+
+$(TMP): | $(VAR)
+	mkdir -v -p -- '$@'
 
 include makelib/*.mk
-
-
