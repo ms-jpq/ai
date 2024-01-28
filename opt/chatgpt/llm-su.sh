@@ -42,6 +42,7 @@ JQ_APPEND=(
   --exit-status
   --raw-input
   --slurp
+  --compact-output
   '{ role: $role, content: . }'
   --arg role
 )
@@ -51,7 +52,8 @@ JQ_SEND=(
   --exit-status
   --slurp
   --arg model "$MODEL"
-  '{ model: $model, messages: . }'
+  --compact-output
+  '{ stream: true, model: $model, messages: . }'
   "$GPT_HISTORY"
 )
 
@@ -62,8 +64,10 @@ if ! [[ -s "$GPT_HISTORY" ]]; then
     TX='/dev/null'
   fi
   SYS="$(prompt.sh "$SELF-system" red "$@")"
-  printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >>"$GPT_HISTORY"
-  printf -- '\n' >&2
+  if [[ -n "$SYS" ]]; then
+    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >>"$GPT_HISTORY"
+    printf -- '\n' >&2
+  fi
   hr.sh '>'
 fi
 
@@ -75,11 +79,44 @@ else
   RX="$TX"
 fi
 
+REEXEC=0
 if [[ -t 0 ]]; then
-  readline.sh green "$SELF-user"
+  USR="$(readline.sh green "$SELF-user")"
+  if [[ -z "$USR" ]]; then
+    REEXEC=1
+  fi
+  read -r -- LINE <<<"$USR"
+  case "$LINE" in
+  '>exit')
+    exit 0
+    ;;
+  '>cls')
+    REEXEC=1
+    clear
+    ;;
+  '>die')
+    REEXEC=1
+    sed -E -e '1!d' -i -- "$GPT_HISTORY"
+    ;;
+  '>diehard')
+    REEXEC=1
+    rm -v -fr -- "$GPT_HISTORY"
+    ;;
+  '>redo')
+    sed -E -e '$d' -i -- "$GPT_HISTORY"
+    REEXEC=1
+    ;;
+  *) ;;
+  esac
 else
-  cat --
-fi | tee -- "$TX" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
+  USR="$(</dev/stdin)"
+fi
+
+if ((REEXEC)); then
+  exec -- "$0" "${ARGV[@]}"
+fi
+
+tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
 
 {
   printf -v JQHIST -- '%q ' jq '.' "$GPT_HISTORY"

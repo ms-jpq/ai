@@ -10,8 +10,4 @@ CURL=(
   "$@"
 )
 
-if [[ -t 1 ]]; then
-  "${CURL[@]}" | jq --exit-status --sort-keys
-else
-  exec -- "${CURL[@]}"
-fi
+exec -- "${CURL[@]}"

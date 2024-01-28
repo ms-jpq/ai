@@ -16,7 +16,7 @@ ARGV=(
   --substitute-prompt '>: '
   --prompt-colour="$COLOUR"
   --history-filename "$HIST/$NAME.history"
-  -- tee
+  -- sed -E -e 's/^[[:space:]]+|[[:space:]]+$//g'
 )
 
 exec -- "${ARGV[@]}"

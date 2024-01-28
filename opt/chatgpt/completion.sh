@@ -8,6 +8,12 @@ CURL=(
   --data @-
   -- 'https://api.openai.com/v1/chat/completions'
 )
+JQ=(
+  jq
+  --exit-status
+  --join-output
+  '.choices[].delta.content // ""'
+)
 
 hr() {
   {
@@ -18,12 +24,6 @@ hr() {
 }
 
 hr '?'
-if ! OUT="$("${CURL[@]}")"; then
-  {
-    jq <<<"$OUT" || printf -- '%s\n' "$OUT"
-  } >&2
-else
-  jq --exit-status --raw-output '.choices[].message.content' <<<"$OUT" | tee -- "$TEE" | glow
-fi
+"${CURL[@]}" | sed -E -n -e 's/data: (\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | glow
 printf -- '\n' >&2
 hr '<'

@@ -11,18 +11,15 @@ CURL=(
   --no-progress-meter
 )
 
-if [[ -z "$*" ]]; then
-  exec -- xargs -- "$0"
-fi
-
 touch -- "$ENV"
 set -a
 # shellcheck disable=SC1090
 source -- "$ENV"
 set +a
 
-URI="${NEWS_PROXY:-""}$*"
+while read -r -d '' -- LINE; do
+  URI="${NEWS_PROXY:-""}$LINE"
+  printf -- '%s\n' "$URI" >&2
 
-printf -- '%s\n' "$URI" >&2
-
-"${CURL[@]}" -- "$URI" | read-html.js | llm-su.sh -- "$ETC/prompts/news.txt"
+  "${CURL[@]}" -- "$URI" | read-html.js | llm-su.sh "$@"
+done
