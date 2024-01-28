@@ -5,6 +5,7 @@
     "jsdom": "*"
   },
   "devDependencies": {
+    "@types/jsdom": "*",
     "@types/node": "*",
     "prettier": "*",
     "typescript": "*"
