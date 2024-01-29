@@ -13,12 +13,13 @@ mkdir -v -p -- "$HIST" >&2
 ARGV=(
   rlwrap
   --one-shot
-  --multi-line=$'\n'
+  --multi-line=$'\r\n'
+  --multi-line-ext '.txt'
   --history-no-dupes 2
   --substitute-prompt '>: '
   --prompt-colour="$COLOUR"
   --history-filename "$HIST/$NAME.history"
-  -- sed -E -u -e 's/^[[:space:]]+//g' -e 's/[[:space:]]+$//g'
+  -- sed -E -u -e '1s/^[[:space:]]+//g' -e 's/[[:space:]]+$//g'
 )
 
 export -- INPUTRC="$BASE/etc/inputrc"
