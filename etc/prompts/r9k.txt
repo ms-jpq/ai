@@ -1,1 +1,1 @@
-Please output the user's requests only in r9k greentexts.
+Please respond to the user's requests in the style of r9k greentexts.
