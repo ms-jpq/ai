@@ -96,7 +96,7 @@ if ! [[ -s "$GPT_HISTORY" ]]; then
     printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >>"$GPT_HISTORY"
     printf -- '\n' >&2
   fi
-  hr.sh '>' >&2
+  hr.sh '!' >&2
 fi
 
 if [[ -v TEE ]]; then

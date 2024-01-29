@@ -39,7 +39,7 @@ hr() {
   } >&2
 }
 
-hr '?'
-"${CURL[@]}" | sed -E -n -u -e 's/data: (\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | "${MDPAGER[@]}"
+hr '>'
+"${CURL[@]}" | sed -E -n -u -e 's/data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | "${MDPAGER[@]}"
 printf -- '\n' >&2
 hr '<'
