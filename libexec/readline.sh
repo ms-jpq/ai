@@ -19,7 +19,9 @@ ARGV=(
   --substitute-prompt '>: '
   --prompt-colour="$COLOUR"
   --history-filename "$HIST/$NAME.history"
-  -- sed -E -u -e '1s/^[[:space:]]+//g' -e 's/[[:space:]]+$//g'
+  -- sed -E -u
+  -e '1s/^[[:space:]]+//g'
+  -e 's/[[:space:]]+$//g'
 )
 
 export -- INPUTRC="$BASE/etc/inputrc"
