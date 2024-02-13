@@ -2,4 +2,13 @@
 
 set -o pipefail
 
-exec -- edit.sh "${0%/*}/../../etc/prompts/$*.txt"
+cd -- "${0%/*}/../../etc/prompts"
+NAME="$*"
+if [[ -z "$NAME" ]]; then
+  printf -v PREVIEW -- '%q ' cat --
+  NAME="$(printf -- '%s\0' ./*.txt | fzf --read0 --preview="$PREVIEW {}")"
+else
+  NAME="./$NAME.txt"
+fi
+
+exec -- edit.sh "$NAME"
