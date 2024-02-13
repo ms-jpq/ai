@@ -14,13 +14,16 @@ SHELL := bash
 # TODO: gnumake 4.4 .WAIT
 .PHONY: clean clobber .WAIT
 
+CLEAN :=
+CLOBBER :=
+
 clean:
 	shopt -u failglob
-	rm -v -rf -- '$(TMP)' package-lock.json
+	rm -v -rf -- '$(TMP)' package-lock.json $(CLEAN)
 
 clobber: clean
 	shopt -u failglob
-	rm -v -rf -- '$(VAR)' ./.venv/ ./node_modules/ ./tf/*/.terraform ./*.gpg ./facts/*.gpg
+	rm -v -rf -- '$(VAR)' ./.venv/ ./node_modules/ $(CLOBBER)
 
 
 CURL := curl --fail-with-body --location --no-progress-meter
@@ -34,3 +37,4 @@ $(TMP): | $(VAR)
 	mkdir -v -p -- '$@'
 
 include makelib/*.mk
+include opt/*/makelib/*.mk
