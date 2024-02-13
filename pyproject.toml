@@ -1,6 +1,7 @@
 [project]
-name    = "ai"
-version = "0"
+dependencies = ["numba"]
+name         = "ai"
+version      = "0"
 
 [project.optional-dependencies]
 dev = ["mypy", "types-PyYAML", "black", "isort"]
