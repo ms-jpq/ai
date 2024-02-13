@@ -4,10 +4,9 @@ set -o pipefail
 
 BASE="${0%/*}/../.."
 ENV="$BASE/.env"
-ETC="$BASE/etc"
 CURL=(
   curl
-  --config "$ETC/curlrc"
+  --config "$BASE/libexec/curlrc"
   --no-progress-meter
 )
 

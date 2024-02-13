@@ -6,8 +6,8 @@ COLOUR="$1"
 shift -- 1
 NAME="$*"
 
-BASE="${0%/*}/.."
-HIST="$BASE/var/readline"
+BASE="${0%/*}"
+HIST="$BASE/../var/readline"
 mkdir -v -p -- "$HIST" >&2
 
 ARGV=(
@@ -24,5 +24,5 @@ ARGV=(
   -e 's/[[:space:]]+$//g'
 )
 
-export -- INPUTRC="$BASE/etc/inputrc"
+export -- INPUTRC="$BASE/inputrc"
 exec -- "${ARGV[@]}"
