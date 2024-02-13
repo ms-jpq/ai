@@ -22,6 +22,9 @@ token)
   edit.sh
   chmod 0600 "$NETRC"
   ;;
+'')
+  exec -- find "$DIR" -name 'llm-*.sh' -exec basename -- '{}' ';'
+  ;;
 *)
   shift -- 1
   exec -- "${BASE%'.sh'}-$PROGRAM.sh" "$@"

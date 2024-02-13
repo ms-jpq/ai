@@ -3,7 +3,11 @@
 set -o pipefail
 
 PROMPT="$*"
-MODEL="$(<"${0%/*}/../../etc/llm/image-model")"
+if [[ -z "$PROMPT" ]]; then
+  PROMPT="$(readline.sh green "${0##*/}")"
+fi
+
+MODEL="$(<"${0%/*}/../../etc/openai/image-model")"
 
 JSON="$(jq --exit-status --raw-input --arg model "$MODEL" '{ prompt: ., model: $model }' <<<"$PROMPT")"
 RESP="$(curl.sh --data @- -- 'https://api.openai.com/v1/images/generations' <<<"$JSON")"
