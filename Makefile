@@ -36,5 +36,8 @@ $(VAR):
 $(TMP): | $(VAR)
 	mkdir -v -p -- '$@'
 
+mnt: | /mnt
+	ln -v -sf -- '$<' '$@'
+
 include makelib/*.mk
 include opt/*/makelib/*.mk
