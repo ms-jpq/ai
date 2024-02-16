@@ -4,4 +4,3 @@ set -o pipefail
 
 BASE="${0%/*}"
 PYTHONPATH="$BASE/mistral-src" exec -- "$BASE/.venv/bin/python3" -m main demo "$BASE/../../mnt"/mistral-*/
-
