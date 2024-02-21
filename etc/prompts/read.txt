@@ -1,1 +1,1 @@
-Please summarize the user's text.
+Please summarize the user's text in several paragraphs.
