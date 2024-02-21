@@ -120,7 +120,7 @@ if [[ -t 0 ]]; then
   '>exit')
     exit 0
     ;;
-  '>cls')
+  '>cls' | '>clear')
     REEXEC=1
     clear
     ;;
