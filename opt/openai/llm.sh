@@ -10,7 +10,7 @@ NETRC="$HOME/.netrc"
 if ! grep -F -- 'openai.com' "$NETRC" >/dev/null 2>&1; then
   tee -- "$NETRC" <<-EOF
 machine api.openai.com
-password
+  password
 EOF
   edit.sh "$NETRC"
   chmod 0600 "$NETRC"
