@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-OPTS='s,t:,f:'
-LONG_OPTS='stream,tee:,file:'
+OPTS='g,s,t:,f:'
+LONG_OPTS='gay,stream,tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -15,6 +15,10 @@ MODEL="$(<"$BASE/etc/openai/model")"
 
 while (($#)); do
   case "$1" in
+  -g | --gay)
+    MDPAGER="$BASE/.venv/bin/gay"
+    shift -- 1
+    ;;
   -s | --stream)
     GPT_STREAMING="${GPT_STREAMING:-1}"
     shift -- 1
@@ -60,7 +64,7 @@ done
 
 GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- '+%Y-%m-%d %H:%M:%S').json"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING MDPAGER
 mkdir -v -p -- "$TMPDIR" >&2
 touch -- "$GPT_HISTORY"
 

@@ -1,5 +1,5 @@
 [project]
-dependencies = ["numba"]
+dependencies = ["gay", "numba"]
 name         = "ai"
 version      = "0"
 

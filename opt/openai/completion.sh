@@ -19,16 +19,18 @@ JQ=(
   '.choices[].delta.content // ""'
 )
 
-if ((STREAMING)); then
-  MDPAGER=(tee --)
-else
-  MDPAGER=(
-    bat
-    --style plain
-    --paging never
-    --language markdown
-    -- -
-  )
+if ! [[ -v MDPAGER ]]; then
+  if ((STREAMING)); then
+    MDPAGER=(tee --)
+  else
+    MDPAGER=(
+      bat
+      --style plain
+      --paging never
+      --language markdown
+      -- -
+    )
+  fi
 fi
 
 hr() {
