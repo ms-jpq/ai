@@ -1,0 +1,10 @@
+query {
+  torrent {
+    suggestTags(query: {}) {
+      suggestions {
+        count
+        name
+      }
+    }
+  }
+}
