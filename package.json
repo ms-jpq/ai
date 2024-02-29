@@ -7,6 +7,7 @@
   "devDependencies": {
     "@types/jsdom": "*",
     "@types/node": "*",
+    "graphql": "*",
     "prettier": "*",
     "typescript": "*"
   },
