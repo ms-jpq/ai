@@ -1,6 +1,6 @@
 #!/usr/bin/env -S -- node
 
-import { buildClientSchema, getIntrospectionQuery } from "graphql";
+import { buildClientSchema, getIntrospectionQuery, printSchema } from "graphql";
 import { ok } from "node:assert";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
@@ -10,8 +10,13 @@ import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 
-const query = JSON.stringify({ query: getIntrospectionQuery() });
 const dir = dirname(fileURLToPath(import.meta.url));
+const query = JSON.stringify({
+  query: getIntrospectionQuery({
+    directiveIsRepeatable: true,
+    schemaDescription: true,
+  }),
+});
 
 const f = (async function* () {
   const abortion = new AbortController();
@@ -52,8 +57,8 @@ const f = (async function* () {
       await pipe;
       await code;
     }
-    const [status] = await code;
-    ok(!status);
+    const [status, signal] = await code;
+    ok(!status, JSON.stringify([status, signal], undefined, 2));
   } finally {
     abortion.abort();
   }
@@ -65,7 +70,8 @@ for await (const c of f) {
   acc.push(c);
 }
 const { data, error } = JSON.parse(acc.join(""));
-ok(!error);
+ok(!error, JSON.stringify(error, undefined, 2));
+
 const schema = buildClientSchema(data);
-const json = JSON.stringify(schema, null, 2);
-await pipeline(json, stdout);
+const graphql = printSchema(schema);
+await pipeline(graphql, stdout);
