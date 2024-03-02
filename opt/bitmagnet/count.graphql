@@ -1,9 +1,9 @@
-query {
+query TorrentSuggestTags {
   torrent {
-    suggestTags(query: {}) {
+    suggestTags(query: { prefix: "", exclusions: [] }) {
       suggestions {
-        count
         name
+        count
       }
     }
   }
