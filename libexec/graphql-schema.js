@@ -26,7 +26,7 @@ const f = (async function* () {
       [
         "--config",
         join(dir, "curlrc"),
-        "--data",
+        "--data-binary",
         "@-",
         "--header",
         "Content-Type: application/json",

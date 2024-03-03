@@ -7,7 +7,7 @@ TEE="$2"
 
 CURL=(
   curl.sh
-  --data @-
+  --data-binary @-
   --no-buffer
   -- 'https://api.openai.com/v1/chat/completions'
 )
