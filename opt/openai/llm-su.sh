@@ -130,11 +130,11 @@ if [[ -t 0 ]]; then
     ;;
   '>die')
     REEXEC=1
-    sed -E -e '1!d' -i -- "$GPT_HISTORY"
-    ;;
-  '>diehard')
-    REEXEC=1
     rm -v -fr -- "$GPT_HISTORY"
+    ;;
+  '>undo')
+    REEXEC=1
+    sed -E -e '1!d' -i -- "$GPT_HISTORY"
     ;;
   '>redo')
     sed -E -e '$d' -i -- "$GPT_HISTORY"
