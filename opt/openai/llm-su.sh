@@ -83,8 +83,9 @@ done
 
 DATE_FMT='+%Y-%m-%d %H:%M:%S'
 GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- "$DATE_FMT").json"}"
+GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING MDPAGER
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER
 mkdir -v -p -- "$TMPDIR" >&2
 touch -- "$GPT_HISTORY"
 
@@ -129,7 +130,7 @@ if [[ -v TEE ]]; then
   RX="$TEE/$GPT_LVL.rx.md"
 else
   TX='/dev/null'
-  RX='/dev/stderr'
+  RX="$GPT_TMP"
 fi
 
 REEXEC=0
@@ -189,8 +190,8 @@ tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-RESP="$("${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX" | cstrip.mjs | "${JQ_RECV[@]}")"
-printf -- '%s\n' "$RESP" >>"$GPT_HISTORY"
+"${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX"
+"${JQ_RECV[@]}" <"$RX" >>"$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
