@@ -8,13 +8,14 @@ GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
 SELF="${0##*/}"
-BASE="${0%/*}/../.."
+DIR="${0%/*}"
+BASE="$DIR/../.."
 ARGV=("$@")
 TMPDIR="$BASE/var/chatgpt"
 MODEL="$(<"$BASE/etc/openai/model")"
 
 if ! [[ -v PATHMOD ]]; then
-  PATH="$BASE/libexec:$SELF:$PATH"
+  PATH="$BASE/libexec:$DIR:$PATH"
   export -- PATHMOD=1
 fi
 
