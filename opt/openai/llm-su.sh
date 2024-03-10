@@ -19,12 +19,16 @@ if ! [[ -v PATHMOD ]]; then
   export -- PATHMOD=1
 fi
 
-if ! ((RANDOM % 16)); then
+clean() {
   for F in "$TMPDIR"/*.json; do
     if ! [[ -s "$F" ]]; then
       printf -- '%s\0' "$F"
     fi
   done | xargs -0 -r -- rm -v -f --
+}
+
+if ! ((RANDOM % 16)); then
+  clean
 fi
 
 while (($#)); do
@@ -44,6 +48,7 @@ while (($#)); do
     ;;
   -f | --file)
     if [[ -z "${GPT_HISTORY:-""}" ]]; then
+      clean
       case "$2" in
       -) ;;
       !)
@@ -76,7 +81,8 @@ while (($#)); do
   esac
 done
 
-GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- '+%Y-%m-%d %H:%M:%S').json"}"
+DATE_FMT='+%Y-%m-%d %H:%M:%S'
+GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- "$DATE_FMT").json"}"
 GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY GPT_LVL GPT_STREAMING MDPAGER
 mkdir -v -p -- "$TMPDIR" >&2
@@ -99,7 +105,7 @@ JQ_SEND=(
   --slurp
   --arg model "$MODEL"
   --compact-output
-  '{ stream: true, model: $model, messages: . }'
+  '{ stream: true, model: $model, messages: [.[] | select(.__gpt__ != true)] }'
   "$GPT_HISTORY"
 )
 
@@ -122,7 +128,7 @@ if [[ -v TEE ]]; then
   RX="$TEE/$GPT_LVL.rx.md"
 else
   TX='/dev/null'
-  RX="$TX"
+  RX='/dev/stderr'
 fi
 
 REEXEC=0
@@ -143,15 +149,13 @@ if [[ -t 0 ]]; then
     clear
     ;;
   '>die')
+    GPT_HISTORY="$TMPDIR/$(date -- "$DATE_FMT").json"
     REEXEC=1
-    rm -v -fr -- "$GPT_HISTORY"
     ;;
   '>undo')
-    REEXEC=1
-    sed -E -e '1!d' -i -- "$GPT_HISTORY"
-    ;;
-  '>redo')
-    sed -E -e '$d' -i -- "$GPT_HISTORY"
+    for _ in {1..2}; do
+      sed -E -e '$d' -i -- "$GPT_HISTORY"
+    done
     REEXEC=1
     ;;
   '>buf')
@@ -184,7 +188,8 @@ tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX"
+RESP="$("${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX" | cstrip.mjs)"
+jq --exit-status --raw-input --compact-output '{ __gpt__: true, content: . }' <<<"$RESP" >>"$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
