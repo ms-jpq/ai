@@ -189,7 +189,7 @@ tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
 } >&2
 
 RESP="$("${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX" | cstrip.mjs)"
-jq --exit-status --raw-input --compact-output '{ __gpt__: true, content: . }' <<<"$RESP" >>"$GPT_HISTORY"
+jq --exit-status --raw-input --slurp --compact-output '{ __gpt__: true, content: . }' <<<"$RESP" >>"$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
