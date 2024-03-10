@@ -25,6 +25,7 @@ case "${1:-""}" in
   TXTS=(*."$EXT")
   printf -v PREVIEW -- '%q ' cat --
   TXT="$(printf -- '%s\0' "${TXTS[@]}" | fzf --read0 --preview="$PREVIEW {}" --query="$*")"
+  exec -- cat -- "$TXT"
   ;;
 *)
   INPUT=(
