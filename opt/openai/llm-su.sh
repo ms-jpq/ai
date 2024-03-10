@@ -88,25 +88,26 @@ export -- GPT_HISTORY GPT_LVL GPT_STREAMING MDPAGER
 mkdir -v -p -- "$TMPDIR" >&2
 touch -- "$GPT_HISTORY"
 
+JQ_SC=(jq --exit-status --slurp --compact-output)
+
 # shellcheck disable=SC2016
 JQ_APPEND=(
-  jq
-  --exit-status
+  "${JQ_SC[@]}"
   --raw-input
-  --slurp
-  --compact-output
   '{ role: $role, content: . }'
   --arg role
 )
 # shellcheck disable=SC2016
 JQ_SEND=(
-  jq
-  --exit-status
-  --slurp
+  "${JQ_SC[@]}"
   --arg model "$MODEL"
-  --compact-output
   '{ stream: true, model: $model, messages: [.[] | select(.__gpt__ != true)] }'
   "$GPT_HISTORY"
+)
+JQ_RECV=(
+  "${JQ_SC[@]}"
+  --raw-input
+  '{ __gpt__: true, content: . }'
 )
 
 if ! [[ -s "$GPT_HISTORY" ]]; then
@@ -188,8 +189,8 @@ tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-RESP="$("${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX" | cstrip.mjs)"
-jq --exit-status --raw-input --slurp --compact-output '{ __gpt__: true, content: . }' <<<"$RESP" >>"$GPT_HISTORY"
+RESP="$("${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX" | cstrip.mjs | "${JQ_RECV[@]}")"
+printf -- '%s\n' "$RESP" >>"$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
