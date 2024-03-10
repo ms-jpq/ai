@@ -19,6 +19,14 @@ if ! [[ -v PATHMOD ]]; then
   export -- PATHMOD=1
 fi
 
+if ! ((RANDOM % 16)); then
+  for F in "$TMPDIR"/*.json; do
+    if ! [[ -s "$F" ]]; then
+      printf -- '%s\0' "$F"
+    fi
+  done | xargs -0 -r -- rm -v -f --
+fi
+
 while (($#)); do
   case "$1" in
   -g | --gay)
