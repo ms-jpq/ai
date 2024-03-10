@@ -27,6 +27,7 @@ token)
   ;;
 *)
   shift -- 1
+  export -- PATHMOD=1
   exec -- "${BASE%'.sh'}-$PROGRAM.sh" "$@"
   ;;
 esac

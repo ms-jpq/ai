@@ -13,6 +13,11 @@ ARGV=("$@")
 TMPDIR="$BASE/var/chatgpt"
 MODEL="$(<"$BASE/etc/openai/model")"
 
+if ! [[ -v PATHMOD ]]; then
+  PATH="$BASE/libexec:$SELF:$PATH"
+  export -- PATHMOD=1
+fi
+
 while (($#)); do
   case "$1" in
   -g | --gay)
