@@ -34,7 +34,7 @@ fi
 while (($#)); do
   case "$1" in
   -g | --gay)
-    MDPAGER="$BASE/.venv/bin/gay"
+    printf -v MDPAGER -- '%q ' "$BASE/.venv/bin/gay" '--unbuffered'
     shift -- 1
     ;;
   -s | --stream)

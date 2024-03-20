@@ -21,9 +21,9 @@ JQ=(
 
 if ! [[ -v MDPAGER ]]; then
   if ((STREAMING)); then
-    MDPAGER=(tee --)
+    MPAGER=(tee --)
   else
-    MDPAGER=(
+    MPAGER=(
       bat
       --style plain
       --paging never
@@ -31,6 +31,9 @@ if ! [[ -v MDPAGER ]]; then
       -- -
     )
   fi
+else
+  # shellcheck disable=SC2206
+  MPAGER=($MDPAGER)
 fi
 
 hr() {
@@ -42,6 +45,6 @@ hr() {
 }
 
 hr '>'
-"${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | "${MDPAGER[@]}" >&2
+"${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | "${MPAGER[@]}" >&2
 printf -- '\n' >&2
 hr '<'
