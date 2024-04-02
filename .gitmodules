@@ -1,3 +1,0 @@
-[submodule "opt/mistral/mistral-src"]
-	path = opt/mistral/mistral-src
-	url = https://github.com/mistralai/mistral-src
