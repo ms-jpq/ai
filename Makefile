@@ -40,4 +40,4 @@ mnt: | /mnt
 	ln -v -sf -- '$<' '$@'
 
 include makelib/*.mk
-include opt/*/makelib/*.mk
+# include opt/*/makelib/*.mk
