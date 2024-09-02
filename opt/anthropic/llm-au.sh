@@ -93,7 +93,7 @@ JQ_SEND=(
   "${JQ_SC[@]}"
   --arg model "$MODEL"
   --argjson tokens "$TOKENS"
-  '{ stream: true, model: $model, max_tokens: $tokens, messages: . }'
+  '{ stream: true, model: $model, max_tokens: $tokens, messages: ., system: (if $system == "" then [] else $system end) }'
   "$GPT_HISTORY"
 )
 JQ_RECV=(
@@ -114,6 +114,8 @@ if ! [[ -s $GPT_HISTORY ]]; then
     printf -- '\n' >&2
   fi
   hr.sh '!' >&2
+else
+  SYS=''
 fi
 
 if [[ -v TEE ]]; then
@@ -181,7 +183,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX"
+"${JQ_SEND[@]}" --arg system "$SYS" | completion.sh "${GPT_STREAMING:-0}" "$RX"
 "${JQ_RECV[@]}" < "$RX" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
