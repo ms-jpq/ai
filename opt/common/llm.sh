@@ -4,7 +4,8 @@ set -o pipefail
 
 BASE="$(realpath -- "$0")"
 DIR="${BASE%/*}"
-CURLHOME="$DIR/../../libexec"
+ROOT="$DIR/../.."
+CURLHOME="$ROOT/libexec"
 PATH="$CURLHOME:$PATH"
 DIRS=("$DIR" "$DIR/../anthropic" "$DIR/../openai")
 
@@ -15,6 +16,10 @@ case "$PROGRAM" in
   ;;
 *)
   shift -- 1
+  set -a
+  source -- "$ROOT/.env"
+  set +a
+
   for DIR in "${DIRS[@]}"; do
     SH="$DIR/llm-$PROGRAM.sh"
     if [[ -x $SH ]]; then

@@ -10,6 +10,8 @@ CURL=(
   --header 'Content-Type: application/json'
   --cookie "$COOKIE_JAR"
   --cookie-jar "$COOKIE_JAR"
+  --header 'Anthropic-Version: 2023-06-01'
+  --header "X-API-Key: $ANTHROPIC_API_KEY"
   --no-progress-meter
   "$@"
 )

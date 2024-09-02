@@ -13,6 +13,7 @@ BASE="$DIR/../.."
 ARGV=("$@")
 TMPDIR="$BASE/var/claude"
 MODEL="$(< "$BASE/etc/anthropic/model")"
+TOKENS="$(< "$BASE/etc/anthropic/max_tokens")"
 
 CLEAN=(find "$TMPDIR" -name '*.json' -empty -delete)
 
@@ -91,13 +92,14 @@ JQ_APPEND=(
 JQ_SEND=(
   "${JQ_SC[@]}"
   --arg model "$MODEL"
-  '{ stream: true, model: $model, messages: [.[] | select(.__gpt__ != true)] }'
+  --argjson tokens "$TOKENS"
+  '{ stream: true, model: $model, max_tokens: $tokens, messages: . }'
   "$GPT_HISTORY"
 )
 JQ_RECV=(
   "${JQ_SC[@]}"
   --raw-input
-  '{ __gpt__: true, content: . }'
+  '{ role: "assistant", content: . }'
 )
 
 if ! [[ -s $GPT_HISTORY ]]; then
@@ -108,7 +110,7 @@ if ! [[ -s $GPT_HISTORY ]]; then
   fi
   SYS="$(prompt.sh "$SELF-system" red "$@")"
   if [[ -n $SYS ]]; then
-    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >> "$GPT_HISTORY"
+    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX"
     printf -- '\n' >&2
   fi
   hr.sh '!' >&2
