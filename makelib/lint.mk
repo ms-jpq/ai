@@ -1,12 +1,9 @@
-.PHONY: lint mypy shellcheck hadolint
+.PHONY: lint mypy shellcheck
 
-lint: mypy shellcheck hadolint
+lint: mypy shellcheck
 
 mypy: ./.venv/bin
 	git ls-files --deduplicate -z -- '*.py' | xargs -0 -- '$</mypy' --
 
 shellcheck: $(VAR)/bin/shellcheck
 	git ls-files --deduplicate -z -- '*.*sh' | xargs -0 -- '$<' --
-
-hadolint: $(VAR)/bin/hadolint
-	git ls-files --deduplicate -z -- '*Dockerfile' | xargs -0 -- '$<' --
