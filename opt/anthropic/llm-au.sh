@@ -14,16 +14,10 @@ ARGV=("$@")
 TMPDIR="$BASE/var/claude"
 MODEL="$(< "$BASE/etc/anthropic/model")"
 
-clean() {
-  for F in "$TMPDIR"/*.json; do
-    if ! [[ -s $F ]]; then
-      printf -- '%s\0' "$F"
-    fi
-  done | xargs -0 -r -- rm -v -f --
-}
+CLEAN=(find "$TMPDIR" -name '*.json' -empty -delete)
 
 if ! ((RANDOM % 16)); then
-  clean
+  "${CLEAN[@]}"
 fi
 
 while (($#)); do
@@ -43,7 +37,7 @@ while (($#)); do
     ;;
   -f | --file)
     if [[ -z ${GPT_HISTORY:-""} ]]; then
-      clean
+      "${CLEAN[@]}"
       case "$2" in
       -) ;;
       !)
