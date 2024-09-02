@@ -20,6 +20,6 @@ else
 
   for URI in "${URIS[@]}"; do
     printf -- '%s\n' "$URI"
-    open -- "$URI" || true
+    curl --no-progress-meter -- "$URI" | "$HOME/.config/zsh/bin/icat"
   done
 fi

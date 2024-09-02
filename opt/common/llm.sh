@@ -4,7 +4,8 @@ set -o pipefail
 
 BASE="$(realpath -- "$0")"
 DIR="${BASE%/*}"
-PATH="$DIR/../../libexec:$PATH"
+CURLHOME="$DIR/../../libexec"
+PATH="$CURLHOME:$PATH"
 DIRS=("$DIR" "$DIR/../anthropic" "$DIR/../openai")
 
 PROGRAM="${1:-""}"

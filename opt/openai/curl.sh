@@ -7,7 +7,6 @@ COOKIE_JAR="$BASE/var/chatgpt.cookies"
 
 CURL=(
   curl
-  --config "$BASE/libexec/curlrc"
   --header 'Content-Type: application/json'
   --cookie "$COOKIE_JAR"
   --cookie-jar "$COOKIE_JAR"
