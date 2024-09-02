@@ -22,6 +22,6 @@ else
   ARGV=('read')
 fi
 
-URI="${NEWS_PROXY:-""}$(</dev/stdin)"
+URI="${NEWS_PROXY:-""}$(< /dev/stdin)"
 printf -- '%s\n' "$URI" >&2
 "${CURL[@]}" -- "$URI" | read-html.js | tee -- /dev/stderr | llm-su.sh "${ARGV[@]}"

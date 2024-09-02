@@ -3,20 +3,20 @@
 set -o pipefail
 
 PROMPT="$*"
-if [[ -z "$PROMPT" ]]; then
+if [[ -z $PROMPT ]]; then
   PROMPT="$(readline.sh green "${0##*/}")"
 fi
 
-MODEL="$(<"${0%/*}/../../etc/openai/image-model")"
+MODEL="$(< "${0%/*}/../../etc/openai/image-model")"
 
-JSON="$(jq --exit-status --raw-input --arg model "$MODEL" '{ prompt: ., model: $model }' <<<"$PROMPT")"
-RESP="$(curl.sh --data-binary @- -- 'https://api.openai.com/v1/images/generations' <<<"$JSON")"
+JSON="$(jq --exit-status --raw-input --arg model "$MODEL" '{ prompt: ., model: $model }' <<< "$PROMPT")"
+RESP="$(curl.sh --data-binary @- -- 'https://api.openai.com/v1/images/generations' <<< "$JSON")"
 
-if jq --exit-status '.error' <<<"$RESP" >/dev/null; then
-  jq <<<"$RESP" >&2
+if jq --exit-status '.error' <<< "$RESP" > /dev/null; then
+  jq <<< "$RESP" >&2
 else
-  US="$(jq --exit-status --raw-output '.data[].url' <<<"$RESP")"
-  readarray -t -- URIS <<<"$US"
+  US="$(jq --exit-status --raw-output '.data[].url' <<< "$RESP")"
+  readarray -t -- URIS <<< "$US"
 
   for URI in "${URIS[@]}"; do
     printf -- '%s\n' "$URI"

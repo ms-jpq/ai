@@ -23,4 +23,3 @@ GOARCH := arm64
 else
 GOARCH := amd64
 endif
-

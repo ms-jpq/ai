@@ -34,7 +34,7 @@ case "${1:-""}" in
     "$BANK/$*.$EXT"
   )
   for TXT in "${INPUT[@]}"; do
-    if [[ -f "$TXT" ]]; then
+    if [[ -f $TXT ]]; then
       exec -- cat -- "$TXT"
     fi
   done

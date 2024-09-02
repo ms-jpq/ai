@@ -12,7 +12,7 @@ DIR="${0%/*}"
 BASE="$DIR/../.."
 ARGV=("$@")
 TMPDIR="$BASE/var/chatgpt"
-MODEL="$(<"$BASE/etc/openai/model")"
+MODEL="$(< "$BASE/etc/openai/model")"
 
 if ! [[ -v PATHMOD ]]; then
   PATH="$BASE/libexec:$DIR:$PATH"
@@ -21,7 +21,7 @@ fi
 
 clean() {
   for F in "$TMPDIR"/*.json; do
-    if ! [[ -s "$F" ]]; then
+    if ! [[ -s $F ]]; then
       printf -- '%s\0' "$F"
     fi
   done | xargs -0 -r -- rm -v -f --
@@ -47,7 +47,7 @@ while (($#)); do
     shift -- 2
     ;;
   -f | --file)
-    if [[ -z "${GPT_HISTORY:-""}" ]]; then
+    if [[ -z ${GPT_HISTORY:-""} ]]; then
       clean
       case "$2" in
       -) ;;
@@ -111,15 +111,15 @@ JQ_RECV=(
   '{ __gpt__: true, content: . }'
 )
 
-if ! [[ -s "$GPT_HISTORY" ]]; then
+if ! [[ -s $GPT_HISTORY ]]; then
   if [[ -v TEE ]]; then
     TX="$TEE/->.txt"
   else
     TX='/dev/null'
   fi
   SYS="$(prompt.sh "$SELF-system" red "$@")"
-  if [[ -n "$SYS" ]]; then
-    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >>"$GPT_HISTORY"
+  if [[ -n $SYS ]]; then
+    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >> "$GPT_HISTORY"
     printf -- '\n' >&2
   fi
   hr.sh '!' >&2
@@ -136,11 +136,11 @@ fi
 REEXEC=0
 if [[ -t 0 ]]; then
   USR="$(readline.sh green "$SELF-user")"
-  if [[ -z "$USR" ]]; then
+  if [[ -z $USR ]]; then
     REEXEC=1
   fi
 
-  read -r -- LINE <<<"$USR"
+  read -r -- LINE <<< "$USR"
   PRINT=1
   case "$LINE" in
   '>exit')
@@ -176,14 +176,14 @@ if [[ -t 0 ]]; then
     printf -- '%q\n' "$LINE" >&2
   fi
 else
-  USR="$(</dev/stdin)"
+  USR="$(< /dev/stdin)"
 fi
 
 if ((REEXEC)); then
   exec -- "$0" "${ARGV[@]}"
 fi
 
-tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
+tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
 
 {
   printf -v JQHIST -- '%q ' jq '.' "$GPT_HISTORY"
@@ -191,7 +191,7 @@ tee -- "$TX" <<<"$USR" | "${JQ_APPEND[@]}" user >>"$GPT_HISTORY"
 } >&2
 
 "${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX"
-"${JQ_RECV[@]}" <"$RX" >>"$GPT_HISTORY"
+"${JQ_RECV[@]}" < "$RX" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))

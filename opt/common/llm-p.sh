@@ -4,7 +4,7 @@ set -o pipefail
 
 cd -- "${0%/*}/../../etc/prompts"
 NAME="$*"
-if [[ -z "$NAME" ]]; then
+if [[ -z $NAME ]]; then
   printf -v PREVIEW -- '%q ' cat --
   NAME="$(printf -- '%s\0' ./*.txt | fzf --read0 --preview="$PREVIEW {}")"
 else
