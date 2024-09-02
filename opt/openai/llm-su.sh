@@ -90,13 +90,13 @@ JQ_APPEND=(
 JQ_SEND=(
   "${JQ_SC[@]}"
   --arg model "$MODEL"
-  '{ stream: true, model: $model, messages: [.[] | select(.__gpt__ != true)] }'
+  '{ stream: true, model: $model, messages: . }'
   "$GPT_HISTORY"
 )
 JQ_RECV=(
   "${JQ_SC[@]}"
   --raw-input
-  '{ __gpt__: true, content: . }'
+  '{ role: "assistant", content: . }'
 )
 
 if ! [[ -s $GPT_HISTORY ]]; then
