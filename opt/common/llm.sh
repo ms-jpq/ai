@@ -4,16 +4,24 @@ set -o pipefail
 
 BASE="$(realpath -- "$0")"
 DIR="${BASE%/*}"
-PATH="$DIR/../../libexec:$DIR:$PATH"
+PATH="$DIR/../../libexec:$PATH"
+DIRS=("$DIR" "$DIR/../anthropic" "$DIR/../openai")
 
 PROGRAM="${1:-""}"
 case "$PROGRAM" in
 '')
-  exec -- find "$DIR" -name 'llm-*.sh' -exec basename -- '{}' ';'
+  exec -- find "${DIRS[@]}" -name 'llm-*.sh' -exec basename -- '{}' ';'
   ;;
 *)
   shift -- 1
-  export -- PATHMOD=1
-  exec -- "${BASE%'.sh'}-$PROGRAM.sh" "$@"
+  for DIR in "${DIRS[@]}"; do
+    SH="$DIR/llm-$PROGRAM.sh"
+    if [[ -x $SH ]]; then
+      PATH="$DIR:$PATH"
+      exec -- "$SH" "$@"
+    fi
+  done
+  set -x
+  exit 127
   ;;
 esac

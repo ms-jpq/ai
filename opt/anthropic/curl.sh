@@ -3,7 +3,7 @@
 set -o pipefail
 
 BASE="${0%/*}/../.."
-COOKIE_JAR="$BASE/var/chatgpt.cookies"
+COOKIE_JAR="$BASE/var/claude.cookies"
 
 CURL=(
   curl

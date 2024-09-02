@@ -14,11 +14,6 @@ ARGV=("$@")
 TMPDIR="$BASE/var/chatgpt"
 MODEL="$(< "$BASE/etc/openai/model")"
 
-if ! [[ -v PATHMOD ]]; then
-  PATH="$BASE/libexec:$DIR:$PATH"
-  export -- PATHMOD=1
-fi
-
 clean() {
   for F in "$TMPDIR"/*.json; do
     if ! [[ -s $F ]]; then
