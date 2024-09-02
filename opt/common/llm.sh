@@ -17,6 +17,7 @@ case "$PROGRAM" in
 *)
   shift -- 1
   set -a
+  # shellcheck disable=SC1091
   source -- "$ROOT/.env"
   set +a
 
