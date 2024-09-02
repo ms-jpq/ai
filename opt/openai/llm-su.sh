@@ -13,8 +13,8 @@ BASE="$DIR/../.."
 ARGV=("$@")
 TMPDIR="$BASE/var/chatgpt"
 MODEL="$(< "$BASE/etc/openai/model")"
-CLEAN=(find "$TMPDIR" -name '*.json' -empty -delete)
 
+CLEAN=(find "$TMPDIR" '(' -name '*.json' -empty ')' -or -name 'tmp.*' -delete)
 if ! ((RANDOM % 16)); then
   "${CLEAN[@]}"
 fi

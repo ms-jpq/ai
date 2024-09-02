@@ -15,8 +15,7 @@ TMPDIR="$BASE/var/claude"
 MODEL="$(< "$BASE/etc/anthropic/model")"
 TOKENS="$(< "$BASE/etc/anthropic/max_tokens")"
 
-CLEAN=(find "$TMPDIR" -name '*.json' -empty -delete)
-
+CLEAN=(find "$TMPDIR" '(' -name '*.json' -empty ')' -or -name 'tmp.*' -delete)
 if ! ((RANDOM % 16)); then
   "${CLEAN[@]}"
 fi
