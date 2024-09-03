@@ -74,7 +74,7 @@ DATE_FMT='+%Y-%m-%d %H:%M:%S'
 GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- "$DATE_FMT").json"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER GPT_SYS
 mkdir -v -p -- "$TMPDIR" >&2
 touch -- "$GPT_HISTORY"
 
@@ -107,14 +107,14 @@ if ! [[ -s $GPT_HISTORY ]]; then
   else
     TX='/dev/null'
   fi
-  SYS="$(prompt.sh "$SELF-system" red "$@")"
-  if [[ -n $SYS ]]; then
-    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX"
+  GPT_SYS="$(prompt.sh "$SELF-system" red "$@")"
+  if [[ -n $GPT_SYS ]]; then
+    printf -- '%s' "$GPT_SYS" | tee -- "$TX" >&2
     printf -- '\n' >&2
   fi
   hr.sh '!' >&2
 else
-  SYS=''
+  GPT_SYS="${GPT_SYS:-""}"
 fi
 
 if [[ -v TEE ]]; then
@@ -182,7 +182,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" --arg system "$SYS" | completion.sh "${GPT_STREAMING:-0}" "$RX"
+"${JQ_SEND[@]}" --arg system "$GPT_SYS" | completion.sh "${GPT_STREAMING:-0}" "$RX"
 "${JQ_RECV[@]}" < "$RX" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
