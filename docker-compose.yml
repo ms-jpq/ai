@@ -83,9 +83,9 @@ services:
     labels:
       com.centurylinklabs.watchtower.enable: true
     environment:
-      # NEXT_PUBLIC_BASE_PATH:
       ANTHROPIC_API_KEY:
       OPENAI_API_KEY:
+      WEBUI_AUTH: false
     ports:
       - 8008:8080
     volumes:
