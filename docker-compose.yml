@@ -11,6 +11,24 @@ services:
     volumes:
       - /run/docker.sock:/var/run/docker.sock:ro
 
+  ollama:
+    image: docker.io/ollama/ollama:latest
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities:
+                - gpu
+    ports:
+      - 11434:11434
+    volumes:
+      - /media/shared/ollama:/root/.ollama
+
   tabby:
     image: docker.io/tabbyml/tabby:latest
     restart: unless-stopped
@@ -42,6 +60,8 @@ services:
       com.centurylinklabs.watchtower.enable: true
     environment:
       SEARXNG_API_URL:
+    ports:
+      - 3001:3001
     volumes:
       - data:/home/perplexica/data
       - ./opt/perplexica/config.toml:/home/perplexica/config.toml
@@ -51,8 +71,8 @@ services:
       context: ./opt/perplexica/Perplexica
       dockerfile: app.dockerfile
       args:
-        NEXT_PUBLIC_API_URL: &api_uri http://perplexica-backend:3001/api
-        NEXT_PUBLIC_WS_URL: &ws_uri ws://perplexica-backend:3001
+        NEXT_PUBLIC_API_URL: &api_uri http://${HOSTNAME}:3001/api
+        NEXT_PUBLIC_WS_URL: &ws_uri ws://${HOSTNAME}:3001
     # image: itzcrazykns1337/perplexica-frontend:main
     restart: unless-stopped
     labels:
