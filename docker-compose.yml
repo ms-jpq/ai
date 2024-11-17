@@ -42,6 +42,8 @@ services:
               count: all
               capabilities:
                 - gpu
+    environment:
+      TABBY_WEBSERVER_JWT_TOKEN_SECRET:
     command:
       - serve
       - --device
@@ -53,8 +55,41 @@ services:
     volumes:
       - /media/shared/tabby:/data
 
+  traefik:
+    image: docker.io/library/traefik:latest
+    mem_swappiness: 0
+    healthcheck:
+      test:
+        - CMD
+        - wget
+        - --quiet
+        - --spider
+        - --timeout
+        - "1"
+        - --
+        - localhost:8080
+    labels:
+      traefik.enable: true
+      traefik.http.services.traefik.loadbalancer.server.port: 8080
+    ports:
+      - 8888:8888
+    volumes:
+      - /run/docker.sock:/run/docker.sock:ro
+      - ./:/etc/traefik:ro
+
+  lobe-chat:
+    image: docker.io/lobehub/lobe-chat:latest
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    environment:
+      ANTHROPIC_API_KEY:
+      OPENAI_API_KEY:
+    ports:
+      - 3210:3210
+
   perplexica-backend:
-    image: itzcrazykns1337/perplexica-backend:main
+    image: docker.io/itzcrazykns1337/perplexica-backend:main
     restart: unless-stopped
     labels:
       com.centurylinklabs.watchtower.enable: true
