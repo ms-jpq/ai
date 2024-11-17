@@ -47,15 +47,21 @@ services:
       - ./opt/perplexica/config.toml:/home/perplexica/config.toml
 
   perplexica-frontend:
-    image: itzcrazykns1337/perplexica-frontend:main
+    build:
+      context: ./opt/perplexica/Perplexica
+      dockerfile: app.dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: &api_uri http://perplexica-backend:3001/api
+        NEXT_PUBLIC_WS_URL: &ws_uri ws://perplexica-backend:3001
+    # image: itzcrazykns1337/perplexica-frontend:main
     restart: unless-stopped
     labels:
       com.centurylinklabs.watchtower.enable: true
     depends_on:
       - perplexica-backend
     environment:
-      NEXT_PUBLIC_API_URL: http://perplexica-backend:3001/api
-      NEXT_PUBLIC_WS_URL: ws://perplexica-backend:3001
+      NEXT_PUBLIC_API_URL: *api_uri
+      NEXT_PUBLIC_WS_URL: *ws_uri
     ports:
       - 3000:3000
 
