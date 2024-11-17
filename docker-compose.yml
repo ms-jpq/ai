@@ -1,0 +1,63 @@
+---
+services:
+  watchtower:
+    image: docker.io/containrrr/watchtower:latest
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    environment:
+      WATCHTOWER_CLEANUP: true
+      WATCHTOWER_LABEL_ENABLE: true
+    volumes:
+      - /run/docker.sock:/var/run/docker.sock:ro
+
+  tabby:
+    image: docker.io/tabbyml/tabby:latest
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities:
+                - gpu
+    command:
+      - serve
+      - --device
+      - cuda
+      - --model
+      - StarCoder-3B
+    ports:
+      - 6060:8080
+    volumes:
+      - /media/shared/tabby:/data
+
+  perplexica-backend:
+    image: itzcrazykns1337/perplexica-backend:main
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    environment:
+      SEARXNG_API_URL:
+    volumes:
+      - data:/home/perplexica/data
+      - ./opt/perplexica/config.toml:/home/perplexica/config.toml
+
+  perplexica-frontend:
+    image: itzcrazykns1337/perplexica-frontend:main
+    restart: unless-stopped
+    labels:
+      com.centurylinklabs.watchtower.enable: true
+    depends_on:
+      - perplexica-backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://perplexica-backend:3001/api
+      NEXT_PUBLIC_WS_URL: ws://perplexica-backend:3001
+    ports:
+      - 3000:3000
+
+volumes:
+  data:
