@@ -77,31 +77,19 @@ services:
       - /run/docker.sock:/run/docker.sock:ro
       - ./:/etc/traefik:ro
 
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:main
-    restart: unless-stopped
-    labels:
-      com.centurylinklabs.watchtower.enable: true
-    environment:
-      ANTHROPIC_API_KEY:
-      OPENAI_API_KEY:
-      WEBUI_AUTH: false
-    ports:
-      - 8008:8080
-    volumes:
-      - openwebui:/app/backend/data
-
-  lobe-chat:
-    image: docker.io/lobehub/lobe-chat:latest
-    restart: unless-stopped
-    labels:
-      com.centurylinklabs.watchtower.enable: true
-    environment:
-      # NEXT_PUBLIC_BASE_PATH:
-      ANTHROPIC_API_KEY:
-      OPENAI_API_KEY:
-    ports:
-      - 3210:3210
+  # open-webui:
+  #   image: ghcr.io/open-webui/open-webui:main
+  #   restart: unless-stopped
+  #   labels:
+  #     com.centurylinklabs.watchtower.enable: true
+  #   environment:
+  #     ANTHROPIC_API_KEY:
+  #     OPENAI_API_KEY:
+  #     WEBUI_AUTH: false
+  #   ports:
+  #     - 8008:8080
+  #   volumes:
+  #     - openwebui:/app/backend/data
 
   perplexica-backend:
     image: docker.io/itzcrazykns1337/perplexica-backend:main
