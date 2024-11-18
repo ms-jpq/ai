@@ -1,0 +1,11 @@
+server {
+  listen 80;
+
+  location / {
+    proxy_set_header Accept-Encoding "";
+    sub_filter       "://127.0.0.1:3001" "://$host:3001";
+    sub_filter_once  off;
+    sub_filter_types *;
+    proxy_pass       http://perplexica-web:3000;
+  }
+}
