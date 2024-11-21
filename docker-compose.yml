@@ -11,23 +11,23 @@ services:
     volumes:
       - /run/docker.sock:/var/run/docker.sock:ro
 
-  ollama:
-    image: docker.io/ollama/ollama:latest
-    restart: unless-stopped
-    labels:
-      com.centurylinklabs.watchtower.enable: true
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities:
-                - gpu
-    ports:
-      - 11434:11434
-    volumes:
-      - /media/shared/ollama:/root/.ollama
+  # ollama:
+  #   image: docker.io/ollama/ollama:latest
+  #   restart: unless-stopped
+  #   labels:
+  #     com.centurylinklabs.watchtower.enable: true
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities:
+  #               - gpu
+  #   ports:
+  #     - 11434:11434
+  #   volumes:
+  #     - /media/shared/ollama:/root/.ollama
 
   tabby:
     image: docker.io/tabbyml/tabby:latest
