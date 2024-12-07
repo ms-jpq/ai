@@ -9,7 +9,7 @@ SHELL := bash
 .ONESHELL:
 .SHELLFLAGS := --norc --noprofile -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar -c
 
-.DEFAULT_GOAL := local
+.DEFAULT_GOAL := help
 
 # TODO: gnumake 4.4 .WAIT
 .PHONY: clean clobber .WAIT
