@@ -68,7 +68,7 @@ if ! [[ -s $GPT_HISTORY ]]; then
   fi
   SYS="$(prompt.sh "$SELF-system" red "$@")"
   if [[ -n $SYS ]]; then
-    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >> "$GPT_HISTORY"
+    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" 'system' >> "$GPT_HISTORY"
     printf -- '\n'
   fi
   hr.sh '!'
@@ -97,7 +97,9 @@ if [[ -t 0 ]]; then
     clear
     ;;
   '>die')
+    SYSTEM="$(sed -E -n -e '1p' -- "$GPT_HISTORY")"
     GPT_HISTORY="$(nljson-ledger.sh 'chatty' '')"
+    printf -- '%s' "$SYSTEM" > "$GPT_HISTORY"
     REEXEC=1
     ;;
   '>undo')
