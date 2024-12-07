@@ -39,8 +39,8 @@ for N in {1..3}; do
   } | "$LIBEXEC/md-pager.sh" 0
 done | less || CODE=$?
 
-if ((CODE)) && ((CODE != 141)); then
-  exit "$CODE"
-else
-  exec -- "$0" "$@"
+if ((CODE == 141)); then
+  CODE=0
 fi
+
+exit "$CODE"

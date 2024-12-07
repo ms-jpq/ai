@@ -15,8 +15,8 @@ read -r -d '' -- JQ <<- 'JQ' || true
   "# # \(.metadata.title | gsub("\\s+"; " ") | @html)",
   "## [➜](\(.metadata.url | @html))",
   .pageContent | @html
-] | join("\n")),
-"---",
+] | join("\n\n")),
+"\n---\n",
 .message
 JQ
 
