@@ -6,7 +6,8 @@ ARGV=("$@")
 
 NAME="$1"
 CHAT_PAGER="$2"
-shift -- 2
+CHAT_STREAMING="$3"
+shift -- 3
 
 CHAT_HISTORY="${CHAT_HISTORY:-"$(nljson-ledger.sh "$NAME" '')"}"
 CHAT_TMP="${CHAT_TMP:-"$(mktemp)"}"
@@ -98,7 +99,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$CHAT_HISTORY"
   printf -- '\n%s\n' "$JQ_HIST"
 } >&2
 
-"${JQ_SEND[@]}" | "$CHAT_PAGER" "${CHAT_STREAMING:-2}" "$RX"
+"${JQ_SEND[@]}" | "$CHAT_PAGER" "$CHAT_STREAMING" "$RX"
 "${JQ_APPEND[@]}" 'assistant' < "$RX" >> "$CHAT_HISTORY"
 
 if [[ -t 0 ]]; then

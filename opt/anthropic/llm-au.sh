@@ -14,10 +14,11 @@ TOKENS="$(< "$BASE/etc/anthropic/max_tokens")"
 
 export -- CHAT_TEE CHAT_HISTORY
 
+CHAT_STREAMING=2
 while (($#)); do
   case "$1" in
   -s | --stream)
-    CHAT_STREAMING="${CHAT_STREAMING:-"$2"}"
+    CHAT_STREAMING="$2"
     shift -- 2
     ;;
   -t | --tee)
@@ -43,4 +44,4 @@ read -r -d '' -- JQ <<- 'JQ' || true
 { stream: true, model: $model, max_tokens: $tokens, messages: .[1:], system: .[0].content }
 JQ
 
-exec -- llm-chat.sh "$SELF" completion.sh --arg model "$MODEL" --argjson tokens "$TOKENS" "$JQ"
+exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" --arg model "$MODEL" --argjson tokens "$TOKENS" "$JQ"
