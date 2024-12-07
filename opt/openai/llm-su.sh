@@ -15,10 +15,6 @@ MODEL="$(< "$BASE/etc/openai/model")"
 
 while (($#)); do
   case "$1" in
-  -g | --gay)
-    printf -v MDPAGER -- '%q ' "$BASE/.venv/bin/gay" '--unbuffered'
-    shift -- 1
-    ;;
   -s | --stream)
     GPT_STREAMING="${GPT_STREAMING:-1}"
     shift -- 1
