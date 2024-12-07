@@ -7,7 +7,6 @@ COOKIE_JAR="$BASE/var/perplexica.cookies"
 
 CURL=(
   curl
-  --header 'Content-Type: application/json'
   --cookie "$COOKIE_JAR"
   --cookie-jar "$COOKIE_JAR"
   "$@"

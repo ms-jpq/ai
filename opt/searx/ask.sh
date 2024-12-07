@@ -28,17 +28,17 @@ read -r -d '' -- JQ <<- 'JQ' || true
 JQ
 J=(jq --unbuffered --raw-output "$JQ")
 
-SIG=0
+CODE=0
 for N in {1..3}; do
   {
     # shellcheck disable=SC2154
     "${CURL[@]}" -- "$SEARX_URI/search?format=json&pageno=$N&q=$QUERY" | "${J[@]}"
     printf -- '\n---\n'
   } | CLICOLOR_FORCE=1 COLORTERM=truecolor "${PAGE[@]}"
-done | less || SIG=$?
+done | less || CODE=$?
 
-if ((SIG)) && ((SIG != 141)); then
-  exit "$SIG"
+if ((CODE)) && ((CODE != 141)); then
+  exit "$CODE"
 else
   exec -- "$0" "$@"
 fi
