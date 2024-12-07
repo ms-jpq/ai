@@ -12,8 +12,9 @@ SELF="${BASE##*/}"
 MODEL="$(< "$BASE/../../etc/$SELF/model")"
 TOKENS="$(< "$BASE/../../etc/$SELF/max_tokens")"
 
-export -- CHAT_TEE CHAT_HISTORY
+export -- CHAT_HISTORY
 
+CHAT_TEE=
 CHAT_STREAMING=2
 while (($#)); do
   case "$1" in
@@ -22,8 +23,8 @@ while (($#)); do
     shift -- 2
     ;;
   -t | --tee)
-    TEE="$2"
-    mkdir -v -p -- "$TEE" >&2
+    CHAT_TEE="$2"
+    mkdir -v -p -- "$CHAT_TEE" >&2
     shift -- 2
     ;;
   -f | --file)
@@ -44,4 +45,4 @@ read -r -d '' -- JQ <<- 'JQ' || true
 { stream: true, model: $model, max_tokens: $tokens, messages: .[1:], system: .[0].content }
 JQ
 
-exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$*" --arg model "$MODEL" --argjson tokens "$TOKENS" "$JQ"
+exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$CHAT_TEE" "$*" --arg model "$MODEL" --argjson tokens "$TOKENS" "$JQ"

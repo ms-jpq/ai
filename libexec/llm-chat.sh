@@ -7,8 +7,9 @@ ARGV=("$@")
 NAME="$1"
 CHAT_CLIENT="$2"
 CHAT_STREAMING="$3"
-CHAT_PROMPT="$4"
-shift -- 4
+CHAT_TEE="$4"
+CHAT_PROMPT="$5"
+shift -- 5
 
 CHAT_HISTORY="${CHAT_HISTORY:-"$(nljson-ledger.sh "$NAME" '')"}"
 CHAT_TMP="${CHAT_TMP:-"$(mktemp)"}"
@@ -31,8 +32,8 @@ JQ_SEND=(
 )
 
 if ! [[ -s $CHAT_HISTORY ]]; then
-  if [[ -v TEE ]]; then
-    TX="$TEE/->.txt"
+  if [[ -v CHAT_TEE ]]; then
+    TX="$CHAT_TEE/->.txt"
   else
     TX='/dev/null'
   fi
@@ -44,9 +45,9 @@ if ! [[ -s $CHAT_HISTORY ]]; then
   hr.sh '!'
 fi >&2
 
-if [[ -v TEE ]]; then
-  TX="$TEE/$CHAT_LVL.tx.txt"
-  RX="$TEE/$CHAT_LVL.rx.md"
+if [[ -v CHAT_TEE ]]; then
+  TX="$CHAT_TEE/$CHAT_LVL.tx.txt"
+  RX="$CHAT_TEE/$CHAT_LVL.rx.md"
 else
   TX='/dev/null'
   RX="$CHAT_TMP"
