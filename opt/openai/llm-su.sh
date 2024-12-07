@@ -11,13 +11,7 @@ SELF="${0##*/}"
 DIR="${0%/*}"
 BASE="$DIR/../.."
 ARGV=("$@")
-TMPDIR="$BASE/var/chatgpt"
 MODEL="$(< "$BASE/etc/openai/model")"
-
-CLEAN=(find "$TMPDIR" '(' -name '*.json' -empty ')' -or -name 'tmp.*' -delete)
-if ! ((RANDOM % 16)); then
-  "${CLEAN[@]}"
-fi
 
 while (($#)); do
   case "$1" in
@@ -35,28 +29,7 @@ while (($#)); do
     shift -- 2
     ;;
   -f | --file)
-    if [[ -z ${GPT_HISTORY:-""} ]]; then
-      "${CLEAN[@]}"
-      case "$2" in
-      -) ;;
-      !)
-        printf -v PREVIEW -- '%q ' jq --sort-keys --color-output .
-        GPT_HISTORY="$(printf -- '%s\0' "$TMPDIR"/*.json | fzf --read0 --preview="$PREVIEW {}")"
-        ;;
-      @)
-        FILES=("$TMPDIR"/*.json)
-        GPT_HISTORY="${FILES[-1]}"
-        jq --raw-output '.content' "$GPT_HISTORY" >&2
-        ;;
-      *)
-        GPT_HISTORY="$TMPDIR/$2"
-        if ! [[ -f GPT_HISTORY ]]; then
-          set -x
-          exit 1
-        fi
-        ;;
-      esac
-    fi
+    GPT_HISTORY="$(nljson-ledger.sh 'chatty' "$2")"
     shift -- 2
     ;;
   --)
@@ -69,13 +42,10 @@ while (($#)); do
   esac
 done
 
-DATE_FMT='+%Y-%m-%d %H:%M:%S'
-GPT_HISTORY="${GPT_HISTORY:-"$TMPDIR/$(date -- "$DATE_FMT").json"}"
+GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'chatty' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER
-mkdir -v -p -- "$TMPDIR" >&2
-touch -- "$GPT_HISTORY"
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
 
@@ -139,7 +109,7 @@ if [[ -t 0 ]]; then
     clear
     ;;
   '>die')
-    GPT_HISTORY="$TMPDIR/$(date -- "$DATE_FMT").json"
+    GPT_HISTORY="$(nljson-ledger.sh 'chatty' '')"
     REEXEC=1
     ;;
   '>undo')
