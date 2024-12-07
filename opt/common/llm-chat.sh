@@ -99,7 +99,9 @@ fi
 tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$CHAT_HISTORY"
 
 {
-  printf -v JQ_HIST -- '%q ' jq '.' "$CHAT_HISTORY"
+  SHORT_HIST="~${CHAT_HISTORY#"$HOME"}"
+  printf -v JQ_HIST -- '%q ' jq '.' "$SHORT_HIST"
+  JQ_HIST="${JQ_HIST//'. \~'/'. ~'}"
   printf -- '\n%s\n' "$JQ_HIST"
 } >&2
 
