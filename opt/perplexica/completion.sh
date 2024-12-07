@@ -7,14 +7,17 @@ CURL=(
   'perplexica'
   --no-buffer
   --json @-
-  -- 'https://api.openai.com/v1/chat/completions'
+  -- "$PERPLEXICA_URL/api/search"
 )
-JQ=(
+read -r -d '' -- JQ <<- 'JQ' || true
+
+JQ
+PARSE=(
   jq
   --exit-status
   --join-output
   --unbuffered
-  '.choices[].delta.content // ""'
+  "$JQ"
 )
 
 hr() {
@@ -26,7 +29,7 @@ hr() {
 {
 
   hr '>'
-  "${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | md-pager.sh "$@"
+  "${CURL[@]}" | "${PARSE[@]}" | md-pager.sh "$@"
   printf -- '\n'
   hr '<'
 } >&2
