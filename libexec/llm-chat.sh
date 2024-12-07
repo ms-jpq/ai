@@ -5,7 +5,7 @@ set -o pipefail
 ARGV=("$@")
 
 NAME="$1"
-CHAT_PAGER="$2"
+CHAT_CLIENT="$2"
 CHAT_STREAMING="$3"
 CHAT_PROMPT="$4"
 shift -- 4
@@ -100,7 +100,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$CHAT_HISTORY"
   printf -- '\n%s\n' "$JQ_HIST"
 } >&2
 
-"${JQ_SEND[@]}" | "$CHAT_PAGER" "$CHAT_STREAMING" "$RX"
+"${JQ_SEND[@]}" | "$CHAT_CLIENT" "$CHAT_STREAMING" "$RX"
 "${JQ_APPEND[@]}" 'assistant' < "$RX" >> "$CHAT_HISTORY"
 
 if [[ -t 0 ]]; then
