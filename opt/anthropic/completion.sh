@@ -11,6 +11,7 @@ CURL=(
   --json @-
   -- 'https://api.anthropic.com/v1/messages'
 )
+
 PARSE=(
   jq
   --exit-status

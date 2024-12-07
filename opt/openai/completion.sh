@@ -9,6 +9,7 @@ CURL=(
   --json @-
   -- 'https://api.openai.com/v1/chat/completions'
 )
+
 PARSE=(
   jq
   --exit-status
