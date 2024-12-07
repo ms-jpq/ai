@@ -2,6 +2,11 @@
 
 set -o pipefail
 
+BASE="$(realpath -- "$0")"
+DIR="${BASE%/*}"
+ROOT="$DIR/../.."
+export -- CURL_HOME="$ROOT/libexec"
+
 F="$HOME/.local/state/searx"
 if ! [[ -f $F ]]; then
   # shellcheck disable=SC2154
