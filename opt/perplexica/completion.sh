@@ -11,19 +11,21 @@ CURL=(
 )
 
 read -r -d '' -- JQ <<- 'JQ' || true
-(.sources[] | [
-  "# # \(.metadata.title | gsub("\\s+"; " ") | @html)",
-  "## [➜](\(.metadata.url | @html))",
-  .pageContent | @html
-] | join("\n\n")),
-"\n---\n",
-.message
+[
+  (.sources[] | [
+    "# # \(.metadata.title | gsub("\\s+"; " ") | @html)",
+    "## [➜](\(.metadata.url | @html))",
+    .pageContent | @html
+  ] | join("\n\n")),
+  "\n---\n",
+  .message
+] | join("\n")
 JQ
 
 PARSE=(
   jq
   --exit-status
-  --join-output
+  --raw-output
   --unbuffered
   "$JQ"
 )
