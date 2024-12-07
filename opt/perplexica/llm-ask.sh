@@ -37,6 +37,7 @@ done
 read -r -d '' -- JQ <<- 'JQ' || true
 {
   focusMode: "webSearch",
+  optimizationMode: "speed",
   query: .[0].content,
   history: (.[1:] | map(values))
 }

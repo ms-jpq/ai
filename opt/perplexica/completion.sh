@@ -10,14 +10,13 @@ CURL=(
   -- "$PERPLEXICA_URL/api/search"
 )
 read -r -d '' -- JQ <<- 'JQ' || true
-[
-  .sources[] | [
+(.sources[] | [
   "# # \(.metadata.title | gsub("\\s+"; " ") | @html)",
   "## [➜](\(.metadata.url | @html))",
   .pageContent | @html
-  ] | join("\n"),
-  .message
-] | add | join("\n")
+] | join("\n")),
+"---",
+.message
 JQ
 PARSE=(
   jq
