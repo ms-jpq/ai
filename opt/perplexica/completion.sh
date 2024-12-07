@@ -7,6 +7,7 @@ TEE="$2"
 
 CURL=(
   curl.sh
+  'perplexica'
   --no-buffer
   --json @-
   -- 'https://api.anthropic.com/v1/messages'
