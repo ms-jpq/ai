@@ -26,7 +26,7 @@ while (($#)); do
     shift -- 2
     ;;
   -f | --file)
-    GPT_HISTORY="$(nljson-ledger.sh 'claudy' "$2")"
+    GPT_HISTORY="$(nljson-ledger.sh 'perplexica' "$2")"
     shift -- 2
     ;;
   --)
@@ -39,7 +39,7 @@ while (($#)); do
   esac
 done
 
-GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'claudy' '')"}"
+GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'perplexica' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER GPT_SYS
@@ -51,7 +51,7 @@ JQ_SC=(jq --exit-status --slurp --compact-output)
 JQ_APPEND=(
   "${JQ_SC[@]}"
   --raw-input
-  '{ role: $role, content: . }'
+  '[$role, .]'
   --arg role
 )
 # shellcheck disable=SC2016
@@ -110,13 +110,11 @@ if [[ -t 0 ]]; then
     clear
     ;;
   '>die')
-    GPT_HISTORY="$(nljson-ledger.sh 'claudy' '')"
+    GPT_HISTORY="$(nljson-ledger.sh 'perplexica' '')"
     REEXEC=1
     ;;
   '>undo')
-    for _ in {1..2}; do
-      sed -E -e '$d' -i -- "$GPT_HISTORY"
-    done
+    sed -E -e '$d' -i -- "$GPT_HISTORY"
     REEXEC=1
     ;;
   '>buf')
