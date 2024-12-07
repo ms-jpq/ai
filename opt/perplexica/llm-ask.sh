@@ -42,7 +42,7 @@ JQ_APPEND=(
 # shellcheck disable=SC2016
 JQ_SEND=(
   "${JQ_SC[@]}"
-  '{ stream: true, model: $model, max_tokens: $tokens, messages: ., system: (if $system == "" then [] else $system end) }'
+  '{ stream: true, model: $model, max_tokens: $tokens, messages: .[1:], system: .[0].content }'
   "$GPT_HISTORY"
 )
 
