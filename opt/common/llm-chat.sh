@@ -32,7 +32,7 @@ JQ_SEND=(
 )
 
 if ! [[ -s $CHAT_HISTORY ]]; then
-  if [[ -v CHAT_TEE ]]; then
+  if [[ -n $CHAT_TEE ]]; then
     TX="$CHAT_TEE/->.txt"
   else
     TX='/dev/null'
@@ -45,7 +45,7 @@ if ! [[ -s $CHAT_HISTORY ]]; then
   hr.sh '!'
 fi >&2
 
-if [[ -v CHAT_TEE ]]; then
+if [[ -n $CHAT_TEE ]]; then
   TX="$CHAT_TEE/$CHAT_LVL.tx.txt"
   RX="$CHAT_TEE/$CHAT_LVL.rx.md"
 else
