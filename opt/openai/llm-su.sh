@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-OPTS='s,t:,f:'
-LONG_OPTS='stream,tee:,file:'
+OPTS='s:,t:,f:'
+LONG_OPTS='stream:,tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -16,7 +16,7 @@ MODEL="$(< "$BASE/etc/openai/model")"
 while (($#)); do
   case "$1" in
   -s | --stream)
-    GPT_STREAMING="${GPT_STREAMING:-2}"
+    GPT_STREAMING="${GPT_STREAMING:-"$2"}"
     shift -- 1
     ;;
   -t | --tee)
@@ -97,9 +97,6 @@ if [[ -t 0 ]]; then
   read -r -- LINE <<< "$USR"
   PRINT=1
   case "$LINE" in
-  '>exit')
-    exit 0
-    ;;
   '>cls' | '>clear')
     REEXEC=1
     clear
@@ -112,14 +109,6 @@ if [[ -t 0 ]]; then
     for _ in {1..2}; do
       sed -E -e '$d' -i -- "$GPT_HISTORY"
     done
-    REEXEC=1
-    ;;
-  '>buf')
-    GPT_STREAMING=0
-    REEXEC=1
-    ;;
-  '>unbuf')
-    GPT_STREAMING=2
     REEXEC=1
     ;;
   *)
@@ -144,7 +133,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-0}" "$RX"
+"${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-2}" "$RX"
 "${JQ_RECV[@]}" < "$RX" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
