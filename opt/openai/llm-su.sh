@@ -41,7 +41,7 @@ done
 GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'chatty' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
 

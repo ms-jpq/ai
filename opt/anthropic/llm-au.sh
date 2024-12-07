@@ -42,7 +42,7 @@ done
 GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'claudy' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER GPT_SYS
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP GPT_SYS
 touch -- "$GPT_HISTORY"
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
