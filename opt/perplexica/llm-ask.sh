@@ -28,16 +28,15 @@ done
 
 GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'perplexica' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
-GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP GPT_SYS
+export -- "${GPT_LVL:-0}" GPT_SYS="${GPT_SYS:-""}"
+export -- GPT_HISTORY GPT_STREAMING GPT_TMP
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
-
 # shellcheck disable=SC2016
 JQ_APPEND=(
   "${JQ_SC[@]}"
   --raw-input
-  '{ role: $role, content: . }'
+  '[$role, .]'
   --arg role
 )
 # shellcheck disable=SC2016

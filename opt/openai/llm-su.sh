@@ -44,7 +44,6 @@ export -- GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY GPT_STREAMING GPT_TMP
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
-
 # shellcheck disable=SC2016
 JQ_APPEND=(
   "${JQ_SC[@]}"
