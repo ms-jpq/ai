@@ -18,16 +18,4 @@ PARSE=(
   '.choices[].delta.content // ""'
 )
 
-hr() {
-  printf -- '\n'
-  hr.sh "$@"
-  printf -- '\n'
-}
-
-{
-
-  hr '>'
-  "${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${PARSE[@]}" | md-pager.sh "$@"
-  printf -- '\n'
-  hr '<'
-} >&2
+"${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"
