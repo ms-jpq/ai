@@ -7,7 +7,7 @@ shift -- 1
 NAME="$*"
 
 BASE="${0%/*}"
-HIST="$BASE/../var/readline"
+HIST="$BASE/../../var/readline"
 mkdir -v -p -- "$HIST" >&2
 
 ARGV=(
@@ -24,5 +24,4 @@ ARGV=(
   -e 's/[[:space:]]+$//g'
 )
 
-export -- INPUTRC="$BASE/inputrc"
-exec -- "${ARGV[@]}"
+INPUTRC="$BASE/inputrc" exec -- "${ARGV[@]}"

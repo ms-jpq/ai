@@ -8,7 +8,7 @@ shift -- 2
 
 BASE=${0%/*}
 EXT='txt'
-BANK="$BASE/../etc/prompts"
+BANK="$BASE/../../etc/prompts"
 mkdir -v -p -- "$BANK" >&2
 
 case "${1:-""}" in

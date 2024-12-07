@@ -4,8 +4,7 @@ set -o pipefail
 
 BASE="$(realpath -- "$0")"
 DIR="${BASE%/*}"
-ROOT="$DIR/../.."
-PATH="$ROOT/libexec:$PATH"
+PATH="$DIR:$PATH"
 DIRS=("$DIR" "$DIR/../anthropic" "$DIR/../openai" "$DIR/../perplexica")
 
 PROGRAM="${1:-""}"
@@ -17,7 +16,7 @@ case "$PROGRAM" in
   shift -- 1
   set -a
   # shellcheck disable=SC1091
-  source -- "$ROOT/.env"
+  source -- "$DIR/../../.env"
   set +a
 
   for DIR in "${DIRS[@]}"; do

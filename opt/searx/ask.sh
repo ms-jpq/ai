@@ -2,19 +2,19 @@
 
 set -o pipefail
 
-BASE="$(realpath -- "$0")"
-ROOT="${BASE%/*}/../.."
-LIBEXEC="$ROOT/libexec"
+SELF="$(realpath -- "$0")"
+BASE="${SELF%/*}"
+COMMON="$BASE/../common"
 
 set -a
 # shellcheck disable=SC1091
-source -- "$ROOT/.env"
+source -- "$BASE/../../.env"
 set +a
 
-QUESTION="$("$LIBEXEC/readline.sh" "yellow" "${0##*/}")"
+QUESTION="$("$COMMON/readline.sh" "yellow" "${0##*/}")"
 QUERY="$(jq --raw-input --raw-output '@uri' <<< "$QUESTION")"
 CURL=(
-  "$LIBEXEC/curl.sh"
+  "$COMMON/curl.sh"
   'searx'
   --connect-timeout 6
   --no-buffer
@@ -36,7 +36,7 @@ for N in {1..3}; do
     # shellcheck disable=SC2154
     "${CURL[@]}" -- "$SEARX_URI/search?format=json&pageno=$N&q=$QUERY" | "${J[@]}"
     printf -- '\n---\n'
-  } | "$LIBEXEC/md-pager.sh" 0
+  } | "$COMMON/md-pager.sh" 0
 done | less || CODE=$?
 
 if ((CODE == 141)); then
