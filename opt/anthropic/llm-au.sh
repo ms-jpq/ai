@@ -42,7 +42,13 @@ while (($#)); do
 done
 
 read -r -d '' -- JQ <<- 'JQ' || true
-{ stream: true, model: $model, max_tokens: $tokens, messages: .[1:], system: .[0].content }
+{
+  stream: true,
+  model: $model,
+  max_tokens: $tokens,
+  messages: .[1:],
+  system: .[0].content
+}
 JQ
 
 exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$CHAT_TEE" "$*" --arg model "$MODEL" --argjson tokens "$TOKENS" "$JQ"
