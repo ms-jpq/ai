@@ -7,10 +7,10 @@ LONG_OPTS='stream:,tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
-SELF="${0##*/}"
-BASE="${0%/*}/../.."
-MODEL="$(< "$BASE/etc/$SELF/model")"
-TOKENS="$(< "$BASE/etc/$SELF/max_tokens")"
+BASE="${0%/*}"
+SELF="${BASE##*/}"
+MODEL="$(< "$BASE/../../etc/$SELF/model")"
+TOKENS="$(< "$BASE/../../etc/$SELF/max_tokens")"
 
 export -- CHAT_TEE CHAT_HISTORY
 
