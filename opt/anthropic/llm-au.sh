@@ -71,13 +71,13 @@ if ! [[ -s $GPT_HISTORY ]]; then
   fi
   GPT_SYS="$(prompt.sh "$SELF-system" red "$@")"
   if [[ -n $GPT_SYS ]]; then
-    printf -- '%s' "$GPT_SYS" | tee -- "$TX" >&2
-    printf -- '\n' >&2
+    printf -- '%s' "$GPT_SYS" | tee -- "$TX"
+    printf -- '\n'
   fi
-  hr.sh '!' >&2
+  hr.sh '!'
 else
   GPT_SYS="${GPT_SYS:-""}"
-fi
+fi >&2
 
 if [[ -v TEE ]]; then
   TX="$TEE/$GPT_LVL.tx.txt"

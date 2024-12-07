@@ -69,10 +69,10 @@ if ! [[ -s $GPT_HISTORY ]]; then
   SYS="$(prompt.sh "$SELF-system" red "$@")"
   if [[ -n $SYS ]]; then
     printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" system >> "$GPT_HISTORY"
-    printf -- '\n' >&2
+    printf -- '\n'
   fi
-  hr.sh '!' >&2
-fi
+  hr.sh '!'
+fi >&2
 
 if [[ -v TEE ]]; then
   TX="$TEE/$GPT_LVL.tx.txt"

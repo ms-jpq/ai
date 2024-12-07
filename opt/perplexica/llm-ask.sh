@@ -2,27 +2,18 @@
 
 set -o pipefail
 
-OPTS='t:,f:'
-LONG_OPTS='tee:,file:'
+OPTS='f:'
+LONG_OPTS='file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
 SELF="${0##*/}"
-DIR="${0%/*}"
-BASE="$DIR/../.."
 ARGV=("$@")
-MODEL="$(< "$BASE/etc/anthropic/model")"
-TOKENS="$(< "$BASE/etc/anthropic/max_tokens")"
 
 while (($#)); do
   case "$1" in
   -s | --stream)
     GPT_STREAMING="${GPT_STREAMING:-"$2"}"
-    shift -- 2
-    ;;
-  -t | --tee)
-    TEE="$2"
-    mkdir -v -p -- "$TEE" >&2
     shift -- 2
     ;;
   -f | --file)
@@ -42,7 +33,7 @@ done
 GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'perplexica' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP GPT_SYS
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP
 touch -- "$GPT_HISTORY"
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
@@ -69,11 +60,6 @@ JQ_RECV=(
 )
 
 if ! [[ -s $GPT_HISTORY ]]; then
-  if [[ -v TEE ]]; then
-    TX="$TEE/->.txt"
-  else
-    TX='/dev/null'
-  fi
   GPT_SYS="$(prompt.sh "$SELF-system" red "$@")"
   if [[ -n $GPT_SYS ]]; then
     printf -- '%s' "$GPT_SYS" | tee -- "$TX" >&2
@@ -84,13 +70,8 @@ else
   GPT_SYS="${GPT_SYS:-""}"
 fi
 
-if [[ -v TEE ]]; then
-  TX="$TEE/$GPT_LVL.tx.txt"
-  RX="$TEE/$GPT_LVL.rx.md"
-else
-  TX='/dev/null'
-  RX="$GPT_TMP"
-fi
+TX='/dev/null'
+RX="$GPT_TMP"
 
 REEXEC=0
 if [[ -t 0 ]]; then
