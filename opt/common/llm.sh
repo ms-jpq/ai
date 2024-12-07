@@ -5,7 +5,7 @@ set -o pipefail
 BASE="$(realpath -- "$0")"
 DIR="${BASE%/*}"
 PATH="$DIR:$PATH"
-DIRS=("$DIR" "$DIR/../anthropic" "$DIR/../openai" "$DIR/../perplexica")
+DIRS=("$DIR" "$DIR/../ollama" "$DIR/../anthropic" "$DIR/../openai" "$DIR/../perplexica")
 
 PROGRAM="${1:-""}"
 case "$PROGRAM" in
