@@ -9,7 +9,7 @@ tee -- "$TEE" | case "$STREAMING" in
 0)
   COLS="$(tput -- cols)"
   COLS=$((COLS - 4))
-  glow --config /dev/null --style pink --width "$COLS"
+  CLICOLOR_FORCE=1 COLORTERM=truecolor glow --config /dev/null --style pink --width "$COLS"
   ;;
 1)
   bat --style plain --paging never --language markdown -- -
