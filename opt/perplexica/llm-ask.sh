@@ -43,4 +43,4 @@ read -r -d '' -- JQ <<- 'JQ' || true
 }
 JQ
 
-exec -- llm-chat.sh "$SELF" completion.sh 0 "$CHAT_TEE" - "$JQ"
+CHAT_DIEHARD=1 exec -- llm-chat.sh "$SELF" completion.sh 0 "$CHAT_TEE" - "$JQ"
