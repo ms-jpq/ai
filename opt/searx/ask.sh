@@ -21,7 +21,8 @@ CURL=(
 )
 
 read -r -d '' -- JQ <<- 'JQ' || true
-.results[] | "# # \(.title | gsub("\\s+"; " ") | @html)\n## [➜](\(.url | @html))\n\(.content | @html)"
+.results[]
+| "# # \(.title | gsub("\\s+"; " ") | @html)\n## [➜](\(.url | @html))\n\(.content | @html)"
 JQ
 J=(jq --unbuffered --raw-output "$JQ")
 
