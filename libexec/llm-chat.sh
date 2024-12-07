@@ -7,7 +7,8 @@ ARGV=("$@")
 NAME="$1"
 CHAT_PAGER="$2"
 CHAT_STREAMING="$3"
-shift -- 3
+CHAT_PROMPT="$4"
+shift -- 4
 
 CHAT_HISTORY="${CHAT_HISTORY:-"$(nljson-ledger.sh "$NAME" '')"}"
 CHAT_TMP="${CHAT_TMP:-"$(mktemp)"}"
@@ -35,7 +36,7 @@ if ! [[ -s $CHAT_HISTORY ]]; then
   else
     TX='/dev/null'
   fi
-  SYS="$(prompt.sh "$NAME-system" red "$@")"
+  SYS="$(prompt.sh "$NAME-system" red "$CHAT_PROMPT")"
   if [[ -n $SYS ]]; then
     printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" 'system' >> "$CHAT_HISTORY"
     printf -- '\n'
