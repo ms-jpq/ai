@@ -17,7 +17,7 @@ while (($#)); do
   case "$1" in
   -s | --stream)
     GPT_STREAMING="${GPT_STREAMING:-"$2"}"
-    shift -- 1
+    shift -- 2
     ;;
   -t | --tee)
     TEE="$2"
