@@ -14,7 +14,7 @@ CURL=(
 )
 
 read -r -d '' -- JQ <<- 'JQ' || true
-"\(.status)\(try " - \(.completed / .total * 10000 | round | tostring | sub("^(?<x>..)(?<y>..)$"; "\(.x).\(.y)"))% of \(.total)" catch empty)"
+"\(.status)\(try " - \(.completed / .total * 10000 | round | tostring | sub("^(?<x>..)(?<y>..)$"; "\(.x).\(.y)"))% of \(.total / 1000 / 1000 | round)MB" catch empty)"
 JQ
 
 PARSE=(
