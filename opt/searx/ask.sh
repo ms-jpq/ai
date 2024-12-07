@@ -19,9 +19,6 @@ CURL=(
   --no-buffer
 )
 
-COLS="$(tput -- cols)"
-COLS=$((COLS - 4))
-PAGE=(glow --config /dev/null --style pink --width "$COLS")
 
 read -r -d '' -- JQ <<- 'JQ' || true
 .results[] | "# # \(.title | gsub("\\s+"; " ") | @html)\n## [➜](\(.url | @html))\n\(.content | @html)"

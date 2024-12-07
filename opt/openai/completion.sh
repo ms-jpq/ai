@@ -2,9 +2,6 @@
 
 set -o pipefail
 
-STREAMING="$1"
-TEE="$2"
-
 CURL=(
   curl.sh
   'openai'
@@ -20,32 +17,16 @@ JQ=(
   '.choices[].delta.content // ""'
 )
 
-if ! [[ -v MDPAGER ]]; then
-  if ((STREAMING)); then
-    MPAGER=(tee --)
-  else
-    MPAGER=(
-      bat
-      --style plain
-      --paging never
-      --language markdown
-      -- -
-    )
-  fi
-else
-  # shellcheck disable=SC2206
-  MPAGER=($MDPAGER)
-fi
-
 hr() {
-  {
-    printf -- '\n'
-    hr.sh "$@"
-    printf -- '\n'
-  } >&2
+  printf -- '\n'
+  hr.sh "$@"
+  printf -- '\n'
 }
 
-hr '>'
-"${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | tee -- "$TEE" | "${MPAGER[@]}" >&2
-printf -- '\n' >&2
-hr '<'
+{
+
+  hr '>'
+  "${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | md-pager.sh "$@"
+  printf -- '\n'
+  hr '<'
+} >&2

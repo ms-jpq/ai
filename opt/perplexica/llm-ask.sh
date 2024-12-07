@@ -117,14 +117,6 @@ if [[ -t 0 ]]; then
     sed -E -e '$d' -i -- "$GPT_HISTORY"
     REEXEC=1
     ;;
-  '>buf')
-    GPT_STREAMING=0
-    REEXEC=1
-    ;;
-  '>unbuf')
-    GPT_STREAMING=1
-    REEXEC=1
-    ;;
   *)
     PRINT=0
     ;;
