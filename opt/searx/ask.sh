@@ -3,17 +3,14 @@
 set -o pipefail
 
 BASE="$(realpath -- "$0")"
-DIR="${BASE%/*}"
-ROOT="$DIR/../.."
+ROOT="${BASE%/*}/../.."
 export -- CURL_HOME="$ROOT/libexec"
 
-F="$HOME/.local/state/searx"
-if ! [[ -f $F ]]; then
-  # shellcheck disable=SC2154
-  "$EDITOR" "$F"
-fi
+set -a
+# shellcheck disable=SC1091
+source -- "$ROOT/.env"
+set +a
 
-URI="$(< "$F")"
 QUERY="$(jq --raw-input --raw-output '@uri' <<< "$*")"
 CURL=(
   curl
@@ -32,7 +29,8 @@ J=(jq --unbuffered --raw-output "$JQ")
 
 for N in {1..3}; do
   {
-    "${CURL[@]}" -- "$URI/search?format=json&pageno=$N&q=$QUERY" | "${J[@]}"
+    # shellcheck disable=SC2154
+    "${CURL[@]}" -- "$SEARX_URI/search?format=json&pageno=$N&q=$QUERY" | "${J[@]}"
     printf -- '\n---\n'
   } | CLICOLOR_FORCE=1 COLORTERM=truecolor "${PAGE[@]}"
 done | less
