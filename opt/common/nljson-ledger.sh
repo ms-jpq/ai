@@ -8,7 +8,7 @@ STORE="${0%/*}/../../var/history/$PRINCIPAL"
 
 mkdir -p -- "$STORE"
 if ! ((RANDOM % 16)) || [[ $NAME == '!' ]]; then
-  find "$STORE" -name '*.json' -empty -delete
+  find "$STORE" '(' -name '*.json' -empty ')' -or -name 'tmp.*' -delete
 fi
 
 case "$NAME" in
