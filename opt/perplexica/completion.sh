@@ -16,7 +16,7 @@ read -r -d '' -- JQ <<- 'JQ' || true
     "# # \(.metadata.title | gsub("\\s+"; " ") | @html)",
     "## [➜](\(.metadata.url | @html))",
     .pageContent | @html
-  ] | join("\n\n")),
+  ] | join("\n")),
   "\n---\n",
   .message
 ] | join("\n")
@@ -26,7 +26,6 @@ PARSE=(
   jq
   --exit-status
   --raw-output
-  --unbuffered
   "$JQ"
 )
 
