@@ -1,4 +1,5 @@
 *.isorted
+.aider*
 .env
 .venv/
 node_modules/

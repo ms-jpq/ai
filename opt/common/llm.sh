@@ -5,8 +5,8 @@ set -o pipefail
 BASE="$(realpath -- "$0")"
 DIR="${BASE%/*}"
 ROOT="$DIR/../.."
-CURLHOME="$ROOT/libexec"
-PATH="$CURLHOME:$PATH"
+export -- CURL_HOME="$ROOT/libexec"
+PATH="$CURL_HOME:$PATH"
 DIRS=("$DIR" "$DIR/../anthropic" "$DIR/../openai")
 
 PROGRAM="${1:-""}"

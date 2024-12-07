@@ -12,9 +12,7 @@ URI="$(< "$F")"
 QUERY="$(jq --raw-input --raw-output '@uri' <<< "$*")"
 CURL=(
   curl
-  --fail-with-body
   --connect-timeout 6
-  --no-progress-meter
   --no-buffer
 )
 
