@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-OPTS='g,s,t:,f:'
-LONG_OPTS='gay,stream,tee:,file:'
+OPTS='s,t:,f:'
+LONG_OPTS='stream,tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
