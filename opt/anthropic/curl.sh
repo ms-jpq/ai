@@ -7,7 +7,6 @@ COOKIE_JAR="$BASE/var/claude.cookies"
 
 CURL=(
   curl
-  --header 'Content-Type: application/json'
   --cookie "$COOKIE_JAR"
   --cookie-jar "$COOKIE_JAR"
   --header 'Anthropic-Version: 2023-06-01'

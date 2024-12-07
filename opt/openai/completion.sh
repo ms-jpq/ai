@@ -7,8 +7,8 @@ TEE="$2"
 
 CURL=(
   curl.sh
-  --data-binary @-
   --no-buffer
+  --json @-
   -- 'https://api.openai.com/v1/chat/completions'
 )
 JQ=(

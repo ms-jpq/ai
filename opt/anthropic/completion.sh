@@ -7,8 +7,8 @@ TEE="$2"
 
 CURL=(
   curl.sh
-  --data-binary @-
   --no-buffer
+  --json @-
   -- 'https://api.anthropic.com/v1/messages'
 )
 JQ=(
