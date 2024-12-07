@@ -12,7 +12,7 @@ CHAT_PROMPT="$5"
 shift -- 5
 
 CHAT_HISTORY="${CHAT_HISTORY:-"$(nljson-ledger.sh "$NAME" '')"}"
-CHAT_TMP="${CHAT_TMP:-"$(mktemp)"}"
+CHAT_TMP="${CHAT_TMP:-"$(mktemp -p "${CHAT_HISTORY%/*}")"}"
 export -- CHAT_LVL="${CHAT_LVL:-0}"
 export -- CHAT_HISTORY CHAT_TMP
 
