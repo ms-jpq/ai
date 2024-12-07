@@ -41,9 +41,8 @@ done
 
 GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'claudy' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
-GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP GPT_SYS
-touch -- "$GPT_HISTORY"
+export -- "${GPT_LVL:-0}" GPT_SYS="${GPT_SYS:-""}"
+export -- GPT_HISTORY GPT_STREAMING GPT_TMP
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
 
@@ -63,20 +62,18 @@ JQ_SEND=(
   "$GPT_HISTORY"
 )
 
-if ! [[ -s $GPT_HISTORY ]]; then
-  if [[ -v TEE ]]; then
-    TX="$TEE/->.txt"
-  else
-    TX='/dev/null'
-  fi
+if [[ -v TEE ]]; then
+  TX="$TEE/->.txt"
+else
+  TX='/dev/null'
+fi
+
+if [[ -z $GPT_SYS ]]; then
   GPT_SYS="$(prompt.sh "$SELF-system" red "$@")"
   if [[ -n $GPT_SYS ]]; then
     printf -- '%s' "$GPT_SYS" | tee -- "$TX"
     printf -- '\n'
   fi
-  hr.sh '!'
-else
-  GPT_SYS="${GPT_SYS:-""}"
 fi >&2
 
 if [[ -v TEE ]]; then
