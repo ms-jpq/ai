@@ -15,7 +15,7 @@ PARSE=(
   --exit-status
   --join-output
   --unbuffered
-  '.content_block // .delta // {} | .text // ""'
+  '.message // {} | .content // empty'
 )
 
 "${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"
