@@ -57,7 +57,7 @@ JQ_SEND=(
   "${JQ_SC[@]}"
   --arg model "$MODEL"
   --argjson tokens "$TOKENS"
-  '{ stream: true, model: $model, max_tokens: $tokens, messages: (.[] | select(.role != "system")), system: (.[] | select(.role != "system").content) }'
+  '{ stream: true, model: $model, max_tokens: $tokens, messages: [.[] | select(.role != "system")], system: ([.[] | select(.role == "system").content] | join("")) }'
   "$GPT_HISTORY"
 )
 
