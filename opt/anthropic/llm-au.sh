@@ -9,8 +9,8 @@ eval -- set -- "$GO"
 
 SELF="${0##*/}"
 BASE="${0%/*}/../.."
-MODEL="$(< "$BASE/etc/anthropic/model")"
-TOKENS="$(< "$BASE/etc/anthropic/max_tokens")"
+MODEL="$(< "$BASE/etc/$SELF/model")"
+TOKENS="$(< "$BASE/etc/$SELF/max_tokens")"
 
 export -- CHAT_TEE CHAT_HISTORY
 
