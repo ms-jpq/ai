@@ -21,4 +21,4 @@ PARSE=(
   '.'
 )
 
-jq --null-input --arg model "$MODEL" '.' | "${CURL[@]}" | "${PARSE[@]}"
+jq --null-input --arg model "$MODEL" '{ model: $model }' | "${CURL[@]}" | "${PARSE[@]}"
