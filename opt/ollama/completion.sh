@@ -7,7 +7,7 @@ CURL=(
   'ollama'
   --no-buffer
   --json @-
-  -- "$OLLAMA_URL/api/chat"
+  -- "$OLLAMA_API_BASE/api/chat"
 )
 
 PARSE=(

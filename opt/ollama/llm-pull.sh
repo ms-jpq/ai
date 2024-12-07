@@ -10,7 +10,7 @@ CURL=(
   'ollama'
   --no-buffer
   --json @-
-  -- "$OLLAMA_URL/api/pull"
+  -- "$OLLAMA_API_BASE/api/pull"
 )
 
 PARSE=(
