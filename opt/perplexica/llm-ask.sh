@@ -49,16 +49,13 @@ JQ_SEND=(
 if ! [[ -s $GPT_HISTORY ]]; then
   GPT_SYS="$(prompt.sh "$SELF-system" red "$@")"
   if [[ -n $GPT_SYS ]]; then
-    printf -- '%s' "$GPT_SYS" | tee -- "$TX"
+    printf -- '%s' "$GPT_SYS"
     printf -- '\n'
   fi
   hr.sh '!'
 else
   GPT_SYS="${GPT_SYS:-""}"
 fi >&2
-
-TX='/dev/null'
-RX="$GPT_TMP"
 
 REEXEC=0
 if [[ -t 0 ]]; then
@@ -99,15 +96,15 @@ if ((REEXEC)); then
   exec -- "$0" "${ARGV[@]}"
 fi
 
-tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
+"${JQ_APPEND[@]}" <<< "$USR" user >> "$GPT_HISTORY"
 
 {
   printf -v JQHIST -- '%q ' jq '.' "$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" --arg system "$GPT_SYS" | completion.sh 0 "$RX"
-"${JQ_APPEND[@]}" 'assistant' < "$RX" >> "$GPT_HISTORY"
+"${JQ_SEND[@]}" --arg system "$GPT_SYS" | completion.sh 0 "$GPT_TMP"
+"${JQ_APPEND[@]}" 'assistant' < "$GPT_TMP" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
