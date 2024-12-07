@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-OPTS='s,t:,f:'
-LONG_OPTS='stream,tee:,file:'
+OPTS='t:,f:'
+LONG_OPTS='tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -17,8 +17,8 @@ TOKENS="$(< "$BASE/etc/anthropic/max_tokens")"
 while (($#)); do
   case "$1" in
   -s | --stream)
-    GPT_STREAMING="${GPT_STREAMING:-1}"
-    shift -- 1
+    GPT_STREAMING="${GPT_STREAMING:-"$2"}"
+    shift -- 2
     ;;
   -t | --tee)
     TEE="$2"
@@ -42,7 +42,7 @@ done
 GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'perplexica' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
 GPT_LVL="${GPT_LVL:-0}"
-export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP MDPAGER GPT_SYS
+export -- GPT_HISTORY GPT_LVL GPT_STREAMING GPT_TMP GPT_SYS
 touch -- "$GPT_HISTORY"
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
@@ -51,7 +51,7 @@ JQ_SC=(jq --exit-status --slurp --compact-output)
 JQ_APPEND=(
   "${JQ_SC[@]}"
   --raw-input
-  '[$role, .]'
+  '{ role: $role, content: . }'
   --arg role
 )
 # shellcheck disable=SC2016
@@ -102,9 +102,6 @@ if [[ -t 0 ]]; then
   read -r -- LINE <<< "$USR"
   PRINT=1
   case "$LINE" in
-  '>exit')
-    exit 0
-    ;;
   '>cls' | '>clear')
     REEXEC=1
     clear
@@ -114,7 +111,9 @@ if [[ -t 0 ]]; then
     REEXEC=1
     ;;
   '>undo')
-    sed -E -e '$d' -i -- "$GPT_HISTORY"
+    for _ in {1..2}; do
+      sed -E -e '$d' -i -- "$GPT_HISTORY"
+    done
     REEXEC=1
     ;;
   *)
@@ -139,7 +138,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" --arg system "$GPT_SYS" | completion.sh "${GPT_STREAMING:-0}" "$RX"
+"${JQ_SEND[@]}" --arg system "$GPT_SYS" | completion.sh "${GPT_STREAMING:-2}" "$RX"
 "${JQ_RECV[@]}" < "$RX" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then

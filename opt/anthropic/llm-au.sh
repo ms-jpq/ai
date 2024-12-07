@@ -62,11 +62,6 @@ JQ_SEND=(
   '{ stream: true, model: $model, max_tokens: $tokens, messages: ., system: (if $system == "" then [] else $system end) }'
   "$GPT_HISTORY"
 )
-JQ_RECV=(
-  "${JQ_SC[@]}"
-  --raw-input
-  '{ role: "assistant", content: . }'
-)
 
 if ! [[ -s $GPT_HISTORY ]]; then
   if [[ -v TEE ]]; then
@@ -139,7 +134,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
 } >&2
 
 "${JQ_SEND[@]}" --arg system "$GPT_SYS" | completion.sh "${GPT_STREAMING:-2}" "$RX"
-"${JQ_RECV[@]}" < "$RX" >> "$GPT_HISTORY"
+"${JQ_APPEND[@]}" 'assistant' < "$RX" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
   ((++GPT_LVL))
