@@ -17,7 +17,7 @@ TOKENS="$(< "$BASE/etc/anthropic/max_tokens")"
 while (($#)); do
   case "$1" in
   -s | --stream)
-    GPT_STREAMING="${GPT_STREAMING:-1}"
+    GPT_STREAMING="${GPT_STREAMING:-2}"
     shift -- 1
     ;;
   -t | --tee)
@@ -124,7 +124,7 @@ if [[ -t 0 ]]; then
     REEXEC=1
     ;;
   '>unbuf')
-    GPT_STREAMING=1
+    GPT_STREAMING=2
     REEXEC=1
     ;;
   *)
