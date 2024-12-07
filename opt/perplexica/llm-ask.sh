@@ -2,8 +2,8 @@
 
 set -o pipefail
 
-OPTS='s:,t:,f:'
-LONG_OPTS='stream:,tee:,file:'
+OPTS='t:,f:'
+LONG_OPTS='tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -13,13 +13,8 @@ SELF="${BASE##*/}"
 export -- CHAT_HISTORY
 
 CHAT_TEE=
-CHAT_STREAMING=2
 while (($#)); do
   case "$1" in
-  -s | --stream)
-    CHAT_STREAMING="$2"
-    shift -- 2
-    ;;
   -t | --tee)
     CHAT_TEE="$2"
     mkdir -v -p -- "$CHAT_TEE" >&2
@@ -40,7 +35,11 @@ while (($#)); do
 done
 
 read -r -d '' -- JQ <<- 'JQ' || true
-{ stream: true, model: $model, messages: . }
+{
+  focusMode: "webSearch",
+  query: .[0].content,
+  history: (.[1:] | map(values))
+}
 JQ
 
-exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$CHAT_TEE" "$*" "$JQ"
+exec -- llm-chat.sh "$SELF" completion.sh 0 "$CHAT_TEE" "$*" "$JQ"

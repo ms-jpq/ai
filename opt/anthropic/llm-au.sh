@@ -46,8 +46,8 @@ read -r -d '' -- JQ <<- 'JQ' || true
   stream: true,
   model: $model,
   max_tokens: $tokens,
-  messages: .[1:],
-  system: .[0].content
+  system: .[0].content,
+  messages: .[1:]
 }
 JQ
 
