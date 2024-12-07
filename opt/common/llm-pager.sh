@@ -12,9 +12,16 @@ hr() {
   printf -- '\n'
 }
 
+SED=(
+  sed
+  -E -n -u
+  -e '/^\{/p'
+  -e '/^data:/s/^data:[[:space:]]+(\{.*)/\1/gp'
+)
+
 {
   hr '>'
-  sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "$@" | md-pager.sh "$STREAMING" "$TEE"
+  "${SED[@]}" | "$@" | md-pager.sh "$STREAMING" "$TEE"
   printf -- '\n'
   hr '<'
 } >&2

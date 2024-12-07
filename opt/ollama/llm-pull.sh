@@ -13,16 +13,11 @@ CURL=(
   -- "$OLLAMA_URL/api/pull"
 )
 
-read -r -d '' -- JQ <<- 'JQ' || true
-"\(.status)\(try " - \(.completed / .total * 10000 | round | tostring | sub("^(?<x>..)(?<y>..)$"; "\(.x).\(.y)"))% of \(.total / 1000 / 1000 | round)MB" catch empty)"
-JQ
-
 PARSE=(
   jq
   --exit-status
-  --unbuffered
-  --raw-output
-  "$JQ"
+  --sort-keys
+  '.'
 )
 
 jq --null-input --arg model "$MODEL" '{ model: $model }' | "${CURL[@]}" | "${PARSE[@]}"
