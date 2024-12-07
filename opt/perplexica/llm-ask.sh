@@ -10,8 +10,9 @@ eval -- set -- "$GO"
 BASE="${0%/*}"
 SELF="${BASE##*/}"
 
-export -- CHAT_TEE CHAT_HISTORY
+export -- CHAT_HISTORY
 
+CHAT_TEE=
 CHAT_STREAMING=2
 while (($#)); do
   case "$1" in
@@ -20,8 +21,8 @@ while (($#)); do
     shift -- 2
     ;;
   -t | --tee)
-    TEE="$2"
-    mkdir -v -p -- "$TEE" >&2
+    CHAT_TEE="$2"
+    mkdir -v -p -- "$CHAT_TEE" >&2
     shift -- 2
     ;;
   -f | --file)
@@ -42,4 +43,4 @@ read -r -d '' -- JQ <<- 'JQ' || true
 { stream: true, model: $model, messages: . }
 JQ
 
-exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$*" --arg model "$MODEL" "$JQ"
+exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$CHAT_TEE" "$*" "$JQ"
