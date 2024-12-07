@@ -11,7 +11,7 @@ CURL=(
   --json @-
   -- 'https://api.anthropic.com/v1/messages'
 )
-JQ=(
+PARSE=(
   jq
   --exit-status
   --join-output
@@ -27,7 +27,7 @@ hr() {
 
 {
   hr '>'
-  "${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | md-pager.sh "$@"
+  "${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${PARSE[@]}" | md-pager.sh "$@"
   printf -- '\n'
   hr '<'
 } >&2

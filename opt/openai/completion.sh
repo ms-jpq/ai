@@ -9,7 +9,7 @@ CURL=(
   --json @-
   -- 'https://api.openai.com/v1/chat/completions'
 )
-JQ=(
+PARSE=(
   jq
   --exit-status
   --join-output
@@ -26,7 +26,7 @@ hr() {
 {
 
   hr '>'
-  "${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${JQ[@]}" | md-pager.sh "$@"
+  "${CURL[@]}" | sed -E -n -u -e 's/^data:[[:space:]]+(\{.*)/\1/gp' | "${PARSE[@]}" | md-pager.sh "$@"
   printf -- '\n'
   hr '<'
 } >&2
