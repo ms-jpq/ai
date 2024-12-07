@@ -96,9 +96,9 @@ if [[ -t 0 ]]; then
     clear
     ;;
   '>die')
-    SYSTEM="$(sed -E -n -e '1p' -- "$GPT_HISTORY")"
+    PREV="$GPT_HISTORY"
     GPT_HISTORY="$(nljson-ledger.sh 'chatty' '')"
-    printf -- '%s' "$SYSTEM" > "$GPT_HISTORY"
+    sed -E -n -e '1p' -- "$PREV" > "$GPT_HISTORY"
     REEXEC=1
     ;;
   '>undo')
