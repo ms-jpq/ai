@@ -7,6 +7,9 @@ TEE="$2"
 
 CURL=(
   curl.sh
+  'anthropic'
+  --header 'Anthropic-Version: 2023-06-01'
+  --header "X-API-Key: $ANTHROPIC_API_KEY"
   --no-buffer
   --json @-
   -- 'https://api.anthropic.com/v1/messages'
