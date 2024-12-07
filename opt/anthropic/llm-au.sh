@@ -41,7 +41,7 @@ done
 
 GPT_HISTORY="${GPT_HISTORY:-"$(nljson-ledger.sh 'claudy' '')"}"
 GPT_TMP="${GPT_TMP:-"$(mktemp)"}"
-export -- "${GPT_LVL:-0}"
+export -- GPT_LVL="${GPT_LVL:-0}"
 export -- GPT_HISTORY GPT_STREAMING GPT_TMP
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
@@ -57,7 +57,7 @@ JQ_SEND=(
   "${JQ_SC[@]}"
   --arg model "$MODEL"
   --argjson tokens "$TOKENS"
-  '{ stream: true, model: $model, max_tokens: $tokens, messages: ., system: (if $system == "" then [] else $system end) }'
+  '{ stream: true, model: $model, max_tokens: $tokens, messages: (.[] | select(.role != "system")), system: (.[] | select(.role != "system").content) }'
   "$GPT_HISTORY"
 )
 
@@ -98,7 +98,9 @@ if [[ -t 0 ]]; then
     clear
     ;;
   '>die')
+    SYSTEM="$(sed -E -n -e '1p' -- "$GPT_HISTORY")"
     GPT_HISTORY="$(nljson-ledger.sh 'claudy' '')"
+    printf -- '%s' "$SYSTEM" > "$GPT_HISTORY"
     REEXEC=1
     ;;
   '>undo')
@@ -129,7 +131,7 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$GPT_HISTORY"
   printf -- '\n%s\n' "$JQHIST"
 } >&2
 
-"${JQ_SEND[@]}" --arg system "$GPT_SYS" | completion.sh "${GPT_STREAMING:-2}" "$RX"
+"${JQ_SEND[@]}" | completion.sh "${GPT_STREAMING:-2}" "$RX"
 "${JQ_APPEND[@]}" 'assistant' < "$RX" >> "$GPT_HISTORY"
 
 if [[ -t 0 ]]; then
