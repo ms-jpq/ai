@@ -4,17 +4,17 @@ set -o pipefail
 
 BASE="$(realpath -- "$0")"
 ROOT="${BASE%/*}/../.."
-export -- CURL_HOME="$ROOT/libexec"
 
 set -a
 # shellcheck disable=SC1091
 source -- "$ROOT/.env"
 set +a
 
-QUESTION="$("$CURL_HOME/readline.sh" "yellow" "${0##*/}")"
+QUESTION="$("$ROOT/libexec/readline.sh" "yellow" "${0##*/}")"
 QUERY="$(jq --raw-input --raw-output '@uri' <<< "$QUESTION")"
 CURL=(
-  curl
+  curl.sh
+  'searx'
   --connect-timeout 6
   --no-buffer
 )
