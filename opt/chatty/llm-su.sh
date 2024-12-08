@@ -2,14 +2,13 @@
 
 set -o pipefail
 
-OPTS='s:,t:,f:'
-LONG_OPTS='stream:,tee:,file:'
+OPTS='m:,s:,t:,f:'
+LONG_OPTS='model:,stream:,tee:,file:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
 BASE="${0%/*}"
 SELF="${BASE##*/}"
-MODEL="$(< "$BASE/../../etc/$SELF/model")"
 
 export -- CHAT_HISTORY
 
@@ -17,6 +16,10 @@ CHAT_TEE=
 CHAT_STREAMING=2
 while (($#)); do
   case "$1" in
+  -m | --model)
+    MODEL="$2"
+    shift -- 2
+    ;;
   -s | --stream)
     CHAT_STREAMING="$2"
     shift -- 2
@@ -40,12 +43,40 @@ while (($#)); do
   esac
 done
 
-read -r -d '' -- JQ <<- 'JQ' || true
+ARGV=(--arg model "$MODEL")
+
+case "$MODEL" in
+gpt*)
+  COMP='openai'
+  read -r -d '' -- JQ <<- 'JQ' || true
 {
   stream: true,
   model: $model,
   messages: .
 }
 JQ
+  ;;
+claude*)
+  COMP='anthropic'
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  stream: true,
+  model: $model,
+  max_tokens: 6666,
+  system: .[0].content,
+  messages: .[1:]
+}
+JQ
+  ;;
+*)
+  COMP='ollama'
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  model: $model,
+  messages: .
+}
+JQ
+  ;;
+esac
 
-exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$CHAT_TEE" "$*" --arg model "$MODEL" "$JQ"
+exec -- llm-chat.sh "$SELF" "$BASE/completion/$COMP.sh" "$CHAT_STREAMING" "$CHAT_TEE" "$*" "${ARGV[@]}" "$JQ"

@@ -41,14 +41,5 @@ while (($#)); do
   esac
 done
 
-read -r -d '' -- JQ <<- 'JQ' || true
-{
-  stream: true,
-  model: $model,
-  max_tokens: $tokens,
-  system: .[0].content,
-  messages: .[1:]
-}
-JQ
 
 exec -- llm-chat.sh "$SELF" completion.sh "$CHAT_STREAMING" "$CHAT_TEE" "$*" --arg model "$MODEL" --argjson tokens "$TOKENS" "$JQ"
