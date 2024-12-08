@@ -1,4 +1,5 @@
 ---
+attribute-author: false
 attribute-committer: false
 gitignore: false
 light-mode: true
