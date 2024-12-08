@@ -2,8 +2,13 @@
 
 set -o pipefail
 
-# https://ollama.com/library
-MODEL="$1"
+if (($#)); then
+  MODEL="$*"
+else
+  URI='https://ollama.com/library'
+  printf -- '%s\n' "$URI" >&2
+  open -- "$URI"
+fi
 
 CURL=(
   curl.sh
