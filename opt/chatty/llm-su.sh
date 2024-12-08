@@ -67,8 +67,8 @@ claude*)
   stream: true,
   model: $model,
   max_tokens: 6666,
-  system: .[0].content,
-  messages: .[1:]
+  system: (if length > 1 then .[0].content else "" end),
+  messages: (if length > 1 then .[1:] else . end)
 }
 JQ
   ;;
