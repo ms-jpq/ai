@@ -13,7 +13,11 @@ set +a
 
 ARGV=(
   "$ROOT/.venv/bin/aider"
-  --config "$BASE/conf.yml"
+  --light-mode
+  --no-attribute-author
+  --no-attribute-committer
+  --no-gitignore
+  --no-suggest-shell-commands
   "$@"
 )
 exec -- "${ARGV[@]}"
