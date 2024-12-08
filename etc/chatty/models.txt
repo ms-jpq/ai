@@ -1,1 +1,3 @@
 claude-3-5-sonnet-20241022
+gpt-4o
+qwen2.5:14b

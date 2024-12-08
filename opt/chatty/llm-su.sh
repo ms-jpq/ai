@@ -43,6 +43,10 @@ while (($#)); do
   esac
 done
 
+if [[ -z ${MODEL:-""} ]]; then
+  MODEL="$(fzf < "$BASE/../../etc/chatty/models.txt")"
+fi
+
 ARGV=(--arg model "$MODEL")
 
 case "$MODEL" in

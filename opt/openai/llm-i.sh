@@ -7,7 +7,7 @@ if [[ -z $PROMPT ]]; then
   PROMPT="$(readline.sh green "${0##*/}")"
 fi
 
-MODEL="$(< "${0%/*}/../../etc/openai/image-model")"
+MODEL="$(< "${0%/*}/../../etc/openai/image-model.txt")"
 
 JSON="$(jq --exit-status --raw-input --arg model "$MODEL" '{ prompt: ., model: $model }' <<< "$PROMPT")"
 RESP="$(curl.sh --json @- -- 'https://api.openai.com/v1/images/generations' <<< "$JSON")"
