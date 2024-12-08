@@ -3,11 +3,17 @@
 set -o pipefail
 
 BASE="$(realpath -- "$0")"
-ROOT="${BASE%/*}/../.."
+BASE="${BASE%/*}"
+ROOT="$BASE/../.."
 
 set -a
 # shellcheck disable=SC1091
 source -- "$ROOT/.env"
 set +a
 
-exec -- "$ROOT/.venv/bin/aider" "$@"
+ARGV=(
+  "$ROOT/.venv/bin/aider"
+  --config "$BASE/conf.yml"
+  "$@"
+)
+exec -- "${ARGV[@]}"
