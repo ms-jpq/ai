@@ -1,5 +1,5 @@
 [project]
-dependencies = ["gay", "aider-chat"]
+dependencies = ["gay", "aider-chat", "huggingface_hub"]
 name         = "ai"
 version      = "0"
 
