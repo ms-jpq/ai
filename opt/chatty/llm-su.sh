@@ -66,7 +66,7 @@ claude*)
 {
   stream: true,
   model: $model,
-  max_tokens: 6666,
+  max_tokens: 4096,
   system: (if length > 1 then .[0].content else "" end),
   messages: (if length > 1 then .[1:] else . end)
 }
