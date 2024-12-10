@@ -47,7 +47,7 @@ if [[ -z ${MODEL:-""} ]]; then
   MODEL="$(fzf < "$BASE/../../etc/chatty/models.txt")"
 fi
 
-ARGV=(--arg model "$MODEL")
+ARGV=()
 
 case "$MODEL" in
 gpt*)
@@ -82,5 +82,7 @@ JQ
 JQ
   ;;
 esac
+
+ARGV+=(--arg model "$MODEL")
 
 exec -- llm-chat.sh "$SELF" "$BASE/completion/$COMP.sh" "$CHAT_STREAMING" "$CHAT_TEE" "$*" "${ARGV[@]}" "$JQ"
