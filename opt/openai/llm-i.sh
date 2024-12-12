@@ -2,10 +2,7 @@
 
 set -o pipefail
 
-PROMPT="$*"
-if [[ -z $PROMPT ]]; then
-  PROMPT="$(readline.sh green "${0##*/}")"
-fi
+PROMPT="$(readline.sh green "${0##*/}")"
 
 COOKIE='openai'
 MODEL="$(< "${0%/*}/../../etc/openai/image-model.txt")"
@@ -24,3 +21,5 @@ else
     curl.sh "$COOKIE" -- "$URI" | "$HOME/.config/zsh/bin/icat"
   done
 fi
+
+exec -- "$0" "$@"
