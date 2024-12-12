@@ -7,10 +7,11 @@ if [[ -z $PROMPT ]]; then
   PROMPT="$(readline.sh green "${0##*/}")"
 fi
 
+COOKIE='openai'
 MODEL="$(< "${0%/*}/../../etc/openai/image-model.txt")"
 
 JSON="$(jq --exit-status --raw-input --arg model "$MODEL" '{ prompt: ., model: $model }' <<< "$PROMPT")"
-RESP="$(curl.sh 'openai' --json @- -- 'https://api.openai.com/v1/images/generations' <<< "$JSON")"
+RESP="$(curl.sh "$COOKIE" --json @- -- 'https://api.openai.com/v1/images/generations' <<< "$JSON")"
 
 if jq --exit-status '.error' <<< "$RESP" > /dev/null; then
   jq <<< "$RESP" >&2
@@ -20,6 +21,6 @@ else
 
   for URI in "${URIS[@]}"; do
     printf -- '%s\n' "$URI"
-    curl -- "$URI" | "$HOME/.config/zsh/bin/icat"
+    curl.sh "$COOKIE" -- "$URI" | "$HOME/.config/zsh/bin/icat"
   done
 fi
