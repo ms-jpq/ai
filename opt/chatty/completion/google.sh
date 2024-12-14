@@ -24,7 +24,7 @@ PARSE=(
   --exit-status
   --join-output
   --unbuffered
-  '.candidates[].content.parts[].text'
+  '.candidates[].content.parts // [] | .[].text'
 )
 
 "${CURL[@]}" | "${PREPARSE[@]}" | llm-pager.sh "$@" "${PARSE[@]}"

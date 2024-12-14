@@ -77,7 +77,7 @@ gemini*)
   export -- GEMINI_MODEL="$MODEL"
   read -r -d '' -- JQ <<- 'JQ' || true
 {
-  contents: (if length > 1 then .[1:] else . end) | map({ parts: [{ text: .content }], role: .role }),
+  contents: (if length > 1 then .[1:] else . end) | map({ role: (if .role == "assistant" then "model" else .role end), parts: [{ text: .content }] }),
   safetySettings: [],
   systemInstruction: {
     parts: [{ text: (if length > 1 then .[0].content else "" end) }],
