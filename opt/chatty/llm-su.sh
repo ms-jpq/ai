@@ -86,8 +86,8 @@ gemini*)
   ],
   contents: (if length > 1 then .[1:] else . end) | map({ role: (if .role == "assistant" then "model" else .role end), parts: [{ text: .content }] }),
   systemInstruction: {
-    parts: [{ text: (if length > 1 then .[0].content else "" end) }],
-    role: "system"
+    role: "system",
+    parts: [{ text: (if length > 1 then .[0].content else "" end) }]
   }
 }
 JQ
