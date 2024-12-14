@@ -13,10 +13,11 @@ CURL=(
 PREPARSE=(
   jq
   --exit-status
+  --null-input
   --stream
   --unbuffered
   --compact-output
-  'fromstream(1|truncate_stream(inputs))'
+  'fromstream(1 | truncate_stream(inputs))'
 )
 
 PARSE=(
