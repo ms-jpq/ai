@@ -72,6 +72,20 @@ claude*)
 }
 JQ
   ;;
+gemini*)
+  COMP='google'
+  export -- GEMINI_MODEL="$MODEL"
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  contents: (if length > 1 then .[1:] else . end) | map({ parts: [{ text: .content }], role: .role }),
+  safetySettings: [],
+  systemInstruction: {
+    parts: [{ text: (if length > 1 then .[0].content else "" end) }],
+    role: "system"
+  }
+}
+JQ
+  ;;
 *)
   COMP='ollama'
   read -r -d '' -- JQ <<- 'JQ' || true
