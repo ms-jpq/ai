@@ -77,8 +77,14 @@ gemini*)
   export -- GEMINI_MODEL="$MODEL"
   read -r -d '' -- JQ <<- 'JQ' || true
 {
+  safetySettings: [
+    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" },
+    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+    { category: "HARM_CATEGORY_CIVIC_INTEGRITY", threshold: "BLOCK_NONE" }
+  ],
   contents: (if length > 1 then .[1:] else . end) | map({ role: (if .role == "assistant" then "model" else .role end), parts: [{ text: .content }] }),
-  safetySettings: [],
   systemInstruction: {
     parts: [{ text: (if length > 1 then .[0].content else "" end) }],
     role: "system"
