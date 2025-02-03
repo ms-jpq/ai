@@ -11,8 +11,10 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
+ARG0="$ROOT/.venv/bin/aider"
+
 ARGV=(
-  "$ROOT/.venv/bin/aider"
+  "$ARG0"
   --light-mode
   --no-attribute-author
   --no-attribute-committer
@@ -20,4 +22,9 @@ ARGV=(
   --no-suggest-shell-commands
   "$@"
 )
+
+if ! [[ -f $ARG0 ]]; then
+  make --file "$ROOT/Makefile" -- .venv/bin
+fi
+
 exec -- "${ARGV[@]}"
