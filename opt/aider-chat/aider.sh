@@ -24,7 +24,7 @@ ARGV=(
 )
 
 if ! [[ -f $ARG0 ]]; then
-  make --file "$ROOT/Makefile" -- .venv/bin
+  make --directory "$ROOT" -- .venv/bin
 fi
 
 exec -- "${ARGV[@]}"
