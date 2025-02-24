@@ -1,5 +1,4 @@
-claude-3-5-sonnet-latest
-claude-3-opus-latest
+claude-3-7-sonnet-latest
 gemini-2.0-flash-exp
 gpt-4o
 qwen2.5-coder:14b
