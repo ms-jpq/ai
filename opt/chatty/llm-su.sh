@@ -60,6 +60,16 @@ gpt*)
 }
 JQ
   ;;
+grok*)
+  COMP='xai'
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  stream: true,
+  model: $model,
+  messages: .
+}
+JQ
+  ;;
 claude*)
   COMP='anthropic'
   read -r -d '' -- JQ <<- 'JQ' || true
