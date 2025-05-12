@@ -16,7 +16,7 @@ jobs:
           # TODO: version 3.13 is broken
           python-version: "3.12"
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
 
       - run: |-
           gmake lint
