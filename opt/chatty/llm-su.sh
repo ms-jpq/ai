@@ -26,7 +26,6 @@ while (($#)); do
     ;;
   -t | --tee)
     CHAT_TEE="$2"
-    mkdir -v -p -- "$CHAT_TEE" >&2
     shift -- 2
     ;;
   -f | --file)
@@ -45,6 +44,14 @@ done
 
 if [[ -z ${MODEL:-""} ]]; then
   MODEL="$(fzf < "$BASE/../../etc/chatty/models.txt")"
+fi
+
+if [[ -z ${CHAT_TEE:-""} ]] && [[ -d ./.git ]]; then
+  CHAT_TEE="$PWD/.llm/$(date -- '+%Y-%m-%d %H:%M:%S')"
+fi
+
+if [[ -n ${CHAT_TEE:-""} ]]; then
+  mkdir -v -p -- "$CHAT_TEE" >&2
 fi
 
 ARGV=()
