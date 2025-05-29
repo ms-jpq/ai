@@ -6,6 +6,7 @@ CURL=(
   curl.sh
   'openai'
   --no-buffer
+  --header "Authorization: Bearer $OPENAI_API_KEY"
   --json @-
   -- 'https://api.openai.com/v1/chat/completions'
 )
