@@ -9,6 +9,7 @@ ROOT="$BASE/../.."
 set -a
 # shellcheck disable=SC1091
 source -- "$ROOT/.env"
+LC_ALL='en_CA.UTF-8'
 set +a
 
 ARG0="$ROOT/.venv/bin/aider"
