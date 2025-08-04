@@ -2,6 +2,7 @@
 
 set -o pipefail
 
+# shellcheck disable=SC2154
 CURL=(
   curl.sh
   'openai'

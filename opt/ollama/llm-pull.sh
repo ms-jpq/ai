@@ -10,6 +10,7 @@ else
   open -- "$URI"
 fi
 
+# shellcheck disable=SC2154
 CURL=(
   curl.sh
   'ollama'
