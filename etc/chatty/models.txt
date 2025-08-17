@@ -1,4 +1,4 @@
-claude-4-0-sonnet-latest
+claude-4-sonnet-20250514
 gemini-2.5-pro-exp-03-25
 gpt-4.1
 grok-3-beta
