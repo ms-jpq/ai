@@ -15,14 +15,12 @@ CURL=(
 )
 
 read -r -d '' -- JQ <<- 'JQ' || true
-def fmt: tojson | if length >= 69 then .[0:69] + "...\"" else . end | . + "\n";
-
 . as $i
 | if .type == "content_block_stop"
   then
     "\n"
   else
-    $i.content_block // $i.delta // {} | .text // .partial_json // ((.content // [])[].text | fmt) // empty
+    $i.content_block // $i.delta // {} | .text // empty
   end
 JQ
 

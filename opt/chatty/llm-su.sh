@@ -68,7 +68,7 @@ gpt*)
 {
   stream: true,
   model: $model,
-  messages: .
+  input: .
 }
 JQ
   ;;

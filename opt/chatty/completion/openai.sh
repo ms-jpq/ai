@@ -9,7 +9,7 @@ CURL=(
   --no-buffer
   --header "Authorization: Bearer $OPENAI_API_KEY"
   --json @-
-  -- 'https://api.openai.com/v1/chat/completions'
+  -- 'https://api.openai.com/v1/responses'
 )
 
 PARSE=(
@@ -17,7 +17,7 @@ PARSE=(
   --exit-status
   --join-output
   --unbuffered
-  '.choices[].delta.content // empty'
+  '.delta // empty'
 )
 
 "${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"
