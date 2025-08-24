@@ -14,12 +14,24 @@ CURL=(
   -- 'https://api.anthropic.com/v1/messages'
 )
 
+read -r -d '' -- JQ <<- 'JQ' || true
+def fmt: tojson | if length >= 69 then .[0:69] + "...\"" else . end | . + "\n";
+
+. as $i
+| if .type == "content_block_stop"
+  then
+    "\n"
+  else
+    $i.content_block // $i.delta // {} | .text // .partial_json // ((.content // [])[].text | fmt) // empty
+  end
+JQ
+
 PARSE=(
   jq
   --exit-status
   --join-output
   --unbuffered
-  '.content_block // .delta // {} | .text // empty'
+  "$JQ"
 )
 
 "${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"
