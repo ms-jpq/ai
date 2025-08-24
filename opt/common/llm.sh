@@ -11,7 +11,6 @@ DIRS=(
   "$DIR/../ollama"
   "$DIR/../anthropic"
   "$DIR/../openai"
-  "$DIR/../perplexica"
 )
 
 PROGRAM="${1:-""}"
