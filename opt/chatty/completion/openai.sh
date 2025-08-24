@@ -17,7 +17,7 @@ PARSE=(
   --exit-status
   --join-output
   --unbuffered
-  '.delta // empty'
+  'if .type == "response.mcp_call_arguments.delta" then empty else .delta // empty end'
 )
 
 "${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"
