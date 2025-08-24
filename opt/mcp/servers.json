@@ -1,0 +1,26 @@
+{
+  "context7": {
+    "type": "url",
+    "url": "https://mcp-context7.${MCP_DOMAIN}/mcp"
+  },
+  "dockerhub": {
+    "type": "url",
+    "url": "https://mcp-dockerhub.${MCP_DOMAIN}/mcp"
+  },
+  "microsoft-docs": {
+    "type": "url",
+    "url": "https://learn.microsoft.com/api/mcp"
+  },
+  "python": {
+    "type": "url",
+    "url": "https://mcp-python.${MCP_DOMAIN}/mcp"
+  },
+  "searx": {
+    "type": "url",
+    "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
+  },
+  "terraform": {
+    "type": "url",
+    "url": "https://mcp-terraform.${MCP_DOMAIN}/mcp"
+  }
+}

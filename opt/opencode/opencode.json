@@ -1,30 +1,4 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "mcp": {
-    "context7": {
-      "type": "remote",
-      "url": "https://mcp-context7.{env:MCP_DOMAIN}/mcp"
-    },
-    "dockerhub": {
-      "type": "remote",
-      "url": "https://mcp-dockerhub.{env:MCP_DOMAIN}/mcp"
-    },
-    "microsoft-docs": {
-      "type": "remote",
-      "url": "https://learn.microsoft.com/api/mcp"
-    },
-    "python": {
-      "type": "remote",
-      "url": "https://mcp-python.{env:MCP_DOMAIN}/mcp"
-    },
-    "searx": {
-      "type": "remote",
-      "url": "https://mcp-searx.{env:MCP_DOMAIN}/mcp"
-    },
-    "terraform": {
-      "type": "remote",
-      "url": "https://mcp-terraform.{env:MCP_DOMAIN}/mcp"
-    }
-  },
   "theme": "system"
 }

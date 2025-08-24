@@ -7,6 +7,7 @@ CURL=(
   curl.sh
   'anthropic'
   --header 'Anthropic-Version: 2023-06-01'
+  --header 'Anthropic-Beta: mcp-client-2025-04-04'
   --header "X-API-Key: $ANTHROPIC_API_KEY"
   --no-buffer
   --json @-

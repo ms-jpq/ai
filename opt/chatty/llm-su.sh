@@ -3,7 +3,7 @@
 set -o pipefail
 
 OPTS='m:,s:,t:,f:'
-LONG_OPTS='model:,stream:,tee:,file:'
+LONG_OPTS='model:,stream:,tee:,file:,mcp:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -14,6 +14,7 @@ export -- CHAT_HISTORY
 
 CHAT_TEE=
 CHAT_STREAMING=2
+MCP_SERVERS='{}'
 while (($#)); do
   case "$1" in
   -m | --model)
@@ -30,6 +31,10 @@ while (($#)); do
     ;;
   -f | --file)
     CHAT_HISTORY="$(nljson-ledger.sh "$SELF" "$2")"
+    shift -- 2
+    ;;
+  --mcp)
+    MCP_SERVERS="$(tr -- ',' '\n' <<< "$2" | "$BASE/../mcp/pick.sh")"
     shift -- 2
     ;;
   --)
@@ -85,7 +90,8 @@ claude*)
   model: $model,
   max_tokens: 4096,
   system: (if length > 1 then .[0].content else "" end),
-  messages: (if length > 1 then .[1:] else . end)
+  messages: (if length > 1 then .[1:] else . end),
+  mcp_servers: ($mcp | to_entries | map(.value * {name: .key} | del(.key)))
 }
 JQ
   ;;
@@ -120,6 +126,9 @@ JQ
   ;;
 esac
 
-ARGV+=(--arg model "$MODEL")
+ARGV+=(
+  --arg model "$MODEL"
+  --argjson mcp "$MCP_SERVERS"
+)
 
 exec -- llm-chat.sh "$SELF" "$BASE/completion/$COMP.sh" "$CHAT_STREAMING" "$CHAT_TEE" "$*" "${ARGV[@]}" "$JQ"
