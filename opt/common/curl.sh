@@ -3,7 +3,8 @@
 set -o pipefail
 
 BASE="${0%/*}"
-COOKIE_JAR="$BASE/../../var/$1.cookies"
+COOKIE_JAR="$HOME/.local/state/ai/cookies/$1"
+
 shift -- 1
 
 CURL=(
