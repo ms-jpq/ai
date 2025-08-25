@@ -7,7 +7,7 @@ shift -- 1
 NAME="$*"
 
 BASE="${0%/*}"
-HIST="$BASE/../../var/readline"
+HIST="$HOME/.local/state/ai/readline"
 mkdir -v -p -- "$HIST" >&2
 
 ARGV=(

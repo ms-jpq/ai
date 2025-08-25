@@ -4,9 +4,8 @@ set -o pipefail
 
 PRINCIPAL="$1"
 NAME="$2"
-REL="${0%/*}/../../var/history/$PRINCIPAL"
-mkdir -v -p -- "$REL" >&2
-STORE="$(realpath -- "$REL")"
+STORE="$HOME/.local/state/ai/history/$PRINCIPAL"
+mkdir -v -p -- "$STORE" >&2
 
 mkdir -v -p -- "$STORE" >&2
 if ! ((RANDOM % 16)) || [[ $NAME == '!' ]]; then
