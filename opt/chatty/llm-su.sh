@@ -120,8 +120,10 @@ JQ
   COMP='ollama'
   read -r -d '' -- JQ <<- 'JQ' || true
 {
+  stream: true,
   model: $model,
-  messages: .
+  input: .,
+  tools: ($mcp | to_entries | map({type: "mcp", require_approval: "never", server_label: .key, server_url: .value.url}))
 }
 JQ
   ;;
