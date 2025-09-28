@@ -68,7 +68,7 @@ gpt*)
 {
   stream: true,
   model: $model,
-  input: .,
+  input: (. | map(.type |= "message")),
   tools: ($mcp | to_entries | map({type: "mcp", require_approval: "never", server_label: .key, server_url: .value.url}))
 }
 JQ
@@ -122,7 +122,7 @@ JQ
 {
   stream: true,
   model: $model,
-  input: .,
+  input: (. | map(.type |= "message")),
   tools: ($mcp | to_entries | map({type: "mcp", require_approval: "never", server_label: .key, server_url: .value.url}))
 }
 JQ
