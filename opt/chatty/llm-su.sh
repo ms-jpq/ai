@@ -122,8 +122,7 @@ JQ
 {
   stream: true,
   model: $model,
-  input: (. | map(.type |= "message")),
-  tools: ($mcp | to_entries | map({type: "mcp", require_approval: "never", server_label: .key, server_url: .value.url}))
+  messages: .
 }
 JQ
   ;;

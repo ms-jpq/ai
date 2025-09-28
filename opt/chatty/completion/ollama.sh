@@ -8,7 +8,7 @@ CURL=(
   'ollama'
   --no-buffer
   --json @-
-  -- "$OLLAMA_PROXY_API_BASE/responses"
+  -- "$OLLAMA_API_BASE/api/chat"
 )
 
 PARSE=(
@@ -16,7 +16,7 @@ PARSE=(
   --exit-status
   --join-output
   --unbuffered
-  'if .type == "response.mcp_call_arguments.delta" then empty else .delta // empty end'
+  '.message // {} | .content // empty'
 )
 
 "${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"
