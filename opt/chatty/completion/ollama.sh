@@ -7,7 +7,6 @@ CURL=(
   curl.sh
   'ollama'
   --no-buffer
-  -4k
   --json @-
   -- "$OLLAMA_PROXY_API_BASE/responses"
 )
