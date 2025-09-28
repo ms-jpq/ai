@@ -26,7 +26,7 @@ clobber: clean
 	rm -v -rf -- '$(VAR)' ./.venv/ ./node_modules/ $(CLOBBER)
 
 
-CURL := curl --fail-with-body --location --no-progress-meter
+CURL := curl --fail --location --no-progress-meter
 VAR := ./var
 TMP := $(VAR)/tmp
 
