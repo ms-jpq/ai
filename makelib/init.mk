@@ -28,7 +28,7 @@ $(VAR)/bin: | $(VAR)
 	'$@/python3' <<< '$(PYDEPS)'
 
 ./node_modules/.bin:
-	npm install --upgrade --no-package-lock
+	npm install --ignore-scripts --upgrade --no-package-lock
 
 
 V_SHELLCHECK = $(shell ./libexec/gh-latest.sh $(VAR) koalaman/shellcheck)
