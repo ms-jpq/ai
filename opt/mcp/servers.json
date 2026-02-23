@@ -15,6 +15,10 @@
     "type": "url",
     "url": "https://mcp-python.${MCP_DOMAIN}/mcp"
   },
+  "r": {
+    "type": "url",
+    "url": "https://mcp-r.${MCP_DOMAIN}/mcp"
+  },
   "searx": {
     "type": "url",
     "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
