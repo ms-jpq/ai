@@ -14,7 +14,7 @@ ARGV=(
   rlwrap
   --one-shot
   --multi-line=$'\r'
-  --multi-line-ext '.txt'
+  --multi-line-ext '.md'
   --history-no-dupes 2
   --substitute-prompt '>: '
   --prompt-colour="$COLOUR"
