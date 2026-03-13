@@ -5,6 +5,7 @@ set -o pipefail
 COLOUR="$1"
 shift -- 1
 NAME="$*"
+NAME="${NAME//'/'/'_'}"
 
 BASE="${0%/*}"
 HIST="$HOME/.local/state/ai/readline"
