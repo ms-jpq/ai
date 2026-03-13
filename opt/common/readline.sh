@@ -5,7 +5,6 @@ set -o pipefail
 COLOUR="$1"
 shift -- 1
 NAME="$*"
-NAME="${NAME//'/'/'_'}"
 
 BASE="${0%/*}"
 HIST="$HOME/.local/state/ai/readline"
@@ -14,8 +13,10 @@ mkdir -v -p -- "$HIST" >&2
 ARGV=(
   rlwrap
   --one-shot
+  --no-children
   --multi-line=$'\n'
   --multi-line-ext '.md'
+  --extra-char-after-completion $'\n'
   --history-no-dupes 2
   --substitute-prompt '>: '
   --prompt-colour="$COLOUR"
