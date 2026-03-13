@@ -14,7 +14,7 @@ ARGV=(
   rlwrap
   --one-shot
   --no-children
-  --multi-line=$'\n'
+  --multi-line
   --multi-line-ext '.md'
   --extra-char-after-completion $'\n'
   --history-no-dupes 2
@@ -26,4 +26,4 @@ ARGV=(
   -e 's/[[:space:]]+$//g'
 )
 
-INPUTRC="$BASE/inputrc" exec -- "${ARGV[@]}"
+RLWRAP_EDITOR="$BASE/rlwrap-editor.sh" INPUTRC="$BASE/inputrc" exec -- "${ARGV[@]}"
