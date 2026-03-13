@@ -13,7 +13,7 @@ mkdir -v -p -- "$HIST" >&2
 ARGV=(
   rlwrap
   --one-shot
-  --multi-line=$'\r'
+  --multi-line=$'\n'
   --multi-line-ext '.md'
   --history-no-dupes 2
   --substitute-prompt '>: '
