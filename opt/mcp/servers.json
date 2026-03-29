@@ -7,17 +7,13 @@
     "type": "url",
     "url": "https://mcp-dockerhub.${MCP_DOMAIN}/mcp"
   },
+  "firecrawl": {
+    "type": "url",
+    "url": "https://mcp-firecrawl.${MCP_DOMAIN}/mcp"
+  },
   "microsoft-docs": {
     "type": "url",
     "url": "https://learn.microsoft.com/api/mcp"
-  },
-  "python": {
-    "type": "url",
-    "url": "https://mcp-python.${MCP_DOMAIN}/mcp"
-  },
-  "r": {
-    "type": "url",
-    "url": "https://mcp-r.${MCP_DOMAIN}/mcp"
   },
   "searx": {
     "type": "url",
