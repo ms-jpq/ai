@@ -11,4 +11,5 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
+export -- CLAUDE_CONFIG_DIR="$ROOT/confs/claude"
 exec -- "$ROOT/node_modules/.bin/claude" "$@"
