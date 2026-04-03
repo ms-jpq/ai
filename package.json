@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "dependencies": {
-    "@anthropic-ai/claude-code": "*",
     "@google/gemini-cli": "*",
     "opencode-ai": "*"
   },

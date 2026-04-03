@@ -11,5 +11,17 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
+case "$OSTYPE" in
+darwin*)
+  CC='/opt/homebrew/bin/claude'
+  ;;
+linux*)
+  CC='/usr/bin/claude-code'
+  ;;
+*)
+  exit 2
+  ;;
+esac
+
 export -- CLAUDE_CONFIG_DIR="$ROOT/confs/claude"
-exec -- "$ROOT/node_modules/.bin/claude" "$@"
+exec -- "$CC" "$@"
