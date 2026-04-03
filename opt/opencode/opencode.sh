@@ -11,7 +11,6 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
-OPENCODE_CONFIG="$BASE/opencode.json"
-export -- LC_ALL='en_CA.UTF-8' OPENCODE_CONFIG
+export -- LC_ALL='en_CA.UTF-8' OPENCODE_CONFIG="$BASE/opencode.json"
 
 exec -- hp "$ROOT/node_modules/.bin/opencode" "$@"
