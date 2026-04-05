@@ -24,4 +24,4 @@ linux*)
 esac
 
 export -- CLAUDE_CONFIG_DIR="$ROOT/confs/claude"
-exec -- "$CC" "$@"
+exec -- ~/.local/bin/hp "$CC" "$@"
