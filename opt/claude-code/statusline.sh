@@ -16,7 +16,7 @@ YELLOW=$'\033[33m'
 ######################################
 
 ######################################
-JSON="$(< /dev/stdin)"
+JSON="$(cat)"
 COST="$(jq -r '.cost.total_cost_usd // 0' <<< "$JSON")"
 CWD="$(jq -r '.cwd // ""' <<< "$JSON")"
 LINES_ADDED="$(jq -r '.cost.total_lines_added // 0' <<< "$JSON")"
