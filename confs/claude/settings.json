@@ -28,6 +28,7 @@
       "Bash(sort *)",
       "Bash(stat *)",
       "Bash(tail *)",
+      "Bash(tr *)",
       "Bash(uniq *)",
       "Bash(wc *)",
       "Bash(which *)"
