@@ -91,9 +91,7 @@
       "Bash(tmux *)",
       "Bash(wget *)",
       "Bash(xdg-open *)",
-      "Bash(zsh *)",
-      "Read(*.env)",
-      "Read(*.env.*)"
+      "Bash(zsh *)"
     ]
   },
   "prefersReducedMotion": true,
