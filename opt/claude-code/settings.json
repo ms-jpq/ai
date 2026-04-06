@@ -42,6 +42,7 @@
       "Bash(uniq *)",
       "Bash(wc *)",
       "Bash(which *)",
+      "WebFetch",
       "WebSearch"
     ],
     "deny": [
