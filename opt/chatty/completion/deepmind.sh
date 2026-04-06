@@ -5,7 +5,7 @@ set -o pipefail
 # shellcheck disable=SC2154
 CURL=(
   curl.sh
-  'ollama'
+  'deepmind'
   --no-buffer
   --json @-
   -- "https://generativelanguage.googleapis.com/v1beta/models/$GEMINI_MODEL:streamGenerateContent?key=$GOOGLE_API_KEY"

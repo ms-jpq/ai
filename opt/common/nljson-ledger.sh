@@ -27,7 +27,7 @@ case "$NAME" in
   ;;
 *)
   LEDGER="$STORE/$NAME.json"
-  if ! [[ -f LEDGER ]]; then
+  if ! [[ -f $LEDGER ]]; then
     set -x
     exit 1
   fi

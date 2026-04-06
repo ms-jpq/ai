@@ -7,7 +7,7 @@ if (($#)); then
 else
   URI='https://ollama.com/library'
   printf -- '%s\n' "$URI" >&2
-  open -- "$URI"
+  exec -- open -- "$URI"
 fi
 
 # shellcheck disable=SC2154

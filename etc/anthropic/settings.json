@@ -72,7 +72,7 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "allowRead": ["~/.config/git/"],
+      "allowRead": ["~/.config/git/", "~/.local/opt/ai/etc/anthropic/"],
       "allowWrite": ["/tmp/", "/var/tmp/"],
       "denyRead": ["~/"]
     },

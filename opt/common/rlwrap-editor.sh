@@ -5,5 +5,5 @@ set -o pipefail
 FILE="$*"
 
 # shellcheck disable=2154
-$EDITOR "$FILE"
+"$EDITOR" "$FILE"
 exec -- awk -- '{printf("%s%s", $0, "\\ ")}' "$FILE"

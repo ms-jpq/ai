@@ -97,7 +97,7 @@ claude*)
 JQ
   ;;
 gemini*)
-  COMP='google'
+  COMP='deepmind'
   export -- GEMINI_MODEL="$MODEL"
   read -r -d '' -- JQ <<- 'JQ' || true
 {
