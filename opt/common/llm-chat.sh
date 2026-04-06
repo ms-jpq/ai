@@ -81,6 +81,11 @@ if [[ -t 0 ]]; then
     done
     REEXEC=1
     ;;
+  '>e' | '>edit')
+    # shellcheck disable=2154
+    "$EDITOR" -- "$CHAT_HISTORY"
+    REEXEC=1
+    ;;
   *)
     PRINT=0
     ;;
