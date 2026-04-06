@@ -94,7 +94,7 @@
     }
   },
   "statusLine": {
-    "command": "~/.local/opt/ai/etc/anthropic/statusline.sh",
+    "command": "~/.local/opt/ai/opt/claude-code//statusline.sh",
     "type": "command"
   },
   "worktree": {
