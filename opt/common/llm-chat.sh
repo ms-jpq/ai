@@ -2,6 +2,7 @@
 
 set -o pipefail
 
+ROOT="${0%/*}/../.."
 ARGV=("$@")
 
 NAME="$1"
@@ -82,7 +83,7 @@ if [[ -t 0 ]]; then
     REEXEC=1
     ;;
   '>e' | '>edit')
-    jq --raw-output '["---", "", "# \(.role)", "", .content][]' < "$CHAT_HISTORY" > "$RX"
+    jq --raw-output '["---", "", "# \(.role)", "", .content][]' < "$CHAT_HISTORY" | "$ROOT/node_modules/.bin/prettier" --stdin-filepath '-.md' > "$RX"
     # shellcheck disable=2154
     "$EDITOR" -- "$RX"
     REEXEC=1
