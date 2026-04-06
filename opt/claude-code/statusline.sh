@@ -17,6 +17,7 @@ YELLOW=$'\033[33m'
 
 ######################################
 JSON="$(tee)"
+API_MS="$(jq --raw-output '.cost.total_api_duration_ms' <<< "$JSON")"
 COST="$(jq --raw-output '.cost.total_cost_usd // 0' <<< "$JSON")"
 LINES_ADDED="$(jq --raw-output '.cost.total_lines_added // 0' <<< "$JSON")"
 LINES_REMOVED="$(jq --raw-output '.cost.total_lines_removed // 0' <<< "$JSON")"
