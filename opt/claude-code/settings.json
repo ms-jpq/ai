@@ -1,6 +1,21 @@
 {
   "$docs": "https://code.claude.com/docs/en/settings",
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "enabledPlugins": {
+    "clangd-lsp@claude-plugins-official": false,
+    "csharp-lsp@claude-plugins-official": false,
+    "elixir-ls-lsp@claude-plugins-official": false,
+    "gopls-lsp@claude-plugins-official": false,
+    "jdtls-lsp@claude-plugins-official": false,
+    "kotlin-lsp@claude-plugins-official": false,
+    "lua-lsp@claude-plugins-official": false,
+    "php-lsp@claude-plugins-official": false,
+    "pyright-lsp@claude-plugins-official": false,
+    "ruby-lsp@claude-plugins-official": false,
+    "rust-analyzer-lsp@claude-plugins-official": false,
+    "swift-lsp@claude-plugins-official": false,
+    "typescript-lsp@claude-plugins-official": false
+  },
   "env": {
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "NO_COLOR": "true"
@@ -82,7 +97,7 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "allowRead": ["~/.config/git/"],
+      "allowRead": ["~/.local/opt/ai/opt/claude-code/", "~/.config/git/"],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
       "denyRead": ["~/"],
       "denyWrite": ["/"]
