@@ -4,6 +4,7 @@
   "env": {
     "NO_COLOR": "true"
   },
+  "hooks": {},
   "outputStyle": "Explanatory",
   "permissions": {
     "allow": [
@@ -85,5 +86,7 @@
     "command": "~/.local/opt/ai/etc/anthropic/statusline.sh",
     "type": "command"
   },
-  "worktree": {}
+  "worktree": {
+    "symlinkDirectories": [".cache/", ".venv/", "node_modules/", "vendor/"]
+  }
 }
