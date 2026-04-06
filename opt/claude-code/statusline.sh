@@ -24,7 +24,7 @@ LINES_REMOVED="$(jq --raw-output '.cost.total_lines_removed // 0' <<< "$JSON")"
 MODEL="$(jq --raw-output '.model.display_name // "unknown"' <<< "$JSON")"
 USAGE_PCT="$(jq --raw-output '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
 WD_CURR="$(jq --raw-output '.workspace.current_dir' <<< "$JSON")"
-WD_PROJ="$(jq --raw-output '.workspace.current_dir' <<< "$JSON")"
+WD_PROJ="$(jq --raw-output '.workspace.project_dir' <<< "$JSON")"
 ######################################
 
 ######################################
@@ -33,12 +33,22 @@ COST_INFO="${BOLD}\$${COST_FMT}${RESET}"
 ######################################
 
 ######################################
+SPENT_SECS=$((API_MS / 1000))
+TIMEFMT='%S'
+if ((SPENT_SECS >= 60)); then
+  TIMEFMT="%M:$TIMEFMT"
+fi
+if ((SPENT_SECS >= 3600)); then
+  TIMEFMT="%H:$TIMEFMT"
+fi
+SPENT_TIME="$(date --utc --date="@$SPENT_SECS" -- "+$TIMEFMT")"
+
 BAR_LEN=10
 FILLED=$((USAGE_PCT * BAR_LEN / 100))
 EMPTY=$((BAR_LEN - FILLED))
-BAR=""
-for ((i = 0; i < FILLED; i++)); do BAR+="█"; done
-for ((i = 0; i < EMPTY; i++)); do BAR+="░"; done
+BAR=''
+for ((i = 0; i < FILLED; i++)); do BAR+='█'; done
+for ((i = 0; i < EMPTY; i++)); do BAR+='░'; done
 
 if ((USAGE_PCT >= 90)); then
   BAR_COLOUR="$RED"
@@ -49,7 +59,7 @@ else
 fi
 
 MODEL_INFO="${MODEL}"
-USAGE_INFO="${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
+USAGE_INFO="${DIM}${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
 ######################################
 
 ######################################
