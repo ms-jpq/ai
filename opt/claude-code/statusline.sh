@@ -16,13 +16,14 @@ YELLOW=$'\033[33m'
 ######################################
 
 ######################################
-JSON="$(cat)"
-COST="$(jq -r '.cost.total_cost_usd // 0' <<< "$JSON")"
-CWD="$(jq -r '.cwd // ""' <<< "$JSON")"
-LINES_ADDED="$(jq -r '.cost.total_lines_added // 0' <<< "$JSON")"
-LINES_REMOVED="$(jq -r '.cost.total_lines_removed // 0' <<< "$JSON")"
-MODEL="$(jq -r '.model.display_name // "unknown"' <<< "$JSON")"
-USAGE_PCT="$(jq -r '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
+JSON="$(tee)"
+COST="$(jq --raw-output '.cost.total_cost_usd // 0' <<< "$JSON")"
+LINES_ADDED="$(jq --raw-output '.cost.total_lines_added // 0' <<< "$JSON")"
+LINES_REMOVED="$(jq --raw-output '.cost.total_lines_removed // 0' <<< "$JSON")"
+MODEL="$(jq --raw-output '.model.display_name // "unknown"' <<< "$JSON")"
+USAGE_PCT="$(jq --raw-output '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
+WD_CURR="$(jq --raw-output '.workspace.current_dir' <<< "$JSON")"
+WD_PROJ="$(jq --raw-output '.workspace.current_dir' <<< "$JSON")"
 ######################################
 
 ######################################
@@ -51,15 +52,19 @@ USAGE_INFO="${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
 ######################################
 
 ######################################
-DIR_INFO="./$(basename -- "$CWD")/"
+DIR_INFO=''
+if [[ $WD_CURR != "$WD_PROJ" ]]; then
+  REL="$(realpath --no-symlinks --relative-to "$WD_PROJ" -- "$WD_CURR")"
+  DIR_INFO=" $(basename -- "$WD_PROJ"):$REL"
+fi
 ######################################
 
 ######################################
-GIT_INFO=""
-if [[ -n $CWD ]] && BRANCH=$(git -C "$CWD" branch --show-current 2> /dev/null); then
+GIT_INFO=''
+if [[ -n $WD_CURR ]] && BRANCH=$(git -C "$WD_CURR" branch --show-current 2> /dev/null); then
   DIRTY=""
-  git -C "$CWD" diff --quiet 2> /dev/null || DIRTY="*"
-  git -C "$CWD" diff --cached --quiet 2> /dev/null || DIRTY="*"
+  git -C "$WD_CURR" diff --quiet 2> /dev/null || DIRTY="*"
+  git -C "$WD_CURR" diff --cached --quiet 2> /dev/null || DIRTY="*"
   GIT_INFO=" ${DIM}on${RESET} ${CYAN}${BRANCH}${DIRTY}${RESET}"
 fi
 
