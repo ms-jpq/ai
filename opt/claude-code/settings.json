@@ -79,6 +79,8 @@
       "denyRead": ["~/"]
     },
     "network": {
+      "allowLocalBinding": false,
+      "allowUnixSockets": [],
       "allowedDomains": []
     }
   },
