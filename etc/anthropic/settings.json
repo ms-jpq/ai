@@ -72,12 +72,17 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "allowWrite": ["/tmp", "/var/tmp"],
+      "allowRead": ["~/.config/git/"],
+      "allowWrite": ["/tmp/", "/var/tmp/"],
       "denyRead": ["~/"]
     },
     "network": {
       "allowedDomains": []
     }
+  },
+  "statusLine": {
+    "command": "~/.local/opt/ai/etc/anthropic/statusline.sh",
+    "type": "command"
   },
   "worktree": {}
 }
