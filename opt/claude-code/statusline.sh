@@ -50,7 +50,7 @@ if [[ -n $CWD ]] && BRANCH=$(git -C "$CWD" branch --show-current 2> /dev/null); 
 fi
 
 # Cost
-printf -v COST_FMT -- '$%.4f' "$COST"
+printf -v COST_FMT -- '$%.3f' "$COST"
 
 # Lines changed this session
 DELTA=""
