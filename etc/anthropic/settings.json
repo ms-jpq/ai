@@ -1,6 +1,9 @@
 {
   "$docs": "https://code.claude.com/docs/en/settings",
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "NO_COLOR": "true"
+  },
   "permissions": {
     "allow": [
       "Bash(basename *)",
@@ -64,6 +67,7 @@
       "Read(*.env)"
     ]
   },
+  "prefersReducedMotion": true,
   "sandbox": {
     "enabled": true,
     "filesystem": {
@@ -73,5 +77,6 @@
     "network": {
       "allowedDomains": []
     }
-  }
+  },
+  "worktree": {}
 }
