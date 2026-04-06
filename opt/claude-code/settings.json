@@ -98,7 +98,7 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "allowRead": ["~/.config/git/", "~/.local/opt/ai/opt/claude-code/"],
+      "allowRead": ["~/.config/git/"],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
       "denyRead": ["~/"],
       "denyWrite": ["/"]
