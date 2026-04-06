@@ -1,13 +1,1 @@
-{
-  "$docs": "https://code.claude.com/docs/en/keybindings",
-  "$schema": "https://www.schemastore.org/claude-code-keybindings.json",
-  "bindings": [
-    {
-      "bindings": {
-        "ctrl+b": null,
-        "ctrl+f": "task:background"
-      },
-      "context": "Task"
-    }
-  ]
-}
+../../etc/anthropic/keybindings.json
