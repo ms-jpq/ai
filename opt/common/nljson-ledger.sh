@@ -19,7 +19,7 @@ case "$NAME" in
   ;;
 @)
   printf -v PREVIEW -- '%q ' jq --sort-keys --color-output .
-  LEDGER="$(printf -- '%s\0' "$STORE"/*.json | fzf --read0 --preview="$PREVIEW {}")"
+  LEDGER="$(printf -- '%s\0' "$STORE"/*.json | sort --reverse | fzf --read0 --preview="$PREVIEW {}")"
   ;;
 -)
   FILES=("$STORE"/*.json)
