@@ -40,7 +40,8 @@
       "Bash(tr *)",
       "Bash(uniq *)",
       "Bash(wc *)",
-      "Bash(which *)"
+      "Bash(which *)",
+      "WebSearch"
     ],
     "deny": [
       "Bash(apt *)",
