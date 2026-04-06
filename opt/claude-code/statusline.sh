@@ -27,7 +27,7 @@ USAGE_PCT="$(jq -r '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. 
 
 ######################################
 printf -v COST_FMT -- '%.2f' "$COST"
-printf -v COST_INFO -- '%s' "${BOLD}\$${COST_FMT}${RESET}"
+COST_INFO="${BOLD}\$${COST_FMT}${RESET}"
 ######################################
 
 ######################################
@@ -46,8 +46,12 @@ else
   BAR_COLOUR="$GREEN"
 fi
 
-printf -v MODEL_INFO -- '%s' "${MODEL}"
-printf -v USAGE_INFO -- '%s' "${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
+MODEL_INFO="${MODEL}"
+USAGE_INFO="${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
+######################################
+
+######################################
+DIR_INFO="$(basename -- "$CWD")"
 ######################################
 
 ######################################
@@ -56,14 +60,13 @@ if [[ -n $CWD ]] && BRANCH=$(git -C "$CWD" branch --show-current 2> /dev/null); 
   DIRTY=""
   git -C "$CWD" diff --quiet 2> /dev/null || DIRTY="*"
   git -C "$CWD" diff --cached --quiet 2> /dev/null || DIRTY="*"
-  GIT_INFO="  ${DIM}on${RESET} ${CYAN}${BRANCH}${DIRTY}${RESET}"
+  GIT_INFO=" ${DIM}on${RESET} ${CYAN}${BRANCH}${DIRTY}${RESET}"
 fi
 
 LINES_DELTA=""
 if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
   LINES_DELTA="  ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
 fi
-
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO}${GIT_INFO}${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO}  ${DIR_INFO}${GIT_INFO}${LINES_DELTA}"
