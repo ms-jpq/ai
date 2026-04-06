@@ -58,4 +58,4 @@ if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
   DELTA="  ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
 fi
 
-printf -- '%s' "${BOLD}${MODEL}${RESET}${GIT_INFO}  ${BAR_COLOR}${BAR}${RESET} ${PCT}%  ${DIM}${COST_FMT}${RESET}${DELTA}"
+echo -e -- "${BOLD}${MODEL}${RESET}${GIT_INFO}  ${BAR_COLOR}${BAR}${RESET} ${PCT}%  ${DIM}${COST_FMT}${RESET}${DELTA}"
