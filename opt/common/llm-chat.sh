@@ -82,8 +82,9 @@ if [[ -t 0 ]]; then
     REEXEC=1
     ;;
   '>e' | '>edit')
+    jq --raw-output '["---", "", "# \(.role)", "", .content][]' < "$CHAT_HISTORY" > "$RX"
     # shellcheck disable=2154
-    "$EDITOR" -- "$CHAT_HISTORY"
+    "$EDITOR" -- "$RX"
     REEXEC=1
     ;;
   *)
