@@ -9,7 +9,7 @@ mkdir -v -p -- "$STORE" >&2
 
 mkdir -v -p -- "$STORE" >&2
 if ! ((RANDOM % 16)) || [[ $NAME == '!' ]]; then
-  find "$STORE" '(' -name '*.json' -empty ')' -or -name 'tmp.*' -delete
+  find "$STORE" '(' '(' -name '*.json' -empty ')' -or -name 'tmp.*' ')' -delete
 fi
 
 case "$NAME" in
