@@ -3,14 +3,33 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "permissions": {
     "allow": [
+      "Bash(awk *)",
       "Bash(cat *)",
-      "Bash(git add *)",
+      "Bash(column *)",
+      "Bash(env)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git show *)",
       "Bash(grep *)",
+      "Bash(head *)",
       "Bash(jq *)",
       "Bash(ls *)",
-      "Bash(wc *)"
+      "Bash(pwd)",
+      "Bash(sort *)",
+      "Bash(tail *)",
+      "Bash(wc *)",
+      "Bash(which *)"
     ],
-    "deny": ["Read(*.env)", "Bash(curl *)"]
+    "deny": [
+      "Bash(curl *)",
+      "Bash(dd *)",
+      "Bash(gpg *)",
+      "Bash(reboot *)",
+      "Bash(ssh *)",
+      "Bash(tmux *)",
+      "Bash(wget *)",
+      "Read(*.env)",
+    ]
   },
   "sandbox": {
     "enabled": true,
