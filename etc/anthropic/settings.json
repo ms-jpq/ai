@@ -65,7 +65,8 @@
       "Bash(wget *)",
       "Bash(xdg-open *)",
       "Bash(zsh *)",
-      "Read(*.env)"
+      "Read(*.env)",
+      "Read(*.env.*)"
     ]
   },
   "prefersReducedMotion": true,
