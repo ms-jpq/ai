@@ -3,7 +3,7 @@
 set -o pipefail
 
 OPTS='m:,s:,t:,f:'
-LONG_OPTS='model:,stream:,tee:,file:,mcp:'
+LONG_OPTS='model:,stream:,file:,mcp:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
@@ -12,7 +12,6 @@ SELF="${BASE##*/}"
 
 export -- CHAT_HISTORY
 
-CHAT_TEE=
 CHAT_STREAMING=2
 MCP_SERVERS='{}'
 while (($#)); do
@@ -23,10 +22,6 @@ while (($#)); do
     ;;
   -s | --stream)
     CHAT_STREAMING="$2"
-    shift -- 2
-    ;;
-  -t | --tee)
-    CHAT_TEE="$2"
     shift -- 2
     ;;
   -f | --file)
@@ -49,14 +44,6 @@ done
 
 if [[ -z ${MODEL:-""} ]]; then
   MODEL="$(fzf < "$BASE/../../etc/chatty/models.txt")"
-fi
-
-if [[ -z ${CHAT_TEE:-""} ]] && [[ -d ./.git ]]; then
-  CHAT_TEE="$PWD/.llm/$(date -- '+%Y-%m-%d %H:%M:%S')"
-fi
-
-if [[ -n ${CHAT_TEE:-""} ]]; then
-  mkdir -v -p -- "$CHAT_TEE" >&2
 fi
 
 ARGV=()
@@ -133,4 +120,4 @@ ARGV+=(
   --argjson mcp "$MCP_SERVERS"
 )
 
-exec -- llm-chat.sh "$SELF" "$BASE/completion/$COMP.sh" "$CHAT_STREAMING" "$CHAT_TEE" "$*" "${ARGV[@]}" "$JQ"
+exec -- llm-chat.sh "$SELF" "$BASE/completion/$COMP.sh" "$CHAT_STREAMING" "$*" "${ARGV[@]}" "$JQ"

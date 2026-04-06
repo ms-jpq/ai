@@ -8,13 +8,11 @@ ARGV=("$@")
 NAME="$1"
 CHAT_CLIENT="$2"
 CHAT_STREAMING="$3"
-CHAT_TEE="$4"
-CHAT_PROMPT="$5"
-shift -- 5
+CHAT_PROMPT="$4"
+shift -- 4
 
 CHAT_HISTORY="${CHAT_HISTORY:-"$(nljson-ledger.sh "$NAME" '')"}"
 CHAT_TMP="${CHAT_TMP:-"$(mktemp -p "${CHAT_HISTORY%/*}" -- 'XXXXXXXX.md')"}"
-export -- CHAT_LVL="${CHAT_LVL:-0}"
 export -- CHAT_HISTORY CHAT_TMP
 
 JQ_SC=(jq --exit-status --slurp --compact-output)
@@ -33,26 +31,13 @@ JQ_SEND=(
 )
 
 if ! [[ -s $CHAT_HISTORY ]]; then
-  if [[ -n $CHAT_TEE ]]; then
-    TX="$CHAT_TEE/->.txt"
-  else
-    TX='/dev/null'
-  fi
   SYS="$(prompt.sh "$NAME-system" red "$CHAT_PROMPT")"
   if [[ -n $SYS ]]; then
-    printf -- '%s' "$SYS" | tee -- /dev/stderr "$TX" | "${JQ_APPEND[@]}" 'system' >> "$CHAT_HISTORY"
+    printf -- '%s' "$SYS" | tee -- /dev/stderr | "${JQ_APPEND[@]}" 'system' >> "$CHAT_HISTORY"
     printf -- '\n'
   fi
   hr.sh '!'
 fi >&2
-
-if [[ -n $CHAT_TEE ]]; then
-  TX="$CHAT_TEE/$CHAT_LVL.tx.txt"
-  RX="$CHAT_TEE/$CHAT_LVL.rx.md"
-else
-  TX='/dev/null'
-  RX="$CHAT_TMP"
-fi
 
 REEXEC=0
 if [[ -t 0 ]]; then
@@ -103,7 +88,7 @@ if ((REEXEC)); then
   exec -- "$0" "${ARGV[@]}"
 fi
 
-tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$CHAT_HISTORY"
+"${JQ_APPEND[@]}" user <<< "$USR" >> "$CHAT_HISTORY"
 
 {
   SHORT_HIST="~${CHAT_HISTORY#"$HOME"}"
@@ -112,10 +97,8 @@ tee -- "$TX" <<< "$USR" | "${JQ_APPEND[@]}" user >> "$CHAT_HISTORY"
   printf -- '\n%s\n' "$JQ_HIST"
 } >&2
 
-"${JQ_SEND[@]}" | "$CHAT_CLIENT" "$CHAT_STREAMING" "$RX"
-"${JQ_APPEND[@]}" 'assistant' < "$RX" >> "$CHAT_HISTORY"
+"${JQ_SEND[@]}" | "$CHAT_CLIENT" "$CHAT_STREAMING" | "${JQ_APPEND[@]}" 'assistant' >> "$CHAT_HISTORY"
 
 if [[ -t 0 ]]; then
-  ((++CHAT_LVL))
   exec -- "$0" "${ARGV[@]}"
 fi

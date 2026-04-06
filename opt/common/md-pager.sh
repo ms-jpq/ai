@@ -3,9 +3,8 @@
 set -o pipefail
 
 STREAMING="$1"
-TEE="${2:-"/dev/null"}"
 
-tee -- "$TEE" | case "$STREAMING" in
+case "$STREAMING" in
 0)
   COLS="$(tput -- cols)"
   COLS=$((COLS - 4))

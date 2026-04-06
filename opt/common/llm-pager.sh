@@ -3,8 +3,7 @@
 set -o pipefail
 
 STREAMING="$1"
-TEE="$2"
-shift -- 2
+shift -- 1
 
 hr() {
   printf -- '\n'
@@ -19,9 +18,7 @@ SED=(
   -e '/^data:/s/^data:[[:space:]]+(\{.*)/\1/gp'
 )
 
-{
-  hr '>'
-  "${SED[@]}" | "$@" | md-pager.sh "$STREAMING" "$TEE"
-  printf -- '\n'
-  hr '<'
-} >&2
+hr '>' >&2
+"${SED[@]}" | "$@" | md-pager.sh "$STREAMING" | tee -- /dev/stderr
+printf -- '\n' >&2
+hr '<' >&2
