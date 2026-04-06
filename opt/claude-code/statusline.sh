@@ -6,22 +6,22 @@ set -o pipefail
 
 JSON="$(cat)"
 
-# ANSI colors
-GREEN='\033[32m'
-YELLOW='\033[33m'
-RED='\033[31m'
-CYAN='\033[36m'
-DIM='\033[2m'
-RESET='\033[0m'
-BOLD='\033[1m'
+RESET=$'\033[0m'
+DIM=$'\033[2m'
+BOLD=$'\033[1m'
+
+CYAN=$'\033[36m'
+GREEN=$'\033[32m'
+RED=$'\033[31m'
+YELLOW=$'\033[33m'
 
 # Parse fields
+CWD="$(jq -r '.cwd // ""' <<< "$JSON")"
 MODEL="$(jq -r '.model.display_name // "unknown"' <<< "$JSON")"
 PCT="$(jq -r '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
 COST="$(jq -r '.cost.total_cost_usd // 0' <<< "$JSON")"
 LINES_ADDED="$(jq -r '.cost.total_lines_added // 0' <<< "$JSON")"
 LINES_REMOVED="$(jq -r '.cost.total_lines_removed // 0' <<< "$JSON")"
-CWD="$(jq -r '.cwd // ""' <<< "$JSON")"
 
 # Context bar (10 chars wide)
 BAR_LEN=10
@@ -31,7 +31,7 @@ BAR=""
 for ((i = 0; i < FILLED; i++)); do BAR+="█"; done
 for ((i = 0; i < EMPTY; i++)); do BAR+="░"; done
 
-# Color the bar by threshold
+# Colour the bar by threshold
 if ((PCT >= 90)); then
   BAR_COLOR="$RED"
 elif ((PCT >= 70)); then
@@ -58,4 +58,4 @@ if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
   DELTA="  ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
 fi
 
-echo -e -- "${BOLD}${MODEL}${RESET}${GIT_INFO}  ${BAR_COLOR}${BAR}${RESET} ${PCT}%  ${DIM}${COST_FMT}${RESET}${DELTA}"
+printf -- '%s' "${BOLD}${MODEL}${RESET}${GIT_INFO}  ${BAR_COLOR}${BAR}${RESET} ${PCT}%  ${DIM}${COST_FMT}${RESET}${DELTA}"
