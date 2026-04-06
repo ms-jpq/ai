@@ -75,7 +75,7 @@
     "enabled": true,
     "filesystem": {
       "allowRead": ["~/.config/git/", "~/.local/opt/ai/etc/anthropic/"],
-      "allowWrite": ["/tmp/", "/var/tmp/"],
+      "allowWrite": ["/tmp/", "/var/tmp/", "/private/tmp/"],
       "denyRead": ["~/"]
     },
     "network": {
