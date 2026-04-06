@@ -98,7 +98,10 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "allowRead": ["~/.config/git/"],
+      "allowRead": [
+        "~/.config/git/",
+        "~/.local/opt/ai/opt/claude-code/"
+      ],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
       "denyRead": ["~/"],
       "denyWrite": ["/"]
@@ -110,7 +113,7 @@
     }
   },
   "statusLine": {
-    "command": "~/.local/opt/ai/opt/claude-code//statusline.sh",
+    "command": "~/.local/opt/ai/opt/claude-code/statusline.sh",
     "type": "command"
   },
   "worktree": {
