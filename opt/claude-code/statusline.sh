@@ -69,4 +69,4 @@ if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO} § ${DIR_INFO}${GIT_INFO}${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO} §  ${DIR_INFO}${GIT_INFO}${LINES_DELTA}"
