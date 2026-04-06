@@ -4,7 +4,7 @@ set -o pipefail
 
 # https://code.claude.com/docs/en/statusline
 
-input="$(cat)"
+JSON="$(cat)"
 
 # ANSI colors
 GREEN='\033[32m'
@@ -16,12 +16,12 @@ RESET='\033[0m'
 BOLD='\033[1m'
 
 # Parse fields
-MODEL=$(printf '%s' "$input" | jq -r '.model.display_name // "unknown"')
-PCT=$(printf '%s' "$input" | jq -r '.context_window.used_percentage // 0' | cut -d. -f1)
-COST=$(printf '%s' "$input" | jq -r '.cost.total_cost_usd // 0')
-LINES_ADDED=$(printf '%s' "$input" | jq -r '.cost.total_lines_added // 0')
-LINES_REMOVED=$(printf '%s' "$input" | jq -r '.cost.total_lines_removed // 0')
-CWD=$(printf '%s' "$input" | jq -r '.cwd // ""')
+MODEL="$(jq -r '.model.display_name // "unknown"' <<< "$JSON")"
+PCT="$(jq -r '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
+COST="$(jq -r '.cost.total_cost_usd // 0' <<< "$JSON")"
+LINES_ADDED="$(jq -r '.cost.total_lines_added // 0' <<< "$JSON")"
+LINES_REMOVED="$(jq -r '.cost.total_lines_removed // 0' <<< "$JSON")"
+CWD="$(jq -r '.cwd // ""' <<< "$JSON")"
 
 # Context bar (10 chars wide)
 BAR_LEN=10
@@ -50,7 +50,7 @@ if [[ -n $CWD ]] && BRANCH=$(git -C "$CWD" branch --show-current 2> /dev/null); 
 fi
 
 # Cost
-COST_FMT=$(printf '$%.4f' "$COST")
+printf -v COST_FMT -- '$%.4f' "$COST"
 
 # Lines changed this session
 DELTA=""
@@ -58,4 +58,4 @@ if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
   DELTA="  ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
 fi
 
-echo -e "${BOLD}${MODEL}${RESET}${GIT_INFO}  ${BAR_COLOR}${BAR}${RESET} ${PCT}%  ${DIM}${COST_FMT}${RESET}${DELTA}"
+printf -- '%s' "${BOLD}${MODEL}${RESET}${GIT_INFO}  ${BAR_COLOR}${BAR}${RESET} ${PCT}%  ${DIM}${COST_FMT}${RESET}${DELTA}"
