@@ -3,8 +3,11 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": false,
+    "claude-md-management@claude-plugins-official": false,
+    "code-simplifier@claude-plugins-official": false,
     "csharp-lsp@claude-plugins-official": false,
     "elixir-ls-lsp@claude-plugins-official": false,
+    "github@claude-plugins-official": false,
     "gopls-lsp@claude-plugins-official": false,
     "jdtls-lsp@claude-plugins-official": false,
     "kotlin-lsp@claude-plugins-official": false,
@@ -97,7 +100,7 @@
   "sandbox": {
     "enabled": true,
     "filesystem": {
-      "allowRead": ["~/.local/opt/ai/opt/claude-code/", "~/.config/git/"],
+      "allowRead": ["~/.config/git/"],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
       "denyRead": ["~/"],
       "denyWrite": ["/"]
