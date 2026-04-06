@@ -83,9 +83,9 @@ if [[ -t 0 ]]; then
     REEXEC=1
     ;;
   '>e' | '>edit')
-    jq --raw-output '["---", "", "# \(.role)", "", .content][]' < "$CHAT_HISTORY" | "$ROOT/node_modules/.bin/prettier" --stdin-filepath '-.md' > "$RX"
+    jq --raw-output '["# \(.role)", "", .content, "", "---", ""][]' < "$CHAT_HISTORY" | "$ROOT/node_modules/.bin/prettier" --stdin-filepath='-.md' > "$CHAT_TMP"
     # shellcheck disable=2154
-    "$EDITOR" -- "$RX"
+    "$EDITOR" -- "$CHAT_TMP"
     REEXEC=1
     ;;
   *)
