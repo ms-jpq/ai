@@ -58,13 +58,12 @@ if [[ -n $CWD ]] && BRANCH=$(git -C "$CWD" branch --show-current 2> /dev/null); 
   git -C "$CWD" diff --cached --quiet 2> /dev/null || DIRTY="*"
   GIT_INFO="  ${DIM}on${RESET} ${CYAN}${BRANCH}${DIRTY}${RESET}"
 fi
-######################################
 
-######################################
 LINES_DELTA=""
 if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
   LINES_DELTA="  ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
 fi
+
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO} ${GIT_INFO} ${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO}${GIT_INFO}${LINES_DELTA}"
