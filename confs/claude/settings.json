@@ -21,13 +21,19 @@
       "Bash(which *)"
     ],
     "deny": [
+      "Bash(apt *)",
+      "Bash(apt-get *)",
+      "Bash(bash *)",
+      "Bash(brew *)",
       "Bash(curl *)",
-      "Bash(dd *)",
       "Bash(gpg *)",
+      "Bash(pwsh *)",
       "Bash(reboot *)",
+      "Bash(sh *)",
       "Bash(ssh *)",
       "Bash(tmux *)",
       "Bash(wget *)",
+      "Bash(zsh *)",
       "Read(*.env)",
     ]
   },
