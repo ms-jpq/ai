@@ -59,7 +59,7 @@ else
 fi
 
 MODEL_INFO="${MODEL}"
-USAGE_INFO="${DIM}${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
+USAGE_INFO="${DIM}⧗${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
 ######################################
 
 ######################################
@@ -85,4 +85,4 @@ if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO} §  ${DIR_INFO}${GIT_INFO}${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} §  ${DIR_INFO}${GIT_INFO}${LINES_DELTA}"
