@@ -64,7 +64,7 @@ if [[ -t 0 ]]; then
   read -r -- LINE <<< "$USR"
   PRINT=1
   case "$LINE" in
-  '>cls' | '>clear')
+  '>c' | '>cls')
     REEXEC=1
     clear
     ;;
@@ -76,7 +76,7 @@ if [[ -t 0 ]]; then
     fi
     REEXEC=1
     ;;
-  '>undo')
+  '>u' | '>undo')
     for _ in {1..2}; do
       sed -E -e '$d' -i -- "$CHAT_HISTORY"
     done
