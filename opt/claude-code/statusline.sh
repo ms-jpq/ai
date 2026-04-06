@@ -26,6 +26,11 @@ USAGE_PCT="$(jq -r '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. 
 ######################################
 
 ######################################
+printf -v COST_FMT -- '%.2f' "$COST"
+printf -v COST_INFO -- '%s' "${BOLD}\$${COST_FMT}${RESET}"
+######################################
+
+######################################
 BAR_LEN=10
 FILLED=$((USAGE_PCT * BAR_LEN / 100))
 EMPTY=$((BAR_LEN - FILLED))
@@ -41,9 +46,8 @@ else
   BAR_COLOUR="$GREEN"
 fi
 
-printf -v MODEL_INFO -- '%s' "${BOLD}${MODEL}${RESET}"
-printf -v COST_FMT -- '$%.2f' "$COST"
-printf -v USAGE_INFO -- '%s' "${BAR_COLOUR}${BAR}${RESET} ${USAGE_PCT}% ${COST_FMT}"
+printf -v MODEL_INFO -- '%s' "${MODEL}"
+printf -v USAGE_INFO -- '%s' "${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
 ######################################
 
 ######################################
@@ -63,4 +67,4 @@ if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
 fi
 ######################################
 
-printf -- '%s' "${MODEL_INFO} ${USAGE_INFO} ${GIT_INFO} ${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${USAGE_INFO} ${GIT_INFO} ${LINES_DELTA}"
