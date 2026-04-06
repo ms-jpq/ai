@@ -4,6 +4,7 @@
   "env": {
     "NO_COLOR": "true"
   },
+  "outputStyle": "Explanatory",
   "permissions": {
     "allow": [
       "Bash(basename *)",
