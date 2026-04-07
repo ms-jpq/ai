@@ -33,7 +33,7 @@ case "$CMD_LINE" in
   DECISION='deny'
   REASON='consider using an alternative, like pip install, npm install, etc'
   ;;
-'python -c'* | 'python3 -c'* | 'ruby -e '* | 'node -e'*)
+'python -c '* | 'python3 -c '* | 'ruby -e '* | 'node -e '*)
   REASON='review inline scripts'
   ;;
 'git push '*--force* | 'git push '*-f*)
