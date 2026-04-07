@@ -78,8 +78,8 @@ fi
 
 LINES_DELTA=""
 if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
-  LINES_DELTA="  ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
+  LINES_DELTA=" ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} §  ${DIR_INFO}${GIT_INFO}${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO}${LINES_DELTA} §  ${DIR_INFO}${GIT_INFO}"
