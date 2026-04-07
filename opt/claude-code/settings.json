@@ -85,7 +85,7 @@
   },
   "model": "opus",
   "permissions": {
-    "allow": ["WebFetch", "WebSearch", "Write(./*)"]
+    "allow": ["Glob", "Grep", "Read", "WebFetch", "WebSearch", "Write(./*)"]
   },
   "sandbox": {
     "enabled": true,
