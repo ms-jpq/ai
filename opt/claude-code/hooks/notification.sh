@@ -23,6 +23,20 @@ if [[ -v SSH ]]; then
   exit
 fi
 
-TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
-MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
+EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
+case "$EVENT" in
+Notification)
+  TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
+  MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
+  ;;
+PermissionRequest)
+  TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
+  MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac
+
 exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
