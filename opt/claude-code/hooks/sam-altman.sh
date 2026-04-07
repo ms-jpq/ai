@@ -17,12 +17,16 @@ JQ
 
 DECISION='ask'
 case "$CMD_LINE" in
-'bash '* | 'dash '* | 'fish '* | 'pwsh '* | 'sh '* | 'zsh '*)
+'bash '* | 'dash '* | 'fish '* | 'sh '* | 'zsh '*)
+  DECISION='deny'
   REASON='consider not doing nested shell scripts'
   ;;
 'curl '* | 'wget '*)
   DECISION='deny'
   REASON='consider using an alternative, like pip install, npm install, etc'
+  ;;
+'python -c'* | 'python3 -c'* | 'ruby -e '* | 'node -e'*)
+  REASON='review inline scripts'
   ;;
 'git push '*--force* | 'git push '*-f*)
   REASON='review force pushing'
