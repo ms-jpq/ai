@@ -2,6 +2,13 @@
 
 set -o pipefail
 
-tee --append -- owo.json
+JSON="$(tee)"
+SESSION="$(jq --raw-output '.session_id' <<< "$JSON")"
+
+STORE="$PWD/.llm"
+MD="$STORE/$SESSION.md"
+
+mkdir -p -- "$STORE"
+jq --raw-output '[.last_assistant_message, "", "---"][]' <<< "$JSON" >> "$MD"
 
 printf -- '%s' '{}'
