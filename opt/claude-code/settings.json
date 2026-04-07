@@ -68,7 +68,6 @@
       }
     ]
   },
-  "outputStyle": "Explanatory",
   "permissions": {
     "allow": [
       "Bash(basename *)",
