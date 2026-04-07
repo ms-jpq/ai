@@ -3,11 +3,17 @@
 set -o pipefail
 
 JSON="$(tee)"
-TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
-MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
+
+# shellcheck disable=SC2154
+NOTIFY_SOCK="$XDG_RUNTIME_DIR/notify.sock"
 
 if [[ -v SSH ]]; then
+  if [[ -S $NOTIFY_SOCK ]]; then
+    exec -- socat - "UNIX-CONNECT:$NOTIFY_SOCK" <<< "$JSON"
+  fi
   exit
 fi
 
+TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
+MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
 exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
