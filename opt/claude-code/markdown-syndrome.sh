@@ -7,5 +7,9 @@ if ! [[ -v __CLAUDE_SESSION_ID ]]; then
   exit 2
 fi
 
+ROOT="${0%/*}/.."
+MARKDOWN="./.markdown/$__CLAUDE_SESSION_ID.md"
+flock "$MARKDOWN" "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN"
+
 # shellcheck disable=2154
-tmux new-window -a -c "$PWD" -- nvim -c "norm! ggGMzz" -- "./.markdown/$__CLAUDE_SESSION_ID.md"
+exec -- tmux new-window -a -c "$PWD" -- nvim -c "norm! ggGMzz" -- "$MARKDOWN"

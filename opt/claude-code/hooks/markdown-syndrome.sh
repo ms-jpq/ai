@@ -30,6 +30,15 @@ esac
 
 STORE="$PWD/.markdown"
 MD="$STORE/$SESSION.md"
+# shellcheck disable=2016
+JQ=(
+  jq --raw-output
+  --arg role "$ROLE"
+  '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]'
+)
 
 mkdir -p -- "$STORE"
-exec -- jq --raw-output --arg role "$ROLE" '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]' <<< "$JSON" >> "$MD"
+touch -- "$MD"
+
+# shellcheck disable=SC2094
+exec -- flock "$MD" "${JQ[@]}" <<< "$JSON" >> "$MD"
