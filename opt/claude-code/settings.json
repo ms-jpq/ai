@@ -158,6 +158,12 @@
     "type": "command"
   },
   "worktree": {
-    "symlinkDirectories": [".cache/", ".venv/", "node_modules/", "vendor/"]
+    "symlinkDirectories": [
+      ".cache/",
+      ".markdown/",
+      ".venv/",
+      "node_modules/",
+      "vendor/"
+    ]
   }
 }
