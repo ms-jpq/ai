@@ -16,7 +16,7 @@ if [[ -v RECUR ]]; then
 fi
 JSON="$("${TEE[@]}")"
 
-if [[ -v SSH ]]; then
+if [[ -v SSH_CONNECTION ]]; then
   if [[ -S $SOCK ]]; then
     exec -- socat - "UNIX-CONNECT:$SOCK" <<< "$JSON"
   fi
