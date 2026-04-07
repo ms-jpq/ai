@@ -23,20 +23,6 @@ if [[ -v SSH_CONNECTION ]]; then
   exit
 fi
 
-EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
-case "$EVENT" in
-# PermissionRequest)
-#   TITLE="PermissionRequest: $(jq -e --raw-output '.tool_name' <<< "$JSON")"
-#   MESSAGE="$(jq -e --raw-output '.tool_input' <<< "$JSON")"
-#   ;;
-Notification)
-  TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
-  MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
-  ;;
-*)
-  set -x
-  exit 2
-  ;;
-esac
-
+TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
+MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
 exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
