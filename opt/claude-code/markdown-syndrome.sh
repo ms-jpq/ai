@@ -7,7 +7,8 @@ if ! [[ -v __CLAUDE_SESSION_ID ]] || ! [[ -v TMUX_PANE ]]; then
   exit 2
 fi
 
-MARKDOWN="./.markdown/$__CLAUDE_SESSION_ID.md"
+STORE="$(realpath -- "${0%/*}/../var/markdown")"
+MARKDOWN="$STORE/$__CLAUDE_SESSION_ID.md"
 
 if [[ -v RECUR ]]; then
   ROOT="${0%/*}/.."
