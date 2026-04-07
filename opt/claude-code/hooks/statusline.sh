@@ -71,8 +71,8 @@ fi
 GIT_INFO=''
 if [[ -n $WD_CURR ]] && BRANCH=$(git -C "$WD_CURR" branch --show-current 2> /dev/null); then
   DIRTY=""
-  git -C "$WD_CURR" diff --quiet 2> /dev/null || DIRTY="*"
-  git -C "$WD_CURR" diff --cached --quiet 2> /dev/null || DIRTY="*"
+  git -C "$WD_CURR" diff --quiet 2> /dev/null || DIRTY=" "
+  git -C "$WD_CURR" diff --cached --quiet 2> /dev/null || DIRTY=" "
   GIT_INFO=" ${DIM}on${RESET} ${CYAN}${BRANCH}${DIRTY}${RESET}"
 fi
 

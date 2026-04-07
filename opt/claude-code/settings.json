@@ -73,7 +73,7 @@
   },
   "model": "opus",
   "permissions": {
-    "allow": ["WebFetch", "WebSearch"],
+    "allow": ["WebFetch", "WebSearch", "Write(./)"],
     "ask": [],
     "deny": [
       "Bash(bash *)",
