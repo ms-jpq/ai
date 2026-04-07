@@ -87,7 +87,6 @@
     "allow": ["WebFetch", "WebSearch", "Write(./*)"]
   },
   "sandbox": {
-    "allowUnsandboxedCommands": false,
     "enabled": true,
     "failIfUnavailable": true,
     "filesystem": {
