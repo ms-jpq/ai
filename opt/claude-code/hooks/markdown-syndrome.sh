@@ -9,6 +9,6 @@ STORE="$PWD/.llm"
 MD="$STORE/$SESSION.md"
 
 mkdir -p -- "$STORE"
-jq --raw-output '[.last_assistant_message, "", "---"][]' <<< "$JSON" >> "$MD"
+jq --raw-output '["# >>> assistant <<<", "", .last_assistant_message, "", "---"][]' <<< "$JSON" >> "$MD"
 
 printf -- '%s' '{}'

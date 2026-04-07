@@ -29,14 +29,24 @@
       {
         "hooks": [
           {
+            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/Stop.sh",
             "type": "command"
           }
-        ],
-        "matcher": ""
+        ]
       }
     ],
-    "UserPromptSubmit": []
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/UserPromptSubmit.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ]
   },
   "outputStyle": "Explanatory",
   "permissions": {
