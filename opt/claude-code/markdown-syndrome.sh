@@ -7,11 +7,10 @@ if ! [[ -v __CLAUDE_SESSION_ID ]] || ! [[ -v TMUX_PANE ]]; then
   exit 2
 fi
 
-STORE="$(realpath -- "${0%/*}/../var/markdown")"
-MARKDOWN="$STORE/$__CLAUDE_SESSION_ID.md"
+ROOT="$(realpath -- "${0%/*}")/../../.."
+MARKDOWN="$ROOT/var/markdown/$__CLAUDE_SESSION_ID.md"
 
 if [[ -v RECUR ]]; then
-  ROOT="${0%/*}/.."
   "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN"
   exec -- printf -- '\n' >> "$MARKDOWN"
 fi

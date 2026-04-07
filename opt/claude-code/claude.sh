@@ -9,6 +9,7 @@ fi
 
 BASE="$(realpath -- "$0")"
 BASE="${BASE%/*}"
+PATH="$BASE/bin:$PATH"
 ROOT="$BASE/../.."
 
 set -a
