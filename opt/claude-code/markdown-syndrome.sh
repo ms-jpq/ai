@@ -2,14 +2,14 @@
 
 set -o pipefail
 
-if ! [[ -v __CLAUDE_SESSION_ID ]]; then
+if ! [[ -v __CLAUDE_SESSION_ID ]] || ! [[ -v TMUX_PANE ]]; then
   set -x
   exit 2
 fi
 
 ROOT="${0%/*}/.."
 MARKDOWN="./.markdown/$__CLAUDE_SESSION_ID.md"
-flock "$MARKDOWN" "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN"
+flock "$MARKDOWN" "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN" || :
 
 # shellcheck disable=SC2094
 flock "$MARKDOWN" printf -- '\n' >> "$MARKDOWN"
