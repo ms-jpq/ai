@@ -4,3 +4,18 @@ set -o pipefail
 
 JSON="$(tee)"
 _CMD_LINE="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
+
+read -r -d '' -- JQ <<- 'JQ' || true
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PreToolUse",
+    "permissionDecision": $decision,
+    "permissionDecisionReason": $reason
+  }
+}
+JQ
+
+DECISION='ask'
+REASON=''
+
+jq -e --arg decision "$DECISION" --arg reason "$REASON" "$JQ" > /dev/null
