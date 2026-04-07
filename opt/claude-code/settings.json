@@ -42,7 +42,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sam-altman.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/nanny-state.sh",
             "type": "command"
           }
         ],
