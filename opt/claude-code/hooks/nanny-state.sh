@@ -33,10 +33,6 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='try again, and consider not doing nested shell scripts'
   ;;
-'kill '* | 'killall '* | 'pkill '*)
-  DECISION=deny
-  REASON='do not kill processes'
-  ;;
 'nohup '* | 'crontab '* | 'tmux '* | 'screen '* | 'zellij '*)
   DECISION=deny
   REASON='do not create persistent processes'
@@ -52,6 +48,9 @@ case "$CMD_LINE" in
 'git stash '*)
   DECISION=deny
   REASON='do not use git stash, it is hard to track'
+  ;;
+'kill '* | 'killall '* | 'pkill '*)
+  REASON='review process killing'
   ;;
 'python -c '* | 'python3 -c '* | 'ruby -e '* | 'node -e '*)
   REASON='review inline scripts'
