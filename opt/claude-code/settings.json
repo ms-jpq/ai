@@ -149,7 +149,7 @@
       ]
     },
     "network": {
-      "allowUnixSockets": [],
+      "allowUnixSockets": ["~/.local/opt/ai/var/claude.notify.sock"],
       "allowedDomains": []
     }
   },
