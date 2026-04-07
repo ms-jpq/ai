@@ -74,6 +74,7 @@
   "model": "opus",
   "permissions": {
     "allow": ["Read(./)", "WebFetch", "WebSearch", "Write(./)"],
+    "ask": ["Edit(./)"],
     "deny": [
       "Bash(bash *)",
       "Bash(brew *)",
