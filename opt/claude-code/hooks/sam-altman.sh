@@ -19,10 +19,7 @@ DECISION='ask'
 
 case "$CMD_LINE" in
 'bash '* | 'dash '* | 'fish '* | 'pwsh '* | 'sh '* | 'zsh '*)
-  REASON=''
-  ;;
-'find '*' -x')
-  REASON=''
+  REASON='consider not doing nested shell scripts'
   ;;
 *)
   exit
