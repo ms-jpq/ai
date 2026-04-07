@@ -154,7 +154,22 @@
     "filesystem": {
       "allowRead": [],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
-      "denyRead": [],
+      "denyRead": [
+        "~/.bashrc",
+        "~/.local/",
+        "~/.netrc",
+        "~/.Trash/",
+        "~/.zshenv",
+        "~/Desktop/",
+        "~/Documents/",
+        "~/Downloads/",
+        "~/Library/",
+        "~/Movies/",
+        "~/Music/",
+        "~/Notes/",
+        "~/Pictures/",
+        "~/Public/"
+      ],
       "denyWrite": ["/"]
     },
     "network": {
