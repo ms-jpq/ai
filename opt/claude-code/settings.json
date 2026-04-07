@@ -137,7 +137,6 @@
       "Bash(zsh *)"
     ]
   },
-  "prefersReducedMotion": true,
   "sandbox": {
     "enabled": true,
     "filesystem": {
