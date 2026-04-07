@@ -94,6 +94,8 @@
       "Bash(sh *)",
       "Bash(shutdown *)",
       "Bash(ssh *)",
+      "Bash(su *)",
+      "Bash(sudo *)",
       "Bash(systemctl *)",
       "Bash(tmux *)",
       "Bash(wget *)",
