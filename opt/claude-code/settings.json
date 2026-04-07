@@ -98,7 +98,19 @@
         "~/Pictures/",
         "~/Public/"
       ],
-      "denyWrite": ["/etc"]
+      "denyWrite": [
+        "/Applications/",
+        "/bin/",
+        "/etc/",
+        "/Library/",
+        "/opt/",
+        "/private/etc/",
+        "/sbin/",
+        "/srv/",
+        "/System/",
+        "/Users/Shared/",
+        "/usr/"
+      ]
     },
     "network": {
       "allowUnixSockets": [],
