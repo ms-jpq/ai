@@ -6,4 +6,8 @@ JSON="$(tee)"
 TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
 MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
 
+if [[ -v SSH ]]; then
+  exit
+fi
+
 exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
