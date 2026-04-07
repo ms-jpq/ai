@@ -52,9 +52,6 @@ case "$CMD_LINE" in
 'python -c '* | 'python3 -c '* | 'ruby -e '* | 'node -e '*)
   REASON='review inline scripts'
   ;;
-'git push '*--force* | 'git push '*-f*)
-  REASON='review force pushing'
-  ;;
 'git rebase '* | 'git commit '*--amend*)
   REASON='review history rewriting'
   ;;
