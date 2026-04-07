@@ -141,6 +141,7 @@
   },
   "sandbox": {
     "enabled": true,
+    "failIfUnavailable": true,
     "filesystem": {
       "allowRead": ["~/.config/git/"],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
@@ -148,7 +149,6 @@
       "denyWrite": ["/"]
     },
     "network": {
-      "allowLocalBinding": false,
       "allowUnixSockets": [],
       "allowedDomains": []
     }
