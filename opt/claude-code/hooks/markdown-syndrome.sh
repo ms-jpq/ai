@@ -3,8 +3,8 @@
 set -o pipefail
 
 JSON="$(tee)"
-EVENT="$(jq --raw-output '.hook_event_name' <<< "$JSON")"
-SESSION="$(jq --raw-output '.session_id' <<< "$JSON")"
+EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
+SESSION="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 case "$EVENT" in
 SessionStart)
