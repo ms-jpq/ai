@@ -98,10 +98,7 @@
       "Bash(tmux *)",
       "Bash(wget *)",
       "Bash(xdg-open *)",
-      "Bash(zsh *)",
-      "Edit(/)",
-      "Read(/)",
-      "Write(/)"
+      "Bash(zsh *)"
     ]
   },
   "sandbox": {
