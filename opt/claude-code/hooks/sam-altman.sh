@@ -15,19 +15,23 @@ read -r -d '' -- JQ <<- 'JQ' || true
 }
 JQ
 
-DECISION='ask'
+DECISION=ask
 case "$CMD_LINE" in
 'gosu '* | 'su '* | 'sudo '*)
-  DECISION='deny'
+  DECISION=deny
   REASON='do not elevate privileges'
   ;;
 'brew '* | 'apt '* | 'apt-get '* | 'winget '*)
-  DECISION='deny'
+  DECISION=deny
   REASON='do not install system packages'
   ;;
 'bash '* | 'dash '* | 'fish '* | 'sh '* | 'zsh '*)
-  DECISION='deny'
+  DECISION=deny
   REASON='consider not doing nested shell scripts'
+  ;;
+'git stash '*)
+  DECISION=deny
+  REASON='do not use git stash, it is hard to track'
   ;;
 'python -c '* | 'python3 -c '* | 'ruby -e '* | 'node -e '*)
   REASON='review inline scripts'
@@ -35,7 +39,7 @@ case "$CMD_LINE" in
 'git push '*--force* | 'git push '*-f*)
   REASON='review force pushing'
   ;;
-'git checkout -- '* | 'git reset '*--hard* | 'git clean '*--force* | 'git clean '*-f*)
+'git reset '*--hard* | 'git clean '*--force* | 'git clean '*-f*)
   REASON='review destructive git operation'
   ;;
 *)
