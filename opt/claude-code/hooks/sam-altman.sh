@@ -16,10 +16,16 @@ read -r -d '' -- JQ <<- 'JQ' || true
 JQ
 
 DECISION='ask'
-
 case "$CMD_LINE" in
 'bash '* | 'dash '* | 'fish '* | 'pwsh '* | 'sh '* | 'zsh '*)
   REASON='consider not doing nested shell scripts'
+  ;;
+'curl '* | 'wget '*)
+  DECISION='deny'
+  REASON='consider using an alternative, like pip install, npm install, etc'
+  ;;
+'git push '*--force* | 'git push '*-f*)
+  REASON='review force pushing'
   ;;
 *)
   exit
