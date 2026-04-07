@@ -33,4 +33,5 @@ export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 COLOURS=(blue green yellow purple orange pink cyan)
 RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
 
+clear -x
 printf -- '%s' "/color $RANDOM_COLOR" | exec -- ~/.local/bin/hp "$CC" "$@"
