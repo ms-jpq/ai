@@ -28,8 +28,8 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
             "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
             "type": "command"
           }
         ]
@@ -151,6 +151,7 @@
       "allowedDomains": []
     }
   },
+  "showThinkingSummaries": true,
   "statusLine": {
     "command": "~/.local/opt/ai/opt/claude-code/hooks/statusline.sh",
     "type": "command"
