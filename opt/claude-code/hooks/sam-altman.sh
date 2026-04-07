@@ -25,6 +25,10 @@ case "$CMD_LINE" in
   DECISION='deny'
   REASON='consider using an alternative, like pip install, npm install, etc'
   ;;
+'brew '* | 'apt '* | 'apt-get *' | 'winget *')
+  DECISION='deny'
+  REASON='do not install system packages'
+  ;;
 'python -c'* | 'python3 -c'* | 'ruby -e '* | 'node -e'*)
   REASON='review inline scripts'
   ;;
