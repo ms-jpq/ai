@@ -34,10 +34,7 @@ COST_INFO="${BOLD}\$${COST_FMT}${RESET}"
 
 ######################################
 SPENT_SECS=$((API_MS / 1000))
-TIMEFMT='%S'
-if ((SPENT_SECS >= 60)); then
-  TIMEFMT="%M:$TIMEFMT"
-fi
+TIMEFMT='%M:%S'
 if ((SPENT_SECS >= 3600)); then
   TIMEFMT="%H:$TIMEFMT"
 fi
@@ -59,7 +56,7 @@ else
 fi
 
 MODEL_INFO="${MODEL}"
-USAGE_INFO="${DIM}⧗${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
+USAGE_INFO="${DIM}⧗ ${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
 ######################################
 
 ######################################

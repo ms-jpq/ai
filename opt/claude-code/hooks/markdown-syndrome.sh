@@ -32,6 +32,4 @@ STORE="$PWD/.markdown"
 MD="$STORE/$SESSION.md"
 
 mkdir -p -- "$STORE"
-jq --raw-output --arg role "$ROLE" '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]' <<< "$JSON" >> "$MD"
-
-printf -- '%s' '{}'
+exec -- jq --raw-output --arg role "$ROLE" '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]' <<< "$JSON" >> "$MD"
