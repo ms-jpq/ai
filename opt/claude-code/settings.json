@@ -43,7 +43,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/pretools.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/sam-altman.sh",
             "type": "command"
           }
         ],
