@@ -1,6 +1,7 @@
 {
   "$docs": "https://code.claude.com/docs/en/settings",
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "disableDeepLinkRegistration": true,
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
@@ -23,6 +24,7 @@
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "NO_COLOR": "true"
   },
+  "feedbackSurveyRate": 0,
   "hooks": {
     "Notification": [
       {
