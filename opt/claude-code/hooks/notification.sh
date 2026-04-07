@@ -7,10 +7,14 @@ ROOT="${SELF%/*}/../../.."
 SOCK="$ROOT/var/claude.notify.sock"
 
 if [[ -t 0 ]]; then
-  exec -- socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
+  RECUR=1 exec -- socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
 fi
 
-JSON="$(tee)"
+TEE=(tee --)
+if [[ -v RECUR ]]; then
+  TEE+=(/dev/stderr)
+fi
+JSON="$("${TEE[@]}")"
 
 if [[ -v SSH ]]; then
   if [[ -S $SOCK ]]; then
