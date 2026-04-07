@@ -38,6 +38,17 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/pretools.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash"
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
