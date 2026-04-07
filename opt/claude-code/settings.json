@@ -108,7 +108,7 @@
     "enabled": true,
     "failIfUnavailable": true,
     "filesystem": {
-      "allowRead": [],
+      "allowRead": ["."],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
       "denyRead": [
         "~/.bashrc",
