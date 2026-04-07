@@ -73,38 +73,9 @@
   },
   "model": "opus",
   "permissions": {
-    "allow": ["WebFetch", "WebSearch", "Write(./)"],
-    "ask": [],
-    "deny": [
-      "Bash(bash *)",
-      "Bash(brew *)",
-      "Bash(curl *)",
-      "Bash(defaults *)",
-      "Bash(diskutil *)",
-      "Bash(gpg *)",
-      "Bash(kill *)",
-      "Bash(launchctl *)",
-      "Bash(mount *)",
-      "Bash(nohup *)",
-      "Bash(open *)",
-      "Bash(pkill *)",
-      "Bash(pwsh *)",
-      "Bash(reboot *)",
-      "Bash(screen *)",
-      "Bash(sh *)",
-      "Bash(shutdown *)",
-      "Bash(ssh *)",
-      "Bash(su *)",
-      "Bash(sudo *)",
-      "Bash(systemctl *)",
-      "Bash(tmux *)",
-      "Bash(wget *)",
-      "Bash(xdg-open *)",
-      "Bash(zsh *)"
-    ]
+    "allow": ["WebFetch", "WebSearch", "Write(./*)"]
   },
   "sandbox": {
-    "autoAllowBashIfSandboxed": false,
     "enabled": true,
     "failIfUnavailable": true,
     "filesystem": {
@@ -127,7 +98,7 @@
         "~/Pictures/",
         "~/Public/"
       ],
-      "denyWrite": ["/"]
+      "denyWrite": ["/etc"]
     },
     "network": {
       "allowUnixSockets": [],
