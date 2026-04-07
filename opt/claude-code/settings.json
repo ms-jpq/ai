@@ -73,12 +73,7 @@
   },
   "model": "opus",
   "permissions": {
-    "allow": [
-      "Read(./)",
-      "WebFetch",
-      "WebSearch",
-      "Write(./)"
-    ],
+    "allow": ["Read(./)", "WebFetch", "WebSearch", "Write(./)"],
     "deny": [
       "Bash(bash *)",
       "Bash(brew *)",
@@ -109,6 +104,7 @@
     ]
   },
   "sandbox": {
+    "autoAllowBashIfSandboxed": false,
     "enabled": true,
     "failIfUnavailable": true,
     "filesystem": {
