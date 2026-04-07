@@ -7,12 +7,15 @@ if ! [[ -v __CLAUDE_SESSION_ID ]] || ! [[ -v TMUX_PANE ]]; then
   exit 2
 fi
 
-ROOT="${0%/*}/.."
 MARKDOWN="./.markdown/$__CLAUDE_SESSION_ID.md"
-flock "$MARKDOWN" "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN" || :
 
-# shellcheck disable=SC2094
-flock "$MARKDOWN" printf -- '\n' >> "$MARKDOWN"
+if [[ -v RECUR ]]; then
+  ROOT="${0%/*}/.."
+  "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN"
+  exec -- printf -- '\n' >> "$MARKDOWN"
+fi
+
+RECUR=1 flock "$MARKDOWN" "$0"
 
 # shellcheck disable=2154
 exec -- tmux new-window -a -c "$PWD" -- nvim -c "norm! ggGMzz" -- "$MARKDOWN"
