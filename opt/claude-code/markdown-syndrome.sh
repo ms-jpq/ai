@@ -11,5 +11,8 @@ ROOT="${0%/*}/.."
 MARKDOWN="./.markdown/$__CLAUDE_SESSION_ID.md"
 flock "$MARKDOWN" "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN"
 
+# shellcheck disable=SC2094
+flock "$MARKDOWN" printf -- '\n' >> "$MARKDOWN"
+
 # shellcheck disable=2154
 exec -- tmux new-window -a -c "$PWD" -- nvim -c "norm! ggGMzz" -- "$MARKDOWN"
