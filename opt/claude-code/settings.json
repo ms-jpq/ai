@@ -101,15 +101,21 @@
       "denyWrite": [
         "/Applications/",
         "/bin/",
+        "/boot/",
         "/etc/",
         "/Library/",
+        "/mnt/",
         "/opt/",
         "/private/etc/",
         "/sbin/",
+        "/share/",
         "/srv/",
         "/System/",
         "/Users/Shared/",
-        "/usr/"
+        "/usr/",
+        "/var/mail/",
+        "/var/opt/",
+        "/var/spool/"
       ]
     },
     "network": {
