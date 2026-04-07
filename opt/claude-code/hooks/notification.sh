@@ -3,14 +3,14 @@
 set -o pipefail
 
 if [[ -t 0 ]]; then
-  ROOT="$(realpath -- "${0%/*}/../../..")"
-  exec -- socat UNIX-LISTEN:"$ROOT/var/notify.sock",fork EXEC:"$0"
+  ROOT="${0%/*}/.."
+  exec -- socat UNIX-LISTEN:"$ROOT/var/claude.notify.sock",fork EXEC:"$0"
 fi
 
 JSON="$(tee)"
 
 # shellcheck disable=SC2154
-NOTIFY_SOCK="$XDG_RUNTIME_DIR/notify.sock"
+NOTIFY_SOCK="$XDG_RUNTIME_DIR/claude.notify.sock"
 
 if [[ -v SSH ]]; then
   if [[ -S $NOTIFY_SOCK ]]; then
