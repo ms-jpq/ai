@@ -26,8 +26,8 @@ fi
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 case "$EVENT" in
 Notification)
-  TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
-  MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
+  TITLE="PermissionRequest: $(jq -e --raw-output '.tool_name' <<< "$JSON")"
+  MESSAGE="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
   ;;
 PermissionRequest)
   TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
