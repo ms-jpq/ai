@@ -25,6 +25,10 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not install system packages'
   ;;
+'command '* | 'eval '* | 'exec '* | 'env '*)
+  DECISION=deny
+  REASON='consider not executing commands via these mechanisms that are hard to write permissions for'
+  ;;
 'bash '* | 'dash '* | 'fish '* | 'sh '* | 'zsh '*)
   DECISION=deny
   REASON='consider not doing nested shell scripts'
