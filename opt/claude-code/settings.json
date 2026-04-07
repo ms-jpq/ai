@@ -144,6 +144,7 @@
         "/var/mail/",
         "/var/opt/",
         "/var/spool/",
+        "~/.local/opt/ai/var/claude/CLAUDE.md",
         "~/.local/opt/ai/var/claude/keybindings.json",
         "~/.local/opt/ai/var/claude/settings.json"
       ]
