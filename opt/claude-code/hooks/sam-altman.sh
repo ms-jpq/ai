@@ -29,6 +29,22 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='consider not doing nested shell scripts'
   ;;
+'kill '* | 'killall '* | 'pkill '*)
+  DECISION=deny
+  REASON='do not kill processes'
+  ;;
+'nohup '* | 'crontab '*)
+  DECISION=deny
+  REASON='do not create persistent processes'
+  ;;
+'systemctl '* | 'service '* | 'launchctl '*)
+  DECISION=deny
+  REASON='do not manage system services'
+  ;;
+'ssh '* | 'scp '* | 'rsync '*)
+  DECISION=deny
+  REASON='do not make remote connections'
+  ;;
 'git stash '*)
   DECISION=deny
   REASON='do not use git stash, it is hard to track'
@@ -39,7 +55,10 @@ case "$CMD_LINE" in
 'git push '*--force* | 'git push '*-f*)
   REASON='review force pushing'
   ;;
-'git reset '*--hard* | 'git clean '*--force* | 'git clean '*-f*)
+'git rebase '* | 'git commit '*--amend*)
+  REASON='review history rewriting'
+  ;;
+'git branch '*--delete* | 'git branch '*-D* | 'git reset '*--hard* | 'git clean '*--force* | 'git clean '*-f*)
   REASON='review destructive git operation'
   ;;
 *)
