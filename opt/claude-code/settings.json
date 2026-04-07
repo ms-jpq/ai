@@ -79,6 +79,7 @@
       "Bash(column *)",
       "Bash(cut *)",
       "Bash(date *)",
+      "Bash(diff *)",
       "Bash(dirname *)",
       "Bash(echo *)",
       "Bash(env)",
