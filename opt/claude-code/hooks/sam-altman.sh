@@ -37,7 +37,7 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not create persistent processes'
   ;;
-'systemctl '* | 'service '* | 'launchctl '*)
+'systemctl '* | 'launchctl '*)
   DECISION=deny
   REASON='do not manage system services'
   ;;
