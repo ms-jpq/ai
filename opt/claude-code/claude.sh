@@ -2,6 +2,11 @@
 
 set -o pipefail
 
+if [[ $PWD == "$HOME" ]]; then
+  set -x
+  exit 2
+fi
+
 BASE="$(realpath -- "$0")"
 BASE="${BASE%/*}"
 ROOT="$BASE/../.."
