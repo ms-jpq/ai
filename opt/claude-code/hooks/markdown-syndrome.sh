@@ -28,7 +28,7 @@ Stop)
   ;;
 esac
 
-STORE="$PWD/.markdown"
+STORE="$(realpath -- "${0%/*}/../../../var/markdown")"
 MD="$STORE/$SESSION.md"
 # shellcheck disable=2016
 JQ=(
@@ -37,7 +37,6 @@ JQ=(
   '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]'
 )
 
-mkdir -p -- "$STORE"
 touch -- "$MD"
 
 # shellcheck disable=SC2094

@@ -23,7 +23,7 @@ linux*)
   ;;
 esac
 
-export -- CLAUDE_CONFIG_DIR="$ROOT/confs/claude"
+export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 
 COLOURS=(blue green yellow purple orange pink cyan)
 RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
