@@ -2,6 +2,11 @@
 
 set -o pipefail
 
+if [[ -t 0 ]]; then
+  ROOT="$(realpath -- "${0%/*}/../../..")"
+  exec -- socat UNIX-LISTEN:"$ROOT/var/notify.sock",fork EXEC:"$0"
+fi
+
 JSON="$(tee)"
 
 # shellcheck disable=SC2154
