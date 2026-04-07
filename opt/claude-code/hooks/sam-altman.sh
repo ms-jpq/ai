@@ -17,7 +17,11 @@ JQ
 
 DECISION='ask'
 case "$CMD_LINE" in
-'brew '* | 'apt '* | 'apt-get *' | 'winget *')
+'gosu '* | 'su '* | 'sudo '*)
+  DECISION='deny'
+  REASON='do not elevate privileges'
+  ;;
+'brew '* | 'apt '* | 'apt-get '* | 'winget '*)
   DECISION='deny'
   REASON='do not install system packages'
   ;;
