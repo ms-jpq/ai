@@ -33,7 +33,7 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not kill processes'
   ;;
-'nohup '* | 'crontab '*)
+'nohup '* | 'crontab '* | 'tmux '* | 'screen '* | 'zellij '*)
   DECISION=deny
   REASON='do not create persistent processes'
   ;;
