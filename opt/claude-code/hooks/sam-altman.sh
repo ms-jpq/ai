@@ -3,7 +3,7 @@
 set -o pipefail
 
 JSON="$(tee)"
-_CMD_LINE="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
+CMD_LINE="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
 
 read -r -d '' -- JQ <<- 'JQ' || true
 {
@@ -17,11 +17,11 @@ JQ
 
 DECISION='ask'
 
-case "$_CMD_LINE" in
-bash' '*)
+case "$CMD_LINE" in
+'bash '* | 'dash '* | 'fish '* | 'pwsh '* | 'sh '* | 'zsh '*)
   REASON=''
   ;;
-find' '*' '-x)
+'find '*' -x')
   REASON=''
   ;;
 *)
