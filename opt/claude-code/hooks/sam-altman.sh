@@ -10,7 +10,7 @@ read -r -d '' -- JQ <<- 'JQ' || true
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": $decision,
-    "permissionDecisionReason": $reason
+    "permissionDecisionReason": "⚠️ " + $reason
   }
 }
 JQ
@@ -26,4 +26,4 @@ case "$CMD_LINE" in
   ;;
 esac
 
-exec -- jq -e --arg decision "$DECISION" --arg reason "$REASON" "$JQ" > /dev/null
+exec -- jq -e --null-input --arg decision "$DECISION" --arg reason "$REASON" "$JQ"
