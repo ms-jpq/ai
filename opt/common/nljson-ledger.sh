@@ -5,7 +5,6 @@ set -o pipefail
 PRINCIPAL="$1"
 NAME="$2"
 STORE="$HOME/.local/state/ai/history/$PRINCIPAL"
-mkdir -v -p -- "$STORE" >&2
 
 mkdir -v -p -- "$STORE" >&2
 if ! ((RANDOM % 16)) || [[ $NAME == '!' ]]; then
