@@ -3,12 +3,26 @@
 set -o pipefail
 
 JSON="$(tee)"
+EVENT="$(jq --raw-output '.hook_event_name' <<< "$JSON")"
+case "$EVENT" in
+UserPromptSubmit)
+  ROLE='user'
+  ;;
+Stop)
+  ROLE='assistant'
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac
+
 SESSION="$(jq --raw-output '.session_id' <<< "$JSON")"
 
-STORE="$PWD/.llm"
+STORE="$PWD/.markdown"
 MD="$STORE/$SESSION.md"
 
 mkdir -p -- "$STORE"
-jq --raw-output '["# >>> assistant <<<", "", .last_assistant_message, "", "---"][]' <<< "$JSON" >> "$MD"
+jq --raw-output --arg role "$ROLE" '["# >>> $role <<<", "", .prompt // .last_assistant_message, "", "---"][]' <<< "$JSON" >> "$MD"
 
 printf -- '%s' '{}'

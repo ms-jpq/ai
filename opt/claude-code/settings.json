@@ -30,7 +30,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/Stop.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/markdown-syndrome.sh",
             "type": "command"
           }
         ]
@@ -41,7 +41,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/UserPromptSubmit.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/markdown-syndrome.sh",
             "type": "command"
           }
         ]
