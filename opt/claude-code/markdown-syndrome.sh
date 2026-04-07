@@ -8,4 +8,4 @@ if ! [[ -v __CLAUDE_SESSION_ID ]]; then
 fi
 
 # shellcheck disable=2154
-tmux new-window -a -c "$PWD" -- "$EDITOR" -- "./.markdown/$__CLAUDE_SESSION_ID.md"
+tmux new-window -a -c "$PWD" -- nvim -c "norm! ggGMzz" -- "./.markdown/$__CLAUDE_SESSION_ID.md"
