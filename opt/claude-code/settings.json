@@ -40,17 +40,6 @@
         ]
       }
     ],
-    "PermissionRequest": [
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
-            "type": "command"
-          }
-        ]
-      }
-    ],
     "PreToolUse": [
       {
         "hooks": [
