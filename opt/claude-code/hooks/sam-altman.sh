@@ -16,6 +16,17 @@ read -r -d '' -- JQ <<- 'JQ' || true
 JQ
 
 DECISION='ask'
-REASON=''
 
-jq -e --arg decision "$DECISION" --arg reason "$REASON" "$JQ" > /dev/null
+case "$_CMD_LINE" in
+bash' '*)
+  REASON=''
+  ;;
+find' '*' '-x)
+  REASON=''
+  ;;
+*)
+  exit
+  ;;
+esac
+
+exec -- jq -e --arg decision "$DECISION" --arg reason "$REASON" "$JQ" > /dev/null
