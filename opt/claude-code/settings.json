@@ -24,7 +24,17 @@
     "NO_COLOR": "true"
   },
   "hooks": {
-    "Notification": [],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
+            "async": true,
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
