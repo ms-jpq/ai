@@ -27,11 +27,11 @@ case "$CMD_LINE" in
   ;;
 'command '* | 'eval '* | 'exec '* | 'env '*)
   DECISION=deny
-  REASON='consider not executing commands via these mechanisms that are hard to write permissions for'
+  REASON='try again, and consider not executing commands via these mechanisms that are hard to write permissions for'
   ;;
 'bash '* | 'dash '* | 'fish '* | 'sh '* | 'zsh '*)
   DECISION=deny
-  REASON='consider not doing nested shell scripts'
+  REASON='try again, and consider not doing nested shell scripts'
   ;;
 'kill '* | 'killall '* | 'pkill '*)
   DECISION=deny
