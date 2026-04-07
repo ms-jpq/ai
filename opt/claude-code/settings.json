@@ -133,7 +133,9 @@
         "/usr/",
         "/var/mail/",
         "/var/opt/",
-        "/var/spool/"
+        "/var/spool/",
+        "~/.local/opt/ai/var/claude/keybindings.json",
+        "~/.local/opt/ai/var/claude/settings.json"
       ]
     },
     "network": {
