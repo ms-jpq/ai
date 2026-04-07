@@ -2,19 +2,19 @@
 
 set -o pipefail
 
+SELF="$(realpath -- "$0")"
+ROOT="${SELF%/*}/../../.."
+SOCK="$ROOT/var/claude.notify.sock"
+
 if [[ -t 0 ]]; then
-  ROOT="${0%/*}/.."
-  exec -- socat UNIX-LISTEN:"$ROOT/var/claude.notify.sock",fork EXEC:"$0"
+  exec -- socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
 fi
 
 JSON="$(tee)"
 
-# shellcheck disable=SC2154
-NOTIFY_SOCK="$XDG_RUNTIME_DIR/claude.notify.sock"
-
 if [[ -v SSH ]]; then
-  if [[ -S $NOTIFY_SOCK ]]; then
-    exec -- socat - "UNIX-CONNECT:$NOTIFY_SOCK" <<< "$JSON"
+  if [[ -S $SOCK ]]; then
+    exec -- socat - "UNIX-CONNECT:$SOCK" <<< "$JSON"
   fi
   exit
 fi

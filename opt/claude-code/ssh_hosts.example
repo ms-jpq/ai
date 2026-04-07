@@ -1,2 +1,2 @@
 Host *
-  RemoteForward /run/user/0/claude.notify.sock ${HOME}/.local/opt/ai/var/claude.notify.sock
+  RemoteForward /root/.local/opt/ai/var/claude.notify.sock ${HOME}/.local/opt/ai/var/claude.notify.sock
