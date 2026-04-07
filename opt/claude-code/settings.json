@@ -23,7 +23,21 @@
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "NO_COLOR": "true"
   },
-  "hooks": {},
+  "hooks": {
+    "Notification": [],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/Stop.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": ""
+      }
+    ],
+    "UserPromptSubmit": []
+  },
   "outputStyle": "Explanatory",
   "permissions": {
     "allow": [
