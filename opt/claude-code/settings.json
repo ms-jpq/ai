@@ -97,6 +97,7 @@
     ]
   },
   "sandbox": {
+    "autoAllowBashIfSandboxed": true,
     "enabled": true,
     "failIfUnavailable": true,
     "filesystem": {
