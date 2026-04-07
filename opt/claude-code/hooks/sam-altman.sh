@@ -39,6 +39,9 @@ case "$CMD_LINE" in
 'git push '*--force* | 'git push '*-f*)
   REASON='review force pushing'
   ;;
+'git reset '*--hard* | 'git clean '*--force* | 'git clean '*-f*)
+  REASON='review force pushing'
+  ;;
 *)
   exit
   ;;
