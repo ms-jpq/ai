@@ -29,10 +29,6 @@ case "$CMD_LINE" in
   DECISION='deny'
   REASON='consider not doing nested shell scripts'
   ;;
-'curl '* | 'wget '*)
-  DECISION='deny'
-  REASON='consider using an alternative, like pip install, npm install, etc'
-  ;;
 'python -c '* | 'python3 -c '* | 'ruby -e '* | 'node -e '*)
   REASON='review inline scripts'
   ;;
@@ -40,7 +36,7 @@ case "$CMD_LINE" in
   REASON='review force pushing'
   ;;
 'git reset '*--hard* | 'git clean '*--force* | 'git clean '*-f*)
-  REASON='review force pushing'
+  REASON='review destructive git operation'
   ;;
 *)
   exit
