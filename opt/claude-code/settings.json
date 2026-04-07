@@ -114,6 +114,7 @@
         "~/.bashrc",
         "~/.local/",
         "~/.netrc",
+        "~/.ssh/",
         "~/.Trash/",
         "~/.zshenv",
         "~/Desktop/",
