@@ -1,4 +1,5 @@
 *.isorted
+*.sock
 .env
 .venv/
 node_modules/
