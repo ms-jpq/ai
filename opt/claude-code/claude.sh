@@ -24,4 +24,8 @@ linux*)
 esac
 
 export -- CLAUDE_CONFIG_DIR="$ROOT/confs/claude"
-exec -- ~/.local/bin/hp "$CC" "$@"
+
+COLOURS=(blue green yellow purple orange pink cyan)
+RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
+
+exec -- ~/.local/bin/hp "$CC" "$@" <<< "/color $RANDOM_COLOR"
