@@ -3,4 +3,4 @@
 set -o pipefail
 
 JSON="$(tee)"
-COMMAND="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
+_CMD_LINE="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
