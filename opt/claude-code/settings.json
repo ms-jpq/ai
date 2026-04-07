@@ -25,6 +25,16 @@
   },
   "hooks": {
     "Notification": [],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/markdown-syndrome.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [

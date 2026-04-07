@@ -4,7 +4,18 @@ set -o pipefail
 
 JSON="$(tee)"
 EVENT="$(jq --raw-output '.hook_event_name' <<< "$JSON")"
+SESSION="$(jq --raw-output '.session_id' <<< "$JSON")"
+
 case "$EVENT" in
+SessionStart)
+  if [[ -n $CLAUDE_ENV_FILE ]]; then
+    {
+      printf -- '%q ' 'export' '--' "__CLAUDE_SESSION_ID=$SESSION"
+      printf -- '\n'
+    } >> "$CLAUDE_ENV_FILE"
+  fi
+  exit
+  ;;
 UserPromptSubmit)
   ROLE='user'
   ;;
@@ -16,8 +27,6 @@ Stop)
   exit 2
   ;;
 esac
-
-SESSION="$(jq --raw-output '.session_id' <<< "$JSON")"
 
 STORE="$PWD/.markdown"
 MD="$STORE/$SESSION.md"
