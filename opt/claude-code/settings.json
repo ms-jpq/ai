@@ -109,8 +109,11 @@
       "Bash(uniq *)",
       "Bash(wc *)",
       "Bash(which *)",
+      "Edit(./)",
+      "Read(./)",
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "Write(./)"
     ],
     "deny": [
       "Bash(apt *)",
@@ -139,16 +142,19 @@
       "Bash(tmux *)",
       "Bash(wget *)",
       "Bash(xdg-open *)",
-      "Bash(zsh *)"
+      "Bash(zsh *)",
+      "Edit(/)",
+      "Read(/)",
+      "Write(/)"
     ]
   },
   "sandbox": {
     "enabled": true,
     "failIfUnavailable": true,
     "filesystem": {
-      "allowRead": ["~/.config/git/"],
+      "allowRead": [],
       "allowWrite": [".", "/tmp/", "/var/tmp/", "/private/tmp/"],
-      "denyRead": ["~/"],
+      "denyRead": [],
       "denyWrite": ["/"]
     },
     "network": {
