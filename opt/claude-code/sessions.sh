@@ -18,4 +18,4 @@ fi
 RECUR=1 flock "$MARKDOWN" "$0"
 
 # shellcheck disable=2154
-exec -- tmux new-window -a -c "$PWD" -- nvim -c "norm! ggGMzz" -- "$MARKDOWN"
+exec -- tmux new-window -a -c "$PWD" -- nvim -M -c "norm! ggGMzz" -- "$MARKDOWN"
