@@ -16,6 +16,9 @@ SessionStart)
   fi
   exit
   ;;
+SessionEnd)
+  exit
+  ;;
 UserPromptSubmit)
   ROLE='user'
   ;;
