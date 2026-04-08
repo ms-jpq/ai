@@ -1,26 +1,28 @@
 {
-  "context7": {
-    "type": "url",
-    "url": "https://mcp-context7.${MCP_DOMAIN}/mcp"
-  },
-  "dockerhub": {
-    "type": "url",
-    "url": "https://mcp-dockerhub.${MCP_DOMAIN}/mcp"
-  },
-  "firecrawl": {
-    "type": "http",
-    "url": "https://mcp-firecrawl.${MCP_DOMAIN}/mcp"
-  },
-  "microsoft-docs": {
-    "type": "http",
-    "url": "https://learn.microsoft.com/api/mcp"
-  },
-  "searx": {
-    "type": "http",
-    "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
-  },
-  "terraform": {
-    "type": "http",
-    "url": "https://mcp-terraform.${MCP_DOMAIN}/mcp"
+  "mcpServers": {
+    "context7": {
+      "type": "http",
+      "url": "https://mcp-context7.${MCP_DOMAIN}/mcp"
+    },
+    "dockerhub": {
+      "type": "http",
+      "url": "https://mcp-dockerhub.${MCP_DOMAIN}/mcp"
+    },
+    "firecrawl": {
+      "type": "http",
+      "url": "https://mcp-firecrawl.${MCP_DOMAIN}/mcp"
+    },
+    "microsoft-docs": {
+      "type": "http",
+      "url": "https://learn.microsoft.com/api/mcp"
+    },
+    "searx": {
+      "type": "http",
+      "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
+    },
+    "terraform": {
+      "type": "http",
+      "url": "https://mcp-terraform.${MCP_DOMAIN}/mcp"
+    }
   }
 }
