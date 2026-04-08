@@ -11,8 +11,8 @@ SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
 
 find "$SESSIONS" -mindepth 1 -mtime +30 -delete
 if [[ -v TMUX_PANE ]]; then
-  INDEX="$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}')"
-  printf -- '%s' "$SESSION" > "$SESSIONS/$INDEX.pos"
+  INDEX="$SESSIONS/$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}').pos"
+  printf -- '%s' "$SESSION" > "$INDEX"
 fi
 
 case "$EVENT" in

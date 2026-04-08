@@ -36,5 +36,14 @@ export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 COLOURS=(blue green yellow purple orange pink cyan)
 RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
 
+ARGV=("$@")
+if ! (($#)) && [[ -v TMUX_PANE ]]; then
+  INDEX="$ROOT/var/sessions/$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}').pos"
+  if [[ -s $INDEX ]]; then
+    SESSION="$(< "$INDEX")"
+    ARGV+=(--resume "$SESSION")
+  fi
+fi
+
 clear -x
-printf -- '%s' "/color $RANDOM_COLOR" | exec -- ~/.local/bin/hp "$CC" "$@"
+printf -- '%s' "/color $RANDOM_COLOR" | exec -- ~/.local/bin/hp "$CC" "${ARGV[@]}"
