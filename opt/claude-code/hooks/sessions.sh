@@ -12,7 +12,6 @@ SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
 if INDEX="$("$DIR/session-file.sh" "$PWD")"; then
   printf -- '%s' "$SESSION" > "$INDEX"
 fi
-find "$SESSIONS" -mindepth 1 -mtime +30 -delete
 
 case "$EVENT" in
 SessionStart)
@@ -22,7 +21,7 @@ SessionStart)
       printf -- '\n'
     } >> "$CLAUDE_ENV_FILE"
   fi
-  exit
+  exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
 SessionEnd)
   exit
