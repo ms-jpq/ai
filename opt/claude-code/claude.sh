@@ -2,6 +2,7 @@
 
 set -eEu
 set -o pipefail
+shopt -s dotglob nullglob extglob globstar
 
 if [[ $PWD == "$HOME" ]]; then
   set -x
