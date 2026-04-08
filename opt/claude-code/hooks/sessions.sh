@@ -9,11 +9,10 @@ SESSION="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 DIR="${0%/*}"
 SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
 
-find "$SESSIONS" -mindepth 1 -mtime +30 -delete
-if [[ -v TMUX_PANE ]]; then
-  INDEX="$SESSIONS/$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}').pos"
+if INDEX="$("$DIR/session-file.sh" "$PWD")"; then
   printf -- '%s' "$SESSION" > "$INDEX"
 fi
+find "$SESSIONS" -mindepth 1 -mtime +30 -delete
 
 case "$EVENT" in
 SessionStart)

@@ -37,12 +37,9 @@ COLOURS=(blue green yellow purple orange pink cyan)
 RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
 
 ARGV=("$@")
-if ! (($#)) && [[ -v TMUX_PANE ]]; then
-  INDEX="$ROOT/var/sessions/$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}').pos"
-  if [[ -s $INDEX ]]; then
-    SESSION="$(< "$INDEX")"
-    ARGV+=(--resume "$SESSION")
-  fi
+if ! (($#)) && INDEX="$("$BASE/hooks/session-file.sh" "$PWD")" && [[ -s $INDEX ]]; then
+  SESSION="$(< "$INDEX")"
+  ARGV+=(--resume "$SESSION")
 fi
 
 clear -x
