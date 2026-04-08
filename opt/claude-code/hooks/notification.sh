@@ -14,8 +14,8 @@ if ! [[ -v RECUR ]]; then
   ~/.config/tmux/libexec/taint-inactive.sh
 
   if [[ -v TMUX_PANE ]]; then
-    STATUS="$(tmux display-message -t "$TMUX_PANE" -p '#{session_active}#{window_active}#{pane_active}')"
-    if [[ $STATUS == 111 ]]; then
+    STATUS="$(tmux display-message -t "$TMUX_PANE" -p '#{session_active}#{window_active}')"
+    if [[ $STATUS == 11 ]]; then
       exit
     fi
   fi
