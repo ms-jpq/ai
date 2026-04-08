@@ -44,7 +44,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/nanny-state.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/nanny.sh",
             "type": "command"
           }
         ],
@@ -55,7 +55,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/markdown-syndrome.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           }
         ]
@@ -66,7 +66,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/markdown-syndrome.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           }
         ]
@@ -77,7 +77,7 @@
         "hooks": [
           {
             "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/markdown-syndrome.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           }
         ]

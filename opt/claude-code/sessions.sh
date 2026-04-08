@@ -8,7 +8,7 @@ if ! [[ -v __CLAUDE_SESSION_ID ]] || ! [[ -v TMUX_PANE ]]; then
 fi
 
 ROOT="$(realpath -- "${0%/*}")/../../.."
-MARKDOWN="$ROOT/var/markdown/$__CLAUDE_SESSION_ID.md"
+MARKDOWN="$ROOT/var/sessions/$__CLAUDE_SESSION_ID.md"
 
 if [[ -v RECUR ]]; then
   "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN"

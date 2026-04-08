@@ -28,8 +28,8 @@ Stop)
   ;;
 esac
 
-STORE="$(realpath -- "${0%/*}/../../../var/markdown")"
-MD="$STORE/$SESSION.md"
+SESSIONS="$(realpath -- "${0%/*}/../../../var/sessions")"
+MD="$SESSIONS/$SESSION.md"
 # shellcheck disable=2016
 JQ=(
   jq -e --raw-output
@@ -37,7 +37,7 @@ JQ=(
   '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]'
 )
 
-find "$STORE" -name '*.md' -mtime +30 -delete 2> /dev/null || :
+find "$SESSIONS" -name '*.md' -mtime +30 -delete 2> /dev/null || :
 touch -- "$MD"
 
 # shellcheck disable=SC2094
