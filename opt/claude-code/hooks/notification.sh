@@ -25,7 +25,7 @@ fi
 
 if ! [[ -v RECUR ]]; then
   if [[ -v TMUX_PANE ]] && ! ~/.config/tmux/libexec/pane-active.sh; then
-    ~/.config/tmux/libexec/notify-pane.sh
+    ~/.config/tmux/libexec/taint-pane.sh
   fi
 fi
 
