@@ -47,5 +47,9 @@ if ! (($#)) && INDEX="$("$BASE/hooks/session-file.sh" "$PWD")" && [[ -s $INDEX ]
   fi
 fi
 
+if [[ ${ARGV[*]} == '-' ]]; then
+  ARGV=()
+fi
+
 clear -x
 printf -- '%s' "/color $RANDOM_COLOR" | ~/.local/bin/hp "$CC" "${ARGV[@]}"
