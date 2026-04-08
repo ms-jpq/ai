@@ -27,6 +27,7 @@ UserPromptSubmit)
   ;;
 Stop)
   ROLE='assistant'
+  jq -e '{ title: null, message: .last_assistant_message }' <<< "$JSON" | "$DIR/notification.sh"
   ;;
 *)
   set -x
