@@ -9,7 +9,7 @@ RESET=$'\033[0m'
 DIM=$'\033[2m'
 BOLD=$'\033[1m'
 
-CYAN=$'\033[36m'
+_CYAN=$'\033[36m'
 GREEN=$'\033[32m'
 RED=$'\033[31m'
 YELLOW=$'\033[33m'
@@ -60,6 +60,13 @@ USAGE_INFO="${DIM}⧗ ${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${DIM}${
 ######################################
 
 ######################################
+LINES_DELTA=""
+if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
+  LINES_DELTA=" ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
+fi
+######################################
+
+######################################
 DIR_INFO=''
 if [[ $WD_CURR != "$WD_PROJ" ]]; then
   REL="$(realpath --no-symlinks --relative-to "$WD_PROJ" -- "$WD_CURR")"
@@ -67,19 +74,4 @@ if [[ $WD_CURR != "$WD_PROJ" ]]; then
 fi
 ######################################
 
-######################################
-GIT_INFO=''
-if [[ -n $WD_CURR ]] && BRANCH=$(git -C "$WD_CURR" branch --show-current 2> /dev/null); then
-  DIRTY=""
-  git -C "$WD_CURR" diff --quiet 2> /dev/null || DIRTY=" "
-  git -C "$WD_CURR" diff --cached --quiet 2> /dev/null || DIRTY=" "
-  GIT_INFO=" ${DIM}on${RESET} ${CYAN}${BRANCH}${DIRTY}${RESET}"
-fi
-
-LINES_DELTA=""
-if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
-  LINES_DELTA=" ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
-fi
-######################################
-
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO}${LINES_DELTA} §  ${DIR_INFO}${GIT_INFO}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO}${LINES_DELTA} §  ${DIR_INFO}"
