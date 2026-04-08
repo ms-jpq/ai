@@ -8,19 +8,19 @@
     "url": "https://mcp-dockerhub.${MCP_DOMAIN}/mcp"
   },
   "firecrawl": {
-    "type": "url",
+    "type": "http",
     "url": "https://mcp-firecrawl.${MCP_DOMAIN}/mcp"
   },
   "microsoft-docs": {
-    "type": "url",
+    "type": "http",
     "url": "https://learn.microsoft.com/api/mcp"
   },
   "searx": {
-    "type": "url",
+    "type": "http",
     "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
   },
   "terraform": {
-    "type": "url",
+    "type": "http",
     "url": "https://mcp-terraform.${MCP_DOMAIN}/mcp"
   }
 }
