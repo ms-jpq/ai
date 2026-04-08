@@ -44,9 +44,8 @@ if ! (($#)) && INDEX="$("$BASE/hooks/session-file.sh" "$PWD")" && [[ -s $INDEX ]
 
   if [[ -f $JSONL ]]; then
     ARGV+=(--resume "$SESSION")
-    rm -fr -- "$INDEX"
   fi
 fi
 
 clear -x
-printf -- '%s' "/color $RANDOM_COLOR" | exec -- ~/.local/bin/hp "$CC" "${ARGV[@]}"
+printf -- '%s' "/color $RANDOM_COLOR" | ~/.local/bin/hp "$CC" "${ARGV[@]}"
