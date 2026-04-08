@@ -9,10 +9,6 @@ SESSION="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 DIR="${0%/*}"
 SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
 
-if INDEX="$("$DIR/session-file.sh" "$PWD")"; then
-  printf -- '%s' "$SESSION" > "$INDEX"
-fi
-
 case "$EVENT" in
 SessionStart)
   if [[ -n $CLAUDE_ENV_FILE ]]; then
@@ -37,6 +33,10 @@ Stop)
   exit 2
   ;;
 esac
+
+if INDEX="$("$DIR/session-file.sh" "$PWD")"; then
+  printf -- '%s' "$SESSION" > "$INDEX"
+fi
 
 MD="$SESSIONS/$SESSION.md"
 # shellcheck disable=2016
