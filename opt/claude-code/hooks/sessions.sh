@@ -27,7 +27,7 @@ UserPromptSubmit)
   ;;
 Stop)
   ROLE='assistant'
-  jq -e '{ title: null, message: .last_assistant_message }' <<< "$JSON" | "$DIR/notification.sh"
+  jq -e '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$DIR/notification.sh"
   ;;
 *)
   set -x
