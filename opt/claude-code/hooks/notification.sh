@@ -33,6 +33,8 @@ if [[ -v RECUR ]]; then
   TEE+=(/dev/stderr)
 fi
 JSON="$("${TEE[@]}")"
-TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
+# shellcheck disable=SC2154
+FALLBACK="Chatty ~ $(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
+TITLE="$(jq -e --raw-output --arg fallback "$FALLBACK" '.title // $fallback' <<< "$JSON")"
 MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
 exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
