@@ -11,12 +11,7 @@ if [[ -t 0 ]]; then
 fi
 
 if ! [[ -v RECUR ]]; then
-  if [[ -v TMUX_PANE ]]; then
-    if ~/.config/tmux/libexec/pane-active.sh; then
-      exit
-    fi
-    ~/.config/tmux/libexec/taint-pane.sh
-  fi
+  ~/.config/tmux/libexec/taint-inactive.sh
 fi
 
 if [[ -v SSH_CONNECTION ]]; then
