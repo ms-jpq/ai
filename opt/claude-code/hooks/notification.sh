@@ -23,6 +23,12 @@ if [[ -v SSH_CONNECTION ]]; then
   exit
 fi
 
+if ! [[ -v RECUR ]]; then
+  if [[ -v TMUX_PANE ]] && ! ~/.config/tmux/libexec/pane-active.sh; then
+    ~/.config/tmux/libexec/notify-pane.sh
+  fi
+fi
+
 TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
 MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
 exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
