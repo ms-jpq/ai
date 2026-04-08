@@ -2,6 +2,6 @@
 
 set -o pipefail
 
-if INDEX="$("${0%/*}/hooks/session-file.sh" "$PWD")"; then
+if INDEX="$("${0%/*}/../hooks/session-file.sh" "$PWD")"; then
   rm -fr -- "$INDEX"
 fi

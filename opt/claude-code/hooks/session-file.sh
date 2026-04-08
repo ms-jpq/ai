@@ -7,5 +7,5 @@ if ! [[ -v TMUX_PANE ]]; then
 fi
 
 INFO="$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}')"
-INDEX="${0%/*}/../../../var/sessions/$(md5 <<< "$1").$INFO"
+INDEX="${0%/*}/../../../var/sessions/$(b3sum <<< "$1" | cut -d ' ' -f 1).$INFO"
 printf -- '%s' "$INDEX"
