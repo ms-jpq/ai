@@ -6,6 +6,13 @@ JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
+DIR="${0%/*}"
+SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
+
+if [[ -v TMUX_PANE ]]; then
+  tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}' > "$SESSIONS/$SESSION.pos"
+fi
+
 case "$EVENT" in
 SessionStart)
   if [[ -n $CLAUDE_ENV_FILE ]]; then
@@ -31,7 +38,6 @@ Stop)
   ;;
 esac
 
-SESSIONS="$(realpath -- "${0%/*}/../../../var/sessions")"
 MD="$SESSIONS/$SESSION.md"
 # shellcheck disable=2016
 JQ=(
