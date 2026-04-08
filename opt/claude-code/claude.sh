@@ -1,5 +1,6 @@
-#!/usr/bin/env -S -- bash -Eeu -o pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
+#!/usr/bin/env -S -- bash
 
+set -eEu
 set -o pipefail
 
 if [[ $PWD == "$HOME" ]]; then
