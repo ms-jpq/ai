@@ -2,8 +2,7 @@
 
 set -o pipefail
 
-BASE="${0%/*}"
-JSON="$BASE/servers.json"
+JSON="${0%/*}/../../claude-code/mcp.json"
 SERVERS="$(jq --exit-status --raw-input --null-input --compact-output '[inputs]')"
 
 read -r -d '' -- JQ <<- 'JQ' || true

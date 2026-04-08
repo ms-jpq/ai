@@ -29,7 +29,7 @@ while (($#)); do
     shift -- 2
     ;;
   --mcp)
-    MCP_SERVERS="$(tr -- ',' '\n' <<< "$2" | "$BASE/../mcp/pick.sh")"
+    MCP_SERVERS="$(tr -- ',' '\n' <<< "$2" | "$BASE/mcp/pick.sh")"
     shift -- 2
     ;;
   --)
