@@ -11,7 +11,7 @@ ROOT="$(realpath -- "${0%/*}")/../../.."
 MARKDOWN="$ROOT/var/sessions/$__CLAUDE_SESSION_ID.md"
 
 if [[ -v RECUR ]]; then
-  "$ROOT/node_modules/.bin/prettier" --write -- "$MARKDOWN"
+  "$ROOT/node_modules/.bin/prettier" --write --log-level=warn -- "$MARKDOWN"
   exec -- printf -- '\n' >> "$MARKDOWN"
 fi
 
