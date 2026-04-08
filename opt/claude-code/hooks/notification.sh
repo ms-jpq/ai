@@ -10,6 +10,15 @@ if [[ -t 0 ]]; then
   RECUR=1 exec -- socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
 fi
 
+if ! [[ -v RECUR ]]; then
+  if [[ -v TMUX_PANE ]]; then
+    if ~/.config/tmux/libexec/pane-active.sh; then
+      exit
+    fi
+    ~/.config/tmux/libexec/taint-pane.sh
+  fi
+fi
+
 TEE=(tee --)
 if [[ -v RECUR ]]; then
   TEE+=(/dev/stderr)
@@ -21,15 +30,6 @@ if [[ -v SSH_CONNECTION ]]; then
     exec -- socat - "UNIX-CONNECT:$SOCK" <<< "$JSON"
   fi
   exit
-fi
-
-if ! [[ -v RECUR ]]; then
-  if [[ -v TMUX_PANE ]]; then
-    if ~/.config/tmux/libexec/pane-active.sh; then
-      exit
-    fi
-    ~/.config/tmux/libexec/taint-pane.sh
-  fi
 fi
 
 TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
