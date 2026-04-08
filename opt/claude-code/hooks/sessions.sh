@@ -9,6 +9,7 @@ SESSION="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 DIR="${0%/*}"
 SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
 
+find "$SESSIONS" -mindepth 1 -mtime +30 -delete
 if [[ -v TMUX_PANE ]]; then
   INDEX="$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}')"
   printf -- '%s' "$SESSION" > "$SESSIONS/$INDEX.pos"
@@ -47,7 +48,6 @@ JQ=(
   '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]'
 )
 
-find "$SESSIONS" -name '*.md' -mtime +30 -delete 2> /dev/null || :
 touch -- "$MD"
 
 # shellcheck disable=SC2094
