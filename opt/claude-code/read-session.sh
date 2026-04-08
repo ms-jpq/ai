@@ -18,4 +18,6 @@ fi
 RECUR=1 flock "$MARKDOWN" "$0"
 
 # shellcheck disable=SC2154
-exec -- tmux new-window -a -c "$PWD" -- nvim -M -c "norm! ggGMzz" -- "$MARKDOWN"
+tmux new-window -a -c "$PWD" -- nvim -M -c "norm! ggGMzz" -- "$MARKDOWN"
+
+printf -- '%s' "user decided to inspect the conversation as markdown in external editor"
