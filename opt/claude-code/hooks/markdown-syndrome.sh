@@ -32,11 +32,12 @@ STORE="$(realpath -- "${0%/*}/../../../var/markdown")"
 MD="$STORE/$SESSION.md"
 # shellcheck disable=2016
 JQ=(
-  jq --raw-output
+  jq -e --raw-output
   --arg role "$ROLE"
   '["# >>> \($role) <<<", "", .prompt // .last_assistant_message, "", "---", ""][]'
 )
 
+find "$STORE" -name '*.md' -mtime +30 -delete 2> /dev/null || :
 touch -- "$MD"
 
 # shellcheck disable=SC2094
