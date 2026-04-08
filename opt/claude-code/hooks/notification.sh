@@ -4,7 +4,7 @@ set -o pipefail
 
 SELF="$(realpath -- "$0")"
 ROOT="${SELF%/*}/../../.."
-SOCK="$ROOT/var/claude.notify.sock"
+SOCK="$(realpath -- "$ROOT/var/claude.notify.sock")"
 
 if [[ -t 0 ]]; then
   RECUR=1 exec -- socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
