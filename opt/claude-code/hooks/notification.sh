@@ -24,7 +24,10 @@ if [[ -v SSH_CONNECTION ]]; then
 fi
 
 if ! [[ -v RECUR ]]; then
-  if [[ -v TMUX_PANE ]] && ! ~/.config/tmux/libexec/pane-active.sh; then
+  if [[ -v TMUX_PANE ]]; then
+    if ~/.config/tmux/libexec/pane-active.sh; then
+      exit
+    fi
     ~/.config/tmux/libexec/taint-pane.sh
   fi
 fi
