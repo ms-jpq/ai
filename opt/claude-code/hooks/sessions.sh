@@ -10,7 +10,8 @@ DIR="${0%/*}"
 SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
 
 if [[ -v TMUX_PANE ]]; then
-  tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}' > "$SESSIONS/$SESSION.pos"
+  INDEX="$(tmux display-message -p '#{session_name}:#{window_index}:#{pane_index}')"
+  printf -- '%s' "$SESSION" > "$SESSIONS/$INDEX.pos"
 fi
 
 case "$EVENT" in
