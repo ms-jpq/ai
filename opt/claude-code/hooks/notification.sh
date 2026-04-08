@@ -19,19 +19,18 @@ if ! [[ -v RECUR ]]; then
   fi
 fi
 
+if [[ -v SSH_CONNECTION ]]; then
+  if [[ -S $SOCK ]]; then
+    exec -- socat - "UNIX-CONNECT:$SOCK"
+  fi
+  exit
+fi
+
 TEE=(tee --)
 if [[ -v RECUR ]]; then
   TEE+=(/dev/stderr)
 fi
 JSON="$("${TEE[@]}")"
-
-if [[ -v SSH_CONNECTION ]]; then
-  if [[ -S $SOCK ]]; then
-    exec -- socat - "UNIX-CONNECT:$SOCK" <<< "$JSON"
-  fi
-  exit
-fi
-
 TITLE="$(jq -e --raw-output '.title // "Claude Code"' <<< "$JSON")"
 MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
 exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
