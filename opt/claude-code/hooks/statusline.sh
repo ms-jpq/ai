@@ -81,4 +81,4 @@ if [[ $WD_CURR != "$WD_PROJ" ]]; then
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO}${LINES_DELTA} §${DIR_INFO}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO}§${DIR_INFO}${LINES_DELTA}"
