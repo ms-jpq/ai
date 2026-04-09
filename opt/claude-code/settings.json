@@ -25,7 +25,6 @@
   "env": {
     "ANTHROPIC_API_KEY": "",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
-    "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": "1",
     "NO_COLOR": "true"
   },
   "feedbackSurveyRate": 0,
