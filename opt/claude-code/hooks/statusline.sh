@@ -22,7 +22,9 @@ COST="$(jq -e --raw-output '.cost.total_cost_usd // 0' <<< "$JSON")"
 LINES_ADDED="$(jq -e --raw-output '.cost.total_lines_added // 0' <<< "$JSON")"
 LINES_REMOVED="$(jq -e --raw-output '.cost.total_lines_removed // 0' <<< "$JSON")"
 MODEL="$(jq -e --raw-output '.model.display_name // "unknown"' <<< "$JSON")"
-USAGE_PCT="$(jq -e --raw-output '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
+CTX_USED="$(jq -e --raw-output '.context_window.current_usage.input_tokens // 0' <<< "$JSON" | numfmt --to si)"
+CTX_SIZE="$(jq -e --raw-output '.context_window.context_window_size // 0' <<< "$JSON" | numfmt --to si)"
+CTX_PCT="$(jq -e --raw-output '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
 WD_CURR="$(jq -e --raw-output '.workspace.current_dir' <<< "$JSON")"
 WD_PROJ="$(jq -e --raw-output '.workspace.project_dir' <<< "$JSON")"
 ######################################
@@ -41,22 +43,24 @@ fi
 SPENT_TIME="$(date --utc --date="@$SPENT_SECS" -- "+$TIMEFMT")"
 
 BAR_LEN=10
-FILLED=$((USAGE_PCT * BAR_LEN / 100))
+FILLED=$((CTX_PCT * BAR_LEN / 100))
 EMPTY=$((BAR_LEN - FILLED))
 BAR=''
 for ((i = 0; i < FILLED; i++)); do BAR+='█'; done
 for ((i = 0; i < EMPTY; i++)); do BAR+='░'; done
 
-if ((USAGE_PCT >= 90)); then
+if ((CTX_PCT >= 90)); then
   BAR_COLOUR="$RED"
-elif ((USAGE_PCT >= 70)); then
+elif ((CTX_PCT >= 70)); then
   BAR_COLOUR="$YELLOW"
 else
   BAR_COLOUR="$GREEN"
 fi
 
 MODEL_INFO="${MODEL}"
-USAGE_INFO="${DIM}⧗ ${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${DIM}${USAGE_PCT}%${RESET}"
+
+CTX_INFO="${DIM}${CTX_USED}/${CTX_SIZE}${RESET}"
+USAGE_INFO="${DIM}⧗ ${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${CTX_INFO}"
 ######################################
 
 ######################################
