@@ -62,8 +62,9 @@ else
 fi
 
 MODEL_INFO="${MODEL}"
-CTX_INFO="${DIM} ↑${CTX_INPUT} ↓${CTX_OUTPUT} ${CTX_USED}/${CTX_SIZE}${RESET}"
-USAGE_INFO="${DIM}⧗ ${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${CTX_INFO}"
+CTX_INFO="${DIM}↑${CTX_INPUT} ↓${CTX_OUTPUT} ${CTX_USED}/${CTX_SIZE}${RESET}"
+USAGE_INFO="${CTX_INFO} ${BAR_COLOUR}${BAR}${RESET}"
+TIME_INFO="${DIM}${SPENT_TIME}${RESET}"
 ######################################
 
 ######################################
@@ -89,4 +90,4 @@ if [[ $WD_CURR != "$WD_PROJ" ]]; then
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} §${DIR_INFO}${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} ${TIME_INFO} §${DIR_INFO}${LINES_DELTA}"
