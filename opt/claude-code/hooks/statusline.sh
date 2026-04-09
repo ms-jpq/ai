@@ -68,8 +68,16 @@ USAGE_INFO="${DIM}⧗ ${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${CTX_IN
 
 ######################################
 LINES_DELTA=""
-if ((LINES_ADDED > 0 || LINES_REMOVED > 0)); then
-  LINES_DELTA=" ${GREEN}+${LINES_ADDED}${RESET} ${RED}-${LINES_REMOVED}${RESET}"
+if ((LINES_ADDED > 0)); then
+  LINES_DELTA+=" ${GREEN}+${LINES_ADDED}${RESET}"
+fi
+if ((LINES_REMOVED > 0)); then
+  if ((LINES_ADDED > 0)); then
+    LINES_DELTA+=","
+  else
+    LINES_DELTA+=" "
+  fi
+  LINES_DELTA+="${RED}-${LINES_REMOVED}${RESET}"
 fi
 ######################################
 
