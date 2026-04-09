@@ -1,6 +1,6 @@
 # Shell Scripting Guidelines
 
-- **Always** run `shellcheck`.
+- **Always** run `shellcheck '<script>.sh'`, **always** run `shfmt.sh '<script>.sh'`
 
 - Do not forget to add a shebang like `#!/usr/bin/env -S -- nodejs`, followed by `chmod +x`.
 
