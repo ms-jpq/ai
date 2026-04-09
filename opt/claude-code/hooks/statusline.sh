@@ -74,8 +74,8 @@ fi
 DIR_INFO=''
 if [[ $WD_CURR != "$WD_PROJ" ]]; then
   REL="$(realpath --no-symlinks --relative-to "$WD_PROJ" -- "$WD_CURR")"
-  DIR_INFO=" $(basename -- "$WD_PROJ"):$REL"
+  DIR_INFO=" ${BOLD}$(basename -- "$WD_PROJ"):$REL${RESET}"
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO}${LINES_DELTA} §  ${DIR_INFO}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO}${LINES_DELTA} §${DIR_INFO}"
