@@ -58,7 +58,6 @@ else
 fi
 
 MODEL_INFO="${MODEL}"
-
 CTX_INFO="${DIM}${CTX_USED}/${CTX_SIZE}${RESET}"
 USAGE_INFO="${DIM}⧗ ${SPENT_TIME}${RESET} ${BAR_COLOUR}${BAR}${RESET} ${CTX_INFO}"
 ######################################
