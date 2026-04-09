@@ -1,7 +1,5 @@
 # Typescript Guidelines
 
-## Style
-
 1. Prefer `() =>` arrow functions.
 
 2. Use generator `function*` for writing iterables.
