@@ -10,4 +10,6 @@
 
 4. Use `Map<K ,V>` instead of `Record<K, V>` to represent maps.
 
-5. When there is both a sync and async version of doing something, prefer async.
+5. Use IIFE `(() => {})` to either localize or avoid mutable state.
+
+6. When there is both a sync and async version of doing something, prefer async.
