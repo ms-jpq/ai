@@ -30,7 +30,7 @@ case "$CMD_LINE" in
   REASON='try again, and consider not executing commands via these mechanisms that are hard to write permissions for'
   ;;
 'bash '* | 'dash '* | 'fish '* | 'sh '* | 'zsh '*)
-  DECISION=deny
+  DECISION=ask
   REASON='try again, and consider not doing nested shell scripts'
   ;;
 'nohup '* | 'crontab '* | 'tmux '* | 'screen '* | 'zellij '*)
