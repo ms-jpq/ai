@@ -1,8 +1,8 @@
 # Typescript Guidelines
 
-1. Prefer `() =>` arrow functions.
+1. Prefer `const = () => {}` functions declarations.
 
-2. Use generator `function*` for writing iterables.
+2. Use generator `function*` for writing iterables, and use the `const = function*() {}` style of declarations.
 
 3. Use the most generic type. for example: use `IteratorObject<T>` rather than `Generator<T>`.
 

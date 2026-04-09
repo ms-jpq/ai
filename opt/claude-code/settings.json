@@ -7,20 +7,20 @@
   "enabledPlugins": {
     "clangd-lsp@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
-    "code-simplifier@claude-plugins-official": false,
+    "code-simplifier@claude-plugins-official": true,
     "csharp-lsp@claude-plugins-official": false,
     "elixir-ls-lsp@claude-plugins-official": false,
     "github@claude-plugins-official": false,
-    "gopls-lsp@claude-plugins-official": false,
+    "gopls-lsp@claude-plugins-official": true,
     "jdtls-lsp@claude-plugins-official": false,
     "kotlin-lsp@claude-plugins-official": false,
-    "lua-lsp@claude-plugins-official": false,
+    "lua-lsp@claude-plugins-official": true,
     "php-lsp@claude-plugins-official": false,
     "pyright-lsp@claude-plugins-official": false,
     "ruby-lsp@claude-plugins-official": false,
     "rust-analyzer-lsp@claude-plugins-official": false,
     "swift-lsp@claude-plugins-official": false,
-    "typescript-lsp@claude-plugins-official": false
+    "typescript-lsp@claude-plugins-official": true
   },
   "env": {
     "ANTHROPIC_API_KEY": "",
