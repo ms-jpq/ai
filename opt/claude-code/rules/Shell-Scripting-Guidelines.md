@@ -6,7 +6,7 @@
 
 - Always use long form flags, like `--delimiter` instead of `-d`, when available, use `--` to stop argument parse errors
 
-- Always use `null` byte as delimiter if possible, i.e. `find ... -print0 | xargs --null ...`
+- Always use null byte as delimiter if possible, i.e. `find ... -print0 | xargs --null ...`
 
 - Do capture re-usable arguments in an array to invoke later, ie. `GREP=(grep --recursive ...)`, `${GREP[@]}`.
   - Do this instead of `\ ` escaping for long / many arguments
@@ -16,7 +16,7 @@
 
 - Avoid inlining complicated scripts such as that of `jq` and `awk`. Create a `.awk`, `.jq`, `.sed` executable script instead, and call them.
 
-- When calling scripts that are relatively close on the file system,
+- When invoking scripts that are relatively close on the file system, call them by relative location like so:
 
 ```bash
 SELF="$(realpath -- "$0")"
@@ -25,7 +25,7 @@ BASE="${SELF%/*}"
 exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 ```
 
-- Take advantage of `bash`'s control flows being pipe-able, an example:
+- Really take advantage of everything in `bash` being pipe-able, an example:
 
 ```bash
 grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
@@ -33,4 +33,16 @@ grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
 else
   tee
 fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
+```
+
+- Think out side of the box with control flows, for example, when `flock` was needed to lock down a file, to prevent race issues, use recursion:
+
+```bash
+FILE="$1"
+if [[ -v RECUR ]]; then
+  isort -- "$FILE"
+  exec -- black -- "$FILE"
+fi
+
+RECUR=1 flock "$FILE" "$0" "$@"
 ```
