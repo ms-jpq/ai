@@ -17,4 +17,13 @@ DELTAS="${0%/*}/../../var/deltas"
 SESSION_DIR="$(realpath --no-symlinks -- "$DELTAS")/$SESSION_ID"
 mkdir -p -- "$SESSION_DIR"
 
-tmux new-window -a -c "$SESSION_DIR"
+FIRST=1
+for OLD in "$SESSION_DIR"/*.old.*; do
+  NEW="${OLD/.old./.new.}"
+  if ((FIRST)); then
+    tmux new-window -a -c "$SESSION_DIR" -- nvim -d -- "$OLD" "$NEW"
+    FIRST=0
+  else
+    tmux split-window -c "$SESSION_DIR" -- nvim -d -- "$OLD" "$NEW"
+  fi
+done
