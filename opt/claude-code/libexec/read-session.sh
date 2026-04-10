@@ -8,12 +8,12 @@ if ! [[ -v TMUX ]]; then
 fi
 
 SESSION_ID="$(tmux display-message -p '#{@claude_session}')"
-if [[ -z $SESSION_ID ]]; then
-  exec -- tmux display-message -- '🐶'
-fi
-
-ROOT="${0%/*}/../../../.."
+ROOT="$(realpath -- "${0%/*}/../../..")"
 MARKDOWN="$ROOT/var/sessions/$SESSION_ID.md"
+
+if [[ -z $SESSION_ID ]] || ! [[ -f $MARKDOWN ]]; then
+  exec -- tmux display-message -- "🐶 $MARKDOWN"
+fi
 
 if [[ -v RECUR ]]; then
   "$ROOT/node_modules/.bin/prettier" --write --log-level=warn -- "$MARKDOWN"
