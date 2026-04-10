@@ -10,7 +10,7 @@ read -r -d '' -- JQ <<- 'JQ' || true
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
     "permissionDecision": $decision,
-    "permissionDecisionReason": "⚠️ " + $reason
+    "permissionDecisionReason": ("⚠️ " + $reason)
   }
 }
 JQ
