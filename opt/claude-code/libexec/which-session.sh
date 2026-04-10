@@ -24,7 +24,7 @@ case "${#UNIQUE[@]}" in
   exit 0
   ;;
 *)
-  tmux display-message -- "🚧 ${UNIQUE[*]}"
+  tmux display-message -- "🚧 ${UNIQUE[*]:--}"
   ;;
 esac
 
