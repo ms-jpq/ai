@@ -14,12 +14,12 @@
 
 - Avoid writing functions and traps these make error propagation harder.
 
-- Avoid writing `echo` statements, use `printf -- '%s' ...` instead for single statements, for multiline statements see:
+- Avoid writing `echo` statements, use `printf -- '%s' ...` instead for single statements, for multiline statements with interpolations see:
 
 ```bash
-tee <<- 'JSON'
+tee <<- JSON
 {
-  "host": null,
+  "host": "$HOST",
   "user": "root"
 }
 JSON
