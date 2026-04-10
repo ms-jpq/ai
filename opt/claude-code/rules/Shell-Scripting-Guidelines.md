@@ -16,6 +16,25 @@
 
 - Avoid inlining complicated scripts such as that of `jq` and `awk`. Create a `.awk`, `.jq`, `.sed` executable script instead, and call them.
 
+- Always use the following prelude for bash scripts
+
+```bash
+#!/usr/bin/env -S -- bash
+
+set -Eeu
+set -o pipefail
+shopt -s dotglob nullglob extglob globstar
+```
+
+- When handling unexpected script inputs, prefer exit code 2 like so:
+
+```bash
+if '...'; then
+  set -x
+  exit 2
+fi
+```
+
 - When invoking scripts that are relatively close on the file system, call them by relative location like so:
 
 ```bash
