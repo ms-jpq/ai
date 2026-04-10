@@ -27,6 +27,7 @@ PreToolUse)
   OLD="${ENTRY_DIR}/${STEM}.old${SUFFIX}"
   NEW="${ENTRY_DIR}/${STEM}.new${SUFFIX}"
   mkdir -p -- "$ENTRY_DIR"
+  jq --sort-keys '.' <<< "$JSON" > "${ENTRY_DIR}/${STEM}.json"
 
   case "$TOOL_NAME" in
   Edit)
@@ -36,15 +37,18 @@ PreToolUse)
       ORIGINAL="$OLD"
     fi
 
-    if jq -e --raw-output '.tool_input.replace_all' <<< "$JSON" > /dev/null; then
-      exec -- jq -e --raw-output --join-output '.tool_input.new_string' <<< "$JSON" > "$NEW"
-    fi
-
-    read -r -d '' -- JQ <<- 'JQ' || true
-.tool_input as {old_string: $old, new_string: $new} 
+    if jq -e '.tool_input.replace_all' <<< "$JSON" > /dev/null; then
+      read -r -d '' -- JQ <<- 'JQ' || true
+.tool_input as {old_string: $old, new_string: $new}
+| $original | split($old) | join($new)
+JQ
+    else
+      read -r -d '' -- JQ <<- 'JQ' || true
+.tool_input as {old_string: $old, new_string: $new}
 | ($original | index($old)) as $i
 | if $i then $original[:$i] + $new + $original[($i + ($old | length)):] else $original end
 JQ
+    fi
 
     exec -- jq -e --raw-output --join-output --rawfile original "$ORIGINAL" "$JQ" <<< "$JSON" > "$NEW"
     ;;
