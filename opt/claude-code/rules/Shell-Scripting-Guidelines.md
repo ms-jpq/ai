@@ -27,7 +27,8 @@ CURL+=(-- "$URL")
 "${CURL[@]}"
 ```
 
-- When there are multiple branches, use comprehensive enumeration instead of `if/elif` chains:
+- When there are multiple branches, use comprehensive enumeration instead of `if/elif` chains.
+  - Always include a catch-all (`*`) that exits with `set -x; exit 2` for unexpected inputs.
 
 ```bash
 case "$VARIABLE" in
@@ -54,7 +55,7 @@ EOF >&2
 
 - Use `(( ))` for math comparisons, not `[[ ]]`.
 
-- Use `exec --` for early exit if possible, to simplify control flow.
+- Use `exec --` for early exit of control flow if possible, to simplify control flow.
 
 - Avoid inlining complicated `jq`, `awk`, or `sed` scripts. Create a standalone `.jq`, `.awk`, `.sed` executable instead.
   - If inlining is desired, always use a heredoc.
@@ -75,7 +76,7 @@ jq --raw-output0 "$JQ" < 'example.json'
 set -o pipefail
 ```
 
-- For bash scripts under `~/work/` and `~/work.localized/`, use this prelude instead:
+- For bash scripts under `~/work/` and `~/work.localized/`, use this prelude instead, for bash 3 compat:
 
 ```bash
 #!/usr/bin/env -S -- bash
@@ -84,8 +85,6 @@ set -Eeu
 set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 ```
-
-- When handling unexpected script inputs, prefer `set -x; exit 2` (also shown in the `case` catch-all above).
 
 - Invoke nearby scripts by relative path:
 
