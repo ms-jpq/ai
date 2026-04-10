@@ -2,10 +2,6 @@
 
 set -o pipefail
 
-SELF="$(realpath -- "$0")"
-BASE="${SELF%/*}"
-DIFF_DIR="$(realpath -- "$BASE/../../var/deltas")"
-
 case "${SCRIPT_MODE:-""}" in
 preview)
   CWD="$(tr -d '\0')"
@@ -18,12 +14,17 @@ execute)
   exec -- nvim -d -- old* new*
   ;;
 *)
+  SELF="$(realpath -- "$0")"
+  BASE="${SELF%/*}"
+  DIFF_DIR="$(realpath -- "$BASE/../../var/deltas")"
+  cd -- "$DIFF_DIR"
 
   ARGV=(
-    find "$DIFF_DIR"
-    -mindepth 2
-    -name 'cwd.txt'
-    -execdir cat -- '{}' ';'
+    find .
+    -mindepth 1
+    -maxdepth 1
+    -type d
+    -print0
   )
   "${ARGV[@]}" | ~/.config/zsh/libexec/fzf-lr.sh "$0" "$*"
   ;;
