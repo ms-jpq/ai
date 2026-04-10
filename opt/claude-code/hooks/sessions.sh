@@ -20,14 +20,17 @@ SessionStart)
   fi
 
   if [[ -v TMUX_PANE ]]; then
-    printf -v SH -- '%q' "$ROOT/opt/claude-code/review-diffs.sh"
     tmux set-option -t "$TMUX_PANE" -p @claude_session "$SESSION_ID"
-    tmux bind-key f run-shell -- "$SH"
+
+    printf -v REVIEW -- '%q' "$ROOT/opt/claude-code/libexec/review-diffs.sh"
+    printf -v HIST -- '%q' "$ROOT/opt/claude-code/libexec/read-session.sh"
+    tmux bind-key f run-shell -- "$REVIEW"
+    tmux bind-key F run-shell -- "$HIST"
   fi
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
 SessionEnd)
-  if INDEX="$("$BASE/session-file.sh" "$PWD")"; then
+  if INDEX="$("$BASE/../libexec/session-file.sh" "$PWD")"; then
     rm -fr -- "$INDEX"
   fi
   exit
@@ -39,13 +42,17 @@ Stop)
   ROLE='assistant'
   jq -e --compact-output '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$BASE/notification.sh"
   ;;
+PostToolUse)
+  tee <<< "$JSON" -- ./owo.json
+  exit
+  ;;
 *)
   set -x
   exit 2
   ;;
 esac
 
-if INDEX="$("$BASE/session-file.sh" "$PWD")"; then
+if INDEX="$("$BASE/../libexec/session-file.sh" "$PWD")"; then
   printf -- '%s' "$SESSION_ID" > "$INDEX"
 fi
 

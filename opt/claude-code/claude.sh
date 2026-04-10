@@ -37,7 +37,7 @@ COLOURS=(blue green yellow purple orange pink cyan)
 RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
 
 ARGV=("$@")
-if ! (($#)) && INDEX="$("$BASE/hooks/session-file.sh" "$PWD")" && [[ -s $INDEX ]]; then
+if ! (($#)) && INDEX="$("$BASE/libexec/session-file.sh" "$PWD")" && [[ -s $INDEX ]]; then
   SESSION="$(< "$INDEX")"
   DIR="$(sed -E -e 's#[^[:alnum:]]#-#g' <<< "$PWD")"
   JSONL="$ROOT/var/claude/projects/$DIR/$SESSION.jsonl"

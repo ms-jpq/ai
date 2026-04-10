@@ -7,7 +7,7 @@ if ! [[ -v __CLAUDE_SESSION_ID ]] || ! [[ -v TMUX_PANE ]]; then
   exit 2
 fi
 
-ROOT="$(realpath -- "${0%/*}")/../../.."
+ROOT="${0%/*}/../../../.."
 MARKDOWN="$ROOT/var/sessions/$__CLAUDE_SESSION_ID.md"
 
 if [[ -v RECUR ]]; then

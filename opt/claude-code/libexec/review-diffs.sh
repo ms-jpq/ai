@@ -13,7 +13,7 @@ if [[ -z $SESSION_ID ]]; then
   exec -- tmux display-message -- '🐶'
 fi
 
-DELTAS="${0%/*}/../../var/deltas"
+DELTAS="${0%/*}/../../../var/deltas"
 SESSION_DIR="$(realpath --no-symlinks -- "$DELTAS")/$SESSION_ID"
 mkdir -p -- "$SESSION_DIR"
 

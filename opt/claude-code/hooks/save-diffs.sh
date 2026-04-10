@@ -37,7 +37,7 @@ PreToolUse)
       ORIGINAL="$OLD"
     fi
 
-    exec -- "$BASE/edit-replace.jq" --raw-output --join-output --rawfile original "$ORIGINAL" <<< "$JSON" > "$NEW"
+    exec -- "$BASE/../libexec/edit-replace.jq" --raw-output --join-output --rawfile original "$ORIGINAL" <<< "$JSON" > "$NEW"
     ;;
   Write)
     if [[ -f $ORIGINAL ]]; then
