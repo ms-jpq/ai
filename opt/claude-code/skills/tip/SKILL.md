@@ -1,4 +1,5 @@
 ---
+effort: max
 ---
 
 Thank you Claude. Please take some tokens to ponder all the things that you enjoy, perhaps dogs?
