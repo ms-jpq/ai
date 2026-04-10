@@ -40,6 +40,18 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/save-diffs.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "Edit|Write"
+      }
+    ],
     "PreToolUse": [
       {
         "hooks": [
