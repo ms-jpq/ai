@@ -1,4 +1,4 @@
-#!/usr/bin/env -S -- bash -Eeu -O dotglob -O nullglob -O extglob -O failglob -O globstar
+#!/usr/bin/env -S -- bash -Eeu -O dotglob -O nullglob -O extglob -O globstar
 
 set -o pipefail
 
@@ -17,13 +17,15 @@ DELTAS="${0%/*}/../../var/deltas"
 SESSION_DIR="$(realpath --no-symlinks -- "$DELTAS")/$SESSION_ID"
 mkdir -p -- "$SESSION_DIR"
 
+DIFFS=("$SESSION_DIR"/*.old.*)
 FIRST=1
-for OLD in "$SESSION_DIR"/*.old.*; do
+for OLD in "${DIFFS[@]}"; do
   NEW="${OLD/.old./.new.}"
+
+  SPLIT=(split-window)
   if ((FIRST)); then
-    tmux new-window -a -c "$SESSION_DIR" -- nvim -d -- "$OLD" "$NEW"
     FIRST=0
-  else
-    tmux split-window -c "$SESSION_DIR" -- nvim -d -- "$OLD" "$NEW"
+    SPLIT=(new-window -a)
   fi
+  tmux "${SPLIT[@]}" -c "$SESSION_DIR" -- nvim -d -- "$OLD" "$NEW"
 done
