@@ -49,6 +49,8 @@ EOF > &2
 
 - Avoid using `[[ ]]` for math comparisons, use `(( ))` instead.
 
+- Use `exec --` for early exit if possible, to simplify control flows
+
 - Avoid inlining complicated scripts such as that of `jq` and `awk`. Create a `.awk`, `.jq`, `.sed` executable script instead, and call them.
   - If inlining is desired, always use heredoc.
 
