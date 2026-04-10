@@ -36,6 +36,7 @@ esac
 ENTRY_DIR="${DIFFS}/${SESSION_ID}"
 mkdir -p -- "$ENTRY_DIR"
 find "$ENTRY_DIR" -mindepth 1 -delete
+printf -- '%s\n' "$ENTRY_DIR" > "${ENTRY_DIR}/cwd.txt"
 printf -- '%s\n' "$OLD_STRING" > "${ENTRY_DIR}/old${SUFFIX}"
 printf -- '%s\n' "$NEW_STRING" > "${ENTRY_DIR}/new${SUFFIX}"
 printf -- '%s\n' "$FILE_PATH" > "${ENTRY_DIR}/path.txt"

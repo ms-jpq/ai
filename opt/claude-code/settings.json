@@ -176,6 +176,7 @@
     }
   },
   "showThinkingSummaries": true,
+  "spinnerTipsEnabled": false,
   "statusLine": {
     "command": "~/.local/opt/ai/opt/claude-code/hooks/statusline.sh",
     "type": "command"
