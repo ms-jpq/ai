@@ -49,8 +49,7 @@
             "type": "command"
           },
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-linter.sh",
-            "if": "Edit(*.bash)|Edit(*.sh)|Write(*.bash)|Write(*.sh)",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-linters.sh",
             "type": "command"
           }
         ],
