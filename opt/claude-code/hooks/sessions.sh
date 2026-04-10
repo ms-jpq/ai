@@ -42,10 +42,6 @@ Stop)
   ROLE='assistant'
   jq -e --compact-output '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$BASE/notification.sh"
   ;;
-PostToolUse)
-  tee <<< "$JSON" -- ./owo.json
-  exit
-  ;;
 *)
   set -x
   exit 2
