@@ -2,9 +2,7 @@
 
 - Always add a shebang like `#!/usr/bin/env -S -- nodejs`, and mark the file executable with `chmod +x`.
 
-- Always use long form flags when available, e.g. `--delimiter` instead of `-d`.
-
-- Always use `--` to terminate option parsing, e.g. `cd -- "$DIR"`.
+- Always use long form flags when available (`--delimiter` not `-d`) and `--` to terminate option parsing (`cd -- "$DIR"`).
 
 - Always use null bytes as delimiters if possible, i.e. `find ... -print0 | xargs --null ...`
 
@@ -87,14 +85,7 @@ set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 ```
 
-- When handling unexpected script inputs, prefer exit code 2:
-
-```bash
-if '<unexpected condition>'; then
-  set -x
-  exit 2
-fi
-```
+- When handling unexpected script inputs, prefer `set -x; exit 2` (also shown in the `case` catch-all above).
 
 - Invoke nearby scripts by relative path:
 
@@ -130,24 +121,9 @@ RECUR=1 flock "$FILE" "$0" "$@"
 
 - Use `shift -- <count>` after consuming positional args.
 
-```bash
-DST="$1"
-shift -- 1
-```
-
-- Use `shopt -u failglob` as the first `shopt` after the prelude when globs may legitimately match nothing.
-
-```bash
-set -o pipefail
-shopt -u failglob
-```
+- Use `shopt -u failglob` after the prelude when globs may legitimately match nothing.
 
 - Use `readarray -t` to capture multi-line output into arrays, not subshell loops or word splitting.
-
-```bash
-LINES="$(some-command)"
-readarray -t -- ITEMS <<< "$LINES"
-```
 
 - Use parameter expansion `${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}` over `basename`, `dirname`, or `cut` for string decomposition.
 
@@ -160,9 +136,3 @@ DIR="${FILE%/*}"
 - Use `command -v --` or `hash --` to check command existence, not `which` or `type`.
 
 - Use `set -a` / `set +a` to scope exports when sourcing a file.
-
-```bash
-set -a
-source -- "$ROOT/.env"
-set +a
-```
