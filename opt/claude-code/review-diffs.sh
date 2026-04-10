@@ -6,7 +6,7 @@ case "${SCRIPT_MODE:-""}" in
 preview)
   CWD="$(tr -d '\0')"
   cd -- "$CWD"
-  exec -- delta -- old* new*
+  exec -- delta -- *.old* *.new*
   ;;
 execute)
   CWD="$(tr -d '\0')"
@@ -26,6 +26,6 @@ execute)
     -type d
     -print0
   )
-  "${ARGV[@]}" | ~/.config/zsh/libexec/fzf-lr.sh "$0" "$*"
+  "${ARGV[@]}" | sed -E --null-data -e 's#^\./##' | ~/.config/zsh/libexec/fzf-lr.sh "$0" "$*"
   ;;
 esac

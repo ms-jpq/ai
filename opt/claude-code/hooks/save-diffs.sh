@@ -13,8 +13,10 @@ DIFFS="$(realpath -- "$BASE/../../../var/deltas")"
 BASENAME="${FILE_PATH##*/}"
 EXT="${BASENAME##*.}"
 
+STEM="$BASENAME"
 SUFFIX=""
 if [[ $EXT != "$BASENAME" ]]; then
+  STEM="${BASENAME%.*}"
   SUFFIX=".${EXT}"
 fi
 
@@ -35,7 +37,5 @@ esac
 
 ENTRY_DIR="${DIFFS}/${SESSION_ID}"
 mkdir -p -- "$ENTRY_DIR"
-find "$ENTRY_DIR" -mindepth 1 -delete > /dev/null
-printf -- '%s\n' "$ENTRY_DIR" > "${ENTRY_DIR}/cwd.txt"
-printf -- '%s\n' "$OLD_STRING" > "${ENTRY_DIR}/old${SUFFIX}"
-printf -- '%s\n' "$NEW_STRING" > "${ENTRY_DIR}/new${SUFFIX}"
+printf -- '%s\n' "$OLD_STRING" > "${ENTRY_DIR}/${STEM}.old${SUFFIX}"
+printf -- '%s\n' "$NEW_STRING" > "${ENTRY_DIR}/${STEM}.new${SUFFIX}"
