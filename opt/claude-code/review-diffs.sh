@@ -11,7 +11,7 @@ preview)
 execute)
   CWD="$(tr -d '\0')"
   cd -- "$CWD"
-  exec -- nvim -d -- old* new*
+  exec -- nvim -d -- *.old* *.new*
   ;;
 *)
   SELF="$(realpath -- "$0")"
