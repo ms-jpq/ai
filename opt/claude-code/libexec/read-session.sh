@@ -2,18 +2,17 @@
 
 set -o pipefail
 
-if ! [[ -v TMUX ]]; then
-  set -x
-  exit 2
+BASE="${0%/*}"
+
+if ! SESSION_ID="$("$BASE/which-session.sh")"; then
+  exit
 fi
 
-SESSION_ID="$(tmux display-message -p '#{@claude_session}')"
-ROOT="$(realpath -- "${0%/*}/../../..")"
+ROOT="$(realpath -- "$BASE/../../..")"
 MARKDOWN="$ROOT/var/sessions/$SESSION_ID.md"
 
-if [[ -z $SESSION_ID ]] || ! [[ -f $MARKDOWN ]]; then
-  RELATIVE="$(realpath --relative-base="$HOME" -- "$MARKDOWN")"
-  exec -- tmux display-message -- "🐶 ~/$RELATIVE"
+if ! [[ -f $MARKDOWN ]]; then
+  exec -- tmux display-message -- '🐶'
 fi
 
 if [[ -v RECUR ]]; then
