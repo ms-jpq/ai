@@ -25,6 +25,8 @@ $VARIABLE_1
 EOF > &2
 ```
 
+- Avoid using `[[ ]]` for math comparisons, use `(( ))` instead.
+
 - Avoid inlining complicated scripts such as that of `jq` and `awk`. Create a `.awk`, `.jq`, `.sed` executable script instead, and call them.
   - If inlining is desired, always use heredoc.
 
