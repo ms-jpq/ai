@@ -4,18 +4,25 @@ set -o pipefail
 
 JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
-SESSION="$(jq -e --raw-output '.session_id' <<< "$JSON")"
+SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 BASE="${0%/*}"
-SESSIONS="$(realpath -- "$BASE/../../../var/sessions")"
+ROOT="$(realpath -- "$BASE/../../..")"
+SESSIONS=""$ROOT/var/sessions""
 
 case "$EVENT" in
 SessionStart)
   if [[ -n $CLAUDE_ENV_FILE ]]; then
     {
-      printf -- '%q ' 'export' '--' "__CLAUDE_SESSION_ID=$SESSION"
+      printf -- '%q ' 'export' '--' "__CLAUDE_SESSION_ID=$SESSION_ID"
       printf -- '\n'
     } >> "$CLAUDE_ENV_FILE"
+  fi
+
+  if [[ -v TMUX_PANE ]]; then
+    printf -v EDIT -- '%q ' run-shell -b -- "$ROOT/opt/claude-code/review-diffs.sh"
+    tmux set-option -t "$TMUX_PANE" -p @claude_session "$SESSION_ID"
+    tmux bind-key f -- "$EDIT"
   fi
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
@@ -39,10 +46,10 @@ Stop)
 esac
 
 if INDEX="$("$BASE/session-file.sh" "$PWD")"; then
-  printf -- '%s' "$SESSION" > "$INDEX"
+  printf -- '%s' "$SESSION_ID" > "$INDEX"
 fi
 
-MD="$SESSIONS/$SESSION.md"
+MD="$SESSIONS/$SESSION_ID.md"
 # shellcheck disable=2016
 JQ=(
   jq -e --raw-output
