@@ -1,30 +1,35 @@
 # Shell Scripting Guidelines
 
-- Do not forget to add a shebang like `#!/usr/bin/env -S -- nodejs`, followed by `chmod +x`.
+- Always add a shebang like `#!/usr/bin/env -S -- nodejs`, and mark the file executable with `chmod +x`.
 
-- Always use long form flags, like `--delimiter` instead of `-d`, when available, use `--` to stop argument parse errors, such as `cd -- "$DIR"`.
+- Always use long form flags when available, e.g. `--delimiter` instead of `-d`.
+
+- Always use `--` to terminate option parsing, e.g. `cd -- "$DIR"`.
 
 - Always use null byte as delimiter if possible, i.e. `find ... -print0 | xargs --null ...`
 
-- Avoid writing functions and traps these make error propagation harder.
+- Avoid writing functions and traps — these make error propagation harder.
 
-- Avoid passing variables as stdin with pipes, instead of `echo "$JSON" | jq`, do `jq <<< "$JSON"`
+- Avoid pipes for passing variables or reading single files.
+  - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
+  - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
 
 - Do capture re-usable arguments in an array to invoke later, ie. `GREP=(grep --recursive ...)`, `${GREP[@]}`.
   - Do this instead of `\ ` escaping for long / many arguments
   - Do this instead of functions for code re-using
   - This is also applicable when you have branches that invoke the same command, but with different arguments
+  - Build arrays incrementally with `+=()` based on conditionals
 
 ```bash
-TEE=(tee -- )
-if [[ -t 2 ]];
-  TEE+=(/dev/stderr)
+CURL=(curl --fail --location)
+if [[ -v GH_TOKEN ]]; then
+  CURL+=(--oauth2-bearer "$GH_TOKEN")
 fi
-
-"${TEE[@]}"
+CURL+=(-- "$URL")
+"${CURL[@]}"
 ```
 
-- When there are multiple branches, use comphensive enumeration instead of `if ...; then ...; elif ...; then ...`, do:
+- When there are multiple branches, use comprehensive enumeration instead of `if/elif` chains:
 
 ```bash
 case "$VARIABLE" in
@@ -38,7 +43,9 @@ case "$VARIABLE" in
 esac
 ```
 
-- Avoid writing `echo` statements, use `printf -- '%s' ...` instead for single statements, for multiline statements with interpolations see:
+- Use `printf -- '%s' ...` instead of `echo` for single statements.
+  - Use `printf -v VAR -- '<fmt>' args` to assign formatted output to a variable without a subshell.
+  - For multiline statements with interpolations, use heredocs:
 
 ```bash
 tee <<- EOF
@@ -47,7 +54,7 @@ $VARIABLE_1
 EOF > &2
 ```
 
-- Avoid using `[[ ]]` for math comparisons, use `(( ))` instead.
+- Use `(( ))` for math comparisons, not `[[ ]]`.
 
 - Use `exec --` for early exit if possible, to simplify control flows
 
@@ -98,7 +105,7 @@ BASE="${SELF%/*}"
 exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 ```
 
-- Really take advantage of everything in `bash` being pipe-able, an example:
+- Pipe through conditional blocks — `if`/`case`/`while` can appear mid-pipeline:
 
 ```bash
 grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
@@ -108,7 +115,7 @@ else
 fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 ```
 
-- Think out side of the box with control flows, for example, when `flock` was needed to lock down a file, to prevent race issues, use recursion:
+- Use env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc. Useful for `flock`, `xargs`, and mode-switching.
 
 ```bash
 FILE="$1"
@@ -118,4 +125,43 @@ if [[ -v RECUR ]]; then
 fi
 
 RECUR=1 flock "$FILE" "$0" "$@"
+```
+
+- Use `shift -- <count>` with `--` and an explicit count after consuming positional args.
+
+```bash
+DST="$1"
+shift -- 1
+```
+
+- Use `shopt -u failglob` as the first `shopt` after the prelude when globs may legitimately match nothing.
+
+```bash
+set -o pipefail
+shopt -u failglob
+```
+
+- Use `readarray -t` to capture multi-line output into arrays, not subshell loops or word splitting.
+
+```bash
+LINES="$(some-command)"
+readarray -t -- ITEMS <<< "$LINES"
+```
+
+- Use parameter expansion `${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}` over `basename`, `dirname`, or `cut` for string decomposition.
+
+```bash
+BASENAME="${URI##*/}"
+BASENAME="${BASENAME%.git}"
+DIR="${PATH%/*}"
+```
+
+- Use `command -v --` or `hash --` to check command existence, not `which` or `type`.
+
+- Use `set -a` / `set +a` to scope exports when sourcing a file.
+
+```bash
+set -a
+source -- "$ROOT/.env"
+set +a
 ```
