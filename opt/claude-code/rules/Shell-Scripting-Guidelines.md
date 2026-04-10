@@ -1,7 +1,5 @@
 # Shell Scripting Guidelines
 
-- **Always** run `shellcheck '<script>.sh'`, **always** run `shfmt.sh '<script>.sh'`
-
 - Do not forget to add a shebang like `#!/usr/bin/env -S -- nodejs`, followed by `chmod +x`.
 
 - Always use long form flags, like `--delimiter` instead of `-d`, when available, use `--` to stop argument parse errors, such as `cd -- "$DIR"`.

@@ -47,6 +47,10 @@
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/save-diffs.sh",
             "type": "command"
+          },
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/shellcheck-hook.sh",
+            "type": "command"
           }
         ],
         "matcher": "Edit|Write"
