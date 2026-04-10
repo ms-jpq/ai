@@ -1,12 +1,8 @@
 #!/usr/bin/env -S -- jq --exit-status --from-file
 
 .tool_input as {old_string: $old, new_string: $new, replace_all: $all}
-| if $all
-then $original | split($old) | join($new)
-else
-  ($original | index($old)) as $i
-  | if $i
-  then $original[:$i] + $new + $original[($i + ($old | length)):]
-  else $original
-  end
+| ($original | split($old)) as $parts
+| if ($parts | length) < 2 then $original
+elif $all then $parts | join($new)
+else $parts[0] + $new + ($parts[1:] | join($old))
 end
