@@ -24,27 +24,15 @@ PreToolUse)
     SUFFIX=".${EXT}"
   fi
 
-  OLD="${ENTRY_DIR}/${STEM}.old${SUFFIX}"
   NEW="${ENTRY_DIR}/${STEM}.new${SUFFIX}"
   mkdir -p -- "$ENTRY_DIR"
-  jq --sort-keys '.' <<< "$JSON" > "${ENTRY_DIR}/${STEM}.json"
+  jq --sort-keys '.' <<< "$JSON" > "${ENTRY_DIR}/delta.json"
 
   case "$TOOL_NAME" in
   Edit)
-    if ! [[ -f $OLD ]]; then
-      cp -- "$ORIGINAL" "$OLD"
-    else
-      ORIGINAL="$OLD"
-    fi
-
     exec -- "$BASE/../libexec/edit-replace.jq" --raw-output --join-output --rawfile original "$ORIGINAL" <<< "$JSON" > "$NEW"
     ;;
   Write)
-    if [[ -f $ORIGINAL ]]; then
-      cp -- "$ORIGINAL" "$OLD"
-    else
-      touch -- "$OLD"
-    fi
     exec -- jq -e --raw-output --join-output '.tool_input.content' <<< "$JSON" > "$NEW"
     ;;
   *)
