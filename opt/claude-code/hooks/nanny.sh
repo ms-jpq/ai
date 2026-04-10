@@ -37,6 +37,10 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not create persistent processes'
   ;;
+'gpg-agent '* | 'ssh-agent '*)
+  DECISION=deny
+  REASON='do not spawn auth agents'
+  ;;
 'systemctl '* | 'launchctl '*)
   DECISION=deny
   REASON='do not manage system services'
