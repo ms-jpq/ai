@@ -16,6 +16,20 @@
 
 - Avoid passing variables as stdin with pipes, instead of `echo "$JSON" | jq`, do `jq <<< "$JSON"`
 
+- When there are multiple branches, use comphensive enumeration instead of `if ...; then ...; elif ...; then ...`, do:
+
+```bash
+case "$VARIABLE" in
+...)
+  # ...
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac
+```
+
 - Avoid writing `echo` statements, use `printf -- '%s' ...` instead for single statements, for multiline statements with interpolations see:
 
 ```bash
