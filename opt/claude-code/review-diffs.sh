@@ -20,7 +20,7 @@ mkdir -p -- "$SESSION_DIR"
 DIFFS=("$SESSION_DIR"/*.old.*)
 
 if ((${#DIFFS[@]} == 0)); then
-  exec -- tmux display-message -- '🫧'
+  exec -- tmux display-message -- "🫧 $SESSION_ID"
 fi
 
 FIRST=1
