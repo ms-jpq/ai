@@ -13,6 +13,6 @@ case "$FILE_PATH" in
 esac
 
 {
-  shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH"
-  shellcheck -- "$FILE_PATH"
+  shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
+  shellcheck -- "$FILE_PATH" || exit 2
 } >&2
