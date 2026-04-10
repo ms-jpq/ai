@@ -20,6 +20,9 @@ SessionStart)
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
 SessionEnd)
+  if INDEX="$("$DIR/session-file.sh" "$PWD")"; then
+    rm -fr -- "$INDEX"
+  fi
   exit
   ;;
 UserPromptSubmit)
