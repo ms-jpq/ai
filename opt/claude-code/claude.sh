@@ -5,8 +5,9 @@ set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 
 if [[ $PWD == "$HOME" ]]; then
-  set -x
-  exit 2
+  TMP="$(mktemp -d)"
+  cd -- "$TMP"
+  exec -- "$0" "$@"
 fi
 
 BASE="$(realpath -- "$0")"
