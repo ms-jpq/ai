@@ -8,13 +8,23 @@
 
 - Always use null byte as delimiter if possible, i.e. `find ... -print0 | xargs --null ...`
 
-- Do capture re-usable arguments in an array to invoke later, ie. `GREP=(grep --recursive ...)`, `${GREP[@]}`.
-  - Do this instead of `\ ` escaping for long / many arguments
-  - Do this instead of functions for code re-using
-
 - Avoid writing functions and traps these make error propagation harder.
 
 - Avoid passing variables as stdin with pipes, instead of `echo "$JSON" | jq`, do `jq <<< "$JSON"`
+
+- Do capture re-usable arguments in an array to invoke later, ie. `GREP=(grep --recursive ...)`, `${GREP[@]}`.
+  - Do this instead of `\ ` escaping for long / many arguments
+  - Do this instead of functions for code re-using
+  - This is also applicable when you have branches that invoke the same command, but with different arguments
+
+```bash
+TEE=(tee -- )
+if [[ -t 2 ]];
+  TEE+=(/dev/stderr)
+fi
+
+"${TEE[@]}"
+```
 
 - When there are multiple branches, use comphensive enumeration instead of `if ...; then ...; elif ...; then ...`, do:
 
