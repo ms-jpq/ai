@@ -37,20 +37,7 @@ PreToolUse)
       ORIGINAL="$OLD"
     fi
 
-    if jq -e '.tool_input.replace_all' <<< "$JSON" > /dev/null; then
-      read -r -d '' -- JQ <<- 'JQ' || true
-.tool_input as {old_string: $old, new_string: $new}
-| $original | split($old) | join($new)
-JQ
-    else
-      read -r -d '' -- JQ <<- 'JQ' || true
-.tool_input as {old_string: $old, new_string: $new}
-| ($original | index($old)) as $i
-| if $i then $original[:$i] + $new + $original[($i + ($old | length)):] else $original end
-JQ
-    fi
-
-    exec -- jq -e --raw-output --join-output --rawfile original "$ORIGINAL" "$JQ" <<< "$JSON" > "$NEW"
+    exec -- "$BASE/edit-replace.jq" --raw-output --join-output --rawfile original "$ORIGINAL" <<< "$JSON" > "$NEW"
     ;;
   Write)
     touch -- "$OLD"
