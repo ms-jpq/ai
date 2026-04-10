@@ -18,6 +18,11 @@ SESSION_DIR="$(realpath --no-symlinks -- "$DELTAS")/$SESSION_ID"
 mkdir -p -- "$SESSION_DIR"
 
 DIFFS=("$SESSION_DIR"/*.old.*)
+
+if ((${#DIFFS[@]} == 0)); then
+  exec -- tmux display-message -- '🫧'
+fi
+
 FIRST=1
 for OLD in "${DIFFS[@]}"; do
   NEW="${OLD/.old./.new.}"
