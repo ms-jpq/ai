@@ -14,7 +14,27 @@
 
 - Avoid writing functions and traps these make error propagation harder.
 
+- Avoid writing `echo` statements, use `printf -- '%s' ...` instead for single statements, for multiline statements see:
+
+```bash
+tee <<- 'JSON'
+{
+  "host": null,
+  "user": "root"
+}
+JSON
+```
+
 - Avoid inlining complicated scripts such as that of `jq` and `awk`. Create a `.awk`, `.jq`, `.sed` executable script instead, and call them.
+  - If inlining is desired, always use heredoc.
+
+```bash
+  read -r -d '' -- JQ <<- 'JQ' || true
+.[] | to_entries[] | [.key] + .value | join("\n")
+JQ
+
+jq --raw-output0 "$JQ" < 'example.json'
+```
 
 - Always use the following prelude for bash scripts
 
