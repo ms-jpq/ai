@@ -12,7 +12,8 @@ ROOT="$(realpath -- "${0%/*}/../../..")"
 MARKDOWN="$ROOT/var/sessions/$SESSION_ID.md"
 
 if [[ -z $SESSION_ID ]] || ! [[ -f $MARKDOWN ]]; then
-  exec -- tmux display-message -- "🐶 $MARKDOWN"
+  RELATIVE="$(realpath --relative-base="$HOME" -- "$MARKDOWN")"
+  exec -- tmux display-message -- "🐶 $RELATIVE"
 fi
 
 if [[ -v RECUR ]]; then

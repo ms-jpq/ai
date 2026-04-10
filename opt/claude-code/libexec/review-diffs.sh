@@ -19,7 +19,8 @@ mkdir -p -- "$SESSION_DIR"
 DIFFS=("$SESSION_DIR"/*.old.*)
 
 if ((${#DIFFS[@]} == 0)); then
-  exec -- tmux display-message -- "🫧 $SESSION_DIR"
+  RELATIVE="$(realpath --relative-base="$HOME" -- "$SESSION_DIR")"
+  exec -- tmux display-message -- "🫧 $RELATIVE"
 fi
 
 SPLIT=(new-window -a)
