@@ -24,24 +24,35 @@ PreToolUse)
     SUFFIX=".${EXT}"
   fi
 
+  OLD="${ENTRY_DIR}/${STEM}.old${SUFFIX}"
+  NEW="${ENTRY_DIR}/${STEM}.new${SUFFIX}"
+  mkdir -p -- "$ENTRY_DIR"
+
   case "$TOOL_NAME" in
   Edit)
-    OLD_STRING="$(jq -e --raw-output '.tool_input.old_string' <<< "$JSON")"
-    NEW_STRING="$(jq -e --raw-output '.tool_input.new_string' <<< "$JSON")"
+    cp -- "$FILE_PATH" "$OLD"
+
+    if jq -e --raw-output '.tool_input.file_path' <<< "$JSON" > /dev/null; then
+      exec -- jq -e --raw-output --join-output '.tool_input.new_string' <<< "$JSON" > "$NEW"
+    fi
+
+    read -r -d '' -- JQ <<- 'JQ' || true
+.tool_input as {old_string: $old, new_string: $new} 
+| ($orig | index($old)) as $i
+| if $i then $orig[:$i] + $new + $orig[($i + ($old | length)):] else $orig end
+JQ
+
+    jq -e --raw-output --join-output --rawfile orig "$FILE_PATH" "$JQ" <<< "$JSON"
     ;;
   Write)
-    NEW_STRING="$(jq -e --raw-output '.tool_input.content' <<< "$JSON")"
-    OLD_STRING=""
+    touch -- "$OLD"
+    exec -- jq -e --raw-output --join-output '.tool_input.content' <<< "$JSON" > "$NEW"
     ;;
   *)
     set -x
     exit 2
     ;;
   esac
-
-  mkdir -p -- "$ENTRY_DIR"
-  printf -- '%s\n' "$OLD_STRING" > "${ENTRY_DIR}/${STEM}.old${SUFFIX}"
-  printf -- '%s\n' "$NEW_STRING" > "${ENTRY_DIR}/${STEM}.new${SUFFIX}"
   ;;
 PostToolUse)
   find "$ENTRY_DIR" -mindepth 1 -delete > /dev/null
