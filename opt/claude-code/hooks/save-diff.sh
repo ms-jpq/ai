@@ -12,7 +12,6 @@ DIFFS="$(realpath -- "$BASE/../../../var/sessions")"
 
 BASENAME="${FILE_PATH##*/}"
 EXT="${BASENAME##*.}"
-TIMESTAMP="$(date --utc '+%Y-%m-%d %H:%M:%S')"
 
 SUFFIX=""
 if [[ $EXT != "$BASENAME" ]]; then
@@ -34,8 +33,9 @@ Write)
   ;;
 esac
 
-ENTRY_DIR="${DIFFS}/${SESSION_ID}/${TIMESTAMP}_${BASENAME}"
+ENTRY_DIR="${DIFFS}/${SESSION_ID}"
 mkdir -p -- "$ENTRY_DIR"
+find "$ENTRY_DIR" -mindepth 1 -delete
 printf -- '%s\n' "$OLD_STRING" > "${ENTRY_DIR}/old${SUFFIX}"
 printf -- '%s\n' "$NEW_STRING" > "${ENTRY_DIR}/new${SUFFIX}"
 printf -- '%s\n' "$FILE_PATH" > "${ENTRY_DIR}/path.txt"
