@@ -49,7 +49,10 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not use git stash, it is hard to track'
   ;;
-*terraform*)
+# *terraform*)
+#   REASON='review dangerous terraform command'
+#   ;;
+'terraform '*)
   REASON='review dangerous terraform command'
   ;;
 'kill '* | 'killall '* | 'pkill '*)
