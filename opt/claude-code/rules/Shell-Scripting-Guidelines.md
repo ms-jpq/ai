@@ -14,6 +14,8 @@
 
 - Avoid writing functions and traps these make error propagation harder.
 
+- Avoid passing variables as stdin with pipes, instead of `echo "$JSON" | jq`, do `jq <<< "$JSON"`
+
 - Avoid writing `echo` statements, use `printf -- '%s' ...` instead for single statements, for multiline statements with interpolations see:
 
 ```bash
