@@ -20,7 +20,7 @@ DIFFS=("$SESSION_DIR"/*.old.*)
 
 if ((${#DIFFS[@]} == 0)); then
   RELATIVE="$(realpath --relative-base="$HOME" -- "$SESSION_DIR")"
-  exec -- tmux display-message -- "🫧 $RELATIVE"
+  exec -- tmux display-message -- "🫧 ~/$RELATIVE"
 fi
 
 SPLIT=(new-window -a)
