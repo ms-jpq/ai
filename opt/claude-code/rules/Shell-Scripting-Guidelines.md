@@ -62,7 +62,15 @@ JQ
 jq --raw-output0 "$JQ" < 'example.json'
 ```
 
-- Always use the following prelude for bash scripts
+- Always use the following prelude for bash scripts in general
+
+```bash
+#!/usr/bin/env -S -- bash -Eeu -O dotglob -O nullglob -O extglob -O failglob -O globstar
+
+set -o pipefail
+```
+
+- But use the following prelude for bash scripts under `~/work/` and `~/work.localized/`
 
 ```bash
 #!/usr/bin/env -S -- bash
