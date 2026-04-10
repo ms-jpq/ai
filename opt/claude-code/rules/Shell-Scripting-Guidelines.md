@@ -4,7 +4,7 @@
 
 - Do not forget to add a shebang like `#!/usr/bin/env -S -- nodejs`, followed by `chmod +x`.
 
-- Always use long form flags, like `--delimiter` instead of `-d`, when available, use `--` to stop argument parse errors
+- Always use long form flags, like `--delimiter` instead of `-d`, when available, use `--` to stop argument parse errors, such as `cd -- "$DIR"`.
 
 - Always use null byte as delimiter if possible, i.e. `find ... -print0 | xargs --null ...`
 
