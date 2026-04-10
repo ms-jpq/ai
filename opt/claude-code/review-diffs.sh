@@ -5,13 +5,11 @@ set -o pipefail
 case "${SCRIPT_MODE:-""}" in
 preview)
   CWD="$(tr -d '\0')"
-  cd -- "$CWD"
-  exec -- delta -- *.old* *.new*
+  exec -- eza --all --group-directories-first --classify --header --icons --tree --color=always -- "$CWD"
   ;;
 execute)
   CWD="$(tr -d '\0')"
-  cd -- "$CWD"
-  exec -- nvim -d -- *.old* *.new*
+  exec -- yazi -- "$CWD"
   ;;
 *)
   SELF="$(realpath -- "$0")"
