@@ -6,8 +6,8 @@ JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
-DIR="${0%/*}"
-SESSIONS="$(realpath -- "$DIR/../../../var/sessions")"
+BASE="${0%/*}"
+SESSIONS="$(realpath -- "$BASE/../../../var/sessions")"
 
 case "$EVENT" in
 SessionStart)
@@ -20,7 +20,7 @@ SessionStart)
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
 SessionEnd)
-  if INDEX="$("$DIR/session-file.sh" "$PWD")"; then
+  if INDEX="$("$BASE/session-file.sh" "$PWD")"; then
     rm -fr -- "$INDEX"
   fi
   exit
@@ -30,7 +30,7 @@ UserPromptSubmit)
   ;;
 Stop)
   ROLE='assistant'
-  jq -e --compact-output '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$DIR/notification.sh"
+  jq -e --compact-output '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$BASE/notification.sh"
   ;;
 *)
   set -x
@@ -38,7 +38,7 @@ Stop)
   ;;
 esac
 
-if INDEX="$("$DIR/session-file.sh" "$PWD")"; then
+if INDEX="$("$BASE/session-file.sh" "$PWD")"; then
   printf -- '%s' "$SESSION" > "$INDEX"
 fi
 
