@@ -8,7 +8,7 @@ TOOL_NAME="$(jq --raw-output '.tool_name' <<< "$JSON")"
 FILE_PATH="$(jq --raw-output '.tool_input.file_path' <<< "$JSON")"
 
 BASE="${0%/*}"
-DIFFS="$(realpath -- "$BASE/../../../var/sessions")"
+DIFFS="$(realpath -- "$BASE/../../../var/delta")"
 
 BASENAME="${FILE_PATH##*/}"
 EXT="${BASENAME##*.}"
