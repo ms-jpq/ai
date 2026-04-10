@@ -17,12 +17,10 @@
 - Avoid writing `echo` statements, use `printf -- '%s' ...` instead for single statements, for multiline statements with interpolations see:
 
 ```bash
-tee <<- JSON
-{
-  "host": "$HOST",
-  "user": "root"
-}
-JSON
+tee <<- EOF
+$VARIABLE_1
+... $VARIABLE_2
+EOF > &2
 ```
 
 - Avoid inlining complicated scripts such as that of `jq` and `awk`. Create a `.awk`, `.jq`, `.sed` executable script instead, and call them.
