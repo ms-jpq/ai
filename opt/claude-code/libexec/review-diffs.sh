@@ -8,7 +8,6 @@ if ! [[ -v TMUX ]]; then
 fi
 
 SESSION_ID="$(tmux display-message -p '#{@claude_session}')"
-
 if [[ -z $SESSION_ID ]]; then
   exec -- tmux display-message -- '🐶'
 fi

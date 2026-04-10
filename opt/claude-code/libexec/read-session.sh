@@ -2,13 +2,18 @@
 
 set -o pipefail
 
-if ! [[ -v __CLAUDE_SESSION_ID ]] || ! [[ -v TMUX_PANE ]]; then
+if ! [[ -v TMUX ]]; then
   set -x
   exit 2
 fi
 
+SESSION_ID="$(tmux display-message -p '#{@claude_session}')"
+if [[ -z $SESSION_ID ]]; then
+  exec -- tmux display-message -- '🐶'
+fi
+
 ROOT="${0%/*}/../../../.."
-MARKDOWN="$ROOT/var/sessions/$__CLAUDE_SESSION_ID.md"
+MARKDOWN="$ROOT/var/sessions/$SESSION_ID.md"
 
 if [[ -v RECUR ]]; then
   "$ROOT/node_modules/.bin/prettier" --write --log-level=warn -- "$MARKDOWN"
