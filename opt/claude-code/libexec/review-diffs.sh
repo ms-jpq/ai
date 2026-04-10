@@ -19,7 +19,7 @@ mkdir -p -- "$SESSION_DIR"
 DIFFS=("$SESSION_DIR"/*.old.*)
 
 if ((${#DIFFS[@]} == 0)); then
-  exec -- tmux display-message -- "🫧 $SESSION_ID"
+  exec -- tmux display-message -- "🫧 $SESSION_DIR"
 fi
 
 SPLIT=(new-window -a)
