@@ -15,18 +15,10 @@ case "$EVENT" in
 PreToolUse)
   ORIGINAL="$(jq -e --raw-output '.tool_input.file_path' <<< "$JSON")"
   BASENAME="${ORIGINAL##*/}"
-  EXT="${BASENAME##*.}"
 
-  STEM="$BASENAME"
-  SUFFIX=""
-  if [[ $EXT != "$BASENAME" ]]; then
-    STEM="${BASENAME%.*}"
-    SUFFIX=".${EXT}"
-  fi
-
-  NEW="${ENTRY_DIR}/${STEM}.new${SUFFIX}"
+  NEW="${ENTRY_DIR}/${BASENAME}"
   mkdir -p -- "$ENTRY_DIR"
-  jq --sort-keys '.' <<< "$JSON" > "${ENTRY_DIR}/delta.json"
+  jq --sort-keys '.' <<< "$JSON" > "$ENTRY_DIR/$SESSION_ID.delta.json"
 
   case "$TOOL_NAME" in
   Edit)
