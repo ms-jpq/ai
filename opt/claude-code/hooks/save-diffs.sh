@@ -32,7 +32,7 @@ PreToolUse)
   Edit)
     cp -- "$FILE_PATH" "$OLD"
 
-    if jq -e --raw-output '.tool_input.file_path' <<< "$JSON" > /dev/null; then
+    if jq -e --raw-output '.tool_input.replace_all' <<< "$JSON" > /dev/null; then
       exec -- jq -e --raw-output --join-output '.tool_input.new_string' <<< "$JSON" > "$NEW"
     fi
 
@@ -42,7 +42,7 @@ PreToolUse)
 | if $i then $orig[:$i] + $new + $orig[($i + ($old | length)):] else $orig end
 JQ
 
-    jq -e --raw-output --join-output --rawfile orig "$FILE_PATH" "$JQ" <<< "$JSON"
+    exec -- jq -e --raw-output --join-output --rawfile orig "$FILE_PATH" "$JQ" <<< "$JSON" > "$NEW"
     ;;
   Write)
     touch -- "$OLD"
