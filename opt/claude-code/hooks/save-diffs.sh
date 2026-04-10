@@ -13,8 +13,8 @@ ENTRY_DIR="${DIFFS}/${SESSION_ID}"
 
 case "$EVENT" in
 PreToolUse)
-  FILE_PATH="$(jq -e --raw-output '.tool_input.file_path' <<< "$JSON")"
-  BASENAME="${FILE_PATH##*/}"
+  ORIGINAL="$(jq -e --raw-output '.tool_input.file_path' <<< "$JSON")"
+  BASENAME="${ORIGINAL##*/}"
   EXT="${BASENAME##*.}"
 
   STEM="$BASENAME"
@@ -30,7 +30,11 @@ PreToolUse)
 
   case "$TOOL_NAME" in
   Edit)
-    cp -- "$FILE_PATH" "$OLD"
+    if ! [[ -f $OLD ]]; then
+      cp -- "$ORIGINAL" "$OLD"
+    else
+      ORIGINAL="$OLD"
+    fi
 
     if jq -e --raw-output '.tool_input.replace_all' <<< "$JSON" > /dev/null; then
       exec -- jq -e --raw-output --join-output '.tool_input.new_string' <<< "$JSON" > "$NEW"
@@ -38,11 +42,11 @@ PreToolUse)
 
     read -r -d '' -- JQ <<- 'JQ' || true
 .tool_input as {old_string: $old, new_string: $new} 
-| ($orig | index($old)) as $i
-| if $i then $orig[:$i] + $new + $orig[($i + ($old | length)):] else $orig end
+| ($original | index($old)) as $i
+| if $i then $original[:$i] + $new + $original[($i + ($old | length)):] else $original end
 JQ
 
-    exec -- jq -e --raw-output --join-output --rawfile orig "$FILE_PATH" "$JQ" <<< "$JSON" > "$NEW"
+    exec -- jq -e --raw-output --join-output --rawfile original "$ORIGINAL" "$JQ" <<< "$JSON" > "$NEW"
     ;;
   Write)
     touch -- "$OLD"
