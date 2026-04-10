@@ -23,10 +23,11 @@ if ((${#DIFFS[@]} == 0)); then
   exec -- tmux display-message -- "🫧 ~/$RELATIVE"
 fi
 
+CWD="$(jq -e --raw-output '.cwd' < "$SESSION_DIR/delta.json")"
 OLD="$(jq -e --raw-output '.tool_input.file_path' < "$SESSION_DIR/delta.json")"
 
 SPLIT=(new-window -a)
 for NEW in "${DIFFS[@]}"; do
-  tmux "${SPLIT[@]}" -c "$SESSION_DIR" -- nvim -d -- "$OLD" "$NEW"
+  tmux "${SPLIT[@]}" -c "$CWD" -- nvim -d -- "$OLD" "$NEW"
   SPLIT=(split-window)
 done
