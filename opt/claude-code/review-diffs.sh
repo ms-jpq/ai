@@ -23,14 +23,9 @@ if ((${#DIFFS[@]} == 0)); then
   exec -- tmux display-message -- "🫧 $SESSION_ID"
 fi
 
-FIRST=1
+SPLIT=(new-window -a)
 for OLD in "${DIFFS[@]}"; do
   NEW="${OLD/.old./.new.}"
-
-  SPLIT=(split-window)
-  if ((FIRST)); then
-    FIRST=0
-    SPLIT=(new-window -a)
-  fi
   tmux "${SPLIT[@]}" -c "$SESSION_DIR" -- nvim -d -- "$OLD" "$NEW"
+  SPLIT=(split-window)
 done

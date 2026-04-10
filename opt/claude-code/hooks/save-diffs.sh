@@ -40,7 +40,11 @@ PreToolUse)
     exec -- "$BASE/edit-replace.jq" --raw-output --join-output --rawfile original "$ORIGINAL" <<< "$JSON" > "$NEW"
     ;;
   Write)
-    touch -- "$OLD"
+    if [[ -f $ORIGINAL ]]; then
+      cp -- "$ORIGINAL" "$OLD"
+    else
+      touch -- "$OLD"
+    fi
     exec -- jq -e --raw-output --join-output '.tool_input.content' <<< "$JSON" > "$NEW"
     ;;
   *)
