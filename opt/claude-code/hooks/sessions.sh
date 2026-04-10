@@ -20,9 +20,9 @@ SessionStart)
   fi
 
   if [[ -v TMUX_PANE ]]; then
-    printf -v EDIT -- '%q ' run-shell -b -- "$ROOT/opt/claude-code/review-diffs.sh"
+    printf -v SH -- '%q' "$ROOT/opt/claude-code/review-diffs.sh"
     tmux set-option -t "$TMUX_PANE" -p @claude_session "$SESSION_ID"
-    tmux bind-key f -- "$EDIT"
+    tmux bind-key f run-shell -- "$SH"
   fi
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;

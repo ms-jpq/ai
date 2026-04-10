@@ -2,28 +2,19 @@
 
 set -o pipefail
 
-case "${SCRIPT_MODE:-""}" in
-preview)
-  CWD="$(tr -d '\0')"
-  exec -- eza --all --group-directories-first --classify --header --icons --tree --color=always -- "$CWD"
-  ;;
-execute)
-  CWD="$(tr -d '\0')"
-  exec -- yazi -- "$CWD"
-  ;;
-*)
-  SELF="$(realpath -- "$0")"
-  BASE="${SELF%/*}"
-  DIFF_DIR="$(realpath -- "$BASE/../../var/deltas")"
-  cd -- "$DIFF_DIR"
+if ! [[ -v TMUX ]]; then
+  set -x
+  exit 2
+fi
 
-  ARGV=(
-    find .
-    -mindepth 1
-    -maxdepth 1
-    -type d
-    -print0
-  )
-  "${ARGV[@]}" | sed -E --null-data -e 's#^\./##' | ~/.config/zsh/libexec/fzf-lr.sh "$0" "$*"
-  ;;
-esac
+SESSION_ID="$(tmux display-message -p '#{@claude_session}')"
+
+if [[ -z $SESSION_ID ]]; then
+  exec -- tmux display-message -- '🐶'
+fi
+
+DELTAS="${0%/*}/../../var/deltas"
+SESSION_DIR="$(realpath --no-symlinks -- "$DELTAS")/$SESSION_ID"
+mkdir -p -- "$SESSION_DIR"
+
+tmux new-window -a -c "$SESSION_DIR"
