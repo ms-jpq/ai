@@ -76,7 +76,7 @@ jq --raw-output0 "$JQ" < 'example.json'
 set -o pipefail
 ```
 
-- For bash scripts under `~/work/` and `~/work.localized/`, use this prelude instead, for bash 3 compat:
+- For bash scripts under `~/work/` and `~/work.localized/`, use this prelude instead, for bash 3 compatibility:
 
 ```bash
 #!/usr/bin/env -S -- bash
@@ -134,4 +134,4 @@ DIR="${FILE%/*}"
 
 - Use `command -v --` or `hash --` to check command existence, not `which` or `type`.
 
-- Use `set -a` / `set +a` to scope exports when sourcing a file.
+- Use `set -a` / `set +a` to scope exports when sourcing an env file.
