@@ -6,7 +6,7 @@
 
 - Always use `--` to terminate option parsing, e.g. `cd -- "$DIR"`.
 
-- Always use null byte as delimiter if possible, i.e. `find ... -print0 | xargs --null ...`
+- Always use null bytes as delimiters if possible, i.e. `find ... -print0 | xargs --null ...`
 
 - Avoid writing functions and traps — these make error propagation harder.
 
@@ -14,10 +14,10 @@
   - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
   - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
 
-- Do capture re-usable arguments in an array to invoke later, ie. `GREP=(grep --recursive ...)`, `${GREP[@]}`.
-  - Do this instead of `\ ` escaping for long / many arguments
-  - Do this instead of functions for code re-using
-  - This is also applicable when you have branches that invoke the same command, but with different arguments
+- Capture reusable arguments in an array, i.e. `GREP=(grep --recursive ...)`, `${GREP[@]}`.
+  - Instead of `\ ` escaping for long / many arguments
+  - Instead of functions for code reuse
+  - When branches invoke the same command with different arguments
   - Build arrays incrementally with `+=()` based on conditionals
 
 ```bash
@@ -51,14 +51,14 @@ esac
 tee <<- EOF
 $VARIABLE_1
 ... $VARIABLE_2
-EOF > &2
+EOF >&2
 ```
 
 - Use `(( ))` for math comparisons, not `[[ ]]`.
 
-- Use `exec --` for early exit if possible, to simplify control flows
+- Use `exec --` for early exit if possible, to simplify control flow.
 
-- Avoid inlining complicated scripts such as that of `jq` and `awk`. Create a `.awk`, `.jq`, `.sed` executable script instead, and call them.
+- Avoid inlining complicated `jq`, `awk`, or `sed` scripts. Create a standalone `.jq`, `.awk`, `.sed` executable instead.
   - If inlining is desired, always use heredoc.
 
 ```bash
@@ -69,7 +69,7 @@ JQ
 jq --raw-output0 "$JQ" < 'example.json'
 ```
 
-- Always use the following prelude for bash scripts in general
+- Use the following prelude for bash scripts:
 
 ```bash
 #!/usr/bin/env -S -- bash -Eeu -O dotglob -O nullglob -O extglob -O failglob -O globstar
@@ -77,7 +77,7 @@ jq --raw-output0 "$JQ" < 'example.json'
 set -o pipefail
 ```
 
-- But use the following prelude for bash scripts under `~/work/` and `~/work.localized/`
+- For bash scripts under `~/work/` and `~/work.localized/`, use this prelude instead:
 
 ```bash
 #!/usr/bin/env -S -- bash
@@ -87,7 +87,7 @@ set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 ```
 
-- When handling unexpected script inputs, prefer exit code 2 like so:
+- When handling unexpected script inputs, prefer exit code 2:
 
 ```bash
 if '...'; then
@@ -96,7 +96,7 @@ if '...'; then
 fi
 ```
 
-- When invoking scripts that are relatively close on the file system, call them by relative location like so:
+- Invoke nearby scripts by relative path:
 
 ```bash
 SELF="$(realpath -- "$0")"
@@ -127,7 +127,7 @@ fi
 RECUR=1 flock "$FILE" "$0" "$@"
 ```
 
-- Use `shift -- <count>` with `--` and an explicit count after consuming positional args.
+- Use `shift -- <count>` after consuming positional args.
 
 ```bash
 DST="$1"
@@ -153,7 +153,7 @@ readarray -t -- ITEMS <<< "$LINES"
 ```bash
 BASENAME="${URI##*/}"
 BASENAME="${BASENAME%.git}"
-DIR="${PATH%/*}"
+DIR="${FILE%/*}"
 ```
 
 - Use `command -v --` or `hash --` to check command existence, not `which` or `type`.
