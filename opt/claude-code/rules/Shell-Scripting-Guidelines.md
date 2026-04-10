@@ -59,10 +59,10 @@ EOF >&2
 - Use `exec --` for early exit if possible, to simplify control flow.
 
 - Avoid inlining complicated `jq`, `awk`, or `sed` scripts. Create a standalone `.jq`, `.awk`, `.sed` executable instead.
-  - If inlining is desired, always use heredoc.
+  - If inlining is desired, always use a heredoc.
 
 ```bash
-  read -r -d '' -- JQ <<- 'JQ' || true
+read -r -d '' -- JQ <<- 'JQ' || true
 .[] | to_entries[] | [.key] + .value | join("\n")
 JQ
 
@@ -90,7 +90,7 @@ shopt -s dotglob nullglob extglob globstar
 - When handling unexpected script inputs, prefer exit code 2:
 
 ```bash
-if '...'; then
+if '<unexpected condition>'; then
   set -x
   exit 2
 fi
@@ -115,7 +115,8 @@ else
 fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 ```
 
-- Use env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc. Useful for `flock`, `xargs`, and mode-switching.
+- Use env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc.
+  - Useful for `flock`, `xargs`, and mode-switching.
 
 ```bash
 FILE="$1"
