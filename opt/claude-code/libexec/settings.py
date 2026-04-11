@@ -79,8 +79,7 @@ with nullcontext():
 
     _deny_write |= _deny_read
 
-    _perm_deny = {*_perms.get("deny", [])}
-    _perm_deny |= {*_deny_entries(_deny_read, _deny_write)}
+    _perm_deny = {*_deny_entries(_deny_read, _deny_write)}
 
     _fs["allowRead"] = sorted(_fs.get("allowRead", []), key=_fs_key)
     _fs["allowWrite"] = sorted(_fs.get("allowWrite", []), key=_fs_key)
