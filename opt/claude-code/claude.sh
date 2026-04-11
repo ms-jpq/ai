@@ -57,5 +57,6 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
+make --directory "$ROOT" -- cc
 clear -x
 printf -- '%s' "/color $RANDOM_COLOR" | ~/.local/bin/hp "$CC" "${ARGV[@]}"
