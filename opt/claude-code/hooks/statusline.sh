@@ -17,7 +17,7 @@ YELLOW=$'\033[33m'
 
 ######################################
 JSON="$(tee)"
-API_MS="$(jq -e --raw-output '.cost.total_api_duration_ms' <<< "$JSON")"
+API_MS="$(jq -e --raw-output '.cost.total_api_duration_ms // 0' <<< "$JSON")"
 COST="$(jq -e --raw-output '.cost.total_cost_usd // 0' <<< "$JSON")"
 LINES_ADDED="$(jq -e --raw-output '.cost.total_lines_added // 0' <<< "$JSON")"
 LINES_REMOVED="$(jq -e --raw-output '.cost.total_lines_removed // 0' <<< "$JSON")"
@@ -46,12 +46,11 @@ SPENT_TIME="$(date --utc --date="@$SPENT_SECS" -- "+$TIMEFMT")"
 
 BAR_LEN=10
 FILLED=$((CTX_PCT * BAR_LEN / 100))
-EMPTY=$((BAR_LEN - FILLED))
 
 printf -v BAR -- '%*s' $((FILLED)) ''
-BAR="${BAR// /█}"
-printf -v _EMPTY -- '%*s' $((EMPTY)) ''
-BAR+="${_EMPTY// /░}"
+BAR="${BAR// /'█'}"
+printf -v _EMPTY -- '%*s' $((BAR_LEN - FILLED)) ''
+BAR+="${_EMPTY// /'░'}"
 
 if ((CTX_PCT >= 90)); then
   BAR_COLOUR="$RED"
