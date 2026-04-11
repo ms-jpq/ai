@@ -33,6 +33,9 @@ SessionStart)
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
 SessionEnd)
+  if [[ -v TMUX_PANE ]]; then
+    tmux set-option -t "$TMUX_PANE" -u -p @claude_session
+  fi
   if INDEX="$("${WHICH_INDEX[@]}")"; then
     rm -fr -- "$INDEX"
   fi
