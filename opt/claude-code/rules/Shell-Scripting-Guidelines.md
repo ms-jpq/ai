@@ -98,6 +98,8 @@ $VARIABLE_1
 EOF >&2
 ```
 
+- Use `exec --` for early exit of control flow if possible, to simplify control flow.
+
 - Prefer flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
 
 - Prefer `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
@@ -114,7 +116,7 @@ DIR="${FILE%/*}"
 
 - Use `readarray -t` to capture multi-line output into arrays, not subshell loops or word splitting.
 
-- Use `exec --` for early exit of control flow if possible, to simplify control flow.
+- Use `${ARRAY[*]}` over `${ARRAY[0]}` to stringify a single-element array.
 
 - Use env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc.
   - Useful for `flock`, `xargs`, and mode-switching.
