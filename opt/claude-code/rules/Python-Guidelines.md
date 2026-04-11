@@ -10,6 +10,8 @@
 
 - Use `pathlib.Path` over `os.path` for path manipulation where possible.
 
+- Use library constants over string literals: `linesep` not `"\n"`, `sep` not `"/"`, `executable` not `"python3"`, etc.
+
 - Type iterables in input positions as `Iterable[T]` / `AsyncIterable[T]`, and in output positions as `Iterator[T]` / `AsyncIterator[T]`.
 
 - Prefer literal syntax and comprehensions over constructor calls: `[]` not `list()`, `{}` not `dict()`, `{*x}` not `set(x)`, `{1, 2}` not `set([1, 2])`, `[v for v in x]` not `list(x)`.

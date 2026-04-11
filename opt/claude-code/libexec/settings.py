@@ -3,12 +3,15 @@
 from collections.abc import Iterable, Iterator
 from contextlib import nullcontext
 from json import dumps, loads
-from os import linesep
+from logging import basicConfig, getLogger, INFO
 from pathlib import Path, PurePosixPath
+from sys import executable
+
+basicConfig(level=INFO)
+log = getLogger(__name__)
 
 _SELF = Path(__file__).resolve()
 _SETTINGS = _SELF.parent.parent / "settings.json"
-
 
 _ORIGIN_ORDER = {"//": 0, "~": 1, "/": 2, ".": 2}
 _TOOL_ORDER = {"Read": 0, "Write": 1, "Edit": 2}
