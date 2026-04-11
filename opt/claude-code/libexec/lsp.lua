@@ -29,12 +29,17 @@ local vim_lspdata = (function()
     overrides.cmd = cmds
 
     vim.lsp.config(name, overrides)
-    local conf = vim.lsp.config[name]
+    local merged = vim.lsp.config[name]
 
-    acc[name] = conf
+    acc[name] = {
+      command = conf.bin,
+      args = vim.list_slice(merged.cmd, 2),
+      initializationOptions = merged.init_options,
+      settings = merged.settings,
+    }
   end
   return acc
 end)()
 
-local json = vim.json.encode(vim_lspdata, { indent = 2, sort_keys = true })
+local json = vim.json.encode(vim_lspdata, { indent = [[  ]], sort_keys = true })
 vim.print(json)
