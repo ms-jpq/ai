@@ -9,8 +9,9 @@ RESET=$'\033[0m'
 DIM=$'\033[2m'
 BOLD=$'\033[1m'
 
-_CYAN=$'\033[36m'
+CYAN=$'\033[36m'
 GREEN=$'\033[32m'
+MAGENTA=$'\033[35m'
 RED=$'\033[31m'
 YELLOW=$'\033[33m'
 ######################################
@@ -32,8 +33,9 @@ WD_PROJ="$(jq -e --raw-output '.workspace.project_dir' <<< "$JSON")"
 ######################################
 
 ######################################
+TOT_COUNT="${MAGENTA}↑${RESET}${CTX_INPUT} ${CYAN}↓${RESET}${CTX_OUTPUT}"
 printf -v COST_FMT -- '%.2f' "$COST"
-COST_INFO="${BOLD}\$${COST_FMT}${RESET}"
+COST_INFO="${TOT_COUNT} ${BOLD}\$${COST_FMT}${RESET}"
 ######################################
 
 ######################################
@@ -67,10 +69,6 @@ TIME_INFO="${DIM}${SPENT_TIME}${RESET}"
 ######################################
 
 ######################################
-TOT_COUNT="↑${CTX_INPUT} ↓${CTX_OUTPUT}"
-######################################
-
-######################################
 DIR_INFO=''
 if [[ $WD_CURR != "$WD_PROJ" ]]; then
   REL="$(realpath --no-symlinks --relative-to "$WD_PROJ" -- "$WD_CURR")"
@@ -93,4 +91,4 @@ if ((LINES_REMOVED > 0)); then
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} ${TIME_INFO} § ${TOT_COUNT}${DIR_INFO}${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} ${TIME_INFO} §${LINES_DELTA}${DIR_INFO}"
