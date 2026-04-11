@@ -90,4 +90,4 @@ fi
 ######################################
 
 SEP="${BOLD}⏐${RESET}"
-printf -- '%s' "${COST_INFO} ${TIME_INFO} ${SEP} ${USAGE_INFO} ${TOT_COUNT} ${SEP}${LINES_DELTA}${DIR_INFO}"
+printf -- '%s' "${COST_INFO} ${BOLD}⟢${RESET} ${TIME_INFO} ${BOLD}∷${RESET} ${TOT_COUNT} ${SEP} ${USAGE_INFO} ${SEP}${LINES_DELTA}${DIR_INFO}"
