@@ -34,7 +34,7 @@
             "type": "command"
           },
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-linters.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-fmt.sh",
             "type": "command"
           }
         ],

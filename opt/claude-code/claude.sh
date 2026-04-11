@@ -34,9 +34,6 @@ esac
 
 export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 
-COLOURS=(blue green yellow purple orange pink cyan)
-RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
-
 ARGV=("$@")
 if ! (($#)) && INDEX="$("$BASE/libexec/session-file.sh" "$PWD")" && [[ -s $INDEX ]]; then
   SESSION="$(< "$INDEX")"
@@ -48,6 +45,8 @@ if ! (($#)) && INDEX="$("$BASE/libexec/session-file.sh" "$PWD")" && [[ -s $INDEX
   fi
 fi
 
+COLOURS=(blue green yellow purple orange pink cyan)
+RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
 if [[ ${ARGV[*]} == '-' ]]; then
   RANDOM_COLOR='default'
   ARGV=()
@@ -57,6 +56,7 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
-make --directory "$ROOT" -- cc
+CMD="/color $RANDOM_COLOR"
+
 clear -x
-printf -- '%s' "/color $RANDOM_COLOR" | ~/.local/bin/hp "$CC" "${ARGV[@]}"
+printf -- '%s' "$CMD" | ~/.local/bin/hp "$CC" "${ARGV[@]}"
