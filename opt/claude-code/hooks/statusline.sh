@@ -8,6 +8,7 @@ set -o pipefail
 RESET=$'\033[0m'
 DIM=$'\033[2m'
 BOLD=$'\033[1m'
+ITALIC=$'\033[3m'
 
 CYAN=$'\033[36m'
 GREEN=$'\033[32m'
@@ -22,10 +23,8 @@ API_MS="$(jq -e --raw-output '.cost.total_api_duration_ms // 0' <<< "$JSON")"
 COST="$(jq -e --raw-output '.cost.total_cost_usd // 0' <<< "$JSON")"
 LINES_ADDED="$(jq -e --raw-output '.cost.total_lines_added // 0' <<< "$JSON")"
 LINES_REMOVED="$(jq -e --raw-output '.cost.total_lines_removed // 0' <<< "$JSON")"
-MODEL="$(jq -e --raw-output '.model.display_name // "unknown"' <<< "$JSON")"
 CTX_INPUT="$(jq -e --raw-output '.context_window.total_input_tokens // 0' <<< "$JSON" | numfmt --to si)"
 CTX_OUTPUT="$(jq -e --raw-output '.context_window.total_output_tokens // 0' <<< "$JSON" | numfmt --to si)"
-CTX_USED="$(jq -e --raw-output '(.context_window.used_percentage // 0) / (.context_window.context_window_size // 1)' <<< "$JSON" | numfmt --to si)"
 CTX_SIZE="$(jq -e --raw-output '.context_window.context_window_size // 0' <<< "$JSON" | numfmt --to si)"
 CTX_PCT="$(jq -e --raw-output '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
 WD_CURR="$(jq -e --raw-output '.workspace.current_dir' <<< "$JSON")"
@@ -33,9 +32,9 @@ WD_PROJ="$(jq -e --raw-output '.workspace.project_dir' <<< "$JSON")"
 ######################################
 
 ######################################
-TOT_COUNT="${MAGENTA}↑${RESET}${CTX_INPUT} ${CYAN}↓${RESET}${CTX_OUTPUT}"
+TOT_COUNT="${BOLD}${MAGENTA}↑${RESET} ${CTX_INPUT} ${BOLD}${CYAN}↓${RESET} ${CTX_OUTPUT}"
 printf -v COST_FMT -- '%.2f' "$COST"
-COST_INFO="${TOT_COUNT} ${BOLD}\$${COST_FMT}${RESET}"
+COST_INFO="\$${COST_FMT}"
 ######################################
 
 ######################################
@@ -44,7 +43,6 @@ TIMEFMT='%M:%S'
 if ((SPENT_SECS >= 3600)); then
   TIMEFMT="%H:$TIMEFMT"
 fi
-SPENT_TIME="$(date --utc --date="@$SPENT_SECS" -- "+$TIMEFMT")"
 
 BAR_LEN=10
 FILLED=$((CTX_PCT * BAR_LEN / 100))
@@ -62,10 +60,8 @@ else
   BAR_COLOUR="$GREEN"
 fi
 
-MODEL_INFO="${MODEL}"
-CTX_INFO="${DIM}${CTX_USED}/${CTX_SIZE}${RESET}"
-USAGE_INFO="${CTX_INFO} ${BAR_COLOUR}${BAR}${RESET}"
-TIME_INFO="${DIM}${SPENT_TIME}${RESET}"
+USAGE_INFO="${BAR_COLOUR}${BAR}${RESET} ${DIM}${CTX_SIZE}${RESET}"
+TIME_INFO="${ITALIC}$(date --utc --date="@$SPENT_SECS" -- "+$TIMEFMT")${RESET}"
 ######################################
 
 ######################################
@@ -91,4 +87,5 @@ if ((LINES_REMOVED > 0)); then
 fi
 ######################################
 
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} ${TIME_INFO} §${LINES_DELTA}${DIR_INFO}"
+SEP="${BOLD}⏐${RESET}"
+printf -- '%s' "${COST_INFO} ${TIME_INFO} ${SEP} ${USAGE_INFO} ${TOT_COUNT} ${SEP}${LINES_DELTA}${DIR_INFO}"
