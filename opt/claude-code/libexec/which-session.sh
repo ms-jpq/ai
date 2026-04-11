@@ -7,6 +7,12 @@ if ! [[ -v TMUX ]]; then
   exit 2
 fi
 
+CURRENT="$(tmux display-message -p -- '#{@claude_session}')"
+if [[ -n $CURRENT ]]; then
+  printf -- '%s' "$CURRENT"
+  exit 0
+fi
+
 PANES="$(tmux list-panes -F '#{@claude_session}')"
 readarray -t -- SESSIONS <<< "$PANES"
 
