@@ -53,6 +53,10 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not use git stash, it is hard to track'
   ;;
+'gh '*' delete'* | 'gh '*' archive'*)
+  DECISION=deny
+  REASON='do not delete or archive GitHub resources'
+  ;;
 # *terraform*)
 #   REASON='review dangerous terraform command'
 #   ;;
