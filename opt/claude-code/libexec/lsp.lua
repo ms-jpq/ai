@@ -44,4 +44,4 @@ local vim_lspdata = (function()
 end)()
 
 local json = vim.json.encode(vim_lspdata, { indent = [[  ]], sort_keys = true })
-vim.print(json)
+io.stdout:write(json, "\n")
