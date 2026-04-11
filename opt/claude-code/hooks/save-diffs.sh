@@ -34,7 +34,7 @@ PreToolUse)
   esac
   ;;
 PostToolUse)
-  find "$ENTRY_DIR" -mindepth 1 -delete > /dev/null
+  find "$ENTRY_DIR" -mindepth 1 -delete
   ;;
 *)
   set -x
