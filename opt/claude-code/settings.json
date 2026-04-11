@@ -1,8 +1,10 @@
 {
   "$docs": "https://code.claude.com/docs/en/settings",
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "allowUnsandboxedCommands": false,
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "stable",
+  "disableDeepLinkRegistration": "disable",
   "effortLevel": "high",
   "enabledPlugins": {},
   "env": {
@@ -170,7 +172,7 @@
       ]
     },
     "network": {
-      "allowUnixSockets": ["~/.local/opt/ai/var/claude.notify.sock"],
+      "allowUnixSockets": [],
       "allowedDomains": []
     }
   },
@@ -180,6 +182,8 @@
     "command": "~/.local/opt/ai/opt/claude-code/hooks/statusline.sh",
     "type": "command"
   },
+  "teammateMode": "in-process",
+  "voiceEnabled": false,
   "worktree": {
     "symlinkDirectories": [
       ".cache/",
