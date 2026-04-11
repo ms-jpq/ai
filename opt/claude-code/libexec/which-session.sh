@@ -16,13 +16,13 @@ fi
 PANES="$(tmux list-panes -F '#{@claude_session}')"
 readarray -t -- SESSIONS <<< "$PANES"
 
-UNIQUE=()
+declare -A -- SEEN=()
 for ID in "${SESSIONS[@]}"; do
-  if [[ -z $ID ]]; then
-    continue
+  if [[ -n $ID ]]; then
+    SEEN["$ID"]=1
   fi
-  UNIQUE+=("$ID")
 done
+UNIQUE=("${!SEEN[@]}")
 
 case "${#UNIQUE[@]}" in
 1)

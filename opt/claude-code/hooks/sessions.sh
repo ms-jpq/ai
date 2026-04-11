@@ -15,7 +15,7 @@ WHICH_INDEX=("$BASE/../libexec/session-file.sh" "$PWD")
 
 case "$EVENT" in
 SessionStart)
-  if [[ -n $CLAUDE_ENV_FILE ]]; then
+  if [[ -v CLAUDE_ENV_FILE ]]; then
     {
       printf -- '%q ' 'export' '--' "__CLAUDE_SESSION_ID=$SESSION_ID"
       printf -- '\n'
@@ -69,7 +69,6 @@ if INDEX="$("${WHICH_INDEX[@]}")"; then
   printf -- '%s' "$SESSION_ID" > "$INDEX"
 fi
 
-MD="$SESSIONS/$SESSION_ID.md"
 # shellcheck disable=2016
 JQ=(
   jq -e --raw-output
