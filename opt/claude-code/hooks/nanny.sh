@@ -17,6 +17,13 @@ JQ
 
 DECISION=ask
 case "$CMD_LINE" in
+'command -v '*)
+  exit
+  ;;
+'command '* | 'eval '* | 'exec '* | 'env '*)
+  DECISION=deny
+  REASON='try again, and consider not executing commands via these mechanisms that are hard to write permissions for'
+  ;;
 'gosu '* | 'su '* | 'sudo '*)
   DECISION=deny
   REASON='do not elevate privileges'
@@ -24,10 +31,6 @@ case "$CMD_LINE" in
 'brew '* | 'apt '* | 'apt-get '* | 'winget '*)
   DECISION=deny
   REASON='do not install system packages'
-  ;;
-'command '* | 'eval '* | 'exec '* | 'env '*)
-  DECISION=deny
-  REASON='try again, and consider not executing commands via these mechanisms that are hard to write permissions for'
   ;;
 'bash '* | 'dash '* | 'fish '* | 'sh '* | 'zsh '*)
   DECISION=ask
