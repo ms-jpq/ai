@@ -53,10 +53,13 @@ def _deny_pattern(sandbox_path: str) -> str:
 
 def _deny_entries(deny_read: Iterable[str], deny_write: Iterable[str]) -> Iterator[str]:
     for p in deny_read:
-        yield f"Read({_deny_pattern(p)})"
+        pat = _deny_pattern(p)
+        for op in ("Read", "Grep", "Glob"):
+            yield f"{op}({pat})"
     for p in deny_write:
-        yield f"Write({_deny_pattern(p)})"
-        yield f"Edit({_deny_pattern(p)})"
+        pat = _deny_pattern(p)
+        for op in ("Write", "Edit"):
+            yield f"{op}({pat})"
 
 
 def _perm_key(entry: str) -> tuple[int, int, int, str, int]:
