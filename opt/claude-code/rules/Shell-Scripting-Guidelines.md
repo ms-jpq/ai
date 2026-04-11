@@ -138,4 +138,6 @@ DIR="${FILE%/*}"
 
 - Prefer `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
 
+- Prefer flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
+
 - Never use `[[ ... ]] || exit` or `[[ ... ]] && exit` — use `if [[ ... ]]; then exit; fi`.
