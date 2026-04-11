@@ -34,7 +34,7 @@ WD_PROJ="$(jq -e --raw-output '.workspace.project_dir' <<< "$JSON")"
 ######################################
 TOT_COUNT="${BOLD}${MAGENTA}↑${RESET} ${CTX_INPUT} ${BOLD}${CYAN}↓${RESET} ${CTX_OUTPUT}"
 printf -v COST_FMT -- '%.2f' "$COST"
-COST_INFO="\$${COST_FMT}"
+COST_INFO="${BOLD}\$${COST_FMT}${RESET}"
 ######################################
 
 ######################################
@@ -43,7 +43,10 @@ TIMEFMT='%M:%S'
 if ((SPENT_SECS >= 3600)); then
   TIMEFMT="%H:$TIMEFMT"
 fi
+TIME_INFO="${ITALIC}$(date --utc --date="@$SPENT_SECS" -- "+$TIMEFMT")${RESET}"
+######################################
 
+######################################
 BAR_LEN=10
 FILLED=$((CTX_PCT * BAR_LEN / 100))
 
@@ -61,7 +64,6 @@ else
 fi
 
 USAGE_INFO="${BAR_COLOUR}${BAR}${RESET} ${DIM}${CTX_SIZE}${RESET}"
-TIME_INFO="${ITALIC}$(date --utc --date="@$SPENT_SECS" -- "+$TIMEFMT")${RESET}"
 ######################################
 
 ######################################
