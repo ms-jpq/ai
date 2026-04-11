@@ -8,6 +8,8 @@
 
 - Use the most generic type. For example: `Sequence[T]` over `list[T]`, `Mapping[K, V]` over `dict[K, V]`.
 
+- Use `pathlib.Path` over `os.path` for path manipulation where possible.
+
 - Use generator functions (`Iterable[T]`) and async generators (`AsyncIterable[T]`) for writing iterables.
 
 - No `if __name__ == "__main__":` guard — scripts execute at module scope.
