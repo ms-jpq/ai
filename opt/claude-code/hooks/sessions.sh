@@ -11,6 +11,8 @@ ROOT="$(realpath -- "$BASE/../../..")"
 SESSIONS="$ROOT/var/sessions"
 MD="$SESSIONS/$SESSION_ID.md"
 
+WHICH_INDEX=("$BASE/../libexec/session-file.sh" "$PWD")
+
 case "$EVENT" in
 SessionStart)
   if [[ -n $CLAUDE_ENV_FILE ]]; then
@@ -31,7 +33,7 @@ SessionStart)
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
 SessionEnd)
-  if INDEX="$("$BASE/../libexec/session-file.sh" "$PWD")"; then
+  if INDEX="$("${WHICH_INDEX[@]}")"; then
     rm -fr -- "$INDEX"
   fi
   exit
@@ -63,7 +65,7 @@ Stop)
   ;;
 esac
 
-if INDEX="$("$BASE/../libexec/session-file.sh" "$PWD")"; then
+if INDEX="$("${WHICH_INDEX[@]}")"; then
   printf -- '%s' "$SESSION_ID" > "$INDEX"
 fi
 
