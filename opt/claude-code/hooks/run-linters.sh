@@ -12,6 +12,9 @@ case "$FILE_PATH" in
     shellcheck -- "$FILE_PATH" || exit 2
   } >&2
   ;;
+*.json)
+  jq empty -- "$FILE_PATH" || exit 2
+  ;;
 *)
   exit 0
   ;;
