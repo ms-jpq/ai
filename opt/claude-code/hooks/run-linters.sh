@@ -7,15 +7,16 @@ FILE_PATH="$(jq -e --raw-output '.tool_input.file_path' <<< "$JSON")"
 
 case "$FILE_PATH" in
 *.sh)
-  {
-    shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
-    shellcheck -- "$FILE_PATH" || exit 2
-  } >&2
+  shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
+  shellcheck -- "$FILE_PATH" || exit 2
   ;;
 *.json)
   jq empty -- "$FILE_PATH" || exit 2
   ;;
+*.toml)
+  RUST_LOG=warn taplo format -- "$FILE_PATH" || exit 2
+  ;;
 *)
   exit 0
   ;;
-esac
+esac >&2
