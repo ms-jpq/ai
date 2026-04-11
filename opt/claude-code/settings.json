@@ -113,6 +113,7 @@
       "Glob",
       "Grep",
       "Read",
+      "Skill(tip)",
       "WebFetch",
       "WebSearch",
       "Write(./*)"
