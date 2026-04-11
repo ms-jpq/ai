@@ -8,7 +8,7 @@
 
 - Avoid writing functions and traps — these make error propagation harder.
 
-- Avoid pipes for passing variables or reading single files.
+- Avoid pointless `echo` or `printf` pipes — use redirects instead.
   - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
   - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
 
