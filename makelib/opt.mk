@@ -2,6 +2,11 @@
 
 cc: lsp
 
-lsp: ./opt/claude-code/local-plugins/omnibus/.lsp.json
-./opt/claude-code/local-plugins/omnibus/.lsp.json: ~/.config/nvim/lsp.lua
+CC := ./opt/claude-code
+
+lsp: $(CC)/local-plugins/omnibus/.lsp.json
+$(CC)/local-plugins/omnibus/.lsp.json: ~/.config/nvim/lsp.lua
 	'$<' > '$@'
+
+cc:
+	$(CC)/libexec/settings.py

@@ -10,7 +10,9 @@
 
 - Use `pathlib.Path` over `os.path` for path manipulation where possible.
 
-- Use generator functions (`Iterable[T]`) and async generators (`AsyncIterable[T]`) for writing iterables.
+- Type iterables in input positions as `Iterable[T]` / `AsyncIterable[T]`, and in output positions as `Iterator[T]` / `AsyncIterator[T]`.
+
+- Prefer literal syntax and comprehensions over constructor calls: `[]` not `list()`, `{}` not `dict()`, `{*x}` not `set(x)`, `{1, 2}` not `set([1, 2])`, `[v for v in x]` not `list(x)`.
 
 - No `if __name__ == "__main__":` guard — scripts execute at module scope.
 

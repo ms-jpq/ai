@@ -43,7 +43,7 @@ CURL+=(-- "$URL")
 "${CURL[@]}"
 ```
 
-- When there are multiple branches, use comprehensive enumeration instead of `if/elif` chains.
+- Use `case` over `if/elif` chains for multi-branch dispatch.
   - Always include a catch-all (`*`) that exits with `set -x; exit 2` for unexpected inputs.
 
 ```bash
@@ -89,7 +89,7 @@ fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 
 - Use `printf -- '%s' ...` instead of `echo` for single statements.
   - Use `printf -v VAR -- '<fmt>' args` to assign formatted output to a variable without a subshell.
-  - For multiline statements with interpolations, use heredocs:
+  - For multi-line statements with interpolations, use heredocs:
 
 ```bash
 tee <<- EOF
@@ -98,7 +98,7 @@ $VARIABLE_1
 EOF >&2
 ```
 
-- Use `exec --` for early exit of control flow if possible, to simplify control flow.
+- Use `exec --` when no code follows — avoids a needless subprocess.
 
 - Prefer flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
 
