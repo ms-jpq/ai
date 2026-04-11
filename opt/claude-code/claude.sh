@@ -53,5 +53,9 @@ if [[ ${ARGV[*]} == '-' ]]; then
   ARGV=()
 fi
 
+for PLUGIN in "$BASE/local-plugins"/*/; do
+  ARGV+=(--plugin-dir "$PLUGIN")
+done
+
 clear -x
 printf -- '%s' "/color $RANDOM_COLOR" | ~/.local/bin/hp "$CC" "${ARGV[@]}"
