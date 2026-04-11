@@ -3,9 +3,9 @@
 from collections.abc import Iterable, Iterator
 from contextlib import nullcontext
 from json import dumps, loads
-from logging import basicConfig, getLogger, INFO
+from logging import INFO, basicConfig, getLogger
+from os import linesep
 from pathlib import Path, PurePosixPath
-from sys import executable
 
 basicConfig(level=INFO)
 log = getLogger(__name__)
