@@ -32,6 +32,8 @@ local vim_lspdata = (function()
     local merged = vim.lsp.config[name]
 
     acc[name] = {
+      _filetypes = merged.filetypes,
+      extensionToLanguage = {},
       command = conf.bin,
       args = vim.list_slice(merged.cmd, 2),
       initializationOptions = merged.init_options,
