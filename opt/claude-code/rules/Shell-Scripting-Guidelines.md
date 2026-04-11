@@ -137,3 +137,5 @@ DIR="${FILE%/*}"
 - Use `set -a` / `set +a` to scope exports when sourcing an env file.
 
 - Prefer `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
+
+- Never use `[[ ... ]] || exit` or `[[ ... ]] && exit` — use `if [[ ... ]]; then exit; fi`.
