@@ -8,7 +8,8 @@ SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 BASE="${0%/*}"
 ROOT="$(realpath -- "$BASE/../../..")"
-SESSIONS=""$ROOT/var/sessions""
+SESSIONS="$ROOT/var/sessions"
+MD="$SESSIONS/$SESSION_ID.md"
 
 case "$EVENT" in
 SessionStart)
@@ -34,6 +35,20 @@ SessionEnd)
     rm -fr -- "$INDEX"
   fi
   exit
+  ;;
+PostToolUse)
+  TOOL="$(jq -e --raw-output '.tool_name' <<< "$JSON")"
+
+  case "$TOOL" in
+  ExitPlanMode)
+    touch -- "$MD"
+    # shellcheck disable=SC2094
+    exec -- flock "$MD" jq -e --raw-output '["# >>> plan <<<", "", .tool_response.plan, "", "---", ""][]' <<< "$JSON" >> "$MD"
+    ;;
+  *)
+    exit
+    ;;
+  esac
   ;;
 UserPromptSubmit)
   ROLE='user'
