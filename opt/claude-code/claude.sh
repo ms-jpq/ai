@@ -58,5 +58,10 @@ done
 
 CMD="/color $RANDOM_COLOR"
 
-clear -x
-printf -- '%s' "$CMD" | ~/.local/bin/hp "$CC" "${ARGV[@]}"
+EXEC=(~/.local/bin/hp "$CC" "${ARGV[@]}")
+if [[ -t 0 ]]; then
+  clear -x
+  printf -- '%s' "$CMD" | "${EXEC[@]}"
+else
+  "${EXEC[@]}"
+fi
