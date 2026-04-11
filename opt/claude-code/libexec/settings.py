@@ -86,5 +86,12 @@ with nullcontext():
 
     _SETTINGS.write_text(_json(_settings) + linesep)
 
-    _write_only = {"sandbox": {"filesystem": {"denyWrite": sorted(_deny_write_only, key=_specificity)}}}
-    getLogger().info("%s", _json(_write_only))
+    _summary = {
+        "filesystem": {
+            "allowRead": _fs["allowRead"],
+            "allowWrite": _fs["allowWrite"],
+            "denyRead": _fs["denyRead"],
+            "denyWrite (exclusive)": sorted(_deny_write_only, key=_specificity),
+        }
+    }
+    getLogger().info("%s", _json(_summary))
