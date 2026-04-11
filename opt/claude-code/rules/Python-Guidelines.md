@@ -20,7 +20,9 @@
 
 - Use `suppress()` over `try/except` for simple exception suppression.
 
-- Use `stdout.write()` / `stderr.write()` without trailing newline. Use `print(..., file=stderr)` when a newline is desired.
+- Use `getLogger(__name__)` for output instead of `print`. Use `%s`-style placeholders, not f-strings: `log.info("%s entries", count)`.
+
+- Use `with nullcontext(): ...` to group related statements together.
 
 - Prefer frozen dataclasses (`@dataclass(frozen=True)`) for data types.
 
