@@ -1,0 +1,95 @@
+{
+  "clangd": {
+    "command": "clangd",
+    "extensionToLanguage": {
+      ".c": "c",
+      ".cc": "cpp",
+      ".cpp": "cpp",
+      ".cxx": "cpp",
+      ".h": "c",
+      ".hpp": "cpp",
+      ".hxx": "cpp"
+    }
+  },
+  "csharp-ls": {
+    "command": "csharp-ls",
+    "extensionToLanguage": {
+      ".cs": "csharp"
+    }
+  },
+  "gopls": {
+    "command": "gopls",
+    "extensionToLanguage": {
+      ".go": "go"
+    }
+  },
+  "intelephense": {
+    "args": ["--stdio"],
+    "command": "intelephense",
+    "extensionToLanguage": {
+      ".php": "php"
+    }
+  },
+  "jdtls": {
+    "command": "jdtls",
+    "extensionToLanguage": {
+      ".java": "java"
+    }
+  },
+  "kotlin-lsp": {
+    "command": "kotlin-lsp",
+    "extensionToLanguage": {
+      ".kt": "kotlin",
+      ".kts": "kotlin"
+    }
+  },
+  "lua-language-server": {
+    "command": "lua-language-server",
+    "extensionToLanguage": {
+      ".lua": "lua"
+    }
+  },
+  "pyright-langserver": {
+    "args": ["--stdio"],
+    "command": "pyright-langserver",
+    "extensionToLanguage": {
+      ".py": "python",
+      ".pyi": "python"
+    }
+  },
+  "ruby-lsp": {
+    "command": "ruby-lsp",
+    "extensionToLanguage": {
+      ".gemspec": "ruby",
+      ".rake": "ruby",
+      ".rb": "ruby",
+      ".ru": "ruby"
+    }
+  },
+  "rust-analyzer": {
+    "command": "rust-analyzer",
+    "extensionToLanguage": {
+      ".rs": "rust"
+    }
+  },
+  "sourcekit-lsp": {
+    "command": "sourcekit-lsp",
+    "extensionToLanguage": {
+      ".swift": "swift"
+    }
+  },
+  "typescript-language-server": {
+    "args": ["--stdio"],
+    "command": "typescript-language-server",
+    "extensionToLanguage": {
+      ".cjs": "javascript",
+      ".cts": "typescript",
+      ".js": "javascript",
+      ".jsx": "javascriptreact",
+      ".mjs": "javascript",
+      ".mts": "typescript",
+      ".ts": "typescript",
+      ".tsx": "typescriptreact"
+    }
+  }
+}

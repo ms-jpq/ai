@@ -2,11 +2,11 @@
 
 set -o pipefail
 
-JSON="${0%/*}/../../claude-code/mcp.json"
+JSON="${0%/*}/../../claude-code/local-plugins/omnibus/.mcp.json"
 SERVERS="$(jq --exit-status --raw-input --null-input --compact-output '[inputs]')"
 
 read -r -d '' -- JQ <<- 'JQ' || true
-.mcpServers | [to_entries[] | .value.type = "url" | select(.key | IN($servers[]))] | from_entries
+[to_entries[] | .value.type = "url" | select(.key | IN($servers[]))] | from_entries
 JQ
 
 jq --argjson servers "$SERVERS" "$JQ" < "$JSON" | envsubst
