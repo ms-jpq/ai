@@ -3,6 +3,7 @@
 .env
 .venv/
 node_modules/
+opt/claude-code/local-plugins/omnibus/.lsp.json
 package-lock.json
 schema.graphql
 tsconfig.tsbuildinfo
