@@ -122,6 +122,7 @@
       "Bash",
       "Glob",
       "Grep",
+      "mcp__plugin_omnibus_firecrawl__*",
       "Monitor",
       "Read",
       "Skill(tip)",
