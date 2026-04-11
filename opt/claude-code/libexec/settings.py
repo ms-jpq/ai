@@ -1,6 +1,6 @@
 #!/usr/bin/env -S -- PYTHONSAFEPATH= python3
 
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from contextlib import nullcontext
 from json import dumps, loads
 from logging import INFO, basicConfig, captureWarnings, getLogger
@@ -14,7 +14,6 @@ with nullcontext():
 _SELF = Path(__file__).resolve()
 _SETTINGS = _SELF.parent.parent / "settings.json"
 
-_ORIGIN_ORDER = {"//": 0, "~": 1, "/": 2, ".": 2}
 _TOOL_ORDER = {"Read": 0, "Write": 1, "Edit": 2}
 
 
@@ -22,11 +21,18 @@ def _json(obj: object) -> str:
     return dumps(obj, ensure_ascii=False, sort_keys=True, indent=2)
 
 
-def _specificity(path: str) -> tuple[int, int, str]:
-    parts = PurePosixPath(path).parts
-    origin = _ORIGIN_ORDER.get(parts[0], 3) if parts else 3
-    segments = sum(1 for p in parts if p not in ("/", "~"))
-    return (origin, segments, path)
+def _specificity(origins: Mapping[str, int]) -> Callable[[str], tuple[int, int, str]]:
+    def _key(path: str) -> tuple[int, int, str]:
+        parts = PurePosixPath(path).parts
+        origin = origins.get(parts[0], 3) if parts else 3
+        segments = sum(1 for p in parts if p not in origins)
+        return (origin, segments, path)
+
+    return _key
+
+
+_fs_key = _specificity({"/": 0, "~": 1, ".": 2})
+_perm_path_key = _specificity({"//": 0, "~": 1, "/": 2, ".": 2})
 
 
 def _to_perm_path(sandbox_path: str) -> str:
@@ -57,7 +63,7 @@ def _perm_key(entry: str) -> tuple[int, int, int, str, int]:
     if "(" in entry:
         tool, rest = entry.split("(", 1)
         inner = rest.rstrip(")")
-        return (1, *_specificity(inner), _TOOL_ORDER.get(tool, 3))
+        return (1, *_perm_path_key(inner), _TOOL_ORDER.get(tool, 3))
     return (0, 0, 0, entry, 0)
 
 
@@ -76,10 +82,10 @@ with nullcontext():
     _perm_deny = {*_perms.get("deny", [])}
     _perm_deny |= {*_deny_entries(_deny_read, _deny_write)}
 
-    _fs["allowRead"] = sorted(_fs.get("allowRead", []), key=_specificity)
-    _fs["allowWrite"] = sorted(_fs.get("allowWrite", []), key=_specificity)
-    _fs["denyRead"] = sorted(_deny_read, key=_specificity)
-    _fs["denyWrite"] = sorted(_deny_write, key=_specificity)
+    _fs["allowRead"] = sorted(_fs.get("allowRead", []), key=_fs_key)
+    _fs["allowWrite"] = sorted(_fs.get("allowWrite", []), key=_fs_key)
+    _fs["denyRead"] = sorted(_deny_read, key=_fs_key)
+    _fs["denyWrite"] = sorted(_deny_write, key=_fs_key)
 
     _perms["allow"] = sorted(_perms.get("allow", []), key=_perm_key)
     _perms["deny"] = sorted(_perm_deny, key=_perm_key)
@@ -87,11 +93,9 @@ with nullcontext():
     _SETTINGS.write_text(_json(_settings) + linesep)
 
     _summary = {
-        "filesystem": {
-            "allowRead": _fs["allowRead"],
-            "allowWrite": _fs["allowWrite"],
-            "denyRead": _fs["denyRead"],
-            "denyWrite (exclusive)": sorted(_deny_write_only, key=_specificity),
-        }
+        "allowRead": _fs["allowRead"],
+        "allowWrite": _fs["allowWrite"],
+        "denyRead": _fs["denyRead"],
+        "denyWrite (exclusive)": sorted(_deny_write_only, key=_fs_key),
     }
     getLogger().info("%s", _json(_summary))
