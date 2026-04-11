@@ -24,7 +24,7 @@ LINES_REMOVED="$(jq -e --raw-output '.cost.total_lines_removed // 0' <<< "$JSON"
 MODEL="$(jq -e --raw-output '.model.display_name // "unknown"' <<< "$JSON")"
 CTX_INPUT="$(jq -e --raw-output '.context_window.total_input_tokens // 0' <<< "$JSON" | numfmt --to si)"
 CTX_OUTPUT="$(jq -e --raw-output '.context_window.total_output_tokens // 0' <<< "$JSON" | numfmt --to si)"
-CTX_USED="$(jq -e --raw-output '(.context_window.total_input_tokens // 0) + (.context_window.total_output_tokens // 0)' <<< "$JSON" | numfmt --to si)"
+CTX_USED="$(jq -e --raw-output '(.context_window.used_percentage // 0) / (.context_window.context_window_size // 1)' <<< "$JSON" | numfmt --to si)"
 CTX_SIZE="$(jq -e --raw-output '.context_window.context_window_size // 0' <<< "$JSON" | numfmt --to si)"
 CTX_PCT="$(jq -e --raw-output '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
 WD_CURR="$(jq -e --raw-output '.workspace.current_dir' <<< "$JSON")"
@@ -61,9 +61,21 @@ else
 fi
 
 MODEL_INFO="${MODEL}"
-CTX_INFO="${DIM}↑${CTX_INPUT} ↓${CTX_OUTPUT} ${CTX_USED}/${CTX_SIZE}${RESET}"
+CTX_INFO="${DIM}${CTX_USED}/${CTX_SIZE}${RESET}"
 USAGE_INFO="${CTX_INFO} ${BAR_COLOUR}${BAR}${RESET}"
 TIME_INFO="${DIM}${SPENT_TIME}${RESET}"
+######################################
+
+######################################
+TOT_COUNT="↑${CTX_INPUT} ↓${CTX_OUTPUT}"
+######################################
+
+######################################
+DIR_INFO=''
+if [[ $WD_CURR != "$WD_PROJ" ]]; then
+  REL="$(realpath --no-symlinks --relative-to "$WD_PROJ" -- "$WD_CURR")"
+  DIR_INFO=" ${BOLD}$(basename -- "$WD_PROJ"):$REL${RESET}"
+fi
 ######################################
 
 ######################################
@@ -81,12 +93,4 @@ if ((LINES_REMOVED > 0)); then
 fi
 ######################################
 
-######################################
-DIR_INFO=''
-if [[ $WD_CURR != "$WD_PROJ" ]]; then
-  REL="$(realpath --no-symlinks --relative-to "$WD_PROJ" -- "$WD_CURR")"
-  DIR_INFO=" ${BOLD}$(basename -- "$WD_PROJ"):$REL${RESET}"
-fi
-######################################
-
-printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} ${TIME_INFO} §${DIR_INFO}${LINES_DELTA}"
+printf -- '%s' "${COST_INFO} ${MODEL_INFO} ${BOLD}-${RESET} ${USAGE_INFO} ${TIME_INFO} § ${TOT_COUNT}${DIR_INFO}${LINES_DELTA}"
