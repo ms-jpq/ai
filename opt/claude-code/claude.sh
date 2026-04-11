@@ -49,6 +49,7 @@ if ! (($#)) && INDEX="$("$BASE/libexec/session-file.sh" "$PWD")" && [[ -s $INDEX
 fi
 
 if [[ ${ARGV[*]} == '-' ]]; then
+  RANDOM_COLOR='default'
   ARGV=()
 fi
 
