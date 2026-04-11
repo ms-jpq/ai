@@ -14,7 +14,7 @@ with nullcontext():
 _SELF = Path(__file__).resolve()
 _SETTINGS = _SELF.parent.parent / "settings.json"
 
-_TOOL_ORDER = {"Read": 0, "Write": 1, "Edit": 2}
+_TOOL_ORDER = {t: i for i, t in enumerate(("Read", "Grep", "Glob", "Write", "Edit"))}
 
 
 def _json(obj: object) -> str:

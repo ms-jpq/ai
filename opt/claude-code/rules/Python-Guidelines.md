@@ -23,6 +23,8 @@ with nullcontext():
 
 - Literals and comprehensions over constructors: `[]` not `list()`, `{}` not `dict()`, `{*x}` not `set(x)`.
 
+- Prefer iterator-based solutions: `zip`, `enumerate`, `chain`, `product`, `starmap`, etc. over manual loops and index arithmetic.
+
 - `getLogger()` over `print`. Always call `getLogger()` at the site of logging — never store or pass a logger. Always `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
 
 - `...` for noop bodies, not `pass`. `suppress()` over bare `try/except`. `with nullcontext(): ...` to group related statements. No `if __name__ == "__main__":` guard — scripts execute at module scope.
