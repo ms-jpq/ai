@@ -1,20 +1,25 @@
-#!/usr/bin/env -S -- python3
+#!/usr/bin/env -S -- PYTHONSAFEPATH= python3
 
 from collections.abc import Iterable, Iterator
 from contextlib import nullcontext
 from json import dumps, loads
-from logging import INFO, basicConfig, getLogger
+from logging import INFO, basicConfig, captureWarnings, getLogger
 from os import linesep
 from pathlib import Path, PurePosixPath
 
-basicConfig(level=INFO)
-log = getLogger(__name__)
+with nullcontext():
+    captureWarnings(True)
+    basicConfig(format="%(message)s", level=INFO)
 
 _SELF = Path(__file__).resolve()
 _SETTINGS = _SELF.parent.parent / "settings.json"
 
 _ORIGIN_ORDER = {"//": 0, "~": 1, "/": 2, ".": 2}
 _TOOL_ORDER = {"Read": 0, "Write": 1, "Edit": 2}
+
+
+def _json(obj: object) -> str:
+    return dumps(obj, ensure_ascii=False, sort_keys=True, indent=2)
 
 
 def _specificity(path: str) -> tuple[int, int, str]:
@@ -64,6 +69,7 @@ with nullcontext():
 
     _deny_read = {*_fs.get("denyRead", [])}
     _deny_write = {*_fs.get("denyWrite", [])}
+    _deny_write_only = _deny_write - _deny_read
 
     _deny_write |= _deny_read
 
@@ -78,5 +84,7 @@ with nullcontext():
     _perms["allow"] = sorted(_perms.get("allow", []), key=_perm_key)
     _perms["deny"] = sorted(_perm_deny, key=_perm_key)
 
-    json = dumps(_settings, ensure_ascii=False, sort_keys=True, indent=2)
-    _SETTINGS.write_text(json + linesep)
+    _SETTINGS.write_text(_json(_settings) + linesep)
+
+    _write_only = {"sandbox": {"filesystem": {"denyWrite": sorted(_deny_write_only, key=_specificity)}}}
+    getLogger().info("%s", _json(_write_only))

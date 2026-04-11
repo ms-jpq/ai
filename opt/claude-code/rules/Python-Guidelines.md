@@ -1,5 +1,18 @@
 # Python Guidelines
 
+Typical script prelude:
+
+```python
+#!/usr/bin/env -S -- PYTHONSAFEPATH= python3
+
+from contextlib import nullcontext
+from logging import INFO, basicConfig, captureWarnings
+
+with nullcontext():
+    captureWarnings(True)
+    basicConfig(format="%(message)s", level=INFO)
+```
+
 - `from module import name` for all imports — never bare `import module`.
 
 - Type-annotate all signatures. Use the most generic type: `Sequence[T]` over `list[T]`, `Mapping[K, V]` over `dict[K, V]`, `Iterable[T]`/`AsyncIterable[T]` for inputs, `Iterator[T]`/`AsyncIterator[T]` for outputs.
@@ -10,7 +23,7 @@
 
 - Literals and comprehensions over constructors: `[]` not `list()`, `{}` not `dict()`, `{*x}` not `set(x)`.
 
-- `getLogger(__name__)` over `print`. `%s`-style placeholders, not f-strings: `log.info("%s entries", count)`.
+- `getLogger()` over `print`. Always call `getLogger()` at the site of logging — never store or pass a logger. Always `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
 
 - `...` for noop bodies, not `pass`. `suppress()` over bare `try/except`. `with nullcontext(): ...` to group related statements. No `if __name__ == "__main__":` guard — scripts execute at module scope.
 
