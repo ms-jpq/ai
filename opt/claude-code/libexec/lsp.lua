@@ -5,15 +5,15 @@ do
   vim.opt.rtp:append { lspconfig }
 end
 
-local lspdata = (function()
+local json_lspdata = (function()
   local path = vim.fs.joinpath(vim.fn.stdpath "config", "apriori", "lsp.json")
   local json = vim.fn.readblob(path)
   return vim.json.decode(json, { luanil = { object = true, array = true } })
 end)()
 
-do
+local vim_lspdata = (function()
   local acc = {}
-  for name, conf in pairs(lspdata) do
+  for name, conf in pairs(json_lspdata) do
     local keys = { "filetypes", "init_options", "settings" }
     local overrides = { detached = false }
 
@@ -33,4 +33,8 @@ do
 
     acc[name] = conf
   end
-end
+  return acc
+end)()
+
+local json = vim.json.encode(vim_lspdata, { indent = 2, sort_keys = true })
+vim.print(json)
