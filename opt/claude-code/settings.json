@@ -122,6 +122,7 @@
       "Bash",
       "Glob",
       "Grep",
+      "Monitor",
       "Read",
       "Skill(tip)",
       "WebFetch",
