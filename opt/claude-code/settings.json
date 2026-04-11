@@ -160,6 +160,8 @@
       "Edit(//Users/Shared/**)",
       "Write(//private/etc/**)",
       "Edit(//private/etc/**)",
+      "Write(//var/db/**)",
+      "Edit(//var/db/**)",
       "Write(//var/mail/**)",
       "Edit(//var/mail/**)",
       "Write(//var/opt/**)",
@@ -226,6 +228,8 @@
       "Read(~/Public/**)",
       "Write(~/Public/**)",
       "Edit(~/Public/**)",
+      "Write(~/.local/bin/**)",
+      "Edit(~/.local/bin/**)",
       "Read(~/.local/secrets/**)",
       "Write(~/.local/secrets/**)",
       "Edit(~/.local/secrets/**)"
@@ -289,6 +293,7 @@
         "~/Notes/",
         "~/Pictures/",
         "~/Public/",
+        "~/.local/bin/",
         "~/.local/secrets/",
         "/Applications/",
         "/Library/",
@@ -304,6 +309,7 @@
         "/usr/",
         "/Users/Shared/",
         "/private/etc/",
+        "/var/db/",
         "/var/mail/",
         "/var/opt/",
         "/var/spool/"
