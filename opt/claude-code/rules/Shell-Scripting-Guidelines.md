@@ -140,4 +140,10 @@ DIR="${FILE%/*}"
 
 - Prefer flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
 
+- Prefer long streaming pipelines over intermediate variables or temp files. Each stage should do one thing.
+
+```bash
+"${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
+```
+
 - Never use `[[ ... ]] || exit` or `[[ ... ]] && exit` — use `if [[ ... ]]; then exit; fi`.
