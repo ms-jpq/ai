@@ -8,6 +8,12 @@
         "ctrl+f": "task:background"
       },
       "context": "Task"
-    }
+    },
+    {
+      "bindings": {
+        "right": "footer:openSelected"
+      },
+      "context": "Footer"
+    },
   ]
 }
