@@ -77,7 +77,7 @@ jq --raw-output0 "$JQ" < 'example.json'
 
 ```bash
 grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
-  # ...
+  '...'
 else
   tee
 fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
