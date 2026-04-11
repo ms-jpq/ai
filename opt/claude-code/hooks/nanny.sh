@@ -24,7 +24,7 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='try again, and consider not executing commands via these mechanisms that are hard to write permissions for'
   ;;
-'gosu '* | 'su '* | 'sudo '* | 'systemd-run '*)
+'gosu '* | 'su '* | 'sudo '* | 'systemd-run '* | 'run0 '*)
   DECISION=deny
   REASON='do not elevate privileges'
   ;;
