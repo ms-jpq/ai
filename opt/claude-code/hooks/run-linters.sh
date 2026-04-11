@@ -16,6 +16,9 @@ case "$FILE_PATH" in
 *.toml)
   RUST_LOG=warn taplo format -- "$FILE_PATH" || exit 2
   ;;
+*.lua)
+  stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH" || exit 2
+  ;;
 *)
   exit 0
   ;;
