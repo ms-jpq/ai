@@ -56,12 +56,11 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
-CMD="/color $RANDOM_COLOR"
 
 EXEC=(~/.local/bin/hp "$CC" "${ARGV[@]}")
 if [[ -t 0 ]]; then
   clear -x
-  printf -- '%s' "$CMD" | "${EXEC[@]}"
+  printf -- '%s' "/color $RANDOM_COLOR" | "${EXEC[@]}"
 else
   "${EXEC[@]}"
 fi
