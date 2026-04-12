@@ -127,7 +127,6 @@
       "WebFetch",
       "WebSearch",
       "mcp__plugin_omnibus_firecrawl__*",
-      "Write(./**)",
       "Skill(tip)"
     ],
     "deny": [
