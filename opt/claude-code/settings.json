@@ -128,7 +128,6 @@
       "WebSearch",
       "mcp__plugin_omnibus_firecrawl__*",
       "Write(./**)",
-      "Edit(./**)",
       "Skill(tip)"
     ],
     "deny": [
