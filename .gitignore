@@ -7,4 +7,4 @@ opt/claude-code/local-plugins/omnibus/.lsp.json
 package-lock.json
 schema.graphql
 tsconfig.tsbuildinfo
-var/claude/
+var/
