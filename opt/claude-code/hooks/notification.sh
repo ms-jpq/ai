@@ -7,7 +7,9 @@ ROOT="${SELF%/*}/../../.."
 SOCK="$(realpath -- "$ROOT/var/claude.notify.sock")"
 
 if [[ -t 0 ]]; then
-  RECUR=1 exec -- socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
+  printf -v EXEC -- '%q ' env -- RECUR=1 -- "$0"
+  socat UNIX-LISTEN:"$SOCK",fork EXEC:"$EXEC"
+  exit
 fi
 
 if ! [[ -v RECUR ]]; then
