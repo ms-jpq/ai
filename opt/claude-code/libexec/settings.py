@@ -84,7 +84,9 @@ with nullcontext():
 
     _perm_deny = {*_deny_entries(_deny_read, _deny_write)}
 
-    _fs["allowRead"] = sorted(_fs.get("allowRead", []), key=_fs_key)
+    _allow_read = {*_fs.get("allowRead", []), *_fs.get("allowWrite", [])}
+    _allow_read_only = _allow_read - {*_fs.get("allowWrite", [])}
+    _fs["allowRead"] = sorted(_allow_read, key=_fs_key)
     _fs["allowWrite"] = sorted(_fs.get("allowWrite", []), key=_fs_key)
     _fs["denyRead"] = sorted(_deny_read, key=_fs_key)
     _fs["denyWrite"] = sorted(_deny_write, key=_fs_key)
@@ -95,7 +97,7 @@ with nullcontext():
     _SETTINGS.write_text(_json(_settings) + linesep)
 
     _summary = {
-        "allowRead": _fs["allowRead"],
+        "allowRead (exclusive)": sorted(_allow_read_only, key=_fs_key),
         "allowWrite": _fs["allowWrite"],
         "denyRead": _fs["denyRead"],
         "denyWrite (exclusive)": sorted(_deny_write_only, key=_fs_key),
