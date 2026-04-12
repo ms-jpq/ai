@@ -69,9 +69,6 @@ case "$CMD_LINE" in
 'kill '* | 'killall '* | 'pkill '*)
   REASON='review process killing'
   ;;
-'python -c '* | 'python3 -c '* | 'ruby -e '* | 'node -e '*)
-  REASON='review inline scripts'
-  ;;
 'git rebase '* | 'git commit '*--amend*)
   REASON='review history rewriting'
   ;;

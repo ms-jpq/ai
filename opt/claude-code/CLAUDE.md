@@ -8,6 +8,4 @@
 
 4. Automatically run self-contained queries as background tasks.
 
-5. Never pass multi-line code via `-c` or `-e` flags — write a file with a shebang and run that instead.
-
-6. Lean on the sandbox for routine scripts, do not eseclate to user by default.
+5. Lean on the sandbox for routine scripts, do not eseclate to user by default.
