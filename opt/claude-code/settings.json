@@ -404,14 +404,14 @@
         "/private/tmp/",
         "/var/tmp/",
         "~/Library/Caches/",
-        "./"
+        "."
       ],
       "allowWrite": [
         "/tmp/",
         "/private/tmp/",
         "/var/tmp/",
         "~/Library/Caches/",
-        "./"
+        "."
       ],
       "denyRead": [
         "/boot/",
