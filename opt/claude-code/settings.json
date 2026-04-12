@@ -77,7 +77,6 @@
       {
         "hooks": [
           {
-            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           }
