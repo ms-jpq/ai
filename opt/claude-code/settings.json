@@ -397,14 +397,18 @@
         "/tmp/",
         "/private/tmp/",
         "/var/tmp/",
+        "~/.config/gh/",
         "~/Library/Caches/",
+        "~/Library/Preferences/gh/",
         "."
       ],
       "allowWrite": [
         "/tmp/",
         "/private/tmp/",
         "/var/tmp/",
+        "~/.config/gh/",
         "~/Library/Caches/",
+        "~/Library/Preferences/gh/",
         "."
       ],
       "denyRead": [
