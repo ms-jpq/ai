@@ -382,12 +382,14 @@
     "failIfUnavailable": true,
     "filesystem": {
       "allowRead": [
+        "~/Library/Caches/",
         "./"
       ],
       "allowWrite": [
         "/tmp/",
         "/private/tmp/",
         "/var/tmp/",
+        "~/Library/Caches/",
         "./"
       ],
       "denyRead": [
