@@ -1,6 +1,8 @@
-#!/usr/bin/env -S -- bash -Eeu -o pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
+#!/usr/bin/env -S -- bash
 
+set -Eeu
 set -o pipefail
+shopt -s dotglob nullglob extglob globstar
 
 SELF="$(realpath -- "$0")"
 ROOT="${SELF%/*}/../../.."
