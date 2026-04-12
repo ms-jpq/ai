@@ -164,6 +164,9 @@
       "Edit(//srv/**)",
       "Write(//usr/**)",
       "Edit(//usr/**)",
+      "Read(//Users/Shared/**)",
+      "Grep(//Users/Shared/**)",
+      "Glob(//Users/Shared/**)",
       "Write(//Users/Shared/**)",
       "Edit(//Users/Shared/**)",
       "Write(//private/etc/**)",
@@ -178,6 +181,9 @@
       "Glob(//var/mail/**)",
       "Write(//var/mail/**)",
       "Edit(//var/mail/**)",
+      "Read(//var/opt/**)",
+      "Grep(//var/opt/**)",
+      "Glob(//var/opt/**)",
       "Write(//var/opt/**)",
       "Edit(//var/opt/**)",
       "Read(//var/run/**)",
@@ -290,6 +296,11 @@
       "Glob(~/Public/**)",
       "Write(~/Public/**)",
       "Edit(~/Public/**)",
+      "Read(~/wallpapers.localized/**)",
+      "Grep(~/wallpapers.localized/**)",
+      "Glob(~/wallpapers.localized/**)",
+      "Write(~/wallpapers.localized/**)",
+      "Edit(~/wallpapers.localized/**)",
       "Write(~/.local/bin/**)",
       "Edit(~/.local/bin/**)",
       "Read(~/.local/secrets/**)",
@@ -316,8 +327,10 @@
       "denyRead": [
         "/boot/",
         "/cores/",
+        "/Users/Shared/",
         "/var/db/",
         "/var/mail/",
+        "/var/opt/",
         "/var/run/",
         "/var/spool/",
         "~/.Trash/",
@@ -340,6 +353,7 @@
         "~/Notes/",
         "~/Pictures/",
         "~/Public/",
+        "~/wallpapers.localized/",
         "~/.local/secrets/"
       ],
       "denyWrite": [
@@ -383,6 +397,7 @@
         "~/Notes/",
         "~/Pictures/",
         "~/Public/",
+        "~/wallpapers.localized/",
         "~/.local/bin/",
         "~/.local/secrets/"
       ]
