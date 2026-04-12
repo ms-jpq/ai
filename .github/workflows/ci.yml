@@ -11,12 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
-          # TODO: version 3.13 is broken
-          python-version: "3.12"
+          python-version: "3.13"
+          cache: pip
 
       - uses: actions/setup-node@v4
+        with:
+          cache: npm
 
       - run: |-
           gmake lint
