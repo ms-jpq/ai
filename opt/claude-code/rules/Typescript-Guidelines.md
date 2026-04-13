@@ -2,14 +2,25 @@
 
 - `const foo = () => {}` over `function foo() {}`.
 
-- For generators, use `const foo = function*() {}`. Type the return as `IteratorObject<T>`, not `Generator<T>` — add an explicit `return` in the body to satisfy this.
+- For generators, use `const foo = function*() {}`. Type sync generators as `IteratorObject<T>`, async generators as `AsyncGenerator<T>`. Add an explicit `return` at the bottom of the body.
 
 - Prefer the most generic type. `Map<K, V>` over `Record<K, V>` for runtime key-value stores. `Record` is fine in type positions for object shapes.
 
-- Prefer generators over eagerly-built arrays or stateful accumulators. Yield values lazily; let the caller decide when to collect.
+- Prefer generators over eagerly-built arrays or stateful accumulators. Yield lazily; let the caller collect.
 
 - Use IIFEs `(() => {})()` to localize or eliminate mutable state.
 
 - Prefer async over sync when both exist.
 
-- Prefer modern stdlib APIs over hand-rolled equivalents: `Array.fromAsync`, `text(stream)` from `node:stream/consumers`, `finished(stream)` from `node:stream/promises`, etc.
+- ESM imports from `node:*` — e.g. `import { env, exit } from "node:process"` over `process.*` globals.
+
+- `import type` for type-only imports, especially packages used only for their types.
+
+- `ok()` from `node:assert/strict` for invariant checks over manual `if/throw`.
+
+- Prefer modern stdlib APIs over hand-rolled equivalents:
+  - `text(stream)` from `node:stream/consumers` to read a stream into a string.
+  - `finished(stream)` from `node:stream/promises` to await stream completion.
+  - `once(emitter, event)` from `node:events` for event-to-promise.
+  - `Readable.from(asyncIterable)` to bridge async iterables into streams.
+  - `Array.fromAsync(asyncIterable)` to collect async iterables.
