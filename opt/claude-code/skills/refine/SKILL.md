@@ -1,10 +1,10 @@
 ---
-description: Deeply study a topic by reading the codebase. Distill what you learn into a rules file so future sessions retain it.
+description: Sharpen understanding of a topic by re-reading the codebase against existing rules and memory. Tighten, correct, or extend the rules file so future sessions stay accurate.
 ---
 
-# Learn
+# Refine
 
-Study the codebase to understand how it approaches a topic. Codify that understanding into a rules file or amend the existing rules file.
+Re-examine the codebase for a topic and measure what you find against the current rules file. Tighten what's vague, correct what's drifted, add what's missing.
 
 ## Input
 
