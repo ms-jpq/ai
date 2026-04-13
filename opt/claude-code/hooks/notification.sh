@@ -36,7 +36,7 @@ if [[ -v RECUR ]]; then
   TEE+=(/dev/stderr)
 fi
 JSON="$("${TEE[@]}")"
-if jq -e '.notification_type == "idle_prompt"' --exit-status --quiet <<< "$JSON" 2> /dev/null; then
+if jq -e '.notification_type == "idle_prompt"' <<< "$JSON" 2> /dev/null; then
   exit
 fi
 
