@@ -15,3 +15,7 @@ Rewrite the body of text by asking:
 - What should the ranking by importance to a cold reader be?
 
 - Is the communication concise?
+
+# Change
+
+- One category of change per iteration.

@@ -1,6 +1,6 @@
 # Shell Scripting Guidelines
 
-- Use the following prelude for bash scripts:
+- Prelude for bash scripts:
 
 ```bash
 #!/usr/bin/env -S -- bash -Eeu -O dotglob -O nullglob -O extglob -O failglob -O globstar
@@ -8,7 +8,7 @@
 set -o pipefail
 ```
 
-- For bash scripts under `~/work/` and `~/work.localized/`, use this prelude instead, for bash 3 compatibility:
+- Bash 3 compatible prelude for scripts under `~/work/` and `~/work.localized/`:
 
 ```bash
 #!/usr/bin/env -S -- bash
@@ -18,9 +18,9 @@ set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 ```
 
-- Always use long form flags when available (`--delimiter` not `-d`) and `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
+- Long flags over short (`--delimiter` not `-d`). `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
-- Prefer long streaming pipelines over intermediate variables or temp files. Each stage should do one thing.
+- Streaming pipelines over intermediate variables or temp files. Each stage does one thing.
 
 ```bash
 "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
@@ -41,8 +41,8 @@ CURL+=(-- "$URL")
 "${CURL[@]}"
 ```
 
-- Use `case` over `if/elif` chains for multi-branch dispatch.
-  - Always include a catch-all (`*`) that exits with `set -x; exit 2` for unexpected inputs.
+- `case` over `if/elif` chains for multi-branch dispatch.
+  - Catch-all (`*`) exits with `set -x; exit 2` for unexpected inputs.
 
 ```bash
 case "$VARIABLE" in
@@ -56,12 +56,12 @@ case "$VARIABLE" in
 esac
 ```
 
-- Avoid writing functions and traps — these make error propagation harder.
+- No functions or traps — these make error propagation harder.
 
-- Always use null bytes as delimiters if possible, i.e. `find ... -print0 | xargs --null ...`
+- Null bytes as delimiters where possible — `find ... -print0 | xargs --null ...`
 
-- Avoid inlining complicated `jq`, `awk`, or `sed` scripts. Create a standalone `.jq`, `.awk`, `.sed` executable instead.
-  - If inlining is desired, always use a heredoc.
+- Standalone `.jq`, `.awk`, `.sed` executables over inlined scripts.
+  - Heredoc when inlining.
 
 ```bash
 read -r -d '' -- JQ <<- 'JQ' || true
@@ -81,13 +81,13 @@ else
 fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 ```
 
-- Avoid pointless `echo` or `printf` pipes — use redirects instead.
+- Redirects over `echo`/`printf` pipes.
   - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
   - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
 
-- Use `printf -- '%s' ...` instead of `echo` for single statements.
-  - Use `printf -v VAR -- '<fmt>' args` to assign formatted output to a variable without a subshell.
-  - For multi-line statements with interpolations, use heredocs:
+- `printf -- '%s' ...` over `echo` for single statements.
+  - `printf -v VAR -- '<fmt>' args` to assign formatted output without a subshell.
+  - Heredocs for multi-line statements with interpolations:
 
 ```bash
 tee <<- EOF
@@ -96,13 +96,13 @@ $VARIABLE_1
 EOF >&2
 ```
 
-- Use `exec --` when no code follows — avoids a needless subprocess.
+- `exec --` when no code follows.
 
-- Prefer flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
+- Flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
 
-- Prefer `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
+- `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
 
-- Use parameter expansion `${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}` over `basename`, `dirname`, or `cut` for string decomposition.
+- Parameter expansion (`${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}`) over `basename`, `dirname`, or `cut` for string decomposition.
 
 ```bash
 BASENAME="${URI##*/}"
@@ -110,14 +110,14 @@ BASENAME="${BASENAME%.git}"
 DIR="${FILE%/*}"
 ```
 
-- Use `(( ))` for math comparisons, not `[[ ]]`.
+- `(( ))` for math comparisons, not `[[ ]]`.
 
-- Use `readarray -t` to capture multi-line output into arrays, not subshell loops or word splitting.
+- `readarray -t` to capture multi-line output into arrays, not subshell loops or word splitting.
 
-- Use `${ARRAY[*]}` over `${ARRAY[0]}` to stringify a single-element array.
+- `${ARRAY[*]}` over `${ARRAY[0]}` to stringify a single-element array.
 
-- Use env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc.
-  - Useful for `flock`, `xargs`, and mode-switching.
+- Env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc.
+  - For `flock`, `xargs`, and mode-switching.
 
 ```bash
 FILE="$1"
@@ -138,12 +138,12 @@ BASE="${SELF%/*}"
 exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 ```
 
-- Use `shift -- <count>` after consuming positional args.
+- `shift -- <count>` after consuming positional args.
 
-- Use `shopt -u failglob` after the prelude when globs may legitimately match nothing.
+- `shopt -u failglob` after the prelude when globs may legitimately match nothing.
 
-- Use `command -v --` or `hash --` to check command existence, not `which` or `type`.
+- `command -v --` or `hash --` to check command existence, not `which` or `type`.
 
-- Use `set -a` / `set +a` to scope exports when sourcing an env file.
+- `set -a` / `set +a` to scope exports when sourcing an env file.
 
-- Never use `[[ ... ]] || exit` or `[[ ... ]] && exit` — use `if [[ ... ]]; then exit; fi`.
+- `if [[ ... ]]; then exit; fi` — not `[[ ... ]] || exit` or `[[ ... ]] && exit`.
