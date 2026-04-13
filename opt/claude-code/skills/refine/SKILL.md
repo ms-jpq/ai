@@ -2,7 +2,7 @@
 description: Iteratively improve a rule or skill.
 ---
 
-# Preparation
+# Prepare
 
 - Break prose into point form before iterating. One claim per bullet.
 
@@ -18,6 +18,6 @@ description: Iteratively improve a rule or skill.
 
 - Is the communication concise?
 
-# Change
+# Apply
 
 - One category of refinement per iteration.
