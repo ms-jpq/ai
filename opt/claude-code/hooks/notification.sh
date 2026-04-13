@@ -36,6 +36,7 @@ if [[ -v RECUR ]]; then
   TEE+=(/dev/stderr)
 fi
 JSON="$("${TEE[@]}")"
+"${SELF%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 if jq -e '.notification_type == "idle_prompt"' <<< "$JSON" > /dev/null; then
   exit
 fi

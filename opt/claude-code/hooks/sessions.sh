@@ -15,6 +15,8 @@ WHICH_INDEX=("$BASE/../libexec/session-file.sh" "$PWD")
 # shellcheck disable=SC2016
 NOTIFY=(jq -e --compact-output --argjson n 28 '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
 
+"$BASE/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+
 case "$EVENT" in
 SessionStart)
   if [[ -v CLAUDE_ENV_FILE ]]; then
