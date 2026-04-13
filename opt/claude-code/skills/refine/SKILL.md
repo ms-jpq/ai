@@ -18,6 +18,8 @@ description: Iteratively improve a rule or skill.
 
 - Is the communication concise?
 
+- What would the reader already know?
+
 # Apply
 
 - One category of refinement per iteration.
