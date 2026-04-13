@@ -63,8 +63,7 @@ UserPromptSubmit)
 Stop)
   ROLE='assistant'
   DEDUP="$SESSIONS/$SESSION_ID.notify"
-  HASH="$(jq -e --raw-output '.last_assistant_message' <<< "$JSON" | b3sum)"
-  HASH="${HASH%% *}"
+  HASH="$(jq -e --raw-output '.last_assistant_message' <<< "$JSON")"
 
   if [[ -s $DEDUP ]] && [[ $(< "$DEDUP") == "$HASH" ]]; then
     :
