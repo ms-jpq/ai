@@ -4,9 +4,13 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 
 # Discovery
 
-Find all source files relevant to the topic by extension and content. Exclude generated directories (`node_modules/`, `.venv/`, `var/tmp/`). Read every file — don't sample.
+- Find all source files relevant to the topic:
+  - By extension — files written in the topic's language.
+  - By content — files that embed or invoke it without being written in it.
+  - Exclude generated directories (`node_modules/`, `.venv/`, `var/tmp/`).
+  - Read every file — don't sample.
 
-Catalog what the code actually does. What patterns, idioms, conventions, and structures appear? Each finding is a claim about the codebase — cite files and lines. Rank by prevalence.
+- What recurring choices does the corpus make? Each finding is a specific, falsifiable claim — cite files and lines. Rank by prevalence.
 
 # Comparison
 

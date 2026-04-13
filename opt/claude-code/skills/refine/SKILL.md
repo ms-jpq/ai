@@ -8,15 +8,13 @@ description: Iteratively improve a rule or skill.
 
 # Iterate
 
-Evaluate the target against:
-
 - What are the ambiguities?
 
 - What are the internal contradictions?
 
 - Can any parts be fused?
 
-- What should the ranking by importance to a cold reader be?
+- Are the most important things first?
 
 - Is the communication concise?
 
