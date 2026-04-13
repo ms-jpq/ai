@@ -5,14 +5,15 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 # Discover
 
 - Find all source files relevant to the topic:
-  - By extension — when the topic maps to a file type.
+  - By filetype.
 
-  - By content — files that embed or invoke it without being written in it.
+  - By embedded content.
 
   - Read every file — don't sample.
 
 - What does the corpus consistently do?
   - Each finding is a specific, falsifiable claim about content.
+
   - Cite files and lines. Rank by prevalence.
 
 # Compare
