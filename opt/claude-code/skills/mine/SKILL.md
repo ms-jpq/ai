@@ -16,15 +16,15 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 
 # Compare
 
-- Load the matching rules file and memory as the baseline.
+- Omit this section when no rules file exists.
+
+- Load the matching rules and skills as the baseline.
 
 - **Discrepancies** — rules say X, corpus does Y.
 
 - **Undocumented** — pattern present in corpus, absent from rules.
 
 - **Speculative** — rule not reflected in the corpus.
-
-- Omit this section when no rules file exists.
 
 # Output
 
