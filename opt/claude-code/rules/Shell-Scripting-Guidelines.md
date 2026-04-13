@@ -18,8 +18,6 @@ set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 ```
 
-- Always add a shebang like `#!/usr/bin/env -S -- nodejs`, and mark the file executable with `chmod +x`.
-
 - Always use long form flags when available (`--delimiter` not `-d`) and `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
 - Prefer long streaming pipelines over intermediate variables or temp files. Each stage should do one thing.

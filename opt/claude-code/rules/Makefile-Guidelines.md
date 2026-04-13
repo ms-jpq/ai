@@ -67,11 +67,9 @@ task: $(VAR)/bin/tool
 
 - `$$` in recipes passes a literal `$` to bash — Make expands `$` first. Doubles to `$$$$` inside `eval`'d templates.
 
-- Order-only prerequisites (`|`) for directories and setup that must exist but should not trigger rebuilds.
-
 - Reusable command variables: `CURL := curl --fail --location --remove-on-error --create-dirs --no-progress-meter`.
 
-- `ifeq`/`ifneq`/`ifdef` for conditional blocks. `$(origin VAR)` to detect CLI overrides.
+- `$(origin VAR)` to detect CLI overrides.
 
 - Prefer Make text functions (`$(patsubst)`, `$(notdir)`, `$(dir)`, `$(subst)`, `$(addprefix)`, `$(filter-out)`) over `$(shell)` for string work. `$(shell)` only when the host is needed.
 

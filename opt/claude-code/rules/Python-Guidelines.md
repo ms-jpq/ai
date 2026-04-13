@@ -15,13 +15,11 @@ with nullcontext():
 
 - `from module import name` for all imports — never bare `import module`.
 
-- Type-annotate all signatures. Use the most generic type: `Sequence[T]` over `list[T]`, `Mapping[K, V]` over `dict[K, V]`, `Iterable[T]`/`AsyncIterable[T]` for inputs, `Iterator[T]`/`AsyncIterator[T]` for outputs.
+- Use the most generic type: `Sequence[T]` over `list[T]`, `Mapping[K, V]` over `dict[K, V]`, `Iterable[T]`/`AsyncIterable[T]` for inputs, `Iterator[T]`/`AsyncIterator[T]` for outputs.
 
 - Prefix non-exported module-level names with `_` — constants, functions, classes.
 
-- `pathlib.Path` over `os.path`. Library constants over string literals: `linesep` not `"\n"`, `sep` not `"/"`, `executable` not `"python3"`.
-
-- Literals and comprehensions over constructors: `[]` not `list()`, `{}` not `dict()`, `{*x}` not `set(x)`.
+- Library constants over string literals: `linesep` not `"\n"`, `sep` not `"/"`, `executable` not `"python3"`.
 
 - Prefer iterator-based solutions: `zip`, `enumerate`, `chain`, `product`, `starmap`, etc. over manual loops and index arithmetic.
 
