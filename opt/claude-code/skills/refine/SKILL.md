@@ -4,7 +4,7 @@ description: Sharpen understanding of a topic by re-reading the codebase against
 
 # Refine
 
-Re-examine the codebase for a topic and measure what you find against the current rules file. Tighten what's vague, correct what's drifted, add what's missing.
+Re-examine the codebase for a topic and measure what you find against the current rules file, memory, and context. Tighten what's vague, correct what's drifted, add what's missing.
 
 ## Input
 
@@ -16,11 +16,11 @@ Argument is a topic (e.g., "makefile", "shell", "python"). Match to an existing 
 
 Find all source files relevant to the topic. Exclude generated directories (`node_modules/`, `.venv/`, `var/tmp/`). Read every file — don't sample.
 
-### 2. Understand
+### 2. Reflect
 
 Catalog every pattern, idiom, convention, and structural choice you observe. Note what's deliberate — recurring patterns reflect intent.
 
-If a rules file already exists, compare what you learned against what's documented:
+Compare what you found against what's already documented:
 
 - **Discrepancies** — rules say X, code does Y.
 - **Undocumented** — pattern absent from rules.
