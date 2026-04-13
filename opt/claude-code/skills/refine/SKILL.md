@@ -30,10 +30,24 @@ Create or update the rules file. Each rule:
 
 ### Verify
 
-Re-read what you just wrote as a cold reader — no conversation history, no memory, no prior context. For each rule, ask: could this be misread? Does it under-specify? Would two competent readers produce different code from it?
+Re-read what you just wrote as a cold reader — no conversation history, no memory, no prior context.
+
+For each rule, ask:
+
+- Could this be misread?
+
+- Does it under-specify?
+
+- Would two competent readers produce different code from it?
 
 Flag every ambiguity. Revise. Re-read again. Repeat until a pass produces zero flags.
 
 ## Standard
 
-The rules file is the sole carrier of intent. A fresh Claude instance reading only the rules file must produce the same code the user would write. If a rule can be read two ways, it will be. Stop when every rule has exactly one interpretation.
+- The rules file is the sole carrier of intent.
+
+- A fresh Claude instance reading only the rules file must produce the same code the user would write.
+
+- If a rule can be read two ways, it will be.
+
+- Stop when every rule has exactly one interpretation.
