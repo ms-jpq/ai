@@ -13,19 +13,16 @@ if [[ -t 0 ]]; then
   exit
 fi
 
-TEE=(tee --)
-if [[ -v RECUR ]]; then
-  TEE+=(/dev/stderr)
-fi
-
-JSON="$("${TEE[@]}")"
+JSON="$(tee)"
 # "${SELF%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
 if jq -e '.notification_type == "idle_prompt"' <<< "$JSON" > /dev/null; then
   exit
 fi
 
-if ! [[ -v RECUR ]]; then
+if [[ -v RECUR ]]; then
+  jq . <<< "$JSON"
+else
   ~/.config/tmux/libexec/taint-inactive.sh
 
   if [[ -v TMUX_PANE ]]; then
