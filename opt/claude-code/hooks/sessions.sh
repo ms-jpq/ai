@@ -12,6 +12,9 @@ SESSIONS="$ROOT/var/sessions"
 MD="$SESSIONS/$SESSION_ID.md"
 
 WHICH_INDEX=("$BASE/../libexec/session-file.sh" "$PWD")
+NOTIFY_LEN=28
+# shellcheck disable=SC2016
+NOTIFY=(jq -e --compact-output --argjson n "$NOTIFY_LEN" '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
 
 case "$EVENT" in
 SessionStart)
@@ -68,8 +71,12 @@ Stop)
     :
   else
     printf -- '%s' "$HASH" > "$DEDUP"
-    jq -e --compact-output '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$BASE/notification.sh"
+    "${NOTIFY[@]}" --arg field 'last_assistant_message' <<< "$JSON" | "$BASE/notification.sh"
   fi
+  ;;
+StopFailure)
+  ROLE='assistant'
+  "${NOTIFY[@]}" --arg field 'error' <<< "$JSON" | "$BASE/notification.sh"
   ;;
 *)
   set -x
