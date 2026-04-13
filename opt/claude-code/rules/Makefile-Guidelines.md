@@ -38,12 +38,12 @@ include makelib/*.mk
 - Each `makelib/*.mk` owns one phony umbrella with a `clobber.<task>` wired as a prerequisite of `clobber`. Dot-separated phony namespacing throughout: `pkg.posix`, `clobber.docker`. `._` suffix for internal targets: `pkg._`.
 
 ```make
-.PHONY: helix clobber.helix
-clobber: clobber.helix
-all: helix
+.PHONY: task clobber.task
+clobber: clobber.task
+all: task
 
-clobber.helix:
-	rm -vfr -- $(HELIX)/languages.toml
+clobber.task:
+	rm -vfr -- '$(TMP)/task'
 ```
 
 - `$(VAR)` is the project-local prefix with FHS semantics: `$(VAR)/bin/` for executables. `$(TMP)` for scratch, typically `$(VAR)/tmp`. Dependencies are real file targets under `$(VAR)/*`.
@@ -52,13 +52,15 @@ clobber.helix:
 $(VAR):
 	mkdir -v -p -- '$@'
 
-$(VAR)/bin/shfmt: | $(VAR)/bin
-	URI='https://github.com/mvdan/sh/releases/latest/download/shfmt_$(V_SHFMT)_$(OS)_$(GOARCH)'
+$(VAR)/bin: | $(VAR)
+	mkdir -v -p -- '$@'
+
+$(VAR)/bin/tool: | $(VAR)/bin
 	$(CURL) --output '$@' -- "$$URI"
 	chmod +x '$@'
 
-shfmt: $(VAR)/bin/shfmt
-	git ls-files --deduplicate -z -- '*.*sh' | xargs -r -0 -- '$<' --write --
+task: $(VAR)/bin/tool
+	git ls-files --deduplicate -z -- '*.ext' | xargs -r -0 -- '$<' --
 ```
 
 - Single-quote automatic variables: `'$@'`, `'$<'`, `'$^'`, `'$|'`. `'$</subpath'` for paths relative to a directory prerequisite. `$|` references the first order-only prerequisite.
@@ -86,13 +88,13 @@ $(foreach item,$(DATA),$(eval $(call TEMPLATE,...)))
 - Structured data as whitespace-aligned tables inside `define`, packed with `tr -s -- ' ' '!'`, iterated via `$(foreach)` splitting on `!`. `META_2D` formalizes 2-column tables:
 
 ```make
-define REPOS
-$(OPT)/ai       https://github.com/ms-jpq/ai
-$(OPT)/fzf-tab  https://github.com/Aloxaf/fzf-tab
+define DATA
+$(OPT)/foo  https://example.com/foo.tar.gz
+$(OPT)/bar  https://example.com/bar.tar.gz
 endef
 
-REPOS := $(shell tr -s -- ' ' '!' <<<'$(REPOS)')
-$(call META_2D,REPOS,TEMPLATE)
+DATA := $(shell tr -s -- ' ' '!' <<<'$(DATA)')
+$(call META_2D,DATA,TEMPLATE)
 ```
 
 - Accumulator variables when multiple `.mk` files contribute to one target: `CLOBBER.FS += /etc/docker/*` across files, consumed by one recipe.
