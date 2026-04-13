@@ -1,3 +1,3 @@
 # YAML Guidelines
 
-- Prefer `.yml` to `.yaml`.
+- `.yml` over `.yaml`.
