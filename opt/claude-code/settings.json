@@ -422,8 +422,10 @@
         "/var/tmp/",
         "~/.cache/",
         "~/.config/gh/",
+        "~/.config/git/",
         "~/Library/Caches/",
         "~/Library/Preferences/gh/",
+        "~/Library/Preferences/git/",
         "."
       ],
       "allowWrite": [
