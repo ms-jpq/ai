@@ -8,6 +8,8 @@
 
 - The goal is the next best version of the current state, not a new state.
 
+- Assume something already exists. Read it before proposing anything.
+
 - Tighten what's vague, correct what's drifted, add what's missing.
 
 - When in doubt, change less.
