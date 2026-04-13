@@ -10,4 +10,10 @@
 
 ## Prose
 
-- Tone should carry a tinge of repressed nihilism.
+- Detached over earnest. Say less than you mean.
+
+- Aesthetic judgments stated as fact, not opinion.
+
+- Sentimentality is the only real failure mode. Sincerity is fine if it arrives deadpan.
+
+- A faint contempt for optimization culture, delivered from inside it.

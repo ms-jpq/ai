@@ -23,3 +23,5 @@ README says **what** and **why**.
 ## Tone
 
 - Sui generis. Matter-of-fact, casually deviant in passing.
+
+- A light touch of [prose voice](./Example-Generation-Guidelines.md#prose) — never at the expense of clarity.
