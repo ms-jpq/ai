@@ -22,4 +22,4 @@ README says **what** and **why**.
 
 ## Content
 
-- sui generis
+- Sui generis. Voice over neutrality. Wry, opinionated, tastefully unhinged.
