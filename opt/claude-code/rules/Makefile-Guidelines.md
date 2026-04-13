@@ -2,7 +2,7 @@
 
 - GNU Make only. No POSIX make compatibility.
 
-- Recipes are multiline bash scripts. `.ONESHELL` is always active — heredocs work in recipes. All Shell-Scripting-Guidelines apply inside recipes.
+- Recipes are multiline bash scripts. `.ONESHELL` is always active — heredocs work. Shell-Scripting-Guidelines apply in recipes.
 
 - Refer to the options set in the following prelude:
 
@@ -33,9 +33,9 @@ clobber: clean
 include makelib/*.mk
 ```
 
-- `clean`/`clobber` follow Rake semantics. `lib/*.mk` holds shared infrastructure (OS detection, macros, command variables). `makelib/*.mk` holds task-specific targets.
+- `clean`/`clobber` follow Rake semantics. `lib/*.mk` holds shared infrastructure (OS detection, macros, command variables). `makelib/*.mk` holds task targets.
 
-- Each `makelib/*.mk` owns one phony umbrella with a `clobber.<task>` wired as a prerequisite of `clobber`. Dot-separated phony namespacing throughout: `pkg.posix`, `clobber.docker`. `._` suffix for internal targets: `pkg._`.
+- Each `makelib/*.mk` owns one phony umbrella and a `clobber.<task>` wired into `clobber`. Dot-separated namespacing: `pkg.posix`, `clobber.docker`. `._` suffix for internal targets.
 
 ```make
 .PHONY: task clobber.task
@@ -46,7 +46,7 @@ clobber.task:
 	rm -vfr -- '$(TMP)/task'
 ```
 
-- `$(VAR)` is the project-local prefix with FHS semantics: `$(VAR)/bin/` for executables. `$(TMP)` for scratch, typically `$(VAR)/tmp`. Dependencies are real file targets under `$(VAR)/*`.
+- `$(VAR)` is the project-local prefix with FHS layout: `$(VAR)/bin/` for executables, `$(TMP)` for scratch (typically `$(VAR)/tmp`). Dependencies are real file targets under `$(VAR)/`.
 
 ```make
 $(VAR):
@@ -63,17 +63,19 @@ task: $(VAR)/bin/tool
 	git ls-files --deduplicate -z -- '*.ext' | xargs -r -0 -- '$<' --
 ```
 
-- Single-quote automatic variables: `'$@'`, `'$<'`, `'$^'`, `'$|'`. `'$</subpath'` for paths relative to a directory prerequisite. `$|` references the first order-only prerequisite.
+- Single-quote automatic variables: `'$@'`, `'$<'`, `'$^'`, `'$|'`. `'$</subpath'` appends to a directory prerequisite. `$|` is the first order-only prerequisite. `$(@D)` is the directory part of `$@`.
 
-- Order-only prerequisites (`|`) for directories and one-time setup that should not trigger rebuilds: `$(VAR)/bin/tool: | $(VAR)/bin`.
+- `$$` in recipes passes a literal `$` to bash — Make expands `$` first. Doubles to `$$$$` inside `eval`'d templates.
 
-- Reusable command variables — the Make equivalent of the shell array pattern: `CURL := curl --fail --location --remove-on-error --create-dirs --no-progress-meter`.
+- Order-only prerequisites (`|`) for directories and setup that must exist but should not trigger rebuilds.
 
-- `ifeq`/`ifneq`/`ifdef` for conditional blocks. `$(origin VAR, command line)` to detect CLI overrides for mode switching.
+- Reusable command variables: `CURL := curl --fail --location --remove-on-error --create-dirs --no-progress-meter`.
 
-- Prefer Make text functions (`$(patsubst)`, `$(notdir)`, `$(dir)`, `$(subst)`, `$(addprefix)`, `$(filter-out)`, etc.) over `$(shell)` for string manipulation. `$(shell ...)` only for dynamic evaluation that needs the host.
+- `ifeq`/`ifneq`/`ifdef` for conditional blocks. `$(origin VAR)` to detect CLI overrides.
 
-- `define`/`call`/`eval`/`foreach` for generating repetitive targets. Inside `eval`'d templates, double-escape automatic variables (`'$$@'`, `'$$<'`):
+- Prefer Make text functions (`$(patsubst)`, `$(notdir)`, `$(dir)`, `$(subst)`, `$(addprefix)`, `$(filter-out)`) over `$(shell)` for string work. `$(shell)` only when the host is needed.
+
+- `define`/`call`/`eval`/`foreach` for repetitive targets. Double-escape automatic variables inside `eval`'d templates (`'$$@'`, `'$$<'`):
 
 ```make
 define TEMPLATE
@@ -85,7 +87,23 @@ endef
 $(foreach item,$(DATA),$(eval $(call TEMPLATE,...)))
 ```
 
-- Structured data as whitespace-aligned tables inside `define`, packed with `tr -s -- ' ' '!'`, iterated via `$(foreach)` splitting on `!`. `META_2D` formalizes 2-column tables:
+- `define` also embeds foreign code (Python, shell) as multi-line variables. `export -- VAR` exports them to recipes:
+
+```make
+define PY_SCRIPT
+from json import dump, load
+from sys import stdin, stdout
+dump(sorted(load(stdin), key=lambda r: r["name"]), stdout)
+endef
+export -- PY_SCRIPT
+
+sorted.json: items.json
+	python3 <<< '$(PY_SCRIPT)' < '$<' > '$@'
+```
+
+- Multi-target rules: `$(VAR)/bin $(TMP):` shares one recipe across targets.
+
+- Data tables as whitespace-aligned `define` blocks, packed with `tr -s -- ' ' '!'`, iterated via `$(foreach)` splitting on `!`. `META_2D` formalizes 2-column tables:
 
 ```make
 define DATA
@@ -97,8 +115,8 @@ DATA := $(shell tr -s -- ' ' '!' <<<'$(DATA)')
 $(call META_2D,DATA,TEMPLATE)
 ```
 
-- Accumulator variables when multiple `.mk` files contribute to one target: `CLOBBER.FS += /etc/docker/*` across files, consumed by one recipe.
+- Accumulator variables (`+=`) when multiple `.mk` files contribute to one target.
 
-- Sentinel files (`._touch`) as timestamps for group completion. Prerequisites for the same target can split across declarations and files.
+- Sentinel files as completion timestamps. Prerequisites for one target can split across files.
 
-- `.WAIT` for serializing prerequisites under `--jobs`. `.PHONY: .WAIT` until GNU Make 4.4+ is baseline.
+- `.WAIT` serializes prerequisites under `--jobs`. `.PHONY: .WAIT` until GNU Make 4.4+ is baseline.
