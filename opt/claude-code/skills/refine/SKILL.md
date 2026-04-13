@@ -12,18 +12,28 @@ Argument is a topic (e.g., "makefile", "shell", "python"). Match to an existing 
 
 ## Process
 
-If no findings are present in conversation context, run `/mine` for the topic first. Ask before writing.
+If no findings are present in conversation context, run `/mine` for the topic first.
 
-Create or update the rules file. Then compress — repeat until stable:
+Ask before writing. Present proposed changes and wait for approval.
 
-- **Rules** lead with the what, not the why. One idea per bullet.
+### Write
 
-- **Examples** are generic. No project-specific names, paths, or dependencies.
+Create or update the rules file. Each rule:
 
-- **Cut the obvious.** Only keep rules that redirect behavior.
+- Leads with the what, not the why. One idea per bullet.
 
-- **Language** is concise. Cut filler and redundant explanations.
+- Uses generic examples. No project-specific names, paths, or dependencies.
+
+- Redirects behavior. Cut rules a competent default already satisfies.
+
+- Is concise. Cut filler and redundant explanations.
+
+### Verify
+
+Re-read what you just wrote as a cold reader — no conversation history, no memory, no prior context. For each rule, ask: could this be misread? Does it under-specify? Would two competent readers produce different code from it?
+
+Flag every ambiguity. Revise. Re-read again. Repeat until a pass produces zero flags.
 
 ## Standard
 
-The rules file is the sole carrier of intent. A fresh Claude instance reading only the rules file — no conversation history, no memory, no examples to reference — must produce the same code the user would write. If a rule can be read two ways, it will be. Iterate until every rule has exactly one interpretation.
+The rules file is the sole carrier of intent. A fresh Claude instance reading only the rules file must produce the same code the user would write. If a rule can be read two ways, it will be. Stop when every rule has exactly one interpretation.
