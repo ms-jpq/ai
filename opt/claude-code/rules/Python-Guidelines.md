@@ -15,19 +15,19 @@ with nullcontext():
 
 - `from module import name` for all imports — never bare `import module`.
 
-- Use the most generic type: `Sequence[T]` over `list[T]`, `Mapping[K, V]` over `dict[K, V]`, `Iterable[T]`/`AsyncIterable[T]` for inputs, `Iterator[T]`/`AsyncIterator[T]` for outputs.
+- Most generic type wins. `Sequence[T]` over `list[T]`, `Mapping[K, V]` over `dict[K, V]`, `Iterable[T]`/`AsyncIterable[T]` for inputs, `Iterator[T]`/`AsyncIterator[T]` for outputs.
 
 - Prefix non-exported module-level names with `_` — constants, functions, classes.
 
 - Library constants over string literals: `linesep` not `"\n"`, `sep` not `"/"`, `executable` not `"python3"`.
 
-- Prefer iterator-based solutions: `zip`, `enumerate`, `chain`, `product`, `starmap`, etc. over manual loops and index arithmetic.
+- Iterators over manual loops and index arithmetic: `zip`, `enumerate`, `chain`, `product`, `starmap`, etc.
 
-- `getLogger()` over `print`. Always call `getLogger()` at the site of logging — never store or pass a logger. Always `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
+- `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
 
 - `...` for noop bodies, not `pass`. `suppress()` over bare `try/except`. `with nullcontext(): ...` to group related statements. No `if __name__ == "__main__":` guard — scripts execute at module scope.
 
-- Prefer frozen dataclasses (`@dataclass(frozen=True)`) for data types.
+- `@dataclass(frozen=True)` for data types.
 
 - `from argparse import ArgumentParser, Namespace`. Parse into a `Namespace`, destructure into typed locals.
   - Spell out keyword arguments: `action=`, `type=`, `default=`, `nargs=`, `required=`.
