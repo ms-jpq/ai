@@ -6,8 +6,6 @@ README says **what** and **why**.
 
 - Show before tell — examples before explanation.
 
-- Headers are sui generis, not templated.
-
 - Bullets over paragraphs.
 
 - Code blocks over prose for configuration and commands.
@@ -21,3 +19,7 @@ README says **what** and **why**.
 - Non-root `README.md` contains a navigation table linking to other `*.md` files in that directory.
 
 - Every `*.md` page is linked from a parent or sibling `README.md`. Always relative paths.
+
+## Content
+
+- sui generis
