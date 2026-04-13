@@ -11,9 +11,7 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 
   - Read every file — don't sample.
 
-- What does the corpus consistently do?
-  - Each finding is a specific, falsifiable claim about content.
-
+- What patterns appear?
   - Cite files and lines. Rank by prevalence.
 
 # Compare
