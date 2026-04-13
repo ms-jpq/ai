@@ -34,4 +34,5 @@ Create or update the rules file. Then compress — repeat until stable:
 
 - **Rules** lead with the what, not the why. One idea per bullet.
 - **Examples** are generic. No project-specific names, paths, or dependencies.
+- **Cut the obvious.** Only keep rules that redirect behavior.
 - **Language** is concise. Cut filler and redundant explanations.
