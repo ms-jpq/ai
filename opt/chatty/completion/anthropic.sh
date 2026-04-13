@@ -11,7 +11,7 @@ CURL=(
   --header "X-API-Key: $ANTHROPIC_API_KEY"
   --no-buffer
   --json @-
-  -- 'https://api.anthropic.com/v1/messages'
+  -- "${ANTHROPIC_BASE_URL:-"https://api.anthropic.com"}/v1/messages"
 )
 
 read -r -d '' -- JQ <<- 'JQ' || true

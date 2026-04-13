@@ -9,7 +9,7 @@ CURL=(
   --header "Authorization: Bearer $XAI_API_KEY"
   --no-buffer
   --json @-
-  -- 'https://api.x.ai/v1/chat/completions'
+  -- "${XAI_BASE_URL:-"https://api.x.ai"}/v1/chat/completions"
 )
 
 PARSE=(

@@ -9,7 +9,7 @@ CURL=(
   --no-buffer
   --header "Authorization: Bearer $OPENAI_API_KEY"
   --json @-
-  -- 'https://api.openai.com/v1/responses'
+  -- "${OPENAI_BASE_URL:-"https://api.openai.com"}/v1/responses"
 )
 
 PARSE=(

@@ -8,7 +8,7 @@ CURL=(
   'deepmind'
   --no-buffer
   --json @-
-  -- "https://generativelanguage.googleapis.com/v1beta/models/$GEMINI_MODEL:streamGenerateContent?key=$GOOGLE_API_KEY"
+  -- "${GOOGLE_BASE_URL:-"https://generativelanguage.googleapis.com"}/v1beta/models/$GEMINI_MODEL:streamGenerateContent?key=$GOOGLE_API_KEY"
 )
 
 PREPARSE=(
