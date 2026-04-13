@@ -16,6 +16,8 @@ description: Iteratively improve a rule or skill.
 
 - Are the most important things first?
 
+- Is the communication specific?
+
 - Is the communication concise?
 
 - What would the reader already know?
