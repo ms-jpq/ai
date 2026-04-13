@@ -427,7 +427,8 @@
         "~/Library/Preferences/gh/",
         "~/Library/Preferences/git/",
         "./",
-        "./.git/"
+        "./.git/",
+        "./.gitmodules"
       ],
       "allowWrite": [
         "/tmp/",
@@ -438,7 +439,8 @@
         "~/Library/Caches/",
         "~/Library/Preferences/gh/",
         "./",
-        "./.git/"
+        "./.git/",
+        "./.gitmodules"
       ],
       "denyRead": [
         "/boot/",
