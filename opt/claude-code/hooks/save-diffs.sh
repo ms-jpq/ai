@@ -33,7 +33,7 @@ PreToolUse)
     ;;
   esac
   ;;
-PostToolUse)
+PostToolUse | PostToolUseFailure)
   find "$ENTRY_DIR" -mindepth 1 -delete
   ;;
 *)
