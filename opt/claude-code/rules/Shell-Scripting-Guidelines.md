@@ -96,13 +96,6 @@ EOF >&2
   - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
   - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
 
-```bash
-tee <<- EOF
-$VARIABLE_1
-... $VARIABLE_2
-EOF >&2
-```
-
 - `exec --` when no code follows.
 
 - Flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
