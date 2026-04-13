@@ -4,7 +4,7 @@ description: Survey the codebase for a topic. Report what the code does vs. what
 
 # Mine
 
-Argument is a topic (e.g., "makefile", "shell", "python"). Match to an existing rules file if one fits.
+Argument is a topic (e.g., "makefile", "shell", "python"). Load the matching rules file as the baseline for comparison.
 
 ## Read
 
