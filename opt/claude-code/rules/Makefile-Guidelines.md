@@ -4,7 +4,7 @@
 
 - Recipes are multiline bash scripts. `.ONESHELL` is always active — heredocs work. Shell-Scripting-Guidelines apply in recipes.
 
-- Refer to the options set in the following prelude:
+- Standard prelude:
 
 ```make
 MAKEFLAGS += --check-symlink-times
@@ -33,7 +33,7 @@ clobber: clean
 include makelib/*.mk
 ```
 
-- `clean`/`clobber` follow Rake semantics. `makelib/*.mk` holds task targets.
+- `clean`/`clobber` follow Ruby Rake semantics. `makelib/*.mk` holds task targets.
 
 - Each `makelib/*.mk` owns one phony umbrella and a `clobber.<task>` wired into `clobber`. Dot-separated namespacing: `pkg.posix`, `clobber.docker`. `._` suffix for internal targets.
 
@@ -71,7 +71,7 @@ task: $(VAR)/bin/tool
 
 - `$(origin VAR)` to detect CLI overrides.
 
-- Prefer Make text functions (`$(patsubst)`, `$(notdir)`, `$(dir)`, `$(subst)`, `$(addprefix)`, `$(filter-out)`) over `$(shell)` for string work. `$(shell)` only when the host is needed.
+- Make text functions (`$(patsubst)`, `$(notdir)`, `$(dir)`, `$(subst)`, `$(addprefix)`, `$(filter-out)`) over `$(shell)` for string work. `$(shell)` only when the host is needed.
 
 - `define`/`call`/`eval`/`foreach` for repetitive targets. Double-escape automatic variables inside `eval`'d templates (`'$$@'`, `'$$<'`):
 
