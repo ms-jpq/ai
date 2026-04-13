@@ -34,10 +34,6 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not install system packages'
   ;;
-'bash '* | 'dash '* | 'fish '* | 'sh '* | 'zsh '*)
-  DECISION=ask
-  REASON='try again, and consider not doing nested shell scripts'
-  ;;
 'nohup '* | 'crontab '* | 'tmux '* | 'screen '* | 'zellij '*)
   DECISION=deny
   REASON='do not create persistent processes'
