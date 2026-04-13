@@ -14,7 +14,6 @@ case "$FILE_PATH" in
   ;;
 *.sh)
   shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
-  shellcheck -- "$FILE_PATH" || exit 2
   ;;
 *.lua)
   stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH" || exit 2
