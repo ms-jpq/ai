@@ -22,4 +22,4 @@ README says **what** and **why**.
 
 ## Content
 
-- Sui generis. Voice over neutrality. Wry, opinionated, casually deviant.
+- Sui generis. Matter-of-fact, casually deviant in passing.
