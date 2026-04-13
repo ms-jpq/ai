@@ -1,10 +1,10 @@
 ---
-description: Sharpen understanding of a topic by re-reading the codebase against existing rules and memory. Tighten, correct, or extend the rules file so future sessions stay accurate.
+description: Update or create a rules file from findings in conversation context. Tighten what's vague, correct what's drifted, add what's missing. Pair with /mine to gather findings first.
 ---
 
 # Refine
 
-Re-examine the codebase for a topic and measure what you find against the current rules file, memory, and context. Tighten what's vague, correct what's drifted, add what's missing.
+Take findings — from `/mine`, conversation context, or user input — and codify them into a rules file. Tighten what's vague, correct what's drifted, add what's missing.
 
 ## Input
 
@@ -12,23 +12,7 @@ Argument is a topic (e.g., "makefile", "shell", "python"). Match to an existing 
 
 ## Process
 
-### 1. Read
-
-Find all source files relevant to the topic. Exclude generated directories (`node_modules/`, `.venv/`, `var/tmp/`). Read every file — don't sample.
-
-### 2. Reflect
-
-Catalog every pattern, idiom, convention, and structural choice you observe. Note what's deliberate — recurring patterns reflect intent.
-
-Compare what you found against what's already documented:
-
-- **Discrepancies** — rules say X, code does Y.
-- **Undocumented** — pattern absent from rules.
-- **Speculative** — rule not reflected in code.
-
-Cite files and lines. Rank by prevalence. Report what you found and ask before writing.
-
-### 3. Codify
+If no findings are present in conversation context, run `/mine` for the topic first. Ask before writing.
 
 Create or update the rules file. Then compress — repeat until stable:
 
