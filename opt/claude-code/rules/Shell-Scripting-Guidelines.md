@@ -81,13 +81,20 @@ else
 fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 ```
 
-- Redirects over `echo`/`printf` pipes.
-  - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
-  - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
-
 - `printf -- '%s' ...` over `echo` for single statements.
   - `printf -v VAR -- '<fmt>' args` to assign formatted output without a subshell.
   - Heredocs for multi-line statements with interpolations:
+
+```bash
+tee <<- EOF
+$VARIABLE_1
+... $VARIABLE_2
+EOF >&2
+```
+
+- Redirects over `echo`/`printf` pipes.
+  - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
+  - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
 
 ```bash
 tee <<- EOF
