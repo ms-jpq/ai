@@ -2,7 +2,11 @@
 description: Iteratively improve a rule or skill.
 ---
 
-# Loop
+# Preparation
+
+- Break prose into point form before iterating. One claim per bullet.
+
+# Iterate
 
 Evaluate the target against:
 
