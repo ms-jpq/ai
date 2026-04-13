@@ -2,7 +2,7 @@
 description: Survey the workspace for a topic. Report patterns in the corpus.
 ---
 
-# Discovery
+# Discover
 
 - Find all source files relevant to the topic:
   - By extension — when the topic maps to a file type.
@@ -11,9 +11,11 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 
   - Read every file — don't sample.
 
-- What does the corpus consistently do? Each finding is a specific, falsifiable claim about content — cite files and lines. Rank by prevalence.
+- What does the corpus consistently do?
+  - Each finding is a specific, falsifiable claim about content.
+  - Cite files and lines. Rank by prevalence.
 
-# Comparison
+# Compare
 
 - Load the matching rules file and memory as the baseline.
 
@@ -23,8 +25,8 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 
 - **Speculative** — rule not reflected in the corpus.
 
+- Omit this section when no rules file exists.
+
 # Output
 
-- Write `<topic>.md` in this skill's directory.
-
-- Discovery stands alone — Comparison is omitted when no rules file exists.
+- Write `<topic>.md` in the current working directory.
