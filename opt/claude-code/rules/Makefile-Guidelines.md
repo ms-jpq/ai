@@ -33,7 +33,7 @@ clobber: clean
 include makelib/*.mk
 ```
 
-- `clean`/`clobber` follow Rake semantics. `lib/*.mk` holds shared infrastructure (OS detection, macros, command variables). `makelib/*.mk` holds task targets.
+- `clean`/`clobber` follow Rake semantics. `makelib/*.mk` holds task targets.
 
 - Each `makelib/*.mk` owns one phony umbrella and a `clobber.<task>` wired into `clobber`. Dot-separated namespacing: `pkg.posix`, `clobber.docker`. `._` suffix for internal targets.
 
@@ -46,7 +46,7 @@ clobber.task:
 	rm -vfr -- '$(TMP)/task'
 ```
 
-- `$(VAR)` is the project-local prefix with FHS layout: `$(VAR)/bin/` for executables, `$(TMP)` for scratch (typically `$(VAR)/tmp`). Dependencies are real file targets under `$(VAR)/`.
+- `$(VAR)` is the project-local prefix with Linux FHS layout: `$(VAR)/bin/` for executables, `$(TMP)` for scratch (typically `$(VAR)/tmp`). Dependencies are real file targets under `$(VAR)/`.
 
 ```make
 $(VAR):
