@@ -60,7 +60,16 @@ UserPromptSubmit)
   ;;
 Stop)
   ROLE='assistant'
-  jq -e --compact-output '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$BASE/notification.sh"
+  DEDUP="$SESSIONS/$SESSION_ID.notify"
+  HASH="$(jq -e --raw-output '.last_assistant_message' <<< "$JSON" | b3sum)"
+  HASH="${HASH%% *}"
+
+  if [[ -s $DEDUP ]] && [[ $(< "$DEDUP") == "$HASH" ]]; then
+    :
+  else
+    printf -- '%s' "$HASH" > "$DEDUP"
+    jq -e --compact-output '{ title: null, message: (.last_assistant_message | if length > 28 then .[:28] + "…" else . end) }' <<< "$JSON" | "$BASE/notification.sh"
+  fi
   ;;
 *)
   set -x
