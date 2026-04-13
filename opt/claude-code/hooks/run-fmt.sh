@@ -3,6 +3,8 @@
 set -o pipefail
 
 JSON="$(tee)"
+# "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+
 FILE_PATH="$(jq -e --raw-output '.tool_input.file_path' <<< "$JSON")"
 
 case "$FILE_PATH" in

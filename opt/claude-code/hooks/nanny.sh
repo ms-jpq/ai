@@ -3,6 +3,8 @@
 set -o pipefail
 
 JSON="$(tee)"
+# "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+
 CMD_LINE="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
 
 read -r -d '' -- JQ <<- 'JQ' || true

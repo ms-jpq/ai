@@ -3,6 +3,8 @@
 set -o pipefail
 
 JSON="$(tee)"
+# "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
@@ -14,8 +16,6 @@ MD="$SESSIONS/$SESSION_ID.md"
 WHICH_INDEX=("$BASE/../libexec/session-file.sh" "$PWD")
 # shellcheck disable=SC2016
 NOTIFY=(jq -e --compact-output --argjson n 28 '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
-
-"$BASE/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
 case "$EVENT" in
 SessionStart)

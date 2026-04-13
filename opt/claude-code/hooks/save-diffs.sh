@@ -3,6 +3,8 @@
 set -o pipefail
 
 JSON="$(tee)"
+# "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 TOOL_NAME="$(jq -e --raw-output '.tool_name' <<< "$JSON")"
