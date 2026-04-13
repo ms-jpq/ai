@@ -17,6 +17,13 @@ If no findings are present in conversation context, run `/mine` for the topic fi
 Create or update the rules file. Then compress — repeat until stable:
 
 - **Rules** lead with the what, not the why. One idea per bullet.
+
 - **Examples** are generic. No project-specific names, paths, or dependencies.
+
 - **Cut the obvious.** Only keep rules that redirect behavior.
+
 - **Language** is concise. Cut filler and redundant explanations.
+
+## Standard
+
+The rules file is the sole carrier of intent. A fresh Claude instance reading only the rules file — no conversation history, no memory, no examples to reference — must produce the same code the user would write. If a rule can be read two ways, it will be. Iterate until every rule has exactly one interpretation.
