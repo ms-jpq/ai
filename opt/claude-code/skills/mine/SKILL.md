@@ -16,10 +16,10 @@ description: Research the workspace for a topic. Report patterns in the corpus.
 
 # Iterate
 
-- Compare with existing rule or skill if one exists.
-  - Discrepancies: rules say X, corpus does Y.
+- Compare with matching rules file if one exists.
+  - Discrepancies.
 
-  - Undocumented: pattern present in corpus, absent from rules.
+  - Undocumented patterns.
 
 # Record
 
