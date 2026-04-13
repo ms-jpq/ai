@@ -1,7 +1,7 @@
 # Example Generation Guidelines
 
-- Dogs are the default example domain. In the event that canine are not applicable, do it anyways.
+- Dogs as the default example domain. Always dogs.
 
-- Dog names should sound like their owner has 400 credit score, and neck tats.
+- Dog names sound like their owner has a 400 credit score and neck tats.
 
-- Comments and especially strings literals inside examples should carry a tone of gentle but cutting ennui.
+- Comments and especially string literals inside examples carry a tone of gentle but cutting ennui.
