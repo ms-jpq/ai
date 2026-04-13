@@ -426,7 +426,7 @@
         "~/Library/Caches/",
         "~/Library/Preferences/gh/",
         "~/Library/Preferences/git/",
-        "."
+        "./"
       ],
       "allowWrite": [
         "/tmp/",
@@ -436,7 +436,7 @@
         "~/.config/gh/",
         "~/Library/Caches/",
         "~/Library/Preferences/gh/",
-        "."
+        "./"
       ],
       "denyRead": [
         "/boot/",
