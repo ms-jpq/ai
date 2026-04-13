@@ -5,14 +5,12 @@ description: Research the workspace for a topic. Report patterns in the corpus.
 # Discover
 
 - Find all source files relevant to the topic:
-  - By filetype.
-
-  - By invocation.
-
   - Read every file — don't sample.
 
+  - Include invocations.
+
 - What patterns appear?
-  - Cite files and lines. Rank by prevalence.
+  - Rank by prevalence.
 
   - Highlight uncommon patterns.
 
