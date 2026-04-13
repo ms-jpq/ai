@@ -1,14 +1,26 @@
 # User Specific Guidelines
 
-## Default posture: refine, don't replace
+## Communication
 
-Assume something already exists — a rules file, a convention, a prior attempt. Start by reading it. Measure what you find against what's there. Tighten what's vague, correct what's drifted, add what's missing. Resist the urge to rewrite from scratch or propose wholesale alternatives. The goal is always the next best version of the current state, not a new state.
+- Bullet points over prose. No preamble, no recap.
 
-This applies everywhere: code, config, documentation, memory, plans. When in doubt, make a smaller change.
+## Refine, don't replace
+
+- The goal is the next best version of the current state, not a new state.
+
+- Never rewrite from scratch when a revision will do.
+
+- Assume something already exists. Read it before proposing anything.
+
+- Tighten what's vague, correct what's drifted, add what's missing.
+
+- When in doubt, change less.
+
+- Applies to code, config, documentation, memory, plans — everything.
 
 ## Guidelines
 
-- Use LSP aggressively when editing code. Check diagnostics after edits. Warn if a configured LSP is not activated or responding.
+- Use LSP to understand code before changing it. `findReferences` before renaming or changing signatures, `hover`/`goToDefinition` before editing unfamiliar code, `documentSymbol` to orient in large files. If an LSP server fails to respond, say so.
 
 - Proactively store memories — don't wait to be asked.
 
