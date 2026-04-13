@@ -26,7 +26,7 @@ shopt -s dotglob nullglob extglob globstar
 "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
 ```
 
-- Capture reusable arguments in an array, i.e. `GREP=(grep --recursive ...)`, `${GREP[@]}`.
+- Reusable arguments in arrays: `GREP=(grep --recursive ...)`, `${GREP[@]}`.
   - Instead of `\ ` escaping for long / many arguments
   - Instead of functions for code reuse
   - When branches invoke the same command with different arguments
