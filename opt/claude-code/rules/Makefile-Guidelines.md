@@ -37,7 +37,7 @@ include makelib/*.mk
 
 - Each `makelib/*.mk` file owns one task — a phony umbrella grouping related subtargets, with a `<task>.clean` wired as a prerequisite of the global `clean`.
 
-- `$(VAR)` is the project-local prefix with FHS semantics: `$(VAR)/bin/` for executables, `$(VAR)/tmp/` for scratch. Dependencies are real file targets under `$(VAR)/*`; other targets depend on them via prerequisites.
+- `$(VAR)` is the project-local prefix with FHS semantics: `$(VAR)/bin/` for executables, `$(VAR)/tmp/` for scratch. Dependencies are real file targets under `$(VAR)/*`.
 
 ```make
 $(VAR):
@@ -56,8 +56,3 @@ shfmt: $(VAR)/bin/shfmt
 ```
 
 - Single-quote automatic variables: `'$@'`, `'$<'`, `'$^'`. `'$</subpath'` for paths relative to a directory prerequisite.
-
-```make
-mypy: ./.venv/bin
-	git ls-files --deduplicate -z -- '*.py' | xargs -0 -- '$</mypy' --
-```
