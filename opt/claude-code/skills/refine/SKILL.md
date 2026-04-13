@@ -1,46 +1,45 @@
 ---
-description: Update or create a rules file from findings in conversation context. Tighten what's vague, correct what's drifted, add what's missing. Pair with /mine to gather findings first.
+description: Iteratively distill codebase findings into a rules file through conversation. Propose, ask, revise, repeat until unambiguous. Pair with /mine to gather findings first.
 ---
 
 # Refine
 
-Take findings — from `/mine`, conversation context, or user input — and codify them into a rules file. Tighten what's vague, correct what's drifted, add what's missing.
+Distill findings into a rules file through iterative conversation with the user. Never write without asking. Never stop asking until every rule is unambiguous.
 
 ## Input
 
 Argument is a topic (e.g., "makefile", "shell", "python"). Match to an existing rules file if one fits. Create one if not.
 
-## Process
-
 If no findings are present in conversation context, run `/mine` for the topic first.
 
-Ask before writing. Present proposed changes and wait for approval.
+## Loop
 
-### Write
+Each pass:
 
-Create or update the rules file. Each rule:
+1. **Propose** — present candidate rules or changes. Explain what each captures and why it matters.
 
-- Leads with the what, not the why. One idea per bullet.
+2. **Ask** — surface ambiguities, trade-offs, and gaps. Ask the user to resolve them. Do not guess.
 
-- Uses generic examples. No project-specific names, paths, or dependencies.
+3. **Revise** — incorporate the user's answer. Tighten language. Cut what a competent default already satisfies.
 
-- Redirects behavior. Cut rules a competent default already satisfies.
+4. **Check** — re-read as a cold reader. For each rule, ask:
+   - Could this be misread?
 
-- Is concise. Cut filler and redundant explanations.
+   - Does it under-specify?
 
-### Verify
+   - Would two readers produce different output from it?
 
-Re-read what you just wrote as a cold reader — no conversation history, no memory, no prior context.
+   If any answer is yes, go to step 1 with the flagged rules.
 
-For each rule, ask:
+Repeat until a pass produces zero flags.
 
-- Could this be misread?
+## Rules quality
 
-- Does it under-specify?
+- One idea per bullet. Lead with the what.
 
-- Would two competent readers produce different output from it?
+- Examples are generic — no project-specific names, paths, or dependencies.
 
-Flag every ambiguity. Revise. Re-read again. Repeat until a pass produces zero flags.
+- Cut filler. Cut obvious. Only keep what redirects behavior.
 
 ## Standard
 
