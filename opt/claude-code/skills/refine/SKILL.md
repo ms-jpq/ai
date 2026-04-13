@@ -38,7 +38,7 @@ For each rule, ask:
 
 - Does it under-specify?
 
-- Would two competent readers produce different code from it?
+- Would two competent readers produce different output from it?
 
 Flag every ambiguity. Revise. Re-read again. Repeat until a pass produces zero flags.
 
@@ -46,7 +46,7 @@ Flag every ambiguity. Revise. Re-read again. Repeat until a pass produces zero f
 
 - The rules file is the sole carrier of intent.
 
-- A fresh Claude instance reading only the rules file must produce the same code the user would write.
+- A fresh Claude instance reading only the rules file must produce the same output the user would write.
 
 - If a rule can be read two ways, it will be.
 
