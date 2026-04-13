@@ -36,6 +36,10 @@ if [[ -v RECUR ]]; then
   TEE+=(/dev/stderr)
 fi
 JSON="$("${TEE[@]}")"
+if jq -e '.notification_type == "idle_prompt"' --exit-status --quiet <<< "$JSON" 2> /dev/null; then
+  exit
+fi
+
 # shellcheck disable=SC2154
 FALLBACK="Chatty ~ $(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
 TITLE="$(jq -e --raw-output --arg fallback "$FALLBACK" '.title // $fallback' <<< "$JSON")"
