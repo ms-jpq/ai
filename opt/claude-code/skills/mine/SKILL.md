@@ -1,22 +1,18 @@
 ---
-description: Survey the codebase for a topic. Catalog every pattern, idiom, and convention found. Compare against existing rules and memory. Report discrepancies — don't write rules.
+description: Survey the codebase for a topic. Report what the code does vs. what the rules say.
 ---
 
-# Input
+# Mine
 
 Argument is a topic (e.g., "makefile", "shell", "python"). Match to an existing rules file if one fits.
 
-# Process
+## Read
 
-## 1. Read
+Find all source files relevant to the topic by extension and content. Exclude generated directories (`node_modules/`, `.venv/`, `var/tmp/`). Read every file — don't sample.
 
-Find all source files relevant to the topic. Exclude generated directories (`node_modules/`, `.venv/`, `var/tmp/`). Read every file — don't sample.
+## Report
 
-## 2. Reflect
-
-Catalog every pattern, idiom, convention, and structural choice you observe. Note what's deliberate — recurring patterns reflect intent.
-
-Compare what you found against what's already documented:
+Compare what you found against existing rules and memory:
 
 - **Discrepancies** — rules say X, code does Y.
 
@@ -24,4 +20,4 @@ Compare what you found against what's already documented:
 
 - **Speculative** — rule not reflected in code.
 
-Cite files and lines. Rank by prevalence. Report what you found.
+Cite files and lines. Rank by prevalence.
