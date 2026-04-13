@@ -14,14 +14,16 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 
 # Comparison
 
-Load the matching rules file as the baseline. Compare discovery findings against rules and memory:
+- Load the matching rules file and memory as the baseline.
 
-- **Discrepancies** — rules say X, code does Y.
+- **Discrepancies** — rules say X, corpus does Y.
 
-- **Undocumented** — pattern present in code, absent from rules.
+- **Undocumented** — pattern present in corpus, absent from rules.
 
-- **Speculative** — rule not reflected in any code.
+- **Speculative** — rule not reflected in any corpus.
 
 # Output
 
-Write `<topic>.md` in this skill's directory. Two sections: **Discovery** (the inventory), then **Comparison** (the delta). Discovery stands alone — useful even when no rules file exists.
+- Write `<topic>.md` in this skill's directory.
+
+- Discovery stands alone — Comparison is omitted when no rules file exists.
