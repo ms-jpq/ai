@@ -24,4 +24,4 @@ description: Iteratively improve a rule or skill.
 
 # Apply
 
-- One category of refinement per iteration.
+- One question per iteration.
