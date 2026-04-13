@@ -423,6 +423,7 @@
         "~/.cache/",
         "~/.config/gh/",
         "~/.config/git/",
+        "~/.ssh/config",
         "~/Library/Caches/",
         "~/Library/Preferences/gh/",
         "~/Library/Preferences/git/",
