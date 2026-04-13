@@ -16,7 +16,7 @@ description: Research the workspace for a topic. Report patterns in the corpus.
 
 # Iterate
 
-- Compare with matching rules file if one exists.
+- Cross reference with matching rule or skill file if one exists.
   - Discrepancies.
 
   - Undocumented patterns.
