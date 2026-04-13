@@ -12,9 +12,8 @@ SESSIONS="$ROOT/var/sessions"
 MD="$SESSIONS/$SESSION_ID.md"
 
 WHICH_INDEX=("$BASE/../libexec/session-file.sh" "$PWD")
-NOTIFY_LEN=28
 # shellcheck disable=SC2016
-NOTIFY=(jq -e --compact-output --argjson n "$NOTIFY_LEN" '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
+NOTIFY=(jq -e --compact-output --argjson n 28 '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
 
 case "$EVENT" in
 SessionStart)
