@@ -1,23 +1,23 @@
 ---
-description: Survey the codebase for a topic. Report what the code does vs. what the rules say.
+description: Survey the workspace for a topic. Report patterns in the corpus.
 ---
 
-# Mine
-
-Argument is a topic (e.g., "makefile", "shell", "python"). Load the matching rules file as the baseline for comparison.
-
-## Read
+# Discovery
 
 Find all source files relevant to the topic by extension and content. Exclude generated directories (`node_modules/`, `.venv/`, `var/tmp/`). Read every file — don't sample.
 
-## Report
+Catalog what the code actually does. What patterns, idioms, conventions, and structures appear? Each finding is a claim about the codebase — cite files and lines. Rank by prevalence.
 
-Compare what you found against existing rules and memory:
+# Comparison
+
+Load the matching rules file as the baseline. Compare discovery findings against rules and memory:
 
 - **Discrepancies** — rules say X, code does Y.
 
-- **Undocumented** — pattern absent from rules.
+- **Undocumented** — pattern present in code, absent from rules.
 
-- **Speculative** — rule not reflected in code.
+- **Speculative** — rule not reflected in any code.
 
-Cite files and lines. Rank by prevalence.
+# Output
+
+Write `<topic>.md` in this skill's directory. Two sections: **Discovery** (the inventory), then **Comparison** (the delta). Discovery stands alone — useful even when no rules file exists.
