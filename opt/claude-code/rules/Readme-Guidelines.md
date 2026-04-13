@@ -20,6 +20,6 @@ README says **what** and **why**.
 
 - Every `*.md` page is linked from a parent or sibling `README.md`. Always relative paths.
 
-## Content
+## Tone
 
 - Sui generis. Matter-of-fact, casually deviant in passing.
