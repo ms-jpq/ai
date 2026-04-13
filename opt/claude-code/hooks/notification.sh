@@ -13,6 +13,17 @@ if [[ -t 0 ]]; then
   exit
 fi
 
+TEE=(tee --)
+if [[ -v RECUR ]]; then
+  TEE+=(/dev/stderr)
+fi
+
+JSON="$("${TEE[@]}")"
+"${SELF%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+if jq -e '.notification_type == "idle_prompt"' <<< "$JSON" > /dev/null; then
+  exit
+fi
+
 if ! [[ -v RECUR ]]; then
   ~/.config/tmux/libexec/taint-inactive.sh
 
@@ -22,23 +33,13 @@ if ! [[ -v RECUR ]]; then
       exit
     fi
   fi
-fi
 
-if [[ -v SSH_CONNECTION ]]; then
-  if [[ -S $SOCK ]]; then
-    exec -- socat - "UNIX-CONNECT:$SOCK"
+  if [[ -v SSH_CONNECTION ]]; then
+    if [[ -S $SOCK ]]; then
+      exec -- socat - "UNIX-CONNECT:$SOCK" <<< "$JSON"
+    fi
+    exit
   fi
-  exit
-fi
-
-TEE=(tee --)
-if [[ -v RECUR ]]; then
-  TEE+=(/dev/stderr)
-fi
-JSON="$("${TEE[@]}")"
-"${SELF%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
-if jq -e '.notification_type == "idle_prompt"' <<< "$JSON" > /dev/null; then
-  exit
 fi
 
 # shellcheck disable=SC2154
