@@ -1,5 +1,5 @@
 ---
-description: Survey the workspace for a topic. Report patterns in the corpus.
+description: Research the workspace for a topic. Report patterns in the corpus.
 ---
 
 # Discover
@@ -14,16 +14,13 @@ description: Survey the workspace for a topic. Report patterns in the corpus.
 - What patterns appear?
   - Cite files and lines. Rank by prevalence.
 
-# Compare
+# Iterate
 
-- Discrepancies: rules say X, corpus does Y.
+- Compare with existing rule or skill if one exists.
+  - Discrepancies: rules say X, corpus does Y.
 
-- Undocumented: pattern present in corpus, absent from rules.
+  - Undocumented: pattern present in corpus, absent from rules.
 
-- Speculative: rule not reflected in the corpus.
+# Record
 
-- Omit this section when no rules file exists.
-
-# Output
-
-- Write `<topic>.md` in the current working directory.
+- Write `<topic>.md` in the current working directory with each step.
