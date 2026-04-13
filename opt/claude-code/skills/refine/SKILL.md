@@ -4,7 +4,7 @@ description: Iteratively improve a rule or skill.
 
 # Loop
 
-Rewrite the body of text by asking:
+Evaluate the target against:
 
 - What are the ambiguities?
 
@@ -18,4 +18,4 @@ Rewrite the body of text by asking:
 
 # Change
 
-- One category of change per iteration.
+- One category of refinement per iteration.
