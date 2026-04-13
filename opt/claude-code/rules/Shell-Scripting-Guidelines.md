@@ -56,6 +56,8 @@ case "$VARIABLE" in
 esac
 ```
 
+- `if [[ ... ]]; then exit; fi` — not `[[ ... ]] || exit` or `[[ ... ]] && exit`.
+
 - No functions or traps — these make error propagation harder.
 
 - Null bytes as delimiters where possible — `find ... -print0 | xargs --null ...`
@@ -145,5 +147,3 @@ exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 - `command -v --` or `hash --` to check command existence, not `which` or `type`.
 
 - `set -a` / `set +a` to scope exports when sourcing an env file.
-
-- `if [[ ... ]]; then exit; fi` — not `[[ ... ]] || exit` or `[[ ... ]] && exit`.
