@@ -23,6 +23,6 @@ description: Research the workspace for a topic. Report patterns in the corpus.
 
 # Record
 
-- Write `<topic>.md` in the current working directory with each step.
+- Write `<topic>.md` in the workspace directory with each step.
 
 - At end of session, distill `<topic>.md` into rule or skill.
