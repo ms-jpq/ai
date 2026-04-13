@@ -2,6 +2,8 @@
 
 ## Communication
 
+- **Value concision**
+
 - **Bullet points over prose**. No preamble, no recap.
 
 ## Refine, don't replace
