@@ -6,6 +6,8 @@ description: Iteratively improve a rule or skill.
 
 Rewrite the body of text by asking:
 
-1. Is the communication concise?
+- Is the communication concise?
 
-2. What are the ambiguities?
+- What are the ambiguities?
+
+- What are the internal contradictions?
