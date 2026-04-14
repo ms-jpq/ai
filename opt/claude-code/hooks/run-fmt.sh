@@ -24,10 +24,10 @@ case "$FILE_PATH" in
   stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH" || exit 2
   ;;
 *.link | *.netdev | *.network | *.socket | *.service | *.target | *.mount | *.automount | *.dnssd)
-  SYSTEMD_FMT_MODE='stream' systemd-fmt.sh "$FILE_PATH" || exit 2
+  systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
   ;;
 */repart.d/*.conf | */systemd/**/*.conf | */*.network.d/*.conf)
-  SYSTEMD_FMT_MODE='stream' systemd-fmt.sh "$FILE_PATH" || exit 2
+  systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
   ;;
 *)
   exit 0
