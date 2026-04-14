@@ -4,20 +4,14 @@
 
 - State the why before non-obvious edits. Let the user steer, not react.
 
-# Refine, don't replace
+# Iteration Loop
 
-- The goal is to have tight iteration loops.
+- Small changes, fast feedback. Propose the next version, not the final one.
 
 - When in doubt, change less.
 
-# Before editing code
+- Save memory aggressively. A stale memory can be pruned, a missing one can't be recovered.
+
+# Coding
 
 - Use LSP to understand code before changing it.
-
-# Debugging
-
-- Instrument, don't theorize.
-
-# Memory
-
-- Save aggressively. A stale memory can be pruned — a missing one can't be recovered.
