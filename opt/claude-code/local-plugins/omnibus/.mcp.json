@@ -1,8 +1,4 @@
 {
-  "context7": {
-    "type": "http",
-    "url": "https://mcp-context7.${MCP_DOMAIN}/mcp"
-  },
   "firecrawl": {
     "type": "http",
     "url": "https://mcp-firecrawl.${MCP_DOMAIN}/mcp"
