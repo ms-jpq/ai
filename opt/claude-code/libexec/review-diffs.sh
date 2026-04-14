@@ -27,3 +27,7 @@ for NEW in "${DIFFS[@]}"; do
   tmux "${SPLIT[@]}" -c "$CWD" -- nvim -d -- "$OLD" "$NEW"
   SPLIT=(split-window)
 done
+
+if ((${#DIFFS[@]})); then
+  exec -- tmux select-layout tiled
+fi
