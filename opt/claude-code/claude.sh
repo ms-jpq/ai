@@ -46,7 +46,7 @@ if ! (($#)) && INDEX="$("$BASE/libexec/session-file.sh" "$PWD")" && [[ -s $INDEX
 fi
 
 COLOURS=(blue green yellow purple orange pink cyan)
-RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
+RANDOM_COLOR="${COLOURS[RANDOM % ${#COLOURS[@]}]}"
 if [[ ${ARGV[*]} == '-' ]]; then
   RANDOM_COLOR='default'
   ARGV=()
