@@ -19,7 +19,7 @@ JQ
 
 DECISION=ask
 case "$CMD_LINE" in
-'command -v '*)
+'env' | 'command -v '*)
   exit
   ;;
 'command '* | 'eval '* | 'exec '* | 'env '*)
