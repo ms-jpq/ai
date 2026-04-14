@@ -1,4 +1,4 @@
 ---
-description: Perform action via general-purpose sub-agent
+description: Perform action via general-purpose sub-agent, to save on context window.
 agent: general-purpose
 ---
