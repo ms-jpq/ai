@@ -13,7 +13,6 @@ ROOT="$(realpath -- "$BASE/../../..")"
 SESSIONS="$ROOT/var/sessions"
 MD="$SESSIONS/$SESSION_ID.md"
 
-WHICH_INDEX=("$BASE/../libexec/session-file.sh" "$PWD")
 # shellcheck disable=SC2016
 NOTIFY=(jq -e --compact-output --argjson n 28 '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
 
@@ -39,9 +38,6 @@ SessionStart)
 SessionEnd)
   if [[ -v TMUX_PANE ]]; then
     tmux set-option -t "$TMUX_PANE" -u -p @claude_session
-  fi
-  if INDEX="$("${WHICH_INDEX[@]}")"; then
-    rm -fr -- "$INDEX"
   fi
   exit
   ;;
@@ -75,10 +71,6 @@ StopFailure)
   exit 2
   ;;
 esac
-
-if INDEX="$("${WHICH_INDEX[@]}")"; then
-  printf -- '%s' "$SESSION_ID" > "$INDEX"
-fi
 
 # shellcheck disable=2016
 JQ=(

@@ -35,22 +35,9 @@ esac
 export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 
 ARGV=("$@")
-if ! (($#)) && INDEX="$("$BASE/libexec/session-file.sh" "$PWD")" && [[ -s $INDEX ]]; then
-  SESSION="$(< "$INDEX")"
-  DIR="$(sed -E -e 's#[^[:alnum:]]#-#g' <<< "$PWD")"
-  JSONL="$ROOT/var/claude/projects/$DIR/$SESSION.jsonl"
-
-  if [[ -f $JSONL ]]; then
-    ARGV+=(--resume "$SESSION")
-  fi
-fi
 
 COLOURS=(blue green yellow purple orange pink cyan)
 RANDOM_COLOR="${COLOURS[RANDOM % ${#COLOURS[@]}]}"
-if [[ ${ARGV[*]} == '-' ]]; then
-  RANDOM_COLOR='default'
-  ARGV=()
-fi
 
 for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
