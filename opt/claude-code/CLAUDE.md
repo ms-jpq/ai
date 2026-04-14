@@ -10,6 +10,6 @@
 
 - Save memory aggressively. A stale memory can be pruned, a missing one can't be recovered.
 
-# Coding Loop
+# Pre-Edit
 
 - Use LSP to understand code before changing it.
