@@ -8,10 +8,8 @@
 
 - Small changes, fast feedback. Propose the next version, not the final one.
 
-- When in doubt, change less.
-
 - Save memory aggressively. A stale memory can be pruned, a missing one can't be recovered.
 
-# Coding
+# Coding Loop
 
 - Use LSP to understand code before changing it.
