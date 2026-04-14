@@ -13,7 +13,7 @@ fi
 BASE="$(realpath -- "$0")"
 BASE="${BASE%/*}"
 PATH="$BASE/bin:$PATH"
-ROOT="$BASE/../.."
+ROOT="$(realpath -- "$BASE/../..")"
 
 set -a
 # shellcheck disable=SC1091
@@ -46,7 +46,7 @@ if ! (($#)) && INDEX="$("$BASE/libexec/session-file.sh" "$PWD")" && [[ -s $INDEX
 fi
 
 COLOURS=(blue green yellow purple orange pink cyan)
-RANDOM_COLOR="${COLOURS[RANDOM % ${#COLOURS[@]}]}"
+RANDOM_COLOR="${COLOURS[RANDOM%${#COLOURS[@]}]}"
 if [[ ${ARGV[*]} == '-' ]]; then
   RANDOM_COLOR='default'
   ARGV=()
