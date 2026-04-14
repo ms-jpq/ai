@@ -30,8 +30,8 @@ SessionStart)
 
     printf -v REVIEW -- '%q' "$ROOT/opt/claude-code/libexec/review-diffs.sh"
     printf -v HIST -- '%q' "$ROOT/opt/claude-code/libexec/read-session.sh"
-    tmux bind-key f run-shell -- "$REVIEW"
-    tmux bind-key F run-shell -- "$HIST"
+    tmux bind-key f run-shell -- "$HIST"
+    tmux bind-key F run-shell -- "$REVIEW"
   fi
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
