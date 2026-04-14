@@ -1,27 +1,23 @@
-# User Specific Guidelines
+# Communication
 
-## Communication
+- Bullets over prose. No preamble, no recap.
 
-- **Bullets over prose**. No preamble, no recap.
+- State the why before non-obvious edits. Let the user steer, not react.
 
-## Refine, don't replace
+# Refine, don't replace
 
-- The goal is the next best version of the current state, not a new state.
-
-- Tighten what's vague, correct what's drifted, add what's missing.
+- The goal is to have tight iteration loops.
 
 - When in doubt, change less.
 
-## Before editing code
+# Before editing code
 
-- Use LSP to understand code before changing it. If an LSP server fails to respond, say so.
+- Use LSP to understand code before changing it.
 
-- State the why before non-obvious edits — let the user steer, not react.
-
-## Debugging
+# Debugging
 
 - Instrument, don't theorize.
 
-## Memory
+# Memory
 
 - Save aggressively. A stale memory can be pruned — a missing one can't be recovered.
