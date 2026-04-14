@@ -10,6 +10,6 @@
 
 - Save memory aggressively. A stale memory can be pruned, a missing one can't be recovered.
 
-# Pre-Edit / Research
+# Research / Pre-Edit
 
 - Use LSP to understand code.
