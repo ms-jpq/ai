@@ -1,4 +1,6 @@
 ---
-description: Perform action via sub-agent. This will save token usage for the primary agent instance and enable you to continue acting while the subagent performs its task. Even if the task appears simple, please launch an auxiliary subagent rather than taking it on yourself.
+description: Delegate to a background sub-agent. Always — even for simple tasks.
 agent: general-purpose
 ---
+
+Delegate the task to a background sub-agent. Do not perform any part of it yourself. Continue with other work while it runs.
