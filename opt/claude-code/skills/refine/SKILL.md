@@ -1,5 +1,5 @@
 ---
-description: Iteratively improve a rule or skill.
+description: Iteratively improve writing.
 ---
 
 # Prepare
@@ -10,9 +10,13 @@ description: Iteratively improve a rule or skill.
 
 - What would the reader already know?
 
+- What's missing from the domain that isn't stated yet?
+
 - What are the ambiguities?
 
 - What are the internal contradictions?
+
+- Is each point at the right strength?
 
 - Can any parts be fused?
 
@@ -22,14 +26,6 @@ description: Iteratively improve a rule or skill.
 
 - Are the most important things first?
 
-# Generate
+# Iterate
 
-- What's missing from the domain that isn't stated yet?
-
-- Is each point at the right strength — too absolute, too soft, or well-calibrated?
-
-- Propose options with tradeoffs. Let the author choose.
-
-# Apply
-
-- One question per iteration.
+- One question per turn. Propose options with tradeoffs.
