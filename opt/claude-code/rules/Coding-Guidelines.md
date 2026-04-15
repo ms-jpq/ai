@@ -4,27 +4,25 @@
 
 - Model the system as a series of stages (I → O). Decompose along stage boundaries.
 
-- Types model the domain. For every stage, a single file of types reads as the problem statement.
+- Types model the domain. Each stage has a single types file — complete enough to state the problem without the implementation.
 
-- Records types over OOP.
-
-- Frozen data by default. Mutation requires justification.
+- Records over classes.
 
 - Transforms or effects. Not both.
 
-- State materializes at stage boundaries only.
+- Persistent state lives at stage boundaries — files, queues, databases. Stages themselves are stateless.
 
-- Lazy over eager. Generators / iterators / streams.
+- Every component testable by direct call and return value.
 
-- Generic interfaces over concrete types. When concrete, most specific.
-
-- If tests need mocks, the code is wrong.
+- Generic interfaces at stage boundaries. Concrete (most specific) within a stage.
 
 ## Implementation
 
-- Expression over statement.
+- Frozen data by default. Mutation requires justification.
 
 - Exhaustive matching over the state space.
+
+- Lazy over eager; generators and streams over collections.
 
 ## Workflow
 

@@ -4,11 +4,13 @@ description: Iteratively improve writing.
 
 # Prepare
 
+- Infer the reader from context.
+
 - Break prose into point form before iterating. One claim per bullet.
 
 # Analyze
 
-- What would the reader already know?
+- What does the reader already know?
 
 - What's missing from the domain that isn't stated yet?
 
@@ -16,16 +18,16 @@ description: Iteratively improve writing.
 
 - What are the internal contradictions?
 
-- Is each point at the right strength?
+- Is each point at the right strength — too absolute, too hedged, or well-calibrated?
 
-- Can any parts be fused?
+- Are claims concrete enough to act on?
 
-- Is the communication specific?
+- Are the wordings concise?
 
-- Is the communication concise?
-
-- Are the most important things first?
+- Are related ideas grouped? Are the most important ideas first?
 
 # Iterate
 
-- One question per turn. Propose options with tradeoffs.
+- One question per turn.
+
+- Propose options with tradeoffs.
