@@ -20,8 +20,6 @@ shopt -s dotglob nullglob extglob globstar
 
 - Long flags over short (`--delimiter` not `-d`). `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
-- Streaming pipelines over intermediate variables or temp files. Each stage does one thing.
-
 ```bash
 "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
 ```

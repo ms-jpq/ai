@@ -15,13 +15,7 @@ with nullcontext():
 
 - `from module import name` for all imports — never bare `import module`.
 
-- Most generic type wins. `Sequence[T]` over `list[T]`, `Mapping[K, V]` over `dict[K, V]`, `Iterable[T]`/`AsyncIterable[T]` for inputs, `Iterator[T]`/`AsyncIterator[T]` for outputs.
-
 - Prefix non-exported module-level names with `_` — constants, functions, classes.
-
-- Library constants over string literals: `linesep` not `"\n"`, `sep` not `"/"`, `executable` not `"python3"`.
-
-- Iterators over manual loops and index arithmetic: `zip`, `enumerate`, `chain`, `product`, `starmap`, etc.
 
 - `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
 
