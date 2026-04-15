@@ -4,18 +4,20 @@
 
 - Plain data over custom types.
 
+- Immutable by default.
+
 - Separate data from effects.
+
+- Exhaustive matching over the state space.
 
 - State materializes at data boundaries only.
 
 - Lazy over eager. Generators / iterators / streams.
 
-- Stdlib over hand-rolled.
+- Values over branches.
 
 - Wide interfaces, narrow shapes.
 
+- Stdlib over hand-rolled.
+
 - If tests need mocks, the code is wrong.
-
-- Values over branches.
-
-- Immutable by default.
