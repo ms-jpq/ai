@@ -2,9 +2,11 @@
 
 ## Design
 
-- The system is a pipeline of stages (I → O). Decompose along stage boundaries.
+- Model the system as a series of stages (I → O). Decompose along stage boundaries.
 
-- Plain data types instead of OOP.
+- Types model the domain. For every stage, a single file of types reads as the problem statement.
+
+- Records types over OOP.
 
 - Frozen data by default. Mutation requires justification.
 
