@@ -12,15 +12,16 @@ DELTAS="$(realpath --no-symlinks -- "$BASE/../../../var/deltas")"
 SESSION_DIR="$DELTAS/$SESSION_ID"
 mkdir -p -- "$SESSION_DIR"
 
+DELTA="$SESSION_DIR/$SESSION_ID.delta.json"
 NAME="$SESSION_ID.delta.json"
 DIFFS=("$SESSION_DIR"/!("$NAME"))
 
-if ((${#DIFFS[@]} == 0)); then
+if ! [[ -f $DELTA ]] || ((${#DIFFS[@]} == 0)); then
   exec -- tmux display-message -- '🫧'
 fi
 
-CWD="$(jq -e --raw-output '.cwd' < "$SESSION_DIR/$SESSION_ID.delta.json")"
-OLD="$(jq -e --raw-output '.tool_input.file_path' < "$SESSION_DIR/$SESSION_ID.delta.json")"
+CWD="$(jq -e --raw-output '.cwd' < "$DELTA")"
+OLD="$(jq -e --raw-output '.tool_input.file_path' < "$DELTA")"
 
 SPLIT=(new-window -a)
 for NEW in "${DIFFS[@]}"; do
@@ -28,6 +29,4 @@ for NEW in "${DIFFS[@]}"; do
   SPLIT=(split-window)
 done
 
-if ((${#DIFFS[@]})); then
-  exec -- tmux select-layout tiled
-fi
+exec -- tmux select-layout tiled
