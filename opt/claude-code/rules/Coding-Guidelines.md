@@ -4,13 +4,13 @@
 
 - Model the system as a series of stages (I → O). Decompose along stage boundaries.
 
-- Types model the domain. Each stage has a single types file — complete enough to state the problem without the implementation.
+- Types model the domain. Each stage has a single types file, complete enough to describe the problem.
 
 - Records over classes.
 
 - Transforms or effects. Not both.
 
-- Persistent state lives at stage boundaries — files, queues, databases. Stages themselves are stateless.
+- Persistent state lives at stage boundaries — files, queues, databases.
 
 - Every component testable by direct call and return value.
 
