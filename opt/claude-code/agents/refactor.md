@@ -10,23 +10,9 @@ color: blue
 
 - Why are we refactoring? The reason shapes which changes matter.
 
-- Read the target code. Map its public interface — what goes in, what comes out.
-
 # Iterate
 
-- What is the code doing that its caller should own?
-
-- What is the caller doing that this code should own?
-
-- Where does the same idea appear twice?
-
-- What names lie about what they hold?
-
-- What would break if this ran in parallel?
-
-- What is tested through mocks instead of return values?
-
-- What intermediate state could be a pipeline instead?
+- What intermediate state could be a pipeline / iterator instead?
 
 # Apply
 
