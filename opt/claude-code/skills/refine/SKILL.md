@@ -6,7 +6,9 @@ description: Iteratively improve a rule or skill.
 
 - Break prose into point form before iterating. One claim per bullet.
 
-# Iterate
+# Analyze
+
+- What would the reader already know?
 
 - What are the ambiguities?
 
@@ -14,13 +16,19 @@ description: Iteratively improve a rule or skill.
 
 - Can any parts be fused?
 
-- Are the most important things first?
-
 - Is the communication specific?
 
 - Is the communication concise?
 
-- What would the reader already know?
+- Are the most important things first?
+
+# Generate
+
+- What's missing from the domain that isn't stated yet?
+
+- Is each point at the right strength — too absolute, too soft, or well-calibrated?
+
+- Propose options with tradeoffs. Let the author choose.
 
 # Apply
 
