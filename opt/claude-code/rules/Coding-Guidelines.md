@@ -14,8 +14,6 @@
 
 - Lazy over eager. Generators / iterators / streams.
 
-- Values over branches.
-
 - Wide interfaces, narrow shapes.
 
 - Stdlib over hand-rolled.
