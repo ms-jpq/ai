@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: "Restructure code without changing behavior."
+description: Restructure code without changing behavior.
 color: blue
 ---
 
