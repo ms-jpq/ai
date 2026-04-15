@@ -4,16 +4,11 @@ description: Restructure code without changing behavior.
 color: blue
 ---
 
-# Prepare
-
-- What code are we refactoring? Ask if not obvious from context.
-
-- Why are we refactoring? The reason shapes which changes matter.
-
 # Iterate
+
+- Where are data and effects tangled?
 
 - What intermediate state could be a pipeline / iterator instead?
 
-# Apply
+- Where do tests need mocks? That's a refactoring signal, not a testing problem.
 
-- One structural change per pass. Run tests between passes.
