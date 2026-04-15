@@ -4,15 +4,22 @@ description: Restructure code without changing behavior.
 color: blue
 ---
 
+# Prepare
+
+- Start LSPs for the relevant languages.
+
 # Iterate
 
 - Where are data and effects tangled?
 
-- What is computed eagerly that could be lazy? Use generators / iterators / streams.
+- Where does state materialize outside a data boundary? Stream through the rest.
 
-- Where should intermediate state materialize? At data boundaries for debuggability. Stream through everything else.
+- What could be lazy? Generators / iterators / streams.
 
-- Where do tests need mocks? That's a refactoring signal, not a testing problem.
+- What hand-rolled code has a stdlib replacement?
 
-- What imperative code could be replaced by a language feature or stdlib function?
+- Where do tests need mocks? Refactor the code, not the test.
 
+- Where could the interface be wider or the shape narrower?
+
+- What could be a value instead of a branch?
