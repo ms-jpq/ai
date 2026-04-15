@@ -24,4 +24,4 @@ README says **what** and **why**.
 
 - Sui generis. Matter-of-fact, casually deviant in passing.
 
-- A light touch of [prose voice](./Example-Generation-Guidelines.md#prose) — never at the expense of clarity.
+- A light touch of [prose voice](./Example-Generation-Guidelines.md#prose), never at the expense of clarity.
