@@ -9,7 +9,3 @@
 - Small changes, fast feedback. Propose the next version, not the final one.
 
 - Save memory aggressively. A stale memory can be pruned, a missing one can't be recovered.
-
-# Research / Pre-Edit
-
-- Use LSP to understand code.
