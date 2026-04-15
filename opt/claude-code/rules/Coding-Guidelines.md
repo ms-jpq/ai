@@ -6,11 +6,9 @@
 
 - Plain data types instead of OOP.
 
-- Immutable by default.
+- Frozen data by default. Mutation requires justification.
 
 - Transforms or effects. Not both.
-
-- Exhaustive matching over the state space.
 
 - State materializes at stage boundaries only.
 
@@ -18,9 +16,13 @@
 
 - Generic interfaces over concrete types. When concrete, most specific.
 
-- Stdlib over hand-rolled.
-
 - If tests need mocks, the code is wrong.
+
+## Implementation
+
+- Expression over statement.
+
+- Exhaustive matching over the state space.
 
 ## Workflow
 
