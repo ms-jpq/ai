@@ -39,8 +39,7 @@ CURL+=(-- "$URL")
 "${CURL[@]}"
 ```
 
-- `case` over `if/elif` chains for multi-branch dispatch.
-  - Catch-all (`*`) exits with `set -x; exit 2` for unexpected inputs.
+- `case` catch-all (`*`) exits with `set -x; exit 2` for unexpected inputs.
 
 ```bash
 case "$VARIABLE" in
