@@ -15,3 +15,5 @@
 - Wide interfaces, narrow shapes.
 
 - Values over branches.
+
+- Immutable by default.
