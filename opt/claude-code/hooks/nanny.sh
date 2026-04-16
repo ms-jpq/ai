@@ -19,10 +19,10 @@ JQ
 
 DECISION=ask
 case "$CMD_LINE" in
-'env' | 'command -v '*)
+'command -v '*)
   exit
   ;;
-'command '* | 'eval '* | 'exec '* | 'env '*)
+'command '* | 'eval '* | 'exec '*)
   DECISION=deny
   REASON='try again, and consider not executing commands via these mechanisms that are hard to write permissions for'
   ;;
