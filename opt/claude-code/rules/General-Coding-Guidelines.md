@@ -1,8 +1,8 @@
-# Coding Guidelines
+# General Coding Guidelines
 
 ## Macro
 
-- Model the system as a series of stages (I → O). Decompose along stage boundaries.
+- Model the system as a series of stages (Input -> Output). Decompose along stage boundaries.
 
 - Types model the domain. Each stage has a single types file, complete enough to describe the problem.
 
