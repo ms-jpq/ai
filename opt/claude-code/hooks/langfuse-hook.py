@@ -539,7 +539,6 @@ def _main() -> int:
         ss.turn_count += emitted
         _write_session_state(state, ss)
         _save_state(session_id, state)
-        langfuse.flush()
         dur = time() - start
         getLogger().info(
             "%s", f"Processed {emitted} turns in {dur:.2f}s (session={session_id})"
