@@ -385,11 +385,13 @@ def _tool_calls(
                 _ToolCall(
                     id=str(tu.get("id") or ""),
                     name=tu.get("name") or "unknown",
-                    input=inp
-                    if isinstance(
-                        inp := tu.get("input"), (dict, list, str, int, float, bool)
-                    )
-                    else {},
+                    input=(
+                        inp
+                        if isinstance(
+                            inp := tu.get("input"), (dict, list, str, int, float, bool)
+                        )
+                        else {}
+                    ),
                 )
             )
     return calls
@@ -408,7 +410,9 @@ def _emit_turn(
     assistant_text, assistant_meta = _truncate(
         _extract_text(_get_content(last_assistant))
     )
-    model = _get_model(turn.assistant_msgs[0] if turn.assistant_msgs else last_assistant)
+    model = _get_model(
+        turn.assistant_msgs[0] if turn.assistant_msgs else last_assistant
+    )
     calls = _tool_calls(turn.assistant_msgs)
 
     for c in calls:
@@ -520,7 +524,10 @@ def _main() -> int:
     if (payload := _read_payload()) is None:
         return 0
 
-    with _timed(f"hook (session={payload.session_id})"), _langfuse_client(config) as langfuse:
+    with (
+        _timed(f"hook (session={payload.session_id})"),
+        _langfuse_client(config) as langfuse,
+    ):
         if langfuse is None:
             return 0
 

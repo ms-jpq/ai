@@ -1,13 +1,12 @@
 #!/usr/bin/env -S -- node
 
+import type { BaseHookInput } from "@anthropic-ai/claude-agent-sdk";
 import type {
   ContentBlock,
   Message,
-  TextBlock,
   ToolResultBlockParam,
   ToolUseBlock,
 } from "@anthropic-ai/sdk/resources/messages/messages.js";
-import type { BaseHookInput } from "@anthropic-ai/claude-agent-sdk";
 import { LangfuseSpanProcessor } from "@langfuse/otel";
 import {
   propagateAttributes,
@@ -23,10 +22,10 @@ import {
   renameSync,
   writeFileSync,
 } from "node:fs";
-import { text } from "node:stream/consumers";
 import { open } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { env, exit, stdin } from "node:process";
+import { text } from "node:stream/consumers";
 import { fileURLToPath } from "node:url";
 
 // ── Constants ────────────────────────────────────────
@@ -76,10 +75,21 @@ type Turn = {
   toolResults: Map<string, unknown>;
 };
 
-// ── Disposable observation ───────────────────────────
+// ── Disposable helpers ───────────────────────────────
 
 const disposable = <T extends { end(): void }>(obs: T) =>
   Object.assign(obs, { [Symbol.dispose]: () => obs.end() });
+
+const timed = (label: string) => {
+  const start = performance.now();
+  log({ level: "debug", msg: `${label} started` });
+  return {
+    [Symbol.dispose]() {
+      const dur = ((performance.now() - start) / 1000).toFixed(2);
+      log({ level: "info", msg: `${label} completed in ${dur}s` });
+    },
+  };
+};
 
 // ── Logging ──────────────────────────────────────────
 
@@ -168,8 +178,7 @@ const saveState = (sessionId: string, state: ReaderState) => {
 
 // ── Message vocabulary ───────────────────────────────
 
-const getContent = (msg: TranscriptLine) =>
-  msg.message?.content ?? msg.content;
+const getContent = (msg: TranscriptLine) => msg.message?.content ?? msg.content;
 
 const getRole = (msg: TranscriptLine) => {
   const role = msg.type ?? msg.message?.role;
@@ -188,13 +197,12 @@ const contentBlocks = <T extends ContentBlock | ToolResultBlockParam>(
 
 const isToolResult = (msg: TranscriptLine) =>
   getRole(msg) === "user" &&
-  contentBlocks<ToolResultBlockParam>(getContent(msg), "tool_result").length > 0;
+  contentBlocks<ToolResultBlockParam>(getContent(msg), "tool_result").length >
+    0;
 
-const getModel = (msg: TranscriptLine) =>
-  msg.message?.model || "claude";
+const getModel = (msg: TranscriptLine) => msg.message?.model || "claude";
 
-const getMessageId = (msg: TranscriptLine) =>
-  msg.message?.id || undefined;
+const getMessageId = (msg: TranscriptLine) => msg.message?.id || undefined;
 
 const extractText = (content: unknown): string => {
   if (typeof content === "string") return content;
@@ -241,8 +249,9 @@ const readNewMessages = async (
 ): Promise<[TranscriptLine[], ReaderState]> => {
   let chunk: Buffer;
   let newOffset: number;
+  await using fh = await open(path, "r");
+
   try {
-    await using fh = await open(path, "r");
     const stat = await fh.stat();
     const size = stat.size - state.offset;
     if (size <= 0) return [[], state];
@@ -329,10 +338,7 @@ function* assembleTurns(messages: TranscriptLine[]): Generator<Turn> {
 const toolCalls = (assistantMsgs: TranscriptLine[]) => {
   const calls: ToolCall[] = [];
   for (const am of assistantMsgs) {
-    for (const tu of contentBlocks<ToolUseBlock>(
-      getContent(am),
-      "tool_use",
-    )) {
+    for (const tu of contentBlocks<ToolUseBlock>(getContent(am), "tool_use")) {
       calls.push({
         id: tu.id,
         name: tu.name,
@@ -354,9 +360,7 @@ const emitTurn = ({
   turn: Turn;
   transcriptPath: string;
 }) => {
-  const [userText, userMeta] = truncate(
-    extractText(getContent(turn.userMsg)),
-  );
+  const [userText, userMeta] = truncate(extractText(getContent(turn.userMsg)));
   const lastAssistant = turn.assistantMsgs.at(-1) ?? turn.userMsg;
   const [assistantText, assistantMeta] = truncate(
     extractText(getContent(lastAssistant)),
@@ -379,48 +383,57 @@ const emitTurn = ({
   const traceName = `Claude Code - Turn ${turnNum}`;
 
   propagateAttributes({ sessionId, traceName, tags: ["claude-code"] }, () => {
-    using trace = disposable(startObservation(traceName, {
-      input: { role: "user", content: userText },
-      metadata: {
-        source: "claude-code",
-        session_id: sessionId,
-        turn_number: turnNum,
-        transcript_path: transcriptPath,
-        user_text: userMeta,
-      },
-    }));
+    using trace = disposable(
+      startObservation(traceName, {
+        input: { role: "user", content: userText },
+        metadata: {
+          source: "claude-code",
+          session_id: sessionId,
+          turn_number: turnNum,
+          transcript_path: transcriptPath,
+          user_text: userMeta,
+        },
+      }),
+    );
 
     {
-      using _ = disposable(startObservation(
-        "Claude Response",
-        {
-          input: { role: "user", content: userText },
-          output: { role: "assistant", content: assistantText },
-          model,
-          metadata: { assistant_text: assistantMeta, tool_count: calls.length },
-        },
-        { asType: "generation" },
-      ));
+      using _ = disposable(
+        startObservation(
+          "Claude Response",
+          {
+            input: { role: "user", content: userText },
+            output: { role: "assistant", content: assistantText },
+            model,
+            metadata: {
+              assistant_text: assistantMeta,
+              tool_count: calls.length,
+            },
+          },
+          { asType: "generation" },
+        ),
+      );
     }
 
     for (const c of calls) {
-      let inObj: unknown = c.input;
+      let inObj = c.input;
       let inMeta: TruncMeta | null = null;
       if (typeof inObj === "string") [inObj, inMeta] = truncate(inObj);
 
-      using toolObs = disposable(startObservation(
-        `Tool: ${c.name}`,
-        {
-          input: inObj,
-          metadata: {
-            tool_name: c.name,
-            tool_id: c.id,
-            input_meta: inMeta,
-            output_meta: c.output_meta,
+      using toolObs = disposable(
+        startObservation(
+          `Tool: ${c.name}`,
+          {
+            input: inObj,
+            metadata: {
+              tool_name: c.name,
+              tool_id: c.id,
+              input_meta: inMeta,
+              output_meta: c.output_meta,
+            },
           },
-        },
-        { asType: "tool" },
-      ));
+          { asType: "tool" },
+        ),
+      );
       toolObs.update({ output: c.output });
     }
 
@@ -429,10 +442,12 @@ const emitTurn = ({
         const planStr =
           typeof c.input === "string" ? c.input : JSON.stringify(c.input);
         const [planTrunc, planMeta] = truncate(planStr);
-        using _ = disposable(startObservation("Plan", {
-          output: planTrunc,
-          metadata: { plan_meta: planMeta },
-        }));
+        using _ = disposable(
+          startObservation("Plan", {
+            output: planTrunc,
+            metadata: { plan_meta: planMeta },
+          }),
+        );
       }
     }
 
@@ -472,12 +487,10 @@ const main = async () => {
   const payload = await readPayload();
   if (!payload) return 0;
 
-  const start = performance.now();
-  log({ level: "debug", msg: `hook started (session=${payload.session_id})` });
+  using _ = timed(`hook (session=${payload.session_id})`);
+  await using __ = createProvider(config);
 
   {
-    await using _ = createProvider(config);
-
     let state = loadState(payload.session_id);
     const [msgs, nextState] = await readNewMessages(
       payload.transcript_path,
@@ -513,12 +526,6 @@ const main = async () => {
 
     state = { ...state, turnCount: state.turnCount + emitted };
     saveState(payload.session_id, state);
-
-    const dur = ((performance.now() - start) / 1000).toFixed(2);
-    log({
-      level: "info",
-      msg: `Processed ${emitted} turns in ${dur}s (session=${payload.session_id})`,
-    });
   }
 
   return 0;
