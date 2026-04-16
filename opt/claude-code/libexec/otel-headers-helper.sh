@@ -6,5 +6,5 @@ set -o pipefail
 TOKEN="$(base64 -w0 <<< "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY")"
 
 tee <<- JSON
-{"Authorization": "Bearer $TOKEN"}
+{"Authorization": "Basic $TOKEN", "x-langfuse-ingestion-version": "4"}
 JSON
