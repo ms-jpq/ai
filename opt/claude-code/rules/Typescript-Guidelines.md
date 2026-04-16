@@ -7,7 +7,15 @@
 - `({ ... })` — single params object for multi-argument functions. Inline the type unless shared.
 
 ```typescript
-const fetch = ({ url, timeout = 30, retries = 3 }: { url: string; timeout?: number; retries?: number }) => {};
+const fetch = ({
+  url,
+  timeout = 30,
+  retries = 3,
+}: {
+  url: string;
+  timeout?: number;
+  retries?: number;
+}) => {};
 ```
 
 - `satisfies` over type annotations where possible. Preserves literal/narrowed types.
