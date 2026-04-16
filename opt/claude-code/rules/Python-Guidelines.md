@@ -23,16 +23,19 @@ def render(template, *, context, strict=False): ...
 ```
 
 - Control flow idioms:
-  - `...` for noop bodies, not `pass`.
+  - `:=` to collapse assign-then-test into one expression.
   - `suppress()` over bare `try/except`.
-  - `with nullcontext(): ...` to group related statements.
+  - `...` for noop bodies, not `pass`.
   - No `if __name__ == "__main__":` guard — scripts execute at module scope.
+  - `with nullcontext(): ...` to group related statements.
 
 - Prefix non-exported module-level names with `_` — constants, functions, classes.
 
 - `@dataclass(frozen=True)` for data types.
 
-- `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
+- `dict.setdefault()` over check-then-insert.
+
+- `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`. For errors, log `e` directly: `getLogger().error("%s", e, exc_info=True)`.
 
 - `argparse` for CLIs.
   - Spell out keyword arguments: `action=`, `type=`, `default=`, `nargs=`, `required=`.
