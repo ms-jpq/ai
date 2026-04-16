@@ -12,10 +12,10 @@ const fetch = ({
   timeout = 30,
   retries = 3,
 }: {
-  url: string;
-  timeout?: number;
-  retries?: number;
-}) => {};
+  url: string
+  timeout?: number
+  retries?: number
+}) => {}
 ```
 
 - `satisfies` over type annotations where possible. Preserves literal/narrowed types.
