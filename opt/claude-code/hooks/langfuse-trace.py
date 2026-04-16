@@ -12,7 +12,7 @@ from os import replace as atomic_replace
 from pathlib import Path
 from sys import exit, stdin
 from time import time
-from typing import Any, Iterator
+from typing import Any, Iterator, NotRequired, TypedDict
 
 from langfuse import Langfuse, propagate_attributes
 
@@ -36,7 +36,43 @@ def _log_errors() -> Iterator[None]:
         getLogger().error("%s", e, exc_info=True)
 
 
+@contextmanager
+def _timed(label: str) -> Iterator[None]:
+    getLogger().debug("%s", f"{label} started")
+    start = time()
+    yield
+    getLogger().debug("%s", f"{label} completed in {time() - start:.2f}s")
+
+
 # ── Types ──────────────────────────────────────────────
+
+
+class _ApiMessage(TypedDict, total=False):
+    role: str
+    content: Any
+    model: str
+    id: str
+
+
+class _TranscriptLine(TypedDict, total=False):
+    type: str
+    message: _ApiMessage
+    content: Any
+
+
+class _TruncMeta(TypedDict):
+    truncated: bool
+    orig_len: int
+    kept_len: NotRequired[int]
+    sha256: NotRequired[str]
+
+
+class _ToolCall(TypedDict):
+    id: str
+    name: str
+    input: Any
+    output: NotRequired[str | None]
+    output_meta: NotRequired[_TruncMeta]
 
 
 @dataclass(frozen=True)
@@ -61,8 +97,8 @@ class _ReaderState:
 
 @dataclass(frozen=True)
 class _Turn:
-    user_msg: dict[str, Any]
-    assistant_msgs: tuple[dict[str, Any], ...]
+    user_msg: _TranscriptLine
+    assistant_msgs: tuple[_TranscriptLine, ...]
     tool_results: dict[str, Any]
 
 
@@ -176,7 +212,7 @@ def _save_state(session_id: str, *, state: _ReaderState) -> None:
 # ── Message vocabulary ─────────────────────────────────
 
 
-def _get_content(msg: dict[str, Any]) -> Any:
+def _get_content(msg: _TranscriptLine) -> Any:
     match msg:
         case {"message": {"content": content}}:
             return content
@@ -186,7 +222,7 @@ def _get_content(msg: dict[str, Any]) -> Any:
             return None
 
 
-def _get_role(msg: dict[str, Any]) -> str | None:
+def _get_role(msg: _TranscriptLine) -> str | None:
     match msg:
         case {"type": "user" | "assistant" as role}:
             return str(role)
@@ -202,13 +238,13 @@ def _content_blocks(content: Any, *, block_type: str) -> list[dict[str, Any]]:
     return [x for x in content if isinstance(x, dict) and x.get("type") == block_type]
 
 
-def _is_tool_result(msg: dict[str, Any]) -> bool:
+def _is_tool_result(msg: _TranscriptLine) -> bool:
     return _get_role(msg) == "user" and bool(
         _content_blocks(_get_content(msg), block_type="tool_result")
     )
 
 
-def _get_model(msg: dict[str, Any]) -> str:
+def _get_model(msg: _TranscriptLine) -> str:
     match msg:
         case {"message": {"model": str(model)}} if model:
             return model
@@ -216,7 +252,7 @@ def _get_model(msg: dict[str, Any]) -> str:
             return "claude"
 
 
-def _get_message_id(msg: dict[str, Any]) -> str | None:
+def _get_message_id(msg: _TranscriptLine) -> str | None:
     match msg:
         case {"message": {"id": str(mid)}} if mid:
             return mid
@@ -241,17 +277,17 @@ def _extract_text(content: Any) -> str:
             return ""
 
 
-def _truncate(s: str, *, max_chars: int = _MAX_CHARS) -> tuple[str, dict[str, Any]]:
+def _truncate(s: str, *, max_chars: int = _MAX_CHARS) -> tuple[str, _TruncMeta]:
     orig_len = len(s)
     if orig_len <= max_chars:
-        return s, {"truncated": False, "orig_len": orig_len}
+        return s, _TruncMeta(truncated=False, orig_len=orig_len)
     head = s[:max_chars]
-    return head, {
-        "truncated": True,
-        "orig_len": orig_len,
-        "kept_len": len(head),
-        "sha256": sha256(s.encode("utf-8")).hexdigest(),
-    }
+    return head, _TruncMeta(
+        truncated=True,
+        orig_len=orig_len,
+        kept_len=len(head),
+        sha256=sha256(s.encode("utf-8")).hexdigest(),
+    )
 
 
 # ── Parse ──────────────────────────────────────────────
@@ -259,7 +295,7 @@ def _truncate(s: str, *, max_chars: int = _MAX_CHARS) -> tuple[str, dict[str, An
 
 def _read_new_messages(
     path: Path, *, state: _ReaderState
-) -> tuple[list[dict[str, Any]], _ReaderState]:
+) -> tuple[list[_TranscriptLine], _ReaderState]:
     """Read only new bytes since state.offset. Returns parsed lines and updated state."""
     if not path.exists():
         return [], state
@@ -280,7 +316,7 @@ def _read_new_messages(
     combined = state.buffer + text
     lines = combined.split("\n")
 
-    msgs: list[dict[str, Any]] = []
+    msgs: list[_TranscriptLine] = []
     for line in lines[:-1]:
         if not (line := line.strip()):
             continue
@@ -293,13 +329,13 @@ def _read_new_messages(
 # ── Assemble ───────────────────────────────────────────
 
 
-def _assemble_turns(messages: list[dict[str, Any]]) -> Iterator[_Turn]:
+def _assemble_turns(messages: list[_TranscriptLine]) -> Iterator[_Turn]:
     """
     Group transcript rows into turns: user → assistant(s) → tool_result(s).
     Dict insertion order deduplicates assistant messages by id (latest content wins).
     """
-    user_msg: dict[str, Any] | None = None
-    assistants: dict[str, dict[str, Any]] = {}
+    user_msg: _TranscriptLine | None = None
+    assistants: dict[str, _TranscriptLine] = {}
     tool_results: dict[str, Any] = {}
 
     for msg in messages:
@@ -340,21 +376,21 @@ def _assemble_turns(messages: list[dict[str, Any]]) -> Iterator[_Turn]:
 
 
 def _tool_calls(
-    assistant_msgs: tuple[dict[str, Any], ...],
-) -> list[dict[str, Any]]:
-    calls: list[dict[str, Any]] = []
+    assistant_msgs: tuple[_TranscriptLine, ...],
+) -> list[_ToolCall]:
+    calls: list[_ToolCall] = []
     for am in assistant_msgs:
         for tu in _content_blocks(_get_content(am), block_type="tool_use"):
             calls.append(
-                {
-                    "id": str(tu.get("id") or ""),
-                    "name": tu.get("name") or "unknown",
-                    "input": inp
+                _ToolCall(
+                    id=str(tu.get("id") or ""),
+                    name=tu.get("name") or "unknown",
+                    input=inp
                     if isinstance(
                         inp := tu.get("input"), (dict, list, str, int, float, bool)
                     )
                     else {},
-                }
+                )
             )
     return calls
 
@@ -376,7 +412,7 @@ def _emit_turn(
     calls = _tool_calls(turn.assistant_msgs)
 
     for c in calls:
-        if (raw := turn.tool_results.get(c.get("id", ""))) is not None:
+        if (raw := turn.tool_results.get(c["id"])) is not None:
             out_str = raw if isinstance(raw, str) else dumps(raw, ensure_ascii=False)
             out_trunc, out_meta = _truncate(out_str)
             c["output"] = out_trunc
@@ -418,18 +454,18 @@ def _emit_turn(
             ...
 
         for c in calls:
-            in_obj = c.get("input", {})
-            in_meta = None
+            in_obj: Any = c["input"]
+            in_meta: _TruncMeta | None = None
             if isinstance(in_obj, str):
                 in_obj, in_meta = _truncate(in_obj)
 
             with langfuse.start_as_current_observation(
-                name=f"Tool: {c.get('name', 'unknown')}",
+                name=f"Tool: {c['name']}",
                 as_type="tool",
                 input=in_obj,
                 metadata={
-                    "tool_name": c.get("name", "unknown"),
-                    "tool_id": c.get("id", ""),
+                    "tool_name": c["name"],
+                    "tool_id": c["id"],
                     "input_meta": in_meta,
                     "output_meta": c.get("output_meta"),
                 },
@@ -437,7 +473,7 @@ def _emit_turn(
                 tool_obs.update(output=c.get("output"))
 
         for c in calls:
-            if c.get("name") == "ExitPlanMode" and (plan := c.get("input")):
+            if c["name"] == "ExitPlanMode" and (plan := c["input"]):
                 plan_str = (
                     plan if isinstance(plan, str) else dumps(plan, ensure_ascii=False)
                 )
@@ -478,16 +514,13 @@ def _langfuse_client(config: _Config) -> Iterator[Langfuse | None]:
 
 
 def _main() -> int:
-    start = time()
-    getLogger().debug("%s", "hook started")
-
     if (config := _read_config()) is None:
         return 0
 
     if (payload := _read_payload()) is None:
         return 0
 
-    with _langfuse_client(config) as langfuse:
+    with _timed(f"hook (session={payload.session_id})"), _langfuse_client(config) as langfuse:
         if langfuse is None:
             return 0
 
@@ -518,10 +551,9 @@ def _main() -> int:
         state = replace(state, turn_count=state.turn_count + emitted)
         _save_state(payload.session_id, state=state)
 
-        dur = time() - start
         getLogger().info(
             "%s",
-            f"Processed {emitted} turns in {dur:.2f}s (session={payload.session_id})",
+            f"Processed {emitted} turns (session={payload.session_id})",
         )
 
     return 0

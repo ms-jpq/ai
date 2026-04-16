@@ -33,6 +33,8 @@ def render(template, *, context, strict=False): ...
 
 - `@dataclass(frozen=True)` for data types.
 
+- `TypedDict` for JSON input shapes — model the structure, use typed field access.
+
 - `dict.setdefault()` over check-then-insert.
 
 - `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`. For errors, log `e` directly: `getLogger().error("%s", e, exc_info=True)`.
