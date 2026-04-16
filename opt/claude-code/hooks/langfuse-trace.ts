@@ -15,14 +15,8 @@ import {
 } from "@langfuse/tracing";
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node";
 import { createHash } from "node:crypto";
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  renameSync,
-  writeFileSync,
-} from "node:fs";
-import { open } from "node:fs/promises";
+import { createReadStream } from "node:fs";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { env, exit, stdin } from "node:process";
 import { text } from "node:stream/consumers";
@@ -35,6 +29,18 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const SESSIONS_DIR = resolve(ROOT, "var/sessions");
 
 // ── Types ────────────────────────────────────────────
+
+type Config = {
+  publicKey: string;
+  secretKey: string;
+  host: string;
+};
+
+type ReaderState = {
+  offset: number;
+  buffer: string;
+  turnCount: number;
+};
 
 type TranscriptLine = {
   type?: "user" | "assistant";
@@ -55,18 +61,6 @@ type ToolCall = {
   input: unknown;
   output?: string | null;
   output_meta?: TruncMeta;
-};
-
-type Config = {
-  publicKey: string;
-  secretKey: string;
-  host: string;
-};
-
-type ReaderState = {
-  offset: number;
-  buffer: string;
-  turnCount: number;
 };
 
 type Turn = {
@@ -134,46 +128,36 @@ const readPayload = async () => {
 const statePath = (sessionId: string) =>
   resolve(SESSIONS_DIR, `${sessionId}.langfuse.json`);
 
-const loadState = (sessionId: string): ReaderState => {
-  const p = statePath(sessionId);
-  try {
-    if (existsSync(p)) {
-      const raw = JSON.parse(readFileSync(p, "utf-8"));
+const loadState = async (sessionId: string): Promise<ReaderState> =>
+  readFile(statePath(sessionId), "utf-8")
+    .then((data) => {
+      const raw = JSON.parse(data);
       return {
         offset: Number(raw["offset"] ?? 0),
         buffer: String(raw["buffer"] ?? ""),
         turnCount: Number(raw["turn_count"] ?? 0),
       };
-    }
-  } catch (e) {
-    log({ level: "error", msg: String(e) });
-  }
-  return { offset: 0, buffer: "", turnCount: 0 };
-};
+    })
+    .catch(() => ({ offset: 0, buffer: "", turnCount: 0 }));
 
-const saveState = (sessionId: string, state: ReaderState) => {
-  try {
-    const p = statePath(sessionId);
-    mkdirSync(dirname(p), { recursive: true });
-    const tmp = `${p}.tmp`;
-    writeFileSync(
-      tmp,
-      JSON.stringify(
-        {
-          offset: state.offset,
-          buffer: state.buffer,
-          turn_count: state.turnCount,
-          updated: new Date().toISOString(),
-        },
-        null,
-        2,
-      ),
-      "utf-8",
-    );
-    renameSync(tmp, p);
-  } catch (e) {
-    log({ level: "error", msg: String(e) });
-  }
+const saveState = async (sessionId: string, state: ReaderState) => {
+  const p = statePath(sessionId);
+  const tmp = `${p}.tmp`;
+  const json = JSON.stringify(
+    {
+      offset: state.offset,
+      buffer: state.buffer,
+      turn_count: state.turnCount,
+      updated: new Date().toISOString(),
+    },
+    null,
+    2,
+  );
+
+  await mkdir(dirname(p), { recursive: true })
+    .then(() => writeFile(tmp, json, "utf-8"))
+    .then(() => rename(tmp, p))
+    .catch((e) => log({ level: "error", msg: String(e) }));
 };
 
 // ── Message vocabulary ───────────────────────────────
@@ -186,7 +170,7 @@ const getRole = (msg: TranscriptLine) => {
 };
 
 const contentBlocks = <T extends ContentBlock | ToolResultBlockParam>(
-  content: unknown,
+  content: (ContentBlock | ToolResultBlockParam)[] | string | undefined,
   blockType: string,
 ): T[] => {
   if (!Array.isArray(content)) return [];
@@ -200,30 +184,30 @@ const isToolResult = (msg: TranscriptLine) =>
   contentBlocks<ToolResultBlockParam>(getContent(msg), "tool_result").length >
     0;
 
-const getModel = (msg: TranscriptLine) => msg.message?.model || "claude";
+const getModel = (msg: TranscriptLine) => msg.message?.model ?? "claude";
 
-const getMessageId = (msg: TranscriptLine) => msg.message?.id || undefined;
+const getMessageId = (msg: TranscriptLine) => msg.message?.id ?? undefined;
 
-const extractText = (content: unknown): string => {
+const extractText = (
+  content: (ContentBlock | ToolResultBlockParam)[] | string | undefined,
+): string => {
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
-
-  const parts: string[] = [];
-  for (const block of content) {
-    if (typeof block === "string" && block) {
-      parts.push(block);
-    } else if (
-      typeof block === "object" &&
-      block !== null &&
-      "type" in block &&
-      block.type === "text" &&
-      "text" in block &&
-      typeof block.text === "string"
-    ) {
-      parts.push(block.text);
-    }
-  }
-  return parts.join("\n");
+  return content
+    .flatMap((block) => {
+      if (typeof block === "string" && block) return [block];
+      if (
+        typeof block === "object" &&
+        block !== null &&
+        "type" in block &&
+        block.type === "text" &&
+        "text" in block &&
+        typeof block.text === "string"
+      )
+        return [block.text];
+      return [];
+    })
+    .join("\n");
 };
 
 const truncate = (s: string, maxChars = MAX_CHARS): [string, TruncMeta] => {
@@ -247,45 +231,42 @@ const readNewMessages = async (
   path: string,
   state: ReaderState,
 ): Promise<[TranscriptLine[], ReaderState]> => {
-  let chunk: Buffer;
-  let newOffset: number;
-  await using fh = await open(path, "r");
-
-  try {
-    const stat = await fh.stat();
-    const size = stat.size - state.offset;
-    if (size <= 0) return [[], state];
-    chunk = Buffer.alloc(size);
-    const { bytesRead } = await fh.read(chunk, 0, size, state.offset);
-    newOffset = state.offset + bytesRead;
-  } catch (e) {
+  const chunk = await text(
+    createReadStream(path, { start: state.offset, encoding: "utf-8" }),
+  ).catch((e) => {
     log({ level: "error", msg: String(e) });
-    return [[], state];
-  }
+    return "";
+  });
+  if (!chunk) return [[], state];
 
-  const combined = state.buffer + chunk.toString("utf-8");
+  const combined = state.buffer + chunk;
   const lines = combined.split("\n");
 
-  const msgs: TranscriptLine[] = [];
-  for (const raw of lines.slice(0, -1)) {
-    const line = raw.trim();
-    if (!line) continue;
+  const msgs = lines.slice(0, -1).flatMap((raw) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return [];
     try {
-      msgs.push(JSON.parse(line));
+      return [JSON.parse(trimmed) as TranscriptLine];
     } catch {
-      // skip malformed lines
+      return [];
     }
-  }
+  });
 
   return [
     msgs,
-    { ...state, offset: newOffset, buffer: lines[lines.length - 1] ?? "" },
+    {
+      ...state,
+      offset: state.offset + Buffer.byteLength(chunk),
+      buffer: lines.at(-1) ?? "",
+    },
   ];
 };
 
 // ── Assemble ─────────────────────────────────────────
 
-function* assembleTurns(messages: TranscriptLine[]): Generator<Turn> {
+const assembleTurns = function* (
+  messages: TranscriptLine[],
+): IteratorObject<Turn> {
   let userMsg: TranscriptLine | null = null;
   let assistants = new Map<string, TranscriptLine>();
   let toolResults = new Map<string, unknown>();
@@ -307,7 +288,7 @@ function* assembleTurns(messages: TranscriptLine[]): Generator<Turn> {
       if (userMsg !== null && assistants.size > 0) {
         yield {
           userMsg,
-          assistantMsgs: [...assistants.values()],
+          assistantMsgs: assistants.values().toArray(),
           toolResults: new Map(toolResults),
         };
       }
@@ -327,27 +308,24 @@ function* assembleTurns(messages: TranscriptLine[]): Generator<Turn> {
   if (userMsg !== null && assistants.size > 0) {
     yield {
       userMsg,
-      assistantMsgs: [...assistants.values()],
+      assistantMsgs: assistants.values().toArray(),
       toolResults: new Map(toolResults),
     };
   }
-}
+
+  return;
+};
 
 // ── Emit ─────────────────────────────────────────────
 
-const toolCalls = (assistantMsgs: TranscriptLine[]) => {
-  const calls: ToolCall[] = [];
-  for (const am of assistantMsgs) {
-    for (const tu of contentBlocks<ToolUseBlock>(getContent(am), "tool_use")) {
-      calls.push({
-        id: tu.id,
-        name: tu.name,
-        input: tu.input,
-      });
-    }
-  }
-  return calls;
-};
+const toolCalls = (assistantMsgs: TranscriptLine[]): ToolCall[] =>
+  assistantMsgs.flatMap((am) =>
+    contentBlocks<ToolUseBlock>(getContent(am), "tool_use").map((tu) => ({
+      id: tu.id,
+      name: tu.name,
+      input: tu.input,
+    })),
+  );
 
 const emitTurn = ({
   sessionId,
@@ -491,7 +469,7 @@ const main = async () => {
   await using __ = createProvider(config);
 
   {
-    let state = loadState(payload.session_id);
+    let state = await loadState(payload.session_id);
     const [msgs, nextState] = await readNewMessages(
       payload.transcript_path,
       state,
@@ -499,13 +477,13 @@ const main = async () => {
     state = nextState;
 
     if (!msgs.length) {
-      saveState(payload.session_id, state);
+      await saveState(payload.session_id, state);
       return 0;
     }
 
-    const turns = [...assembleTurns(msgs)];
+    const turns = assembleTurns(msgs).toArray();
     if (!turns.length) {
-      saveState(payload.session_id, state);
+      await saveState(payload.session_id, state);
       return 0;
     }
 
@@ -525,7 +503,7 @@ const main = async () => {
     }
 
     state = { ...state, turnCount: state.turnCount + emitted };
-    saveState(payload.session_id, state);
+    await saveState(payload.session_id, state);
   }
 
   return 0;
