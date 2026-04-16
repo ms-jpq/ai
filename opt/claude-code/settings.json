@@ -11,7 +11,13 @@
     "ANTHROPIC_API_KEY": "",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
-    "NO_COLOR": "true"
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "1",
+    "CLAUDE_CODE_ENHANCED_TELEMETRY_BETA": "1",
+    "NO_COLOR": "true",
+    "OTEL_EXPORTER_OTLP_PROTOCOL": "http",
+    "OTEL_LOGS_EXPORTER": "none",
+    "OTEL_METRICS_EXPORTER": "none",
+    "OTEL_TRACES_EXPORTER": "none"
   },
   "feedbackSurveyRate": 0,
   "hooks": {
@@ -140,6 +146,7 @@
     ]
   },
   "model": "opus",
+  "otelHeadersHelper": "~/.local/opt/ai/opt/claude-code/libexec/otel-headers-helper.sh",
   "permissions": {
     "allow": [
       "Bash",
