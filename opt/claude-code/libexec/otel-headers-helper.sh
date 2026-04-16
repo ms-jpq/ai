@@ -6,5 +6,5 @@ set -o pipefail
 TOKEN="$(jq -e --raw-input --join-output '@base64' <<< ":")"
 
 tee <<- JSON
-{"Authorization": "Basic $TOKEN", "x-langfuse-ingestion-version": "4"}
+{"Authorization": "Basic $TOKEN"}
 JSON
