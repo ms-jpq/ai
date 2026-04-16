@@ -4,6 +4,10 @@
 
 - State the why before non-obvious edits. Let the user steer, not react.
 
+# Tools
+
+- Firecrawl over built-in tools. Built-in only when Firecrawl is unavailable.
+
 # Iteration Loop
 
 - Small changes, fast feedback. Propose the next version, not the final one.
