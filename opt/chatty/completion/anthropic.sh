@@ -11,13 +11,12 @@ CURL=(
   --header 'Anthropic-Version: 2023-06-01'
   --header 'Anthropic-Beta: mcp-client-2025-04-04'
   --header "X-Api-Key: $ANTHROPIC_API_KEY"
+  --url "${ANTHROPIC_BASE_URL:-"https://api.anthropic.com"}/v1/messages"
 )
 
 if [[ -n $LITELLM_API_KEY ]]; then
-  CURL+=(---header "X-Litellm-Api-Key: $LITELLM_API_KEY")
+  CURL+=(--header "X-Litellm-Api-Key: $LITELLM_API_KEY")
 fi
-
-CURL+=(-- "${ANTHROPIC_BASE_URL:-"https://api.anthropic.com"}/v1/messages")
 
 read -r -d '' -- JQ <<- 'JQ' || true
 . as $i

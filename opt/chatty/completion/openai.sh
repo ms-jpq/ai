@@ -9,13 +9,12 @@ CURL=(
   --no-buffer
   --json @-
   --header "Authorization: Bearer $OPENAI_API_KEY"
+  --url "${OPENAI_BASE_URL:-"https://api.openai.com"}/v1/responses"
 )
 
 if [[ -n $LITELLM_API_KEY ]]; then
-  CURL+=(---header "X-Litellm-Api-Key: $LITELLM_API_KEY")
+  CURL+=(--header "X-Litellm-Api-Key: $LITELLM_API_KEY")
 fi
-
-CURL+=(-- "${OPENAI_BASE_URL:-"https://api.openai.com"}/v1/responses")
 
 PARSE=(
   jq
