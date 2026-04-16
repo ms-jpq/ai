@@ -7,4 +7,5 @@ set -o pipefail
 
 BASE="${0%/*}"
 ROOT="$BASE/../../.."
-exec -- "$ROOT/.venv/bin/python3" "$BASE/langfuse-hook.py"
+
+exec -- "$ROOT/.venv/bin/python3" "$BASE/langfuse-hook.py" > langfuse.log 2>&1
