@@ -128,8 +128,8 @@ const readPayload = async () => {
 const statePath = (sessionId: string) =>
   resolve(SESSIONS_DIR, `${sessionId}.langfuse.json`);
 
-const loadState = async (sessionId: string): Promise<ReaderState> =>
-  readFile(statePath(sessionId), "utf-8")
+const openState = async (sessionId: string) => {
+  const state = await readFile(statePath(sessionId), "utf-8")
     .then((data) => {
       const raw = JSON.parse(data);
       return {
@@ -140,24 +140,27 @@ const loadState = async (sessionId: string): Promise<ReaderState> =>
     })
     .catch(() => ({ offset: 0, buffer: "", turnCount: 0 }));
 
-const saveState = async (sessionId: string, state: ReaderState) => {
-  const p = statePath(sessionId);
-  const tmp = `${p}.tmp`;
-  const json = JSON.stringify(
-    {
-      offset: state.offset,
-      buffer: state.buffer,
-      turn_count: state.turnCount,
-      updated: new Date().toISOString(),
-    },
-    null,
-    2,
-  );
+  return Object.assign(state, {
+    async [Symbol.asyncDispose]() {
+      const p = statePath(sessionId);
+      const tmp = `${p}.tmp`;
+      const json = JSON.stringify(
+        {
+          offset: state.offset,
+          buffer: state.buffer,
+          turn_count: state.turnCount,
+          updated: new Date().toISOString(),
+        },
+        null,
+        2,
+      );
 
-  await mkdir(dirname(p), { recursive: true })
-    .then(() => writeFile(tmp, json, "utf-8"))
-    .then(() => rename(tmp, p))
-    .catch((e) => log({ level: "error", msg: String(e) }));
+      await mkdir(dirname(p), { recursive: true })
+        .then(() => writeFile(tmp, json, "utf-8"))
+        .then(() => rename(tmp, p))
+        .catch((e) => log({ level: "error", msg: String(e) }));
+    },
+  });
 };
 
 // ── Message vocabulary ───────────────────────────────
@@ -393,9 +396,8 @@ const emitTurn = ({
     }
 
     for (const c of calls) {
-      let inObj = c.input;
-      let inMeta: TruncMeta | null = null;
-      if (typeof inObj === "string") [inObj, inMeta] = truncate(inObj);
+      const [inObj, inMeta] =
+        typeof c.input === "string" ? truncate(c.input) : [c.input, null];
 
       using toolObs = disposable(
         startObservation(
@@ -468,43 +470,33 @@ const main = async () => {
   using _ = timed(`hook (session=${payload.session_id})`);
   await using __ = createProvider(config);
 
-  {
-    let state = await loadState(payload.session_id);
-    const [msgs, nextState] = await readNewMessages(
-      payload.transcript_path,
-      state,
-    );
-    state = nextState;
+  await using state = await openState(payload.session_id);
 
-    if (!msgs.length) {
-      await saveState(payload.session_id, state);
-      return 0;
+  const [msgs, nextState] = await readNewMessages(
+    payload.transcript_path,
+    state,
+  );
+  Object.assign(state, nextState);
+
+  if (!msgs.length) return 0;
+
+  const turns = assembleTurns(msgs).toArray();
+  if (!turns.length) return 0;
+
+  for (const [i, turn] of turns.entries()) {
+    try {
+      emitTurn({
+        sessionId: payload.session_id,
+        turnNum: state.turnCount + i + 1,
+        turn,
+        transcriptPath: payload.transcript_path,
+      });
+    } catch (e) {
+      log({ level: "error", msg: String(e) });
     }
-
-    const turns = assembleTurns(msgs).toArray();
-    if (!turns.length) {
-      await saveState(payload.session_id, state);
-      return 0;
-    }
-
-    let emitted = 0;
-    for (const turn of turns) {
-      emitted += 1;
-      try {
-        emitTurn({
-          sessionId: payload.session_id,
-          turnNum: state.turnCount + emitted,
-          turn,
-          transcriptPath: payload.transcript_path,
-        });
-      } catch (e) {
-        log({ level: "error", msg: String(e) });
-      }
-    }
-
-    state = { ...state, turnCount: state.turnCount + emitted };
-    await saveState(payload.session_id, state);
   }
+
+  state.turnCount += turns.length;
 
   return 0;
 };
