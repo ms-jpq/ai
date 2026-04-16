@@ -16,4 +16,4 @@ description: Research the workspace for a topic. Report patterns in the corpus.
 
 # Record
 
-- Write `<topic>.md` to "."
+- Write `<topic>.md` to the user's current working directory, not this skill's directory.
