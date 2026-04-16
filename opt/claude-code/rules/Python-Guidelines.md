@@ -15,15 +15,26 @@ with nullcontext():
 
 - `from module import name` for all imports — never bare `import module`.
 
+- Functions with multiple parameters use `*` after the first positional argument — forces keyword passing for the rest.
+
+```python
+def fetch(url, *, timeout=30, retries=3): ...
+def render(template, *, context, strict=False): ...
+```
+
+- Control flow idioms:
+  - `...` for noop bodies, not `pass`.
+  - `suppress()` over bare `try/except`.
+  - `with nullcontext(): ...` to group related statements.
+  - No `if __name__ == "__main__":` guard — scripts execute at module scope.
+
 - Prefix non-exported module-level names with `_` — constants, functions, classes.
-
-- `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
-
-- `...` for noop bodies, not `pass`. `suppress()` over bare `try/except`. `with nullcontext(): ...` to group related statements. No `if __name__ == "__main__":` guard — scripts execute at module scope.
 
 - `@dataclass(frozen=True)` for data types.
 
-- `from argparse import ArgumentParser, Namespace`. Parse into a `Namespace`, destructure into typed locals.
+- `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`.
+
+- `argparse` for CLIs.
   - Spell out keyword arguments: `action=`, `type=`, `default=`, `nargs=`, `required=`.
   - `add_mutually_exclusive_group()` for conflicting flags.
   - `add_subparsers(dest=..., required=True)` for multi-command CLIs, dispatch with `match`/`case`.

@@ -4,6 +4,12 @@
 
 - `const foo = function*() {}` for generators. `IteratorObject<T>` sync, `AsyncGenerator<T>` async. Explicit `return` at body end.
 
+- `({ ... })` — single params object for multi-argument functions. Inline the type unless shared.
+
+```typescript
+const fetch = ({ url, timeout = 30, retries = 3 }: { url: string; timeout?: number; retries?: number }) => {};
+```
+
 - `satisfies` over type annotations where possible. Preserves literal/narrowed types.
 
 - IIFEs `(() => {})()` to localize or eliminate mutable state.
