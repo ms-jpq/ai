@@ -29,7 +29,7 @@ _SESSIONS_DIR = _ROOT / "var" / "sessions"
 
 
 @contextmanager
-def _log_errors():
+def _log_errors() -> Iterator[None]:
     try:
         yield
     except Exception as e:
@@ -189,9 +189,9 @@ def _get_content(msg: dict[str, Any]) -> Any:
 def _get_role(msg: dict[str, Any]) -> str | None:
     match msg:
         case {"type": "user" | "assistant" as role}:
-            return role
+            return str(role)
         case {"message": {"role": "user" | "assistant" as role}}:
-            return role
+            return str(role)
         case _:
             return None
 
@@ -435,6 +435,19 @@ def _emit_turn(
                 },
             ) as tool_obs:
                 tool_obs.update(output=c.get("output"))
+
+        for c in calls:
+            if c.get("name") == "ExitPlanMode" and (plan := c.get("input")):
+                plan_str = (
+                    plan if isinstance(plan, str) else dumps(plan, ensure_ascii=False)
+                )
+                plan_trunc, plan_meta = _truncate(plan_str)
+                with langfuse.start_as_current_observation(
+                    name="Plan",
+                    output=plan_trunc,
+                    metadata={"plan_meta": plan_meta},
+                ):
+                    ...
 
         trace.update(output={"role": "assistant", "content": assistant_text})
 
