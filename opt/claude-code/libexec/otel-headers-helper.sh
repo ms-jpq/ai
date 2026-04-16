@@ -3,7 +3,7 @@
 set -o pipefail
 
 # shellcheck disable=SC2154
-TOKEN="$(printf -- '%s' "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" | jq -e --raw-input --join-output '@base64')"
+TOKEN="$(jq -e --raw-input --join-output '@base64' <<< "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY")"
 
 tee <<- JSON
 {"Authorization": "Basic $TOKEN", "x-langfuse-ingestion-version": "4"}
