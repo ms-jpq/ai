@@ -43,7 +43,6 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
-PATH="$ROOT/.venv/bin:$PATH"
 EXEC=(~/.local/bin/hp "$CC" "${ARGV[@]}")
 if [[ -t 0 ]]; then
   clear -x
