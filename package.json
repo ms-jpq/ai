@@ -1,9 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "dependencies": {
+    "@anthropic-ai/claude-agent-sdk": "*",
     "@google/gemini-cli": "*",
-    "prettier": "*",
-    "opencode-ai": "*"
+    "@langfuse/otel": "*",
+    "@langfuse/tracing": "*",
+    "@opentelemetry/sdk-node": "*",
+    "opencode-ai": "*",
+    "prettier": "*"
   },
   "type": "module"
 }
