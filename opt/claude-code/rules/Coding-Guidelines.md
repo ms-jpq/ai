@@ -6,8 +6,6 @@
 
 - Types model the domain. Each stage has a single types file, complete enough to describe the problem.
 
-- Records over classes.
-
 - Transforms or effects. Not both.
 
 - Persistent state lives at stage boundaries — files, queues, databases.
@@ -17,6 +15,8 @@
 - Generic interfaces at stage boundaries. Concrete (most specific) within a stage.
 
 ## Micro
+
+- Records over classes.
 
 - Frozen data by default. Mutation requires justification.
 
