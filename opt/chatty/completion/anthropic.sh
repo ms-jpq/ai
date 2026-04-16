@@ -14,7 +14,8 @@ CURL=(
   --url "${ANTHROPIC_BASE_URL:-"https://api.anthropic.com"}/v1/messages"
 )
 
-if [[ -n $LITELLM_API_KEY ]]; then
+# shellcheck disable=SC2154
+if [[ -n ${LITELLM_API_KEY:-""} ]]; then
   CURL+=(--header "X-Litellm-Api-Key: $LITELLM_API_KEY")
 fi
 
