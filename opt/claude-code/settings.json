@@ -127,7 +127,7 @@
           },
           {
             "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/langfuse.py",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/langfuse.sh",
             "type": "command"
           }
         ]
