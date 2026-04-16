@@ -6,4 +6,3 @@ from logging import INFO, basicConfig, captureWarnings
 with nullcontext():
     captureWarnings(True)
     basicConfig(format="%(message)s", level=INFO)
-
