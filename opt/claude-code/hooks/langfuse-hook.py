@@ -504,7 +504,7 @@ def _main() -> int:
 
     try:
         langfuse = Langfuse(
-            public_key=public_key, secret_key=secret_key, host=host, timeout=300
+            public_key=public_key, secret_key=secret_key, host=host, timeout=10
         )
     except Exception:
         getLogger().error("%s", "Langfuse init failed", exc_info=True)
