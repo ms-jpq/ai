@@ -1,6 +1,6 @@
 # Coding Guidelines
 
-## Design
+## Macro
 
 - Model the system as a series of stages (I → O). Decompose along stage boundaries.
 
@@ -16,7 +16,7 @@
 
 - Generic interfaces at stage boundaries. Concrete (most specific) within a stage.
 
-## Implementation
+## Micro
 
 - Frozen data by default. Mutation requires justification.
 
