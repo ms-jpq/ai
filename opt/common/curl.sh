@@ -12,7 +12,12 @@ CURL=(
   --config "$BASE/.curlrc"
   --cookie "$COOKIE_JAR"
   --cookie-jar "$COOKIE_JAR"
-  "$@"
 )
 
-exec -- "${CURL[@]}"
+TEE=(tee --)
+if [[ -v DEBUG ]]; then
+  CURL+=(--fail-with-body)
+  TEE+=(/dev/stderr)
+fi
+
+"${CURL[@]}" "$@" | "${TEE[@]}"
