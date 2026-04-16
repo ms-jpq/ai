@@ -6,13 +6,18 @@ set -o pipefail
 CURL=(
   curl.sh
   'anthropic'
-  --header 'Anthropic-Version: 2023-06-01'
-  --header 'Anthropic-Beta: mcp-client-2025-04-04'
-  --header "X-API-Key: $ANTHROPIC_API_KEY"
   --no-buffer
   --json @-
-  -- "${ANTHROPIC_BASE_URL:-"https://api.anthropic.com"}/v1/messages"
+  --header 'Anthropic-Version: 2023-06-01'
+  --header 'Anthropic-Beta: mcp-client-2025-04-04'
+  --header "X-Api-Key: $ANTHROPIC_API_KEY"
 )
+
+if [[ -n $LITELLM_API_KEY ]]; then
+  CURL+=(---header "X-Litellm-Api-Key: $LITELLM_API_KEY")
+fi
+
+CURL+=(-- "${ANTHROPIC_BASE_URL:-"https://api.anthropic.com"}/v1/messages")
 
 read -r -d '' -- JQ <<- 'JQ' || true
 . as $i

@@ -7,10 +7,15 @@ CURL=(
   curl.sh
   'openai'
   --no-buffer
-  --header "Authorization: Bearer $OPENAI_API_KEY"
   --json @-
-  -- "${OPENAI_BASE_URL:-"https://api.openai.com"}/v1/responses"
+  --header "Authorization: Bearer $OPENAI_API_KEY"
 )
+
+if [[ -n $LITELLM_API_KEY ]]; then
+  CURL+=(---header "X-Litellm-Api-Key: $LITELLM_API_KEY")
+fi
+
+CURL+=(-- "${OPENAI_BASE_URL:-"https://api.openai.com"}/v1/responses")
 
 PARSE=(
   jq

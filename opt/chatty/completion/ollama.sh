@@ -2,14 +2,19 @@
 
 set -o pipefail
 
-# shellcheck disable=SC2154
 CURL=(
   curl.sh
   'ollama'
   --no-buffer
   --json @-
-  -- "$OLLAMA_API_BASE/api/chat"
 )
+
+if [[ -n $LITELLM_API_KEY ]]; then
+  CURL+=(---header "X-Litellm-Api-Key: $LITELLM_API_KEY")
+fi
+
+# shellcheck disable=SC2154
+CURL+=(-- "$OLLAMA_API_BASE/api/chat")
 
 PARSE=(
   jq
