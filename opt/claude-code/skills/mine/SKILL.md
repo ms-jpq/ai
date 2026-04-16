@@ -16,4 +16,4 @@ description: Research the workspace for a topic. Report patterns in the corpus.
 
 # Record
 
-- Write `<topic>.md` in the workspace directory with each step.
+- Write `<topic>.md` to "."
