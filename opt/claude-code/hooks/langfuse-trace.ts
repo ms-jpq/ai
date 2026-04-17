@@ -23,8 +23,6 @@ import { fileURLToPath } from "node:url"
 
 type Conf = { publicKey: string; secretKey: string; host: string }
 
-type SessionState = AsyncDisposable & { offset: number }
-
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..,", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
 
@@ -67,7 +65,9 @@ const hookInput = async (): Promise<HookInput | undefined> => {
   return data.trim() ? (JSON.parse(data) as HookInput) : undefined
 }
 
-const openState = async (sessionId: string): Promise<SessionState> => {
+const openState = async (
+  sessionId: string,
+): Promise<AsyncDisposable & { offset: number }> => {
   const path = resolve(SESSIONS_DIR, `${sessionId}.langfuse.json`)
   const state = await (async () => {
     try {
