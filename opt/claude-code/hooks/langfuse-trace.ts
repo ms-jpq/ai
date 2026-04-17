@@ -31,14 +31,15 @@ const log = ({
   msg: string
 }) => console.error(`[${level}] ${msg}`)
 
-const timed = (label: string) => {
-  const start = performance.now()
+const measure = (label: string) => {
+  const now = performance.now()
   log({ level: "debug", msg: `${label} started` })
 
   return {
+    now,
     [Symbol.dispose]() {
-      const dur = ((performance.now() - start) / 1000).toFixed(2)
-      log({ level: "info", msg: `${label} completed in ${dur}s` })
+      const elapsed = ((performance.now() - now) / 1000).toFixed(2)
+      log({ level: "info", msg: `${label} completed in ${elapsed}s` })
     },
   }
 }
@@ -301,7 +302,7 @@ const main = async () => {
     return
   }
 
-  using _ = timed(`${hook.hook_event_name} (session=${hook.session_id})`)
+  using time = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
   const isSub = hook.hook_event_name === "SubagentStop"
   const stateKey = isSub
@@ -333,8 +334,9 @@ const main = async () => {
           continue
         }
 
+        const startTime = time.now + i
         using msg = defer(
-          tracer.startSpan(`${hook.hook_event_name} - ${i}`, undefined),
+          tracer.startSpan(`${hook.hook_event_name} - ${i}`, { startTime }),
         )
 
         if (input) {
