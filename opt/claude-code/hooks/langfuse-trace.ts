@@ -38,13 +38,14 @@ const log = ({
 }
 
 const measure = (label: string) => {
-  const now = performance.now()
+  const process = performance.now()
   log({ level: "debug", msg: `${label} started` })
 
   return {
-    now,
+    jesus: Date.now(),
+    process,
     [Symbol.dispose]() {
-      const elapsed = ((performance.now() - now) / 1000).toFixed(2)
+      const elapsed = ((performance.now() - process) / 1000).toFixed(2)
       log({ level: "info", msg: `${label} completed in ${elapsed}s` })
     },
   }
@@ -349,7 +350,7 @@ const main = async () => {
       continue
     }
 
-    const startTime = time.now + i * 10
+    const startTime = time.jesus + i * 10
     using msg = defer(
       tracer.startSpan(`${traceName}: ${i}`, { startTime, attributes }),
     )
