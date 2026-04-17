@@ -12,7 +12,6 @@ import type { Span } from "@opentelemetry/api"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
-import { EOL } from "node:os"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
 import { text } from "node:stream/consumers"
@@ -131,9 +130,9 @@ const contents = function* ({
 }
 
 type Extracted =
-  | { type: "input"; value: string }
-  | { type: "output"; value: string }
-  | { type: "error"; value: string }
+  | { type: "input"; value: unknown }
+  | { type: "output"; value: unknown }
+  | { type: "error"; value: unknown }
 
 const extract = (role: Role, block: Block): Extracted | undefined => {
   const side = role === "assistant" ? "output" : "input"
@@ -155,7 +154,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "tool_use":
       return {
         type: "output",
-        value: JSON.stringify({ name: block.name, input: block.input }),
+        value: { name: block.name, input: block.input },
       }
 
     case "code_execution_tool_result":
@@ -167,20 +166,20 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "encrypted_code_execution_result":
           return {
             type: "output",
-            value: JSON.stringify({
+            value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
-            }),
+            },
           }
         case "bash_code_execution_result":
         case "code_execution_result":
           return {
             type: "output",
-            value: JSON.stringify({
+            value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
               stdout: block.content.stdout,
-            }),
+            },
           }
         default:
           fail(block.content satisfies never)
@@ -189,18 +188,18 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "mcp_tool_result":
     case "tool_result":
       if (block.is_error) {
-        return { type: "error", value: JSON.stringify(block.content) }
+        return { type: "error", value: block.content }
       }
-      return { type: "output", value: JSON.stringify(block.content) }
+      return { type: "output", value: block.content }
 
     case "search_result":
       return {
         type: "output",
-        value: JSON.stringify({
+        value: {
           source: block.source,
           title: block.title,
           content: block.content,
-        }),
+        },
       }
 
     case "text_editor_code_execution_tool_result":
@@ -212,19 +211,17 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "text_editor_code_execution_create_result":
           return {
             type: "output",
-            value: JSON.stringify({
-              is_file_update: block.content.is_file_update,
-            }),
+            value: { is_file_update: block.content.is_file_update },
           }
         case "text_editor_code_execution_str_replace_result":
           return {
             type: "output",
-            value: JSON.stringify({
+            value: {
               old_start: block.content.old_start,
               old_lines: block.content.old_lines,
               new_start: block.content.new_start,
               new_lines: block.content.new_lines,
-            }),
+            },
           }
         default:
           fail(block.content satisfies never)
@@ -235,10 +232,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "tool_search_tool_result_error":
           return { type: "error", value: block.content.error_code }
         case "tool_search_tool_search_result":
-          return {
-            type: "output",
-            value: JSON.stringify(block.content.tool_references),
-          }
+          return { type: "output", value: block.content.tool_references }
         default:
           fail(block.content satisfies never)
       }
@@ -247,9 +241,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       if (Array.isArray(block.content)) {
         return {
           type: "output",
-          value: JSON.stringify(
-            block.content.map((r) => ({ title: r.title, url: r.url })),
-          ),
+          value: block.content.map((r) => ({ title: r.title, url: r.url })),
         }
       }
       return { type: "error", value: block.content.error_code }
@@ -261,10 +253,10 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "web_fetch_result":
           return {
             type: "output",
-            value: JSON.stringify({
+            value: {
               url: block.content.url,
               retrieved_at: block.content.retrieved_at,
-            }),
+            },
           }
         default:
           fail(block.content satisfies never)
@@ -279,6 +271,11 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       fail(block satisfies never)
   }
 }
+
+const jsonValues = (items: Extracted[]) =>
+  JSON.stringify(
+    items.length === 1 ? items[0]?.value : items.map((b) => b.value),
+  )
 
 const annotated = (message: SessionMessage) => {
   const blocks = contents(message)
@@ -315,10 +312,12 @@ const main = async () => {
 
   tracer.startActiveSpan(hook.hook_event_name, (root) => {
     using _ = defer(root)
+    root.setAttribute("langfuse.trace.name", hook.hook_event_name)
     root.setAttribute("langfuse.session.id", hook.session_id)
 
     for (const message of messages) {
       const { input = [], output = [], error = [] } = annotated(message)
+
       log({
         level: "debug",
         msg: JSON.stringify({ input, output, error }),
@@ -326,26 +325,18 @@ const main = async () => {
 
       tracer.startActiveSpan(message.type, (span) => {
         using _ = defer(span)
+        span.setAttribute("langfuse.session.id", hook.session_id)
 
         if (input.length) {
-          span.setAttribute(
-            "langfuse.observation.input",
-            input.map((b) => b.value).join(EOL),
-          )
+          span.setAttribute("langfuse.observation.input", jsonValues(input))
         }
 
         if (output.length) {
-          span.setAttribute(
-            "langfuse.observation.output",
-            output.map((b) => b.value).join(EOL),
-          )
+          span.setAttribute("langfuse.observation.output", jsonValues(output))
         }
 
         if (error.length) {
-          span.setAttribute(
-            "langfuse.observation.output",
-            error.map((b) => b.value).join(EOL),
-          )
+          span.setAttribute("langfuse.observation.output", jsonValues(error))
           span.setAttribute("langfuse.observation.level", "ERROR")
         }
       })
