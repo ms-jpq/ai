@@ -16,7 +16,6 @@ import {
 } from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { createHash } from "node:crypto"
-import { createReadStream } from "node:fs"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import { env, exit, stdin } from "node:process"
@@ -37,9 +36,7 @@ type Config = {
   host: string
 }
 
-type ReaderState = {
-  offset: number
-  buffer: string
+type SessionState = {
   turnCount: number
 }
 
@@ -72,6 +69,41 @@ type Turn = {
   assistantMsgs: TranscriptLine[]
   toolResults: Map<string, unknown>
 }
+
+type TurnData = {
+  userText: string
+  userMeta: TruncMeta
+  assistantText: string
+  assistantMeta: TruncMeta
+  model: string
+  tools: ResolvedToolCall[]
+}
+
+type TurnEvent = {
+  kind: "turn"
+  sessionId: string
+  transcriptPath: string
+  turnNum: number
+  data: TurnData
+  lastAssistantMessage?: string
+  error?: string
+  errorDetails?: string
+}
+
+type SubagentEvent = {
+  kind: "subagent"
+  sessionId: string
+  agentId: string
+  agentType: string
+  agentTranscriptPath: string
+  turns: TurnData[]
+  inputText: string
+  inputMeta: TruncMeta
+  outputText: string
+  outputMeta: TruncMeta
+}
+
+type PipeEvent = TurnEvent | SubagentEvent
 
 // ── Disposable helpers ───────────────────────────────
 
@@ -106,12 +138,12 @@ const log = ({
 
 // ── Input ────────────────────────────────────────────
 
-const readConfig = (): Config | null => {
-  if (env["TRACE_TO_LANGFUSE"]?.toLowerCase() !== "true") return null
+const readConfig = (): Config | undefined => {
+  if (env["TRACE_TO_LANGFUSE"]?.toLowerCase() !== "true") return undefined
 
   const publicKey = env["CC_LANGFUSE_PUBLIC_KEY"] ?? env["LANGFUSE_PUBLIC_KEY"]
   const secretKey = env["CC_LANGFUSE_SECRET_KEY"] ?? env["LANGFUSE_SECRET_KEY"]
-  if (!publicKey || !secretKey) return null
+  if (!publicKey || !secretKey) return undefined
 
   const host =
     env["CC_LANGFUSE_BASE_URL"] ??
@@ -132,27 +164,17 @@ const readPayload = async () => {
 const openState = async (sessionId: string) => {
   const path = resolve(SESSIONS_DIR, `${sessionId}.langfuse.json`)
 
-  const state = await readFile(path, "utf-8")
-    .then((data) => {
-      const raw = JSON.parse(data)
-      return {
-        offset: Number(raw["offset"] ?? 0),
-        buffer: String(raw["buffer"] ?? ""),
-        turnCount: Number(raw["turn_count"] ?? 0),
-      }
-    })
-    .catch(() => ({ offset: 0, buffer: "", turnCount: 0 }))
+  const state: SessionState = await readFile(path, "utf-8")
+    .then((data) => ({
+      turnCount: Number(JSON.parse(data)["turn_count"] ?? 0),
+    }))
+    .catch(() => ({ turnCount: 0 }))
 
   return Object.assign(state, {
     async [Symbol.asyncDispose]() {
       const tmp = `${path}.tmp`
       const json = JSON.stringify(
-        {
-          offset: state.offset,
-          buffer: state.buffer,
-          turn_count: state.turnCount,
-          updated: new Date().toISOString(),
-        },
+        { turn_count: state.turnCount, updated: new Date().toISOString() },
         null,
         2,
       )
@@ -232,22 +254,14 @@ const truncate = (s: string, maxChars = MAX_CHARS): [string, TruncMeta] => {
 
 // ── Parse ────────────────────────────────────────────
 
-const readNewMessages = async (
-  path: string,
-  state: ReaderState,
-): Promise<[TranscriptLine[], ReaderState]> => {
-  const chunk = await text(
-    createReadStream(path, { start: state.offset, encoding: "utf-8" }),
-  ).catch((e) => {
+const readTranscript = async (path: string): Promise<TranscriptLine[]> => {
+  const content = await readFile(path, "utf-8").catch((e) => {
     log({ level: "error", msg: String(e) })
     return ""
   })
-  if (!chunk) return [[], state]
+  if (!content) return []
 
-  const combined = state.buffer + chunk
-  const lines = combined.split("\n")
-
-  const msgs = lines.slice(0, -1).flatMap((raw) => {
+  return content.split("\n").flatMap((raw) => {
     const trimmed = raw.trim()
     if (!trimmed) return []
     try {
@@ -256,15 +270,6 @@ const readNewMessages = async (
       return []
     }
   })
-
-  return [
-    msgs,
-    {
-      ...state,
-      offset: state.offset + Buffer.byteLength(chunk),
-      buffer: lines.at(-1) ?? "",
-    },
-  ]
 }
 
 // ── Assemble ─────────────────────────────────────────
@@ -321,7 +326,7 @@ const assembleTurns = function* (
   return
 }
 
-// ── Emit ─────────────────────────────────────────────
+// ── Resolve ─────────────────────────────────────────
 
 const toolCalls = (assistantMsgs: TranscriptLine[]): ToolCall[] =>
   assistantMsgs.flatMap((am) =>
@@ -341,21 +346,86 @@ const resolveToolCalls = (turn: Turn): ResolvedToolCall[] =>
     return { ...c, output, output_meta }
   })
 
+const resolveTurnData = (turn: Turn): TurnData => {
+  const [userText, userMeta] = truncate(extractText(getContent(turn.userMsg)))
+  const lastAssistant = turn.assistantMsgs.at(-1)!
+  const [assistantText, assistantMeta] = truncate(
+    extractText(getContent(lastAssistant)),
+  )
+  const model = getModel(turn.assistantMsgs[0]!)
+  const tools = resolveToolCalls(turn)
+  return { userText, userMeta, assistantText, assistantMeta, model, tools }
+}
+
+// ── Pipeline ────────────────────────────────────────
+
+const toEvents = function* (
+  lines: TranscriptLine[],
+  payload: HookInput,
+  skipTurns: number,
+): IteratorObject<PipeEvent> {
+  const turns = assembleTurns(lines).map(resolveTurnData).toArray()
+
+  if (payload.hook_event_name === "SubagentStop") {
+    const first = turns[0]
+    if (!first) return
+    const last = turns.at(-1)!
+    const lastText = payload.last_assistant_message ?? last.assistantText
+    const [outputText, outputMeta] = truncate(lastText)
+    yield {
+      kind: "subagent",
+      sessionId: payload.session_id,
+      agentId: payload.agent_id,
+      agentType: payload.agent_type,
+      agentTranscriptPath: payload.agent_transcript_path,
+      turns,
+      inputText: first.userText,
+      inputMeta: first.userMeta,
+      outputText,
+      outputMeta,
+    }
+    return
+  }
+
+  const isStop =
+    payload.hook_event_name === "Stop" ||
+    payload.hook_event_name === "StopFailure"
+  const emitUpTo = isStop ? turns.length : Math.max(0, turns.length - 1)
+
+  for (let i = skipTurns; i < emitUpTo; i++) {
+    const isLast = i === turns.length - 1
+    yield {
+      kind: "turn",
+      sessionId: payload.session_id,
+      transcriptPath: payload.transcript_path,
+      turnNum: i + 1,
+      data: turns[i]!,
+      lastAssistantMessage:
+        isStop && isLast ? payload.last_assistant_message : undefined,
+      error:
+        payload.hook_event_name === "StopFailure" && isLast
+          ? payload.error
+          : undefined,
+      errorDetails:
+        payload.hook_event_name === "StopFailure" && isLast
+          ? payload.error_details
+          : undefined,
+    }
+  }
+
+  return
+}
+
+// ── Emit ─────────────────────────────────────────────
+
 const emitTurnObservations = ({
   generationName,
   userText,
   assistantText,
   assistantMeta,
   model,
-  calls,
-}: {
-  generationName: string
-  userText: string
-  assistantText: string
-  assistantMeta: TruncMeta
-  model: string
-  calls: ResolvedToolCall[]
-}) => {
+  tools,
+}: { generationName: string } & TurnData) => {
   {
     using _ = disposable(
       startObservation(
@@ -366,7 +436,7 @@ const emitTurnObservations = ({
           model,
           metadata: {
             assistant_text: assistantMeta,
-            tool_count: calls.length,
+            tool_count: tools.length,
           },
         },
         { asType: "generation" },
@@ -374,9 +444,9 @@ const emitTurnObservations = ({
     )
   }
 
-  for (const c of calls) {
+  for (const c of tools) {
     const [inObj, inMeta] =
-      typeof c.input === "string" ? truncate(c.input) : [c.input, null]
+      typeof c.input === "string" ? truncate(c.input) : [c.input, undefined]
 
     using toolObs = disposable(
       startObservation(
@@ -397,141 +467,77 @@ const emitTurnObservations = ({
   }
 }
 
-const emitTurn = ({
-  sessionId,
-  turnNum,
-  turn,
-  transcriptPath,
-  lastAssistantMessage,
-  error,
-  errorDetails,
-}: {
-  sessionId: string
-  turnNum: number
-  turn: Turn
-  transcriptPath: string
-  lastAssistantMessage?: string
-  error?: string
-  errorDetails?: string
-}) => {
-  const [userText, userMeta] = truncate(extractText(getContent(turn.userMsg)))
-  const lastAssistant = turn.assistantMsgs.at(-1) ?? turn.userMsg
-  const transcriptText = extractText(getContent(lastAssistant))
-  const outputText = transcriptText || lastAssistantMessage || ""
-  const [assistantText, assistantMeta] = truncate(outputText)
-  const model = getModel(turn.assistantMsgs[0] ?? lastAssistant)
-  const calls = resolveToolCalls(turn)
+const emit = (event: PipeEvent): void => {
+  switch (event.kind) {
+    case "turn": {
+      const { data, turnNum, sessionId, transcriptPath, error, errorDetails } =
+        event
+      const outputText = data.assistantText || event.lastAssistantMessage || ""
+      const traceName = `Claude Code - Turn ${turnNum}`
 
-  const traceName = `Claude Code - Turn ${turnNum}`
+      propagateAttributes({ sessionId, traceName, tags: ["claude-code"] }, () =>
+        startActiveObservation(traceName, (trace) => {
+          trace.update({
+            input: { role: "user", content: data.userText },
+            metadata: {
+              source: "claude-code",
+              session_id: sessionId,
+              turn_number: turnNum,
+              transcript_path: transcriptPath,
+              user_text: data.userMeta,
+              ...(error ? { error, error_details: errorDetails } : {}),
+            },
+          })
 
-  propagateAttributes({ sessionId, traceName, tags: ["claude-code"] }, () =>
-    startActiveObservation(traceName, (trace) => {
-      trace.update({
-        input: { role: "user", content: userText },
-        metadata: {
-          source: "claude-code",
-          session_id: sessionId,
-          turn_number: turnNum,
-          transcript_path: transcriptPath,
-          user_text: userMeta,
-          ...(error ? { error, error_details: errorDetails } : {}),
-        },
-      })
+          emitTurnObservations({
+            generationName: "Claude Response",
+            ...data,
+          })
 
-      emitTurnObservations({
-        generationName: "Claude Response",
-        userText,
-        assistantText,
-        assistantMeta,
-        model,
-        calls,
-      })
+          trace.update({
+            output: { role: "assistant", content: outputText },
+            ...(error ? { level: "ERROR" } : {}),
+          })
+        }),
+      )
+      break
+    }
 
-      trace.update({
-        output: { role: "assistant", content: assistantText },
-        ...(error ? { level: "ERROR" } : {}),
-      })
-    }),
-  )
-}
+    case "subagent": {
+      const traceName = `Claude Code - Subagent: ${event.agentType}`
+      const tags = ["claude-code", "subagent", event.agentType]
 
-const emitSubagent = async ({
-  sessionId,
-  agentId,
-  agentType,
-  agentTranscriptPath,
-  lastAssistantMessage,
-}: {
-  sessionId: string
-  agentId: string
-  agentType: string
-  agentTranscriptPath: string
-  lastAssistantMessage?: string
-}) => {
-  const [msgs] = await readNewMessages(agentTranscriptPath, {
-    offset: 0,
-    buffer: "",
-    turnCount: 0,
-  })
-  if (!msgs.length) return
+      propagateAttributes({ sessionId: event.sessionId, traceName, tags }, () =>
+        startActiveObservation(traceName, (trace) => {
+          trace.update({
+            input: { role: "user", content: event.inputText },
+            metadata: {
+              source: "claude-code",
+              session_id: event.sessionId,
+              agent_id: event.agentId,
+              agent_type: event.agentType,
+              agent_transcript_path: event.agentTranscriptPath,
+              input_meta: event.inputMeta,
+              output_meta: event.outputMeta,
+              turn_count: event.turns.length,
+            },
+          })
 
-  const turns = assembleTurns(msgs).toArray()
-  const [firstTurn] = turns
-  const firstUserText = firstTurn
-    ? extractText(getContent(firstTurn.userMsg))
-    : ""
-  const [inputText, inputMeta] = truncate(firstUserText)
+          for (const [i, turn] of event.turns.entries()) {
+            emitTurnObservations({
+              generationName: `Turn ${i + 1}`,
+              ...turn,
+            })
+          }
 
-  const lastTurn = turns.at(-1)
-  const outputText =
-    lastAssistantMessage ??
-    (lastTurn
-      ? extractText(
-          getContent(lastTurn.assistantMsgs.at(-1) ?? lastTurn.userMsg),
-        )
-      : "")
-  const [outputTrunc, outputMeta] = truncate(outputText)
-
-  const traceName = `Claude Code - Subagent: ${agentType}`
-  const tags = ["claude-code", "subagent", agentType]
-
-  propagateAttributes({ sessionId, traceName, tags }, () =>
-    startActiveObservation(traceName, (trace) => {
-      trace.update({
-        input: { role: "user", content: inputText },
-        metadata: {
-          source: "claude-code",
-          session_id: sessionId,
-          agent_id: agentId,
-          agent_type: agentType,
-          agent_transcript_path: agentTranscriptPath,
-          input_meta: inputMeta,
-          output_meta: outputMeta,
-          turn_count: turns.length,
-        },
-      })
-
-      for (const [i, turn] of turns.entries()) {
-        const [userText] = truncate(extractText(getContent(turn.userMsg)))
-        const lastAst = turn.assistantMsgs.at(-1) ?? turn.userMsg
-        const [assistantText, assistantMeta] = truncate(
-          extractText(getContent(lastAst)),
-        )
-        const model = getModel(turn.assistantMsgs[0] ?? lastAst)
-
-        emitTurnObservations({
-          generationName: `Turn ${i + 1}`,
-          userText,
-          assistantText,
-          assistantMeta,
-          model,
-          calls: resolveToolCalls(turn),
-        })
-      }
-
-      trace.update({ output: { role: "assistant", content: outputTrunc } })
-    }),
-  )
+          trace.update({
+            output: { role: "assistant", content: event.outputText },
+          })
+        }),
+      )
+      break
+    }
+  }
 }
 
 // ── Provider lifecycle ───────────────────────────────
@@ -566,63 +572,38 @@ const main = async () => {
   const payload = await readPayload()
   if (!payload) return 0
 
-  const event = payload.hook_event_name.padEnd("PostToolUseFailure".length)
-  using _ = timed(`${event} (session=${payload.session_id})`)
+  using _ = timed(`${payload.hook_event_name} (session=${payload.session_id})`)
   await using __ = createProvider(config)
 
-  if (payload.hook_event_name === "SubagentStop") {
+  // Stage 2
+  const transcriptPath =
+    payload.hook_event_name === "SubagentStop"
+      ? payload.agent_transcript_path
+      : payload.transcript_path
+  const lines = await readTranscript(transcriptPath)
+
+  // State
+  const isSubagent = payload.hook_event_name === "SubagentStop"
+  await using state = isSubagent
+    ? undefined
+    : await openState(payload.session_id)
+  const skipTurns = state?.turnCount ?? 0
+
+  // Stage 3+4
+  const events = toEvents(lines, payload, skipTurns)
+
+  // Stage 5
+  let emitted = 0
+  for (const event of events) {
     try {
-      await emitSubagent({
-        sessionId: payload.session_id,
-        agentId: payload.agent_id,
-        agentType: payload.agent_type,
-        agentTranscriptPath: payload.agent_transcript_path,
-        lastAssistantMessage: payload.last_assistant_message,
-      })
-    } catch (e) {
-      log({ level: "error", msg: String(e) })
-    }
-    return 0
-  }
-
-  await using state = await openState(payload.session_id)
-
-  const [msgs, nextState] = await readNewMessages(
-    payload.transcript_path,
-    state,
-  )
-  Object.assign(state, nextState)
-
-  if (!msgs.length) return 0
-
-  const turns = assembleTurns(msgs).toArray()
-  if (!turns.length) return 0
-
-  for (const [i, turn] of turns.entries()) {
-    try {
-      emitTurn({
-        sessionId: payload.session_id,
-        turnNum: state.turnCount + i + 1,
-        turn,
-        transcriptPath: payload.transcript_path,
-        lastAssistantMessage:
-          payload.hook_event_name === "Stop" ||
-          payload.hook_event_name === "StopFailure"
-            ? payload.last_assistant_message
-            : undefined,
-        error:
-          payload.hook_event_name === "StopFailure" ? payload.error : undefined,
-        errorDetails:
-          payload.hook_event_name === "StopFailure"
-            ? payload.error_details
-            : undefined,
-      })
+      emit(event)
+      emitted++
     } catch (e) {
       log({ level: "error", msg: String(e) })
     }
   }
 
-  state.turnCount += turns.length
+  if (state) state.turnCount = skipTurns + emitted
 
   return 0
 }
