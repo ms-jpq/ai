@@ -7,13 +7,13 @@ import {
 } from "@anthropic-ai/claude-agent-sdk"
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
-import { LangfuseSpanProcessor } from "@langfuse/otel"
-import { propagateAttributes } from "@langfuse/tracing"
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
+import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
-import { dirname, resolve } from "node:path"
+import { dirname, join, resolve } from "node:path"
 import { env, stdin } from "node:process"
 import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
@@ -99,17 +99,18 @@ const openState = async (
 }
 
 const provider = (config: Conf) => {
-  const processor = new LangfuseSpanProcessor({
-    publicKey: config.publicKey,
-    secretKey: config.secretKey,
-    baseUrl: config.host,
-    timeout: 10,
-    exportMode: "immediate",
+  const auth = Buffer.from(`${config.publicKey}:${config.secretKey}`).toString(
+    "base64",
+  )
+  const exporter = new OTLPTraceExporter({
+    url: join(config.host, `/api/public/otel/v1/traces`),
+    headers: { Authorization: `Basic ${auth}` },
+    timeoutMillis: 10_000,
   })
-
+  const processor = new SimpleSpanProcessor(exporter)
   const provider = new NodeTracerProvider({ spanProcessors: [processor] })
-  provider.register()
 
+  provider.register()
   return {
     provider,
     async [Symbol.asyncDispose]() {
@@ -334,39 +335,38 @@ const main = async () => {
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
   const traceName = `[${hook.session_id}] - ${hook.hook_event_name}`
-  propagateAttributes(
-    {
-      userId,
-      sessionId: hook.session_id,
-      traceName,
-      tags: ["claude-code"],
-    },
-    () => {
-      for (const [i, message] of messages.entries()) {
-        const map = annotated(message)
-        const { input = "", output = "", error = "" } = Object.fromEntries(map)
-        if (!(input + output + error)) {
-          continue
-        }
+  const attributes = {
+    "user.id": userId,
+    "session.id": hook.session_id,
+    "langfuse.trace.name": traceName,
+    "langfuse.trace.tags": ["claude-code"],
+  }
 
-        const startTime = time.now + i
-        using msg = defer(tracer.startSpan(`${traceName}: ${i}`, { startTime }))
+  for (const [i, message] of messages.entries()) {
+    const map = annotated(message)
+    const { input = "", output = "", error = "" } = Object.fromEntries(map)
+    if (!(input + output + error)) {
+      continue
+    }
 
-        if (input) {
-          msg.span.setAttribute("langfuse.observation.input", input)
-        }
+    const startTime = time.now + i
+    using msg = defer(
+      tracer.startSpan(`${traceName}: ${i}`, { startTime, attributes }),
+    )
 
-        if (output) {
-          msg.span.setAttribute("langfuse.observation.output", output)
-        }
+    if (input) {
+      msg.span.setAttribute("langfuse.observation.input", input)
+    }
 
-        if (error) {
-          msg.span.setAttribute("langfuse.observation.output", error)
-          msg.span.setAttribute("langfuse.observation.level", "ERROR")
-        }
-      }
-    },
-  )
+    if (output) {
+      msg.span.setAttribute("langfuse.observation.output", output)
+    }
+
+    if (error) {
+      msg.span.setAttribute("langfuse.observation.output", error)
+      msg.span.setAttribute("langfuse.observation.level", "ERROR")
+    }
+  }
 
   state.offset += messages.length
 }
