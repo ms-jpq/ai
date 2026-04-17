@@ -11,12 +11,14 @@ import { LangfuseSpanProcessor } from "@langfuse/otel"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
+import { EOL } from "node:os"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
 import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 
 type Conf = { publicKey: string; secretKey: string; host: string }
+type Role = SessionMessage["type"]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -121,12 +123,11 @@ const contents = function* ({
 }
 
 type Extracted =
-  | { type: "error"; error: unknown }
-  | { type: "content"; content: string }
-  | { type: "tool_use"; name: string; input: unknown }
-  | { type: "output"; output: unknown }
+  | { type: "input"; value: string }
+  | { type: "output"; value: string }
+  | { type: "error"; value: string }
 
-const extract = (block: Block): Extracted | undefined => {
+const extract = (role: Role, block: Block): Extracted | undefined => {
   if (typeof block === "string") {
     return { type: "content", content: block }
   }
@@ -260,57 +261,11 @@ const extract = (block: Block): Extracted | undefined => {
 }
 
 const annotated = (message: SessionMessage) => {
-  const texts: string[] = []
-  const tools: { name: string; input: unknown }[] = []
-  const outputs: unknown[] = []
-  const errors: unknown[] = []
-
-  for (const block of contents(message)) {
-    const extracted = extract(block)
-
-    if (!extracted) {
-      continue
-    }
-
-    switch (extracted.type) {
-      case "content":
-        texts.push(extracted.content)
-        break
-      case "tool_use":
-        tools.push({
-          name: extracted.name,
-          input: extracted.input,
-        })
-        break
-      case "output":
-        outputs.push(extracted.output)
-        break
-      case "error":
-        errors.push(extracted.error)
-        break
-      default:
-        fail(extracted satisfies never)
-    }
-  }
-
-  const input = (() => {
-    if (texts.length) {
-      return texts.join("\n\n")
-    }
-    if (tools.length) {
-      return tools
-    }
-    return undefined
-  })()
-
-  const output = (() => {
-    if (outputs.length) {
-      return outputs.length === 1 ? outputs[0] : outputs
-    }
-    return undefined
-  })()
-
-  return { input, output, errors }
+  const blocks = contents(message)
+    .map((b) => extract(message.type, b))
+    .map((b) => b)
+  const grouped = Object.groupBy(blocks, (b) => b!.type)
+  return grouped
 }
 
 const main = async () => {
@@ -343,25 +298,22 @@ const main = async () => {
     root.setAttribute("langfuse.session.id", hook.session_id)
 
     for (const message of messages) {
-      const { input, output, errors } = annotated(message)
+      const { input = [], output = [], error = [] } = annotated(message)
 
       tracer.startActiveSpan(message.type, (span) => {
-        if (input !== undefined) {
-          span.setAttribute("langfuse.observation.input", JSON.stringify(input))
+        if (input.length) {
+          span.setAttribute("langfuse.observation.input", input.join(EOL))
         }
-        if (output !== undefined) {
-          span.setAttribute(
-            "langfuse.observation.output",
-            JSON.stringify(output),
-          )
+
+        if (output.length) {
+          span.setAttribute("langfuse.observation.output", output.join(EOL))
         }
-        if (errors.length > 0) {
+
+        if (error.length) {
+          span.setAttribute("langfuse.observation.output", error.join(EOL))
           span.setAttribute("langfuse.observation.level", "ERROR")
-          span.setAttribute(
-            "langfuse.observation.status_message",
-            JSON.stringify(errors.length === 1 ? errors[0] : errors),
-          )
         }
+
         span.end()
       })
     }
