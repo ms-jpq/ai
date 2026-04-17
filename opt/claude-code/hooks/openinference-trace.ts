@@ -7,6 +7,11 @@ import {
 } from "@anthropic-ai/claude-agent-sdk"
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
+import {
+  MimeType,
+  OpenInferenceSpanKind,
+  SemanticConventions,
+} from "@arizeai/openinference-semantic-conventions"
 import { SpanStatusCode } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
@@ -29,6 +34,10 @@ type Message = SessionMessage & {
   timestamp: string
 }
 type Role = SessionMessage["type"]
+type Extracted =
+  | { type: "input"; kind: OpenInferenceSpanKind; value: unknown }
+  | { type: "output"; kind: OpenInferenceSpanKind; value: unknown }
+  | { type: "error"; kind: OpenInferenceSpanKind; value: unknown }
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -144,31 +153,91 @@ const contents = function* ({ message }: Message): IteratorObject<Block> {
   return
 }
 
-type Extracted =
-  | { type: "input"; value: unknown }
-  | { type: "output"; value: unknown }
-  | { type: "error"; value: unknown }
-
 const extract = (role: Role, block: Block): Extracted | undefined => {
   const side = role === "assistant" ? "output" : "input"
 
   if (typeof block === "string") {
-    return { type: side, value: block }
+    return { type: side, kind: OpenInferenceSpanKind.LLM, value: block }
   }
 
   switch (block.type) {
-    case "compaction":
-      return { type: side, value: block.content ?? "" }
-    case "text":
-      return { type: side, value: block.text }
+    case "image":
+      switch (block.source.type) {
+        case "base64":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.LLM,
+            value: { media_type: block.source.media_type },
+          }
+        case "url":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.LLM,
+            value: { url: block.source.url },
+          }
+        default:
+          fail(block.source satisfies never)
+      }
+
+    case "document":
+      switch (block.source.type) {
+        case "base64":
+        case "text":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: {
+              context: block.context,
+              media_type: block.source.media_type,
+              title: block.title,
+            },
+          }
+        case "url":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: {
+              context: block.context,
+              title: block.title,
+              url: block.source.url,
+            },
+          }
+        case "content":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: { context: block.context, title: block.title },
+          }
+        default:
+          fail(block.source satisfies never)
+      }
+
     case "thinking":
-      return { type: side, value: block.thinking }
+      return {
+        type: side,
+        kind: OpenInferenceSpanKind.LLM,
+        value: block.thinking,
+      }
     case "redacted_thinking":
-      return { type: side, value: block.data }
+      return {
+        type: side,
+        kind: OpenInferenceSpanKind.LLM,
+        value: block.data,
+      }
+
+    case "text":
+      return { type: side, kind: OpenInferenceSpanKind.LLM, value: block.text }
+    case "compaction":
+      return {
+        type: side,
+        kind: OpenInferenceSpanKind.LLM,
+        value: block.content ?? "",
+      }
 
     case "mcp_tool_use":
       return {
         type: "output",
+        kind: OpenInferenceSpanKind.TOOL,
         value: {
           name: block.name,
           input: block.input,
@@ -180,6 +249,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "tool_use":
       return {
         type: "output",
+        kind: OpenInferenceSpanKind.TOOL,
         value: { name: block.name, input: block.input },
       }
 
@@ -188,10 +258,15 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       switch (block.content.type) {
         case "bash_code_execution_tool_result_error":
         case "code_execution_tool_result_error":
-          return { type: "error", value: block.content.error_code }
+          return {
+            type: "error",
+            kind: OpenInferenceSpanKind.TOOL,
+            value: block.content.error_code,
+          }
         case "encrypted_code_execution_result":
           return {
             type: "output",
+            kind: OpenInferenceSpanKind.TOOL,
             value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
@@ -201,6 +276,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "code_execution_result":
           return {
             type: "output",
+            kind: OpenInferenceSpanKind.TOOL,
             value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
@@ -214,13 +290,22 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "mcp_tool_result":
     case "tool_result":
       if (block.is_error) {
-        return { type: "error", value: block.content }
+        return {
+          type: "error",
+          kind: OpenInferenceSpanKind.TOOL,
+          value: block.content,
+        }
       }
-      return { type: "output", value: block.content }
+      return {
+        type: "output",
+        kind: OpenInferenceSpanKind.TOOL,
+        value: block.content,
+      }
 
     case "search_result":
       return {
         type: "output",
+        kind: OpenInferenceSpanKind.RETRIEVER,
         value: {
           content: block.content,
           source: block.source,
@@ -233,6 +318,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "text_editor_code_execution_tool_result_error":
           return {
             type: "error",
+            kind: OpenInferenceSpanKind.TOOL,
             value: {
               error_code: block.content.error_code,
               error_message: block.content.error_message,
@@ -241,6 +327,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "text_editor_code_execution_view_result":
           return {
             type: side,
+            kind: OpenInferenceSpanKind.TOOL,
             value: {
               content: block.content.content,
               file_type: block.content.file_type,
@@ -252,11 +339,13 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "text_editor_code_execution_create_result":
           return {
             type: "output",
+            kind: OpenInferenceSpanKind.TOOL,
             value: { is_file_update: block.content.is_file_update },
           }
         case "text_editor_code_execution_str_replace_result":
           return {
             type: "output",
+            kind: OpenInferenceSpanKind.TOOL,
             value: {
               lines: block.content.lines,
               new_lines: block.content.new_lines,
@@ -273,10 +362,18 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       switch (block.content.type) {
         case "tool_search_tool_result_error": {
           const { type: _, ...rest } = block.content
-          return { type: "error", value: rest }
+          return {
+            type: "error",
+            kind: OpenInferenceSpanKind.TOOL,
+            value: rest,
+          }
         }
         case "tool_search_tool_search_result":
-          return { type: "output", value: block.content.tool_references }
+          return {
+            type: "output",
+            kind: OpenInferenceSpanKind.TOOL,
+            value: block.content.tool_references,
+          }
         default:
           fail(block.content satisfies never)
       }
@@ -285,6 +382,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       if (Array.isArray(block.content)) {
         return {
           type: "output",
+          kind: OpenInferenceSpanKind.RETRIEVER,
           value: block.content.map((r) => ({
             page_age: r.page_age,
             title: r.title,
@@ -292,15 +390,24 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           })),
         }
       }
-      return { type: "error", value: block.content.error_code }
+      return {
+        type: "error",
+        kind: OpenInferenceSpanKind.RETRIEVER,
+        value: block.content.error_code,
+      }
 
     case "web_fetch_tool_result":
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
-          return { type: "error", value: block.content.error_code }
+          return {
+            type: "error",
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: block.content.error_code,
+          }
         case "web_fetch_result":
           return {
             type: "output",
+            kind: OpenInferenceSpanKind.RETRIEVER,
             value: {
               retrieved_at: block.content.retrieved_at,
               url: block.content.url,
@@ -310,48 +417,12 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           fail(block.content satisfies never)
       }
 
-    case "document":
-      switch (block.source.type) {
-        case "base64":
-        case "text":
-          return {
-            type: side,
-            value: {
-              context: block.context,
-              media_type: block.source.media_type,
-              title: block.title,
-            },
-          }
-        case "url":
-          return {
-            type: side,
-            value: {
-              context: block.context,
-              title: block.title,
-              url: block.source.url,
-            },
-          }
-        case "content":
-          return {
-            type: side,
-            value: { context: block.context, title: block.title },
-          }
-        default:
-          fail(block.source satisfies never)
-      }
-
-    case "image":
-      switch (block.source.type) {
-        case "base64":
-          return { type: side, value: { media_type: block.source.media_type } }
-        case "url":
-          return { type: side, value: { url: block.source.url } }
-        default:
-          fail(block.source satisfies never)
-      }
-
     case "container_upload":
-      return { type: side, value: { file_id: block.file_id } }
+      return {
+        type: side,
+        kind: OpenInferenceSpanKind.TOOL,
+        value: { file_id: block.file_id },
+      }
 
     default:
       fail(block satisfies never)
@@ -417,10 +488,10 @@ const main = async (): Promise<void> => {
 
   const traceName = `[${hook.session_id}] - ${hook.hook_event_name}`
   const attributes = {
-    "user.id": userId,
-    "session.id": hook.session_id,
+    [SemanticConventions.USER_ID]: userId,
+    [SemanticConventions.SESSION_ID]: hook.session_id,
+    [SemanticConventions.TAG_TAGS]: ["claude-code"],
     "langfuse.trace.name": traceName,
-    "langfuse.trace.tags": ["claude-code"],
   }
 
   for (const [i, message] of messages.entries()) {
