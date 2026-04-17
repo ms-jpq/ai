@@ -11,6 +11,7 @@ import { LangfuseSpanProcessor } from "@langfuse/otel"
 import {
   propagateAttributes,
   setLangfuseTracerProvider,
+  startActiveObservation,
   startObservation,
 } from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
@@ -361,9 +362,9 @@ const emitTurn = ({
 
   const traceName = `Claude Code - Turn ${turnNum}`
 
-  propagateAttributes({ sessionId, traceName, tags: ["claude-code"] }, () => {
-    using trace = disposable(
-      startObservation(traceName, {
+  propagateAttributes({ sessionId, traceName, tags: ["claude-code"] }, () =>
+    startActiveObservation(traceName, (trace) => {
+      trace.update({
         input: { role: "user", content: userText },
         metadata: {
           source: "claude-code",
@@ -372,65 +373,65 @@ const emitTurn = ({
           transcript_path: transcriptPath,
           user_text: userMeta,
         },
-      }),
-    )
+      })
 
-    {
-      using _ = disposable(
-        startObservation(
-          "Claude Response",
-          {
-            input: { role: "user", content: userText },
-            output: { role: "assistant", content: assistantText },
-            model,
-            metadata: {
-              assistant_text: assistantMeta,
-              tool_count: calls.length,
-            },
-          },
-          { asType: "generation" },
-        ),
-      )
-    }
-
-    for (const c of calls) {
-      const [inObj, inMeta] =
-        typeof c.input === "string" ? truncate(c.input) : [c.input, null]
-
-      using toolObs = disposable(
-        startObservation(
-          `Tool: ${c.name}`,
-          {
-            input: inObj,
-            metadata: {
-              tool_name: c.name,
-              tool_id: c.id,
-              input_meta: inMeta,
-              output_meta: c.output_meta,
-            },
-          },
-          { asType: "tool" },
-        ),
-      )
-      toolObs.update({ output: c.output })
-    }
-
-    for (const c of calls) {
-      if (c.name === "ExitPlanMode" && c.input) {
-        const planStr =
-          typeof c.input === "string" ? c.input : JSON.stringify(c.input)
-        const [planTrunc, planMeta] = truncate(planStr)
+      {
         using _ = disposable(
-          startObservation("Plan", {
-            output: planTrunc,
-            metadata: { plan_meta: planMeta },
-          }),
+          startObservation(
+            "Claude Response",
+            {
+              input: { role: "user", content: userText },
+              output: { role: "assistant", content: assistantText },
+              model,
+              metadata: {
+                assistant_text: assistantMeta,
+                tool_count: calls.length,
+              },
+            },
+            { asType: "generation" },
+          ),
         )
       }
-    }
 
-    trace.update({ output: { role: "assistant", content: assistantText } })
-  })
+      for (const c of calls) {
+        const [inObj, inMeta] =
+          typeof c.input === "string" ? truncate(c.input) : [c.input, null]
+
+        using toolObs = disposable(
+          startObservation(
+            `Tool: ${c.name}`,
+            {
+              input: inObj,
+              metadata: {
+                tool_name: c.name,
+                tool_id: c.id,
+                input_meta: inMeta,
+                output_meta: c.output_meta,
+              },
+            },
+            { asType: "tool" },
+          ),
+        )
+        toolObs.update({ output: c.output })
+      }
+
+      for (const c of calls) {
+        if (c.name === "ExitPlanMode" && c.input) {
+          const planStr =
+            typeof c.input === "string" ? c.input : JSON.stringify(c.input)
+          const [planTrunc, planMeta] = truncate(planStr)
+          using _ = disposable(
+            startObservation("Plan", {
+              output: planTrunc,
+              metadata: { plan_meta: planMeta },
+            }),
+          )
+        }
+      }
+
+      trace.update({ output: { role: "assistant", content: assistantText } })
+    }),
+  )
 }
 
 // ── Provider lifecycle ───────────────────────────────
@@ -451,7 +452,6 @@ const createProvider = (config: Config) => {
     provider,
     async [Symbol.asyncDispose]() {
       await provider.shutdown()
-      setLangfuseTracerProvider(null)
     },
   }
 }
