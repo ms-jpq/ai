@@ -349,7 +349,7 @@ const main = async () => {
       continue
     }
 
-    const startTime = time.now + i
+    const startTime = time.now + i * 10
     using msg = defer(
       tracer.startSpan(`${traceName}: ${i}`, { startTime, attributes }),
     )
