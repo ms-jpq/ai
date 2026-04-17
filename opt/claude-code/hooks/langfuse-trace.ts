@@ -149,6 +149,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       return { type: side, value: block.text }
     case "thinking":
       return { type: side, value: block.thinking }
+    case "redacted_thinking":
+      return { type: side, value: block.data }
 
     case "mcp_tool_use":
     case "server_tool_use":
@@ -206,7 +208,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "text_editor_code_execution_tool_result":
       switch (block.content.type) {
         case "text_editor_code_execution_tool_result_error":
-          return { type: "error", value: block.content.error_code }
+          return { type: "error", value: block.content }
         case "text_editor_code_execution_view_result":
           return { type: side, value: block.content.content }
         case "text_editor_code_execution_create_result":
@@ -265,7 +267,6 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
 
     case "document":
     case "image":
-    case "redacted_thinking":
     case "container_upload":
       return undefined
     default:
