@@ -274,6 +274,59 @@ const extract = (block: Block): Extracted | undefined => {
   }
 }
 
+const annotated = (message: SessionMessage) => {
+  const texts: string[] = []
+  const tools: { name: string; input: unknown }[] = []
+  const outputs: unknown[] = []
+  const errors: unknown[] = []
+
+  for (const block of contents(message)) {
+    const extracted = extract(block)
+    if (!extracted) {
+      continue
+    }
+
+    switch (extracted.type) {
+      case "content":
+        texts.push(extracted.content)
+        break
+      case "tool_use":
+        tools.push({
+          name: extracted.name,
+          input: extracted.input,
+        })
+        break
+      case "output":
+        outputs.push(extracted.output)
+        break
+      case "error":
+        errors.push(extracted.error)
+        break
+      default:
+        fail(extracted satisfies never)
+    }
+  }
+
+  const input = (() => {
+    if (texts.length) {
+      return texts.join("\n\n")
+    }
+    if (tools.length) {
+      return tools
+    }
+    return undefined
+  })()
+
+  const output = (() => {
+    if (outputs.length) {
+      return outputs.length === 1 ? outputs[0] : outputs
+    }
+    return undefined
+  })()
+
+  return { input, output, errors }
+}
+
 const main = async () => {
   const config = conf()
   if (!config) {
@@ -306,40 +359,29 @@ const main = async () => {
       () => {
         for (const message of messages) {
           const msg = message.message as SDKMessage
-          tracer.startActiveSpan(msg.type, (span) => {
-            try {
-              for (const block of contents(message)) {
-                const extracted = extract(block)
-                if (!extracted) {
-                  continue
-                }
+          const { input, output, errors } = annotated(message)
 
-                switch (extracted.type) {
-                  case "content":
-                    span.addEvent("content", { value: extracted.content })
-                    break
-                  case "tool_use":
-                    span.addEvent(`tool:${extracted.name}`, {
-                      input: JSON.stringify(extracted.input),
-                    })
-                    break
-                  case "output":
-                    span.addEvent("output", {
-                      value: JSON.stringify(extracted.output),
-                    })
-                    break
-                  case "error":
-                    span.addEvent("error", {
-                      value: JSON.stringify(extracted.error),
-                    })
-                    break
-                  default:
-                    fail(extracted satisfies never)
-                }
-              }
-            } finally {
-              span.end()
+          tracer.startActiveSpan(msg.type, (span) => {
+            if (input !== undefined) {
+              span.setAttribute(
+                "langfuse.observation.input",
+                JSON.stringify(input),
+              )
             }
+            if (output !== undefined) {
+              span.setAttribute(
+                "langfuse.observation.output",
+                JSON.stringify(output),
+              )
+            }
+            if (errors.length > 0) {
+              span.setAttribute("langfuse.observation.level", "ERROR")
+              span.setAttribute(
+                "langfuse.observation.status_message",
+                JSON.stringify(errors.length === 1 ? errors[0] : errors),
+              )
+            }
+            span.end()
           })
         }
       },
