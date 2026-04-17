@@ -348,7 +348,6 @@ const emitTurnObservations = ({
   assistantMeta,
   model,
   calls,
-  toolResponse,
 }: {
   generationName: string
   userText: string
@@ -356,7 +355,6 @@ const emitTurnObservations = ({
   assistantMeta: TruncMeta
   model: string
   calls: ResolvedToolCall[]
-  toolResponse?: unknown
 }) => {
   {
     using _ = disposable(
@@ -396,20 +394,6 @@ const emitTurnObservations = ({
       ),
     )
     toolObs.update({ output: c.output })
-
-    if (c.name === "ExitPlanMode") {
-      const raw = c.output ?? toolResponse
-      if (raw) {
-        const planStr = typeof raw === "string" ? raw : JSON.stringify(raw)
-        const [planTrunc, planMeta] = truncate(planStr)
-        using _ = disposable(
-          startObservation("Plan", {
-            output: planTrunc,
-            metadata: { plan_meta: planMeta },
-          }),
-        )
-      }
-    }
   }
 }
 
@@ -419,7 +403,6 @@ const emitTurn = ({
   turn,
   transcriptPath,
   lastAssistantMessage,
-  toolResponse,
   error,
   errorDetails,
 }: {
@@ -428,7 +411,6 @@ const emitTurn = ({
   turn: Turn
   transcriptPath: string
   lastAssistantMessage?: string
-  toolResponse?: unknown
   error?: string
   errorDetails?: string
 }) => {
@@ -463,7 +445,6 @@ const emitTurn = ({
         assistantMeta,
         model,
         calls,
-        toolResponse,
       })
 
       trace.update({
@@ -628,10 +609,6 @@ const main = async () => {
           payload.hook_event_name === "Stop" ||
           payload.hook_event_name === "StopFailure"
             ? payload.last_assistant_message
-            : undefined,
-        toolResponse:
-          payload.hook_event_name === "PostToolUse"
-            ? payload.tool_response
             : undefined,
         error:
           payload.hook_event_name === "StopFailure" ? payload.error : undefined,
