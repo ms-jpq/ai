@@ -1,0 +1,471 @@
+#!/usr/bin/env -S -- node
+
+import type { HookInput, SessionMessage } from "@anthropic-ai/claude-agent-sdk"
+import {
+  getSessionMessages,
+  getSubagentMessages,
+} from "@anthropic-ai/claude-agent-sdk"
+import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
+import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
+import { SpanStatusCode } from "@opentelemetry/api"
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
+import {
+  BasicTracerProvider,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-base"
+import { fail, ok } from "node:assert/strict"
+import { execFile } from "node:child_process"
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
+import { dirname, join, resolve } from "node:path"
+import { env, stdin } from "node:process"
+import { text } from "node:stream/consumers"
+import { fileURLToPath } from "node:url"
+import { promisify } from "node:util"
+
+type Conf = { publicKey: string; secretKey: string; host: string }
+type Role = SessionMessage["type"]
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
+const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
+
+const log = ({
+  level,
+  msg,
+}: {
+  level: "debug" | "info" | "error"
+  msg: string
+}): void => {
+  if (level === "error") {
+    console.error(`[${level}] ${msg}`)
+  }
+}
+
+const measure = (
+  label: string,
+): Disposable & { jesus: number; process: number } => {
+  const procT0 = performance.now()
+  log({ level: "debug", msg: `${label} started` })
+
+  return {
+    jesus: Date.now(),
+    process: procT0,
+    [Symbol.dispose]() {
+      const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
+      log({ level: "info", msg: `${label} completed in ${elapsed}s` })
+    },
+  }
+}
+
+const gitUserName = (): Promise<string> =>
+  promisify(execFile)("git", ["config", "user.name"])
+    .then(({ stdout }) => stdout.trim())
+    .catch(() => "")
+
+const conf = (): Conf | undefined => {
+  const [publicKey, secretKey, host] = [
+    env["LANGFUSE_PUBLIC_KEY"],
+    env["LANGFUSE_SECRET_KEY"],
+    env["LANGFUSE_BASE_URL"],
+  ]
+
+  if (!publicKey || !secretKey || !host) {
+    return undefined
+  }
+
+  return { publicKey, secretKey, host }
+}
+
+const hookInput = async (): Promise<HookInput | undefined> => {
+  const data = await text(stdin)
+  return data.trim() ? (JSON.parse(data) as HookInput) : undefined
+}
+
+const openState = async (
+  key: string,
+): Promise<AsyncDisposable & { offset: number }> => {
+  const path = resolve(SESSIONS_DIR, `${key}.langfuse.json`)
+  const state = await (async () => {
+    try {
+      const offset = Number(await readFile(path, "utf-8"))
+      ok(Number.isInteger(offset))
+      return { offset }
+    } catch {
+      return { offset: 0 }
+    }
+  })()
+
+  return Object.assign(state, {
+    async [Symbol.asyncDispose]() {
+      const tmp = `${path}.tmp`
+      await mkdir(dirname(path), { recursive: true })
+      await writeFile(tmp, String(state.offset), "utf-8")
+      await rename(tmp, path)
+    },
+  })
+}
+
+const provider = (
+  config: Conf,
+): AsyncDisposable & { provider: BasicTracerProvider } => {
+  const auth = Buffer.from(`${config.publicKey}:${config.secretKey}`).toString(
+    "base64",
+  )
+  const exporter = new OTLPTraceExporter({
+    url: join(config.host, `/api/public/otel/v1/traces`),
+    headers: { Authorization: `Basic ${auth}` },
+    timeoutMillis: 10_000,
+  })
+  const processor = new SimpleSpanProcessor(exporter)
+  const provider = new BasicTracerProvider({ spanProcessors: [processor] })
+
+  return {
+    provider,
+    async [Symbol.asyncDispose]() {
+      await provider.shutdown()
+    },
+  }
+}
+
+const defer = <T extends { end: () => void }>(
+  span: T,
+): Disposable & { span: T } => ({
+  span,
+  [Symbol.dispose]() {
+    span.end()
+  },
+})
+
+type Block = string | BetaContentBlock | ContentBlockParam
+
+const contents = function* ({
+  message,
+}: SessionMessage): IteratorObject<Block> {
+  const msg = message as { content: string | Block[] }
+
+  if (typeof msg.content === "string") {
+    yield msg.content
+  } else {
+    yield* msg.content
+  }
+
+  return
+}
+
+type Extracted =
+  | { type: "input"; value: unknown }
+  | { type: "output"; value: unknown }
+  | { type: "error"; value: unknown }
+
+const extract = (role: Role, block: Block): Extracted | undefined => {
+  const side = role === "assistant" ? "output" : "input"
+
+  if (typeof block === "string") {
+    return { type: side, value: block }
+  }
+
+  switch (block.type) {
+    case "compaction":
+      return { type: side, value: block.content ?? "" }
+    case "text":
+      return { type: side, value: block.text }
+    case "thinking":
+      return { type: side, value: block.thinking }
+    case "redacted_thinking":
+      return { type: side, value: block.data }
+
+    case "mcp_tool_use":
+      return {
+        type: "output",
+        value: {
+          name: block.name,
+          input: block.input,
+          server_name: block.server_name,
+        },
+      }
+
+    case "server_tool_use":
+    case "tool_use":
+      return {
+        type: "output",
+        value: { name: block.name, input: block.input },
+      }
+
+    case "code_execution_tool_result":
+    case "bash_code_execution_tool_result":
+      switch (block.content.type) {
+        case "bash_code_execution_tool_result_error":
+        case "code_execution_tool_result_error":
+          return { type: "error", value: block.content.error_code }
+        case "encrypted_code_execution_result":
+          return {
+            type: "output",
+            value: {
+              return_code: block.content.return_code,
+              stderr: block.content.stderr,
+            },
+          }
+        case "bash_code_execution_result":
+        case "code_execution_result":
+          return {
+            type: "output",
+            value: {
+              return_code: block.content.return_code,
+              stderr: block.content.stderr,
+              stdout: block.content.stdout,
+            },
+          }
+        default:
+          fail(block.content satisfies never)
+      }
+
+    case "mcp_tool_result":
+    case "tool_result":
+      if (block.is_error) {
+        return { type: "error", value: block.content }
+      }
+      return { type: "output", value: block.content }
+
+    case "search_result":
+      return {
+        type: "output",
+        value: {
+          content: block.content,
+          source: block.source,
+          title: block.title,
+        },
+      }
+
+    case "text_editor_code_execution_tool_result":
+      switch (block.content.type) {
+        case "text_editor_code_execution_tool_result_error":
+          return {
+            type: "error",
+            value: {
+              error_code: block.content.error_code,
+              error_message: block.content.error_message,
+            },
+          }
+        case "text_editor_code_execution_view_result":
+          return {
+            type: side,
+            value: {
+              content: block.content.content,
+              file_type: block.content.file_type,
+              num_lines: block.content.num_lines,
+              start_line: block.content.start_line,
+              total_lines: block.content.total_lines,
+            },
+          }
+        case "text_editor_code_execution_create_result":
+          return {
+            type: "output",
+            value: { is_file_update: block.content.is_file_update },
+          }
+        case "text_editor_code_execution_str_replace_result":
+          return {
+            type: "output",
+            value: {
+              lines: block.content.lines,
+              new_lines: block.content.new_lines,
+              new_start: block.content.new_start,
+              old_lines: block.content.old_lines,
+              old_start: block.content.old_start,
+            },
+          }
+        default:
+          fail(block.content satisfies never)
+      }
+
+    case "tool_search_tool_result":
+      switch (block.content.type) {
+        case "tool_search_tool_result_error": {
+          const { type: _, ...rest } = block.content
+          return { type: "error", value: rest }
+        }
+        case "tool_search_tool_search_result":
+          return { type: "output", value: block.content.tool_references }
+        default:
+          fail(block.content satisfies never)
+      }
+
+    case "web_search_tool_result":
+      if (Array.isArray(block.content)) {
+        return {
+          type: "output",
+          value: block.content.map((r) => ({
+            page_age: r.page_age,
+            title: r.title,
+            url: r.url,
+          })),
+        }
+      }
+      return { type: "error", value: block.content.error_code }
+
+    case "web_fetch_tool_result":
+      switch (block.content.type) {
+        case "web_fetch_tool_result_error":
+          return { type: "error", value: block.content.error_code }
+        case "web_fetch_result":
+          return {
+            type: "output",
+            value: {
+              retrieved_at: block.content.retrieved_at,
+              url: block.content.url,
+            },
+          }
+        default:
+          fail(block.content satisfies never)
+      }
+
+    case "document":
+      switch (block.source.type) {
+        case "base64":
+        case "text":
+          return {
+            type: side,
+            value: {
+              context: block.context,
+              media_type: block.source.media_type,
+              title: block.title,
+            },
+          }
+        case "url":
+          return {
+            type: side,
+            value: {
+              context: block.context,
+              title: block.title,
+              url: block.source.url,
+            },
+          }
+        case "content":
+          return {
+            type: side,
+            value: { context: block.context, title: block.title },
+          }
+        default:
+          fail(block.source satisfies never)
+      }
+
+    case "image":
+      switch (block.source.type) {
+        case "base64":
+          return { type: side, value: { media_type: block.source.media_type } }
+        case "url":
+          return { type: side, value: { url: block.source.url } }
+        default:
+          fail(block.source satisfies never)
+      }
+
+    case "container_upload":
+      return { type: side, value: { file_id: block.file_id } }
+
+    default:
+      fail(block satisfies never)
+  }
+}
+
+const jsonValues = (items: Extracted[]): string | undefined => {
+  const kill = new Set<unknown>([undefined, null, ""])
+  const nonEmpty = items.filter((item) => !kill.has(item.value))
+
+  if (!nonEmpty.length) {
+    return undefined
+  }
+  return JSON.stringify(
+    nonEmpty.length === 1 ? nonEmpty[0]?.value : nonEmpty.map((b) => b.value),
+  )
+}
+
+const annotated = (
+  message: SessionMessage,
+): Map<Extracted["type"], string | undefined> => {
+  const blocks = contents(message)
+    .map((b) => extract(message.type, b))
+    .filter((b): b is Extracted => b !== undefined)
+  const group = Map.groupBy(blocks, (b) => b.type)
+  const gm = group
+    .entries()
+    .map(([k, v]) => [k, jsonValues(v)] as const)
+    .filter(([, v]) => v)
+  return new Map(gm)
+}
+
+const main = async (): Promise<void> => {
+  const config = conf()
+  if (!config) {
+    return
+  }
+
+  const hook = await hookInput()
+  if (!hook) {
+    return
+  }
+
+  using time = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
+
+  const isSub = hook.hook_event_name === "SubagentStop"
+  const stateKey = isSub
+    ? `${hook.session_id}.${hook.agent_id}`
+    : hook.session_id
+
+  const userId = await gitUserName()
+  await using state = await openState(stateKey)
+  await using otel = provider(config)
+
+  const opts = { offset: state.offset }
+  const messages = await (isSub
+    ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
+    : getSessionMessages(hook.session_id, opts))
+
+  log({ level: "debug", msg: `messages: ${messages.length}` })
+
+  const tracer = otel.provider.getTracer("langfuse-sdk")
+
+  const traceName = `[${hook.session_id}] - ${hook.hook_event_name}`
+  const attributes = {
+    "user.id": userId,
+    "session.id": hook.session_id,
+    "langfuse.trace.name": traceName,
+    "langfuse.trace.tags": ["claude-code"],
+  }
+
+  for (const [i, message] of messages.entries()) {
+    const map = annotated(message)
+    const { input = "", output = "", error = "" } = Object.fromEntries(map)
+    if (!(input + output + error)) {
+      continue
+    }
+
+    const startTime = time.jesus + i * 10
+    using msg = defer(
+      tracer.startSpan(`${traceName}: ${i}`, { startTime, attributes }),
+    )
+
+    if (input) {
+      msg.span.setAttributes({
+        "input.value": input,
+        "input.mime_type": "application/json",
+      })
+    }
+
+    if (output) {
+      msg.span.setAttributes({
+        "output.value": output,
+        "output.mime_type": "application/json",
+      })
+    }
+
+    if (error) {
+      msg.span.setStatus({ code: SpanStatusCode.ERROR })
+      msg.span.setAttributes({
+        "output.value": error,
+        "output.mime_type": "application/json",
+      })
+    }
+  }
+
+  state.offset += messages.length
+}
+
+await main()
