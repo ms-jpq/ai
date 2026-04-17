@@ -495,6 +495,7 @@ const main = async (): Promise<void> => {
     "langfuse.trace.name": traceName,
   }
 
+  // TODO: wrap each message's blocks in a parent span so they group as a tree.
   for (const [i, message] of messages.entries()) {
     const startTime = new Date(message.timestamp).getTime()
     const blocks = contents(message)
