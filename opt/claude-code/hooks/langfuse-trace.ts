@@ -288,10 +288,14 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
   }
 }
 
-const jsonValues = (items: Extracted[]) =>
-  JSON.stringify(
-    items.length === 1 ? items[0]?.value : items.map((b) => b.value),
+const jsonValues = (items: Extracted[]) => {
+  const kill = new Set<unknown>([undefined, null, ""])
+  const nonEmpty = items.filter((item) => kill.has(item.value))
+
+  return JSON.stringify(
+    nonEmpty.length === 1 ? nonEmpty[0]?.value : nonEmpty.map((b) => b.value),
   )
+}
 
 const annotated = (message: SessionMessage) => {
   const blocks = contents(message)
