@@ -28,6 +28,8 @@ const fetch = ({
 
 - `??` over `||` for nullish coalescing. `||` only for boolean short-circuit.
 
+- Exhaustive `switch` via `default: fail(value satisfies never)` — `fail` from `node:assert/strict`.
+
 - No `as` casts except `as const`. Perform type narrowing instead.
 
 - Only annotate types where not inferable. Do keep annotations on function signatures.

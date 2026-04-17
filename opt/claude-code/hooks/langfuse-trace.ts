@@ -132,37 +132,38 @@ const contents = function* (message: SessionMessage): IteratorObject<Block> {
 }
 
 type Extracted =
-  | { error: unknown }
-  | { content: string }
-  | { name: string; input: unknown }
-  | { output: unknown }
+  | { type: "error"; error: unknown }
+  | { type: "content"; content: string }
+  | { type: "tool_use"; name: string; input: unknown }
+  | { type: "output"; output: unknown }
 
 const extract = (block: Block): Extracted | undefined => {
   if (typeof block === "string") {
-    return { content: block }
+    return { type: "content", content: block }
   }
 
   switch (block.type) {
     case "compaction":
-      return { content: block.content ?? "" }
+      return { type: "content", content: block.content ?? "" }
     case "text":
-      return { content: block.text }
+      return { type: "content", content: block.text }
     case "thinking":
-      return { content: block.thinking }
+      return { type: "content", content: block.thinking }
 
     case "mcp_tool_use":
     case "server_tool_use":
     case "tool_use":
-      return { name: block.name, input: block.input }
+      return { type: "tool_use", name: block.name, input: block.input }
 
     case "code_execution_tool_result":
     case "bash_code_execution_tool_result":
       switch (block.content.type) {
         case "bash_code_execution_tool_result_error":
         case "code_execution_tool_result_error":
-          return { error: block.content.error_code }
+          return { type: "error", error: block.content.error_code }
         case "encrypted_code_execution_result":
           return {
+            type: "output",
             output: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
@@ -171,6 +172,7 @@ const extract = (block: Block): Extracted | undefined => {
         case "bash_code_execution_result":
         case "code_execution_result":
           return {
+            type: "output",
             output: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
@@ -184,12 +186,13 @@ const extract = (block: Block): Extracted | undefined => {
     case "mcp_tool_result":
     case "tool_result":
       if (block.is_error) {
-        return { error: block.content }
+        return { type: "error", error: block.content }
       }
-      return { output: block.content }
+      return { type: "output", output: block.content }
 
     case "search_result":
       return {
+        type: "output",
         output: {
           source: block.source,
           title: block.title,
@@ -200,15 +203,17 @@ const extract = (block: Block): Extracted | undefined => {
     case "text_editor_code_execution_tool_result":
       switch (block.content.type) {
         case "text_editor_code_execution_tool_result_error":
-          return { error: block.content.error_code }
+          return { type: "error", error: block.content.error_code }
         case "text_editor_code_execution_view_result":
-          return { content: block.content.content }
+          return { type: "content", content: block.content.content }
         case "text_editor_code_execution_create_result":
           return {
+            type: "output",
             output: { is_file_update: block.content.is_file_update },
           }
         case "text_editor_code_execution_str_replace_result":
           return {
+            type: "output",
             output: {
               old_start: block.content.old_start,
               old_lines: block.content.old_lines,
@@ -223,9 +228,9 @@ const extract = (block: Block): Extracted | undefined => {
     case "tool_search_tool_result":
       switch (block.content.type) {
         case "tool_search_tool_result_error":
-          return { error: block.content.error_code }
+          return { type: "error", error: block.content.error_code }
         case "tool_search_tool_search_result":
-          return { output: block.content.tool_references }
+          return { type: "output", output: block.content.tool_references }
         default:
           fail(block.content satisfies never)
       }
@@ -233,17 +238,19 @@ const extract = (block: Block): Extracted | undefined => {
     case "web_search_tool_result":
       if (Array.isArray(block.content)) {
         return {
+          type: "output",
           output: block.content.map((r) => ({ title: r.title, url: r.url })),
         }
       }
-      return { error: block.content.error_code }
+      return { type: "error", error: block.content.error_code }
 
     case "web_fetch_tool_result":
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
-          return { error: block.content.error_code }
+          return { type: "error", error: block.content.error_code }
         case "web_fetch_result":
           return {
+            type: "output",
             output: {
               url: block.content.url,
               retrieved_at: block.content.retrieved_at,
@@ -278,17 +285,56 @@ const main = async () => {
 
   const isSub = hook.hook_event_name === "SubagentStop"
   await using state = isSub ? undefined : await openState(hook.session_id)
-  await using __ = provider(config)
+  await using otel = provider(config)
 
   const opts = { offset: state?.offset }
   const messages = await (isSub
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
     : getSessionMessages(hook.session_id, opts))
 
+  const tracer = otel.provider.getTracer("claude-code")
+
   for (const message of messages) {
-    for (const content of contents(message)) {
-      break
-    }
+    const msg = message.message as SDKMessage
+    tracer.startActiveSpan(
+      msg.type,
+      { attributes: { "session.id": hook.session_id } },
+      (span) => {
+        try {
+          for (const block of contents(message)) {
+            const extracted = extract(block)
+            if (!extracted) {
+              continue
+            }
+
+            switch (extracted.type) {
+              case "content":
+                span.addEvent("content", { value: extracted.content })
+                break
+              case "tool_use":
+                span.addEvent(`tool:${extracted.name}`, {
+                  input: JSON.stringify(extracted.input),
+                })
+                break
+              case "output":
+                span.addEvent("output", {
+                  value: JSON.stringify(extracted.output),
+                })
+                break
+              case "error":
+                span.addEvent("error", {
+                  value: JSON.stringify(extracted.error),
+                })
+                break
+              default:
+                fail(extracted satisfies never)
+            }
+          }
+        } finally {
+          span.end()
+        }
+      },
+    )
   }
 
   if (state) {
