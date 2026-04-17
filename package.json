@@ -3,6 +3,8 @@
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "*",
     "@google/gemini-cli": "*",
+    "@opentelemetry/exporter-trace-otlp-proto": "*",
+    "@opentelemetry/sdk-trace-base": "*",
     "@types/node": "*",
     "opencode-ai": "*",
     "prettier": "*",
