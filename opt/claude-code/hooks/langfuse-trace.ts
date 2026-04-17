@@ -446,6 +446,7 @@ const createProvider = (config: Config) => {
   })
 
   const provider = new NodeTracerProvider({ spanProcessors: [processor] })
+  provider.register()
   setLangfuseTracerProvider(provider)
 
   return {
