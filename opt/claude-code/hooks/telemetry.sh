@@ -5,4 +5,4 @@ set -o pipefail
 # JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
-exec -- "${0%/*}/langfuse-trace.ts" >> langfuse.log 2>&1
+exec -- "${0%/*}/langfuse-trace.ts"

@@ -29,7 +29,11 @@ const log = ({
 }: {
   level: "debug" | "info" | "error"
   msg: string
-}) => console.error(`[${level}] ${msg}`)
+}) => {
+  if (level === "error") {
+    console.error(`[${level}] ${msg}`)
+  }
+}
 
 const measure = (label: string) => {
   const now = performance.now()
