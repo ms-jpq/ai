@@ -157,11 +157,21 @@ const extract = (block: Block): Extracted | undefined => {
     case "tool_use":
       return { name: block.name, input: block.input }
 
+    case "code_execution_tool_result":
     case "bash_code_execution_tool_result":
       switch (block.content.type) {
         case "bash_code_execution_tool_result_error":
+        case "code_execution_tool_result_error":
           return { error: block.content.error_code }
+        case "encrypted_code_execution_result":
+          return {
+            output: {
+              return_code: block.content.return_code,
+              stderr: block.content.stderr,
+            },
+          }
         case "bash_code_execution_result":
+        case "code_execution_result":
           return {
             output: {
               return_code: block.content.return_code,
@@ -173,15 +183,60 @@ const extract = (block: Block): Extracted | undefined => {
           fail(block.content satisfies never)
       }
 
-    case "code_execution_tool_result":
     case "mcp_tool_result":
+      return block.is_error
+        ? { error: String(block.content) }
+        : { output: block.content }
+
     case "search_result":
+      return { output: { source: block.source, title: block.title } }
+
     case "text_editor_code_execution_tool_result":
+      switch (block.content.type) {
+        case "text_editor_code_execution_tool_result_error":
+          return { error: block.content.error_code }
+        case "text_editor_code_execution_view_result":
+          return { content: block.content.content }
+        case "text_editor_code_execution_create_result":
+        case "text_editor_code_execution_str_replace_result":
+          return { output: block.content }
+        default:
+          fail(block.content satisfies never)
+      }
+
     case "tool_result":
-    case "tool_search_tool_result":
-    case "web_fetch_tool_result":
-    case "web_search_tool_result":
+      if (block.is_error) {
+        return { output: block.content }
+      }
+
       return { output: block.content }
+
+    case "tool_search_tool_result":
+      switch (block.content.type) {
+        case "tool_search_tool_result_error":
+          return { error: block.content.error_code }
+        case "tool_search_tool_search_result":
+          return { output: block.content.tool_references }
+        default:
+          fail(block.content satisfies never)
+      }
+
+    case "web_fetch_tool_result":
+      switch (block.content.type) {
+        case "web_fetch_tool_result_error":
+          return { error: block.content.error_code }
+        case "web_fetch_result":
+          return { output: { url: block.content.url } }
+        default:
+          fail(block.content satisfies never)
+      }
+
+    case "web_search_tool_result":
+      if (Array.isArray(block.content)) {
+        return { output: block.content }
+      }
+      return { error: block.content.error_code }
+
     case "document":
     case "image":
     case "redacted_thinking":
@@ -190,8 +245,6 @@ const extract = (block: Block): Extracted | undefined => {
     default:
       fail(block satisfies never)
   }
-
-  return
 }
 
 const main = async () => {
@@ -216,7 +269,7 @@ const main = async () => {
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
     : getSessionMessages(hook.session_id, opts))
 
-  const texts = contents(messages).flatMap(extractText).toArray()
+  const ___ = contents(messages)
 
   if (state) {
     state.offset += messages.length
