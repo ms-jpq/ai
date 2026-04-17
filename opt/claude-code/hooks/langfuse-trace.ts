@@ -330,8 +330,6 @@ const main = async () => {
       tags: ["claude-code"],
     },
     () => {
-      using _ = defer(tracer.startSpan(hook.hook_event_name))
-
       let parentCtx = context.active()
       for (const [i, message] of messages.entries()) {
         const map = annotated(message)
