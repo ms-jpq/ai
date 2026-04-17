@@ -19,6 +19,7 @@ YELLOW=$'\033[33m'
 
 ######################################
 JSON="$(tee)"
+SESSION_ID="$(jq -e --raw-output '.session_id // ""' <<< "$JSON")"
 API_MS="$(jq -e --raw-output '.cost.total_api_duration_ms // 0' <<< "$JSON")"
 COST="$(jq -e --raw-output '.cost.total_cost_usd // 0' <<< "$JSON")"
 LINES_ADDED="$(jq -e --raw-output '.cost.total_lines_added // 0' <<< "$JSON")"
@@ -90,4 +91,15 @@ fi
 ######################################
 
 SEP="${BOLD}⏐${RESET}"
-printf -- '%s' "${COST_INFO} ${BOLD}⟢${RESET} ${TIME_INFO} ${BOLD}∷${RESET} ${TOT_COUNT} ${SEP} ${USAGE_INFO} ${SEP}${LINES_DELTA}${DIR_INFO}"
+
+######################################
+TRACE_INFO=''
+if [[ -n ${LANGFUSE_BASE_URL:-} && -n ${LANGFUSE_PROJECT:-} && -n $SESSION_ID ]]; then
+  TRACE_URL="${LANGFUSE_BASE_URL}/project/${LANGFUSE_PROJECT}/sessions/${SESSION_ID}"
+  OSC8_START=$'\033]8;;'"${TRACE_URL}"$'\033\\'
+  OSC8_END=$'\033]8;;\033\\'
+  TRACE_INFO="${OSC8_START}${BOLD}⌬tel${RESET}${OSC8_END} ${SEP} "
+fi
+######################################
+
+printf -- '%s' "${TRACE_INFO}${COST_INFO} ${BOLD}⟢${RESET} ${TIME_INFO} ${BOLD}∷${RESET} ${TOT_COUNT} ${SEP} ${USAGE_INFO} ${SEP}${LINES_DELTA}${DIR_INFO}"
