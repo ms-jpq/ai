@@ -130,6 +130,10 @@ const defer = <T extends { end: () => void }>(
 })
 
 const contents = function* ({ message }: Message): IteratorObject<Block> {
+  if (!message || typeof message !== "object") {
+    return
+  }
+
   const content = message.content
   if (typeof content === "string") {
     yield content
