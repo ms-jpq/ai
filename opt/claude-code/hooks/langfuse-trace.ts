@@ -173,6 +173,15 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       return { type: side, value: block.data }
 
     case "mcp_tool_use":
+      return {
+        type: "output",
+        value: {
+          name: block.name,
+          input: block.input,
+          server_name: block.server_name,
+        },
+      }
+
     case "server_tool_use":
     case "tool_use":
       return {
@@ -269,7 +278,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "tool_search_tool_result":
       switch (block.content.type) {
         case "tool_search_tool_result_error":
-          return { type: "error", value: block.content.error_code }
+          return { type: "error", value: block.content }
         case "tool_search_tool_search_result":
           return { type: "output", value: block.content.tool_references }
         default:
