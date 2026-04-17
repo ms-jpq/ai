@@ -112,29 +112,27 @@ const provider = (config: Conf) => {
 
 type Block = string | BetaContentBlock | ContentBlockParam
 
-const contents = function* (messages: SessionMessage[]): IteratorObject<Block> {
-  for (const message of messages) {
-    const msg = message.message as SDKMessage
-    switch (msg.type) {
-      case "assistant":
-        yield* msg.message.content
-        break
-      case "user":
-        if (typeof msg.message.content === "string") {
-          yield msg.message.content
-        }
-        yield* msg.message.content
-        break
-      default:
-        break
-    }
+const contents = function* (message: SessionMessage): IteratorObject<Block> {
+  const msg = message.message as SDKMessage
+  switch (msg.type) {
+    case "assistant":
+      yield* msg.message.content
+      break
+    case "user":
+      if (typeof msg.message.content === "string") {
+        yield msg.message.content
+      }
+      yield* msg.message.content
+      break
+    default:
+      break
   }
 
   return
 }
 
 type Extracted =
-  | { error: string }
+  | { error: unknown }
   | { content: string }
   | { name: string; input: unknown }
   | { output: unknown }
@@ -184,12 +182,20 @@ const extract = (block: Block): Extracted | undefined => {
       }
 
     case "mcp_tool_result":
-      return block.is_error
-        ? { error: String(block.content) }
-        : { output: block.content }
+    case "tool_result":
+      if (block.is_error) {
+        return { error: block.content }
+      }
+      return { output: block.content }
 
     case "search_result":
-      return { output: { source: block.source, title: block.title } }
+      return {
+        output: {
+          source: block.source,
+          title: block.title,
+          content: block.content,
+        },
+      }
 
     case "text_editor_code_execution_tool_result":
       switch (block.content.type) {
@@ -198,18 +204,21 @@ const extract = (block: Block): Extracted | undefined => {
         case "text_editor_code_execution_view_result":
           return { content: block.content.content }
         case "text_editor_code_execution_create_result":
+          return {
+            output: { is_file_update: block.content.is_file_update },
+          }
         case "text_editor_code_execution_str_replace_result":
-          return { output: block.content }
+          return {
+            output: {
+              old_start: block.content.old_start,
+              old_lines: block.content.old_lines,
+              new_start: block.content.new_start,
+              new_lines: block.content.new_lines,
+            },
+          }
         default:
           fail(block.content satisfies never)
       }
-
-    case "tool_result":
-      if (block.is_error) {
-        return { output: block.content }
-      }
-
-      return { output: block.content }
 
     case "tool_search_tool_result":
       switch (block.content.type) {
@@ -221,21 +230,28 @@ const extract = (block: Block): Extracted | undefined => {
           fail(block.content satisfies never)
       }
 
+    case "web_search_tool_result":
+      if (Array.isArray(block.content)) {
+        return {
+          output: block.content.map((r) => ({ title: r.title, url: r.url })),
+        }
+      }
+      return { error: block.content.error_code }
+
     case "web_fetch_tool_result":
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
           return { error: block.content.error_code }
         case "web_fetch_result":
-          return { output: { url: block.content.url } }
+          return {
+            output: {
+              url: block.content.url,
+              retrieved_at: block.content.retrieved_at,
+            },
+          }
         default:
           fail(block.content satisfies never)
       }
-
-    case "web_search_tool_result":
-      if (Array.isArray(block.content)) {
-        return { output: block.content }
-      }
-      return { error: block.content.error_code }
 
     case "document":
     case "image":
@@ -269,7 +285,11 @@ const main = async () => {
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
     : getSessionMessages(hook.session_id, opts))
 
-  const ___ = contents(messages)
+  for (const message of messages) {
+    for (const content of contents(message)) {
+      break
+    }
+  }
 
   if (state) {
     state.offset += messages.length
