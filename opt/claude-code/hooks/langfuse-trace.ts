@@ -219,18 +219,33 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       return {
         type: "output",
         value: {
+          content: block.content,
           source: block.source,
           title: block.title,
-          content: block.content,
         },
       }
 
     case "text_editor_code_execution_tool_result":
       switch (block.content.type) {
         case "text_editor_code_execution_tool_result_error":
-          return { type: "error", value: block.content }
+          return {
+            type: "error",
+            value: {
+              error_code: block.content.error_code,
+              error_message: block.content.error_message,
+            },
+          }
         case "text_editor_code_execution_view_result":
-          return { type: side, value: block.content.content }
+          return {
+            type: side,
+            value: {
+              content: block.content.content,
+              file_type: block.content.file_type,
+              num_lines: block.content.num_lines,
+              start_line: block.content.start_line,
+              total_lines: block.content.total_lines,
+            },
+          }
         case "text_editor_code_execution_create_result":
           return {
             type: "output",
@@ -240,10 +255,11 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "output",
             value: {
-              old_start: block.content.old_start,
-              old_lines: block.content.old_lines,
-              new_start: block.content.new_start,
+              lines: block.content.lines,
               new_lines: block.content.new_lines,
+              new_start: block.content.new_start,
+              old_lines: block.content.old_lines,
+              old_start: block.content.old_start,
             },
           }
         default:
@@ -264,7 +280,11 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       if (Array.isArray(block.content)) {
         return {
           type: "output",
-          value: block.content.map((r) => ({ title: r.title, url: r.url })),
+          value: block.content.map((r) => ({
+            page_age: r.page_age,
+            title: r.title,
+            url: r.url,
+          })),
         }
       }
       return { type: "error", value: block.content.error_code }
@@ -277,8 +297,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "output",
             value: {
-              url: block.content.url,
               retrieved_at: block.content.retrieved_at,
+              url: block.content.url,
             },
           }
         default:
@@ -292,18 +312,18 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: side,
             value: {
-              title: block.title,
               context: block.context,
-              source_type: block.source.type,
               media_type: block.source.media_type,
+              source_type: block.source.type,
+              title: block.title,
             },
           }
         case "url":
           return {
             type: side,
             value: {
-              title: block.title,
               context: block.context,
+              title: block.title,
               source_type: block.source.type,
               url: block.source.url,
             },
@@ -312,9 +332,9 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: side,
             value: {
-              title: block.title,
               context: block.context,
               source_type: block.source.type,
+              title: block.title,
             },
           }
         default:
@@ -327,8 +347,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: side,
             value: {
-              source_type: block.source.type,
               media_type: block.source.media_type,
+              source_type: block.source.type,
             },
           }
         case "url":
