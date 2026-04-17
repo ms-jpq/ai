@@ -3,6 +3,7 @@
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "*",
     "@google/gemini-cli": "*",
+    "@types/node": "*",
     "opencode-ai": "*",
     "prettier": "*",
     "typescript": "*"
