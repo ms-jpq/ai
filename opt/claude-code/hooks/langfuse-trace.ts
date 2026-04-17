@@ -324,10 +324,11 @@ const main = async () => {
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
+  const traceName = `[${hook.session_id}] - ${hook.hook_event_name}`
   propagateAttributes(
     {
       sessionId: hook.session_id,
-      traceName: hook.hook_event_name,
+      traceName,
       tags: ["claude-code"],
     },
     () => {
@@ -339,9 +340,7 @@ const main = async () => {
         }
 
         const startTime = time.now + i
-        using msg = defer(
-          tracer.startSpan(`${hook.hook_event_name} - ${i}`, { startTime }),
-        )
+        using msg = defer(tracer.startSpan(`${traceName}: ${i}`, { startTime }))
 
         if (input) {
           msg.span.setAttribute("langfuse.observation.input", input)
