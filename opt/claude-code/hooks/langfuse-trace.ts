@@ -110,9 +110,9 @@ const provider = (config: Conf) => {
   }
 }
 
-const contents = function* (
-  messages: SessionMessage[],
-): IteratorObject<string | BetaContentBlock | ContentBlockParam> {
+type Block = string | BetaContentBlock | ContentBlockParam
+
+const contents = function* (messages: SessionMessage[]): IteratorObject<Block> {
   for (const message of messages) {
     const msg = message.message as SDKMessage
     switch (msg.type) {
@@ -131,6 +131,16 @@ const contents = function* (
   }
 
   return
+}
+
+const blockText = (block: Block): string | undefined => {
+  if (typeof block === "string") {
+    return block
+  }
+
+  switch (block.type) {
+  }
+  return ""
 }
 
 const main = async () => {
