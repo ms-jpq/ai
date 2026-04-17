@@ -34,10 +34,11 @@ type Message = SessionMessage & {
   timestamp: string
 }
 type Role = SessionMessage["type"]
-type Extracted =
-  | { type: "input"; kind: OpenInferenceSpanKind; value: unknown }
-  | { type: "output"; kind: OpenInferenceSpanKind; value: unknown }
-  | { type: "error"; kind: OpenInferenceSpanKind; value: unknown }
+type Extracted = {
+  type: "input" | "output" | "error"
+  kind: OpenInferenceSpanKind
+  value: unknown
+}
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -429,31 +430,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
   }
 }
 
-const jsonValues = (items: Extracted[]): string | undefined => {
-  const kill = new Set<unknown>([undefined, null, ""])
-  const nonEmpty = items.filter((item) => !kill.has(item.value))
-
-  if (!nonEmpty.length) {
-    return undefined
-  }
-  return JSON.stringify(
-    nonEmpty.length === 1 ? nonEmpty[0]?.value : nonEmpty.map((b) => b.value),
-  )
-}
-
-const annotated = (
-  message: Message,
-): Map<Extracted["type"], string | undefined> => {
-  const blocks = contents(message)
-    .map((b) => extract(message.type, b))
-    .filter((b): b is Extracted => b !== undefined)
-  const group = Map.groupBy(blocks, (b) => b.type)
-  const gm = group
-    .entries()
-    .map(([k, v]) => [k, jsonValues(v)] as const)
-    .filter(([, v]) => v)
-  return new Map(gm)
-}
+const EMPTY = new Set<unknown>([undefined, null, ""])
 
 const main = async (): Promise<void> => {
   const config = conf()
@@ -495,37 +472,45 @@ const main = async (): Promise<void> => {
   }
 
   for (const [i, message] of messages.entries()) {
-    const map = annotated(message)
-    const { input = "", output = "", error = "" } = Object.fromEntries(map)
-    if (!(input + output + error)) {
-      continue
-    }
-
+    const blocks = contents(message)
+      .map((b) => extract(message.type, b))
+      .filter((b): b is Extracted => b !== undefined && !EMPTY.has(b.value))
+      .toArray()
     const startTime = new Date(message.timestamp).getTime()
-    using msg = defer(
-      tracer.startSpan(`${traceName}: ${i}`, { startTime, attributes }),
-    )
 
-    if (input) {
-      msg.span.setAttributes({
-        [SemanticConventions.INPUT_VALUE]: input,
-        [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
-      })
-    }
+    for (const [j, block] of blocks.entries()) {
+      using span = defer(
+        tracer.startSpan(`${traceName}: ${i}.${j}`, { startTime, attributes }),
+      )
+      span.span.setAttribute(
+        SemanticConventions.OPENINFERENCE_SPAN_KIND,
+        block.kind,
+      )
 
-    if (output) {
-      msg.span.setAttributes({
-        [SemanticConventions.OUTPUT_VALUE]: output,
-        [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-      })
-    }
-
-    if (error) {
-      msg.span.setStatus({ code: SpanStatusCode.ERROR })
-      msg.span.setAttributes({
-        [SemanticConventions.OUTPUT_VALUE]: error,
-        [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-      })
+      const value = JSON.stringify(block.value)
+      switch (block.type) {
+        case "input":
+          span.span.setAttributes({
+            [SemanticConventions.INPUT_VALUE]: value,
+            [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
+          })
+          break
+        case "output":
+          span.span.setAttributes({
+            [SemanticConventions.OUTPUT_VALUE]: value,
+            [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
+          })
+          break
+        case "error":
+          span.span.setStatus({ code: SpanStatusCode.ERROR })
+          span.span.setAttributes({
+            [SemanticConventions.OUTPUT_VALUE]: value,
+            [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
+          })
+          break
+        default:
+          fail(block satisfies never)
+      }
     }
   }
 
