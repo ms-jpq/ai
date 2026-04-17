@@ -43,7 +43,7 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
-EXEC=(~/.local/bin/hp "$CC" "${ARGV[@]}")
+EXEC=(nice -n 19 -- ~/.local/bin/hp "$CC" "${ARGV[@]}")
 if [[ -t 0 ]]; then
   clear -x
   printf -- '%s' "/color $RANDOM_COLOR" | "${EXEC[@]}"
