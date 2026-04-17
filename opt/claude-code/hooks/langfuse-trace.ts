@@ -8,8 +8,10 @@ import {
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
-import { SimpleSpanProcessor } from "@opentelemetry/sdk-trace-base"
-import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
+import {
+  BasicTracerProvider,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-base"
 import { fail, ok } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -109,9 +111,8 @@ const provider = (config: Conf) => {
     timeoutMillis: 10_000,
   })
   const processor = new SimpleSpanProcessor(exporter)
-  const provider = new NodeTracerProvider({ spanProcessors: [processor] })
+  const provider = new BasicTracerProvider({ spanProcessors: [processor] })
 
-  provider.register()
   return {
     provider,
     async [Symbol.asyncDispose]() {
