@@ -465,7 +465,9 @@ const main = async () => {
   const payload = await readPayload()
   if (!payload) return 0
 
-  using _ = timed(`hook (session=${payload.session_id})`)
+  using _ = timed(
+    `${payload.hook_event_name.padEnd("PostToolUseFailure".length)} (session=${payload.session_id})`,
+  )
   await using __ = createProvider(config)
 
   await using state = await openState(payload.session_id)

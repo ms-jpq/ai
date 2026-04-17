@@ -1,4 +1,4 @@
-# README
+# README Style
 
 README says **what** and **why**.
 
