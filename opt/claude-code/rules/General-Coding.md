@@ -1,4 +1,4 @@
-# General Coding Guidelines
+# General Coding
 
 ## Macro
 

@@ -1,4 +1,4 @@
-# TypeScript Guidelines
+# TypeScript
 
 - `const foo = () => {}` over `function foo() {}`.
 

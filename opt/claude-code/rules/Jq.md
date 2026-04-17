@@ -1,4 +1,4 @@
-# JQ Scripting Guidelines
+# JQ
 
 - Standalone `jq` scripts get this shebang:
 

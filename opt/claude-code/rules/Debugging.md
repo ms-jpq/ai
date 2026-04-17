@@ -1,3 +1,3 @@
-# Debugging Guidelines
+# Debugging
 
 - Instrument, don't theorize.

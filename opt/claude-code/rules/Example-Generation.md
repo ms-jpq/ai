@@ -1,4 +1,4 @@
-# Example Generation Guidelines
+# Example Generation
 
 ## Code
 

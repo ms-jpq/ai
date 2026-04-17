@@ -1,8 +1,8 @@
-# Makefile Guidelines
+# Makefile
 
 - GNU Make only. No POSIX make compatibility.
 
-- Recipes are multiline bash scripts. `.ONESHELL` is always active — heredocs work. Shell-Scripting-Guidelines apply in recipes.
+- Recipes are multiline bash scripts. `.ONESHELL` is always active — heredocs work. Shell-Scripting rules apply in recipes.
 
 - Standard prelude:
 

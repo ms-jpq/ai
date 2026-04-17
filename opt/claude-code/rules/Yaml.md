@@ -1,3 +1,3 @@
-# YAML Guidelines
+# YAML
 
 - `.yml` over `.yaml`.

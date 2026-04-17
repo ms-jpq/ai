@@ -1,4 +1,4 @@
-# Shell Scripting Guidelines
+# Shell Scripting
 
 - Prelude for bash scripts:
 

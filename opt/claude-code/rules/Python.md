@@ -1,4 +1,4 @@
-# Python Guidelines
+# Python
 
 Typical script prelude:
 
