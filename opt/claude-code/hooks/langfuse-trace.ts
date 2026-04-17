@@ -133,108 +133,60 @@ const contents = function* (messages: SessionMessage[]): IteratorObject<Block> {
   return
 }
 
-const extractText = function* (block: Block): IteratorObject<string> {
+type Extracted =
+  | { error: string }
+  | { content: string }
+  | { name: string; input: unknown }
+  | { output: unknown }
+
+const extract = (block: Block): Extracted | undefined => {
   if (typeof block === "string") {
-    yield block
-    return
+    return { content: block }
   }
 
   switch (block.type) {
-    case "text":
-      yield block.text
-      return
-    case "thinking":
-      yield block.thinking
-      return
-    case "redacted_thinking":
-      yield block.data
-      return
-    case "tool_use":
-      break
-    case "server_tool_use":
-      break
-    case "web_search_tool_result":
-      break
-    case "web_fetch_tool_result":
-      break
-    case "code_execution_tool_result":
-      break
-    case "bash_code_execution_tool_result":
-      break
-    case "text_editor_code_execution_tool_result":
-      break
-    case "tool_search_tool_result":
-      break
-    case "mcp_tool_use":
-      break
-    case "mcp_tool_result":
-      break
-    case "container_upload":
-      break
     case "compaction":
-      break
-    case "image":
-      break
-    case "document":
-      break
-    case "search_result":
-      break
-    case "tool_result":
-      break
-    default:
-      fail(block satisfies never)
-  }
-
-  return
-}
-
-const extractTools = function* (block: Block): IteratorObject<string> {
-  if (typeof block === "string") {
-    return
-  }
-
-  switch (block.type) {
+      return { content: block.content ?? "" }
     case "text":
-      yield block.text
-      return
+      return { content: block.text }
     case "thinking":
-      yield block.thinking
-      return
-    case "redacted_thinking":
-      yield block.data
-      return
-    case "tool_use":
-      break
-    case "server_tool_use":
-      break
-    case "web_search_tool_result":
-      break
-    case "web_fetch_tool_result":
-      break
-    case "code_execution_tool_result":
-      break
-    case "bash_code_execution_tool_result":
-      break
-    case "text_editor_code_execution_tool_result":
-      break
-    case "tool_search_tool_result":
-      break
+      return { content: block.thinking }
+
     case "mcp_tool_use":
-      break
+    case "server_tool_use":
+    case "tool_use":
+      return { name: block.name, input: block.input }
+
+    case "bash_code_execution_tool_result":
+      switch (block.content.type) {
+        case "bash_code_execution_tool_result_error":
+          return { error: block.content.error_code }
+        case "bash_code_execution_result":
+          return {
+            output: {
+              return_code: block.content.return_code,
+              stderr: block.content.stderr,
+              stdout: block.content.stdout,
+            },
+          }
+        default:
+          fail(block.content satisfies never)
+      }
+
+    case "code_execution_tool_result":
     case "mcp_tool_result":
-      break
-    case "container_upload":
-      break
-    case "compaction":
-      break
-    case "image":
-      break
-    case "document":
-      break
     case "search_result":
-      break
+    case "text_editor_code_execution_tool_result":
     case "tool_result":
-      break
+    case "tool_search_tool_result":
+    case "web_fetch_tool_result":
+    case "web_search_tool_result":
+      return { output: block.content }
+    case "document":
+    case "image":
+    case "redacted_thinking":
+    case "container_upload":
+      return undefined
     default:
       fail(block satisfies never)
   }
@@ -264,10 +216,10 @@ const main = async () => {
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
     : getSessionMessages(hook.session_id, opts))
 
-  const stream = contents(messages)
+  const texts = contents(messages).flatMap(extractText).toArray()
 
   if (state) {
-    state.offset += 0
+    state.offset += messages.length
   }
 }
 
