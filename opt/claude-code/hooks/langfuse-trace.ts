@@ -348,6 +348,7 @@ const emitTurnObservations = ({
   assistantMeta,
   model,
   calls,
+  toolResponse,
 }: {
   generationName: string
   userText: string
@@ -355,6 +356,7 @@ const emitTurnObservations = ({
   assistantMeta: TruncMeta
   model: string
   calls: ResolvedToolCall[]
+  toolResponse?: unknown
 }) => {
   {
     using _ = disposable(
@@ -394,6 +396,20 @@ const emitTurnObservations = ({
       ),
     )
     toolObs.update({ output: c.output })
+
+    if (c.name === "ExitPlanMode") {
+      const raw = c.output ?? toolResponse
+      if (raw) {
+        const planStr = typeof raw === "string" ? raw : JSON.stringify(raw)
+        const [planTrunc, planMeta] = truncate(planStr)
+        using _ = disposable(
+          startObservation("Plan", {
+            output: planTrunc,
+            metadata: { plan_meta: planMeta },
+          }),
+        )
+      }
+    }
   }
 }
 
@@ -447,22 +463,8 @@ const emitTurn = ({
         assistantMeta,
         model,
         calls,
+        toolResponse,
       })
-
-      for (const c of calls) {
-        if (c.name === "ExitPlanMode") {
-          const raw = c.output ?? toolResponse
-          if (!raw) continue
-          const planStr = typeof raw === "string" ? raw : JSON.stringify(raw)
-          const [planTrunc, planMeta] = truncate(planStr)
-          using _ = disposable(
-            startObservation("Plan", {
-              output: planTrunc,
-              metadata: { plan_meta: planMeta },
-            }),
-          )
-        }
-      }
 
       trace.update({
         output: { role: "assistant", content: assistantText },
