@@ -128,46 +128,51 @@ type Extracted =
   | { type: "error"; value: string }
 
 const extract = (role: Role, block: Block): Extracted | undefined => {
+  const side = role === "assistant" ? "output" : "input"
+
   if (typeof block === "string") {
-    return { type: "content", content: block }
+    return { type: side, value: block }
   }
 
   switch (block.type) {
     case "compaction":
-      return { type: "content", content: block.content ?? "" }
+      return { type: side, value: block.content ?? "" }
     case "text":
-      return { type: "content", content: block.text }
+      return { type: side, value: block.text }
     case "thinking":
-      return { type: "content", content: block.thinking }
+      return { type: side, value: block.thinking }
 
     case "mcp_tool_use":
     case "server_tool_use":
     case "tool_use":
-      return { type: "tool_use", name: block.name, input: block.input }
+      return {
+        type: "output",
+        value: JSON.stringify({ name: block.name, input: block.input }),
+      }
 
     case "code_execution_tool_result":
     case "bash_code_execution_tool_result":
       switch (block.content.type) {
         case "bash_code_execution_tool_result_error":
         case "code_execution_tool_result_error":
-          return { type: "error", error: block.content.error_code }
+          return { type: "error", value: block.content.error_code }
         case "encrypted_code_execution_result":
           return {
             type: "output",
-            output: {
+            value: JSON.stringify({
               return_code: block.content.return_code,
               stderr: block.content.stderr,
-            },
+            }),
           }
         case "bash_code_execution_result":
         case "code_execution_result":
           return {
             type: "output",
-            output: {
+            value: JSON.stringify({
               return_code: block.content.return_code,
               stderr: block.content.stderr,
               stdout: block.content.stdout,
-            },
+            }),
           }
         default:
           fail(block.content satisfies never)
@@ -176,40 +181,42 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "mcp_tool_result":
     case "tool_result":
       if (block.is_error) {
-        return { type: "error", error: block.content }
+        return { type: "error", value: JSON.stringify(block.content) }
       }
-      return { type: "output", output: block.content }
+      return { type: "output", value: JSON.stringify(block.content) }
 
     case "search_result":
       return {
         type: "output",
-        output: {
+        value: JSON.stringify({
           source: block.source,
           title: block.title,
           content: block.content,
-        },
+        }),
       }
 
     case "text_editor_code_execution_tool_result":
       switch (block.content.type) {
         case "text_editor_code_execution_tool_result_error":
-          return { type: "error", error: block.content.error_code }
+          return { type: "error", value: block.content.error_code }
         case "text_editor_code_execution_view_result":
-          return { type: "content", content: block.content.content }
+          return { type: side, value: block.content.content }
         case "text_editor_code_execution_create_result":
           return {
             type: "output",
-            output: { is_file_update: block.content.is_file_update },
+            value: JSON.stringify({
+              is_file_update: block.content.is_file_update,
+            }),
           }
         case "text_editor_code_execution_str_replace_result":
           return {
             type: "output",
-            output: {
+            value: JSON.stringify({
               old_start: block.content.old_start,
               old_lines: block.content.old_lines,
               new_start: block.content.new_start,
               new_lines: block.content.new_lines,
-            },
+            }),
           }
         default:
           fail(block.content satisfies never)
@@ -218,9 +225,12 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "tool_search_tool_result":
       switch (block.content.type) {
         case "tool_search_tool_result_error":
-          return { type: "error", error: block.content.error_code }
+          return { type: "error", value: block.content.error_code }
         case "tool_search_tool_search_result":
-          return { type: "output", output: block.content.tool_references }
+          return {
+            type: "output",
+            value: JSON.stringify(block.content.tool_references),
+          }
         default:
           fail(block.content satisfies never)
       }
@@ -229,22 +239,24 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       if (Array.isArray(block.content)) {
         return {
           type: "output",
-          output: block.content.map((r) => ({ title: r.title, url: r.url })),
+          value: JSON.stringify(
+            block.content.map((r) => ({ title: r.title, url: r.url })),
+          ),
         }
       }
-      return { type: "error", error: block.content.error_code }
+      return { type: "error", value: block.content.error_code }
 
     case "web_fetch_tool_result":
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
-          return { type: "error", error: block.content.error_code }
+          return { type: "error", value: block.content.error_code }
         case "web_fetch_result":
           return {
             type: "output",
-            output: {
+            value: JSON.stringify({
               url: block.content.url,
               retrieved_at: block.content.retrieved_at,
-            },
+            }),
           }
         default:
           fail(block.content satisfies never)
@@ -263,9 +275,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
 const annotated = (message: SessionMessage) => {
   const blocks = contents(message)
     .map((b) => extract(message.type, b))
-    .map((b) => b)
-  const grouped = Object.groupBy(blocks, (b) => b!.type)
-  return grouped
+    .filter((b): b is Extracted => b !== undefined)
+  return Object.groupBy(blocks, (b) => b.type)
 }
 
 const main = async () => {
@@ -299,18 +310,31 @@ const main = async () => {
 
     for (const message of messages) {
       const { input = [], output = [], error = [] } = annotated(message)
+      log({
+        level: "debug",
+        msg: JSON.stringify({ input, output, error }),
+      })
 
       tracer.startActiveSpan(message.type, (span) => {
         if (input.length) {
-          span.setAttribute("langfuse.observation.input", input.join(EOL))
+          span.setAttribute(
+            "langfuse.observation.input",
+            input.map((b) => b.value).join(EOL),
+          )
         }
 
         if (output.length) {
-          span.setAttribute("langfuse.observation.output", output.join(EOL))
+          span.setAttribute(
+            "langfuse.observation.output",
+            output.map((b) => b.value).join(EOL),
+          )
         }
 
         if (error.length) {
-          span.setAttribute("langfuse.observation.output", error.join(EOL))
+          span.setAttribute(
+            "langfuse.observation.output",
+            error.map((b) => b.value).join(EOL),
+          )
           span.setAttribute("langfuse.observation.level", "ERROR")
         }
 
