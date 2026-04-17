@@ -11,6 +11,7 @@ import { LangfuseSpanProcessor } from "@langfuse/otel"
 import { propagateAttributes } from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
+import { execFile } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
@@ -47,6 +48,13 @@ const measure = (label: string) => {
     },
   }
 }
+
+const gitUserName = () =>
+  new Promise((resolve) => {
+    execFile("git", ["config", "user.name"], (err, stdout) => {
+      resolve(err ? "" : stdout.trim())
+    })
+  })
 
 const conf = (): Conf | undefined => {
   const [publicKey, secretKey, host] = [
@@ -312,6 +320,8 @@ const main = async () => {
   const stateKey = isSub
     ? `${hook.session_id}.${hook.agent_id}`
     : hook.session_id
+
+  const userId = await gitUserName()
   await using state = await openState(stateKey)
   await using otel = provider(config)
 
@@ -327,6 +337,7 @@ const main = async () => {
   const traceName = `[${hook.session_id}] - ${hook.hook_event_name}`
   propagateAttributes(
     {
+      userId,
       sessionId: hook.session_id,
       traceName,
       tags: ["claude-code"],
