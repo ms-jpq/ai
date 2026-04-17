@@ -33,13 +33,15 @@ const log = ({
 }: {
   level: "debug" | "info" | "error"
   msg: string
-}) => {
+}): void => {
   if (level === "error") {
     console.error(`[${level}] ${msg}`)
   }
 }
 
-const measure = (label: string) => {
+const measure = (
+  label: string,
+): Disposable & { jesus: number; process: number } => {
   const procT0 = performance.now()
   log({ level: "debug", msg: `${label} started` })
 
@@ -53,7 +55,7 @@ const measure = (label: string) => {
   }
 }
 
-const gitUserName = () =>
+const gitUserName = (): Promise<string> =>
   promisify(execFile)("git", ["config", "user.name"])
     .then(({ stdout }) => stdout.trim())
     .catch(() => "")
@@ -101,7 +103,9 @@ const openState = async (
   })
 }
 
-const provider = (config: Conf) => {
+const provider = (
+  config: Conf,
+): AsyncDisposable & { provider: BasicTracerProvider } => {
   const auth = Buffer.from(`${config.publicKey}:${config.secretKey}`).toString(
     "base64",
   )
@@ -121,7 +125,9 @@ const provider = (config: Conf) => {
   }
 }
 
-const defer = <T extends { end: () => void }>(span: T) => ({
+const defer = <T extends { end: () => void }>(
+  span: T,
+): Disposable & { span: T } => ({
   span,
   [Symbol.dispose]() {
     span.end()
@@ -280,15 +286,72 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       }
 
     case "document":
+      switch (block.source.type) {
+        case "base64":
+        case "text":
+          return {
+            type: side,
+            value: {
+              title: block.title,
+              context: block.context,
+              source_type: block.source.type,
+              media_type: block.source.media_type,
+            },
+          }
+        case "url":
+          return {
+            type: side,
+            value: {
+              title: block.title,
+              context: block.context,
+              source_type: block.source.type,
+              url: block.source.url,
+            },
+          }
+        case "content":
+          return {
+            type: side,
+            value: {
+              title: block.title,
+              context: block.context,
+              source_type: block.source.type,
+            },
+          }
+        default:
+          fail(block.source satisfies never)
+      }
+
     case "image":
+      switch (block.source.type) {
+        case "base64":
+          return {
+            type: side,
+            value: {
+              source_type: block.source.type,
+              media_type: block.source.media_type,
+            },
+          }
+        case "url":
+          return {
+            type: side,
+            value: {
+              source_type: block.source.type,
+              url: block.source.url,
+            },
+          }
+        default:
+          fail(block.source satisfies never)
+      }
+
     case "container_upload":
-      return undefined
+      return { type: side, value: { file_id: block.file_id } }
+
     default:
       fail(block satisfies never)
   }
 }
 
-const jsonValues = (items: Extracted[]) => {
+const jsonValues = (items: Extracted[]): string | undefined => {
   const kill = new Set<unknown>([undefined, null, ""])
   const nonEmpty = items.filter((item) => kill.has(item.value))
 
@@ -300,7 +363,9 @@ const jsonValues = (items: Extracted[]) => {
   )
 }
 
-const annotated = (message: SessionMessage) => {
+const annotated = (
+  message: SessionMessage,
+): Map<Extracted["type"], string | undefined> => {
   const blocks = contents(message)
     .map((b) => extract(message.type, b))
     .filter((b): b is Extracted => b !== undefined)
@@ -312,7 +377,7 @@ const annotated = (message: SessionMessage) => {
   return new Map(gm)
 }
 
-const main = async () => {
+const main = async (): Promise<void> => {
   const config = conf()
   if (!config) {
     return
