@@ -9,7 +9,6 @@ import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { LangfuseSpanProcessor } from "@langfuse/otel"
 import { propagateAttributes } from "@langfuse/tracing"
-import { context, trace } from "@opentelemetry/api"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -320,10 +319,6 @@ const main = async () => {
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
-  if (isSub) {
-    console.log(messages)
-  }
-
   propagateAttributes(
     {
       sessionId: hook.session_id,
@@ -331,7 +326,6 @@ const main = async () => {
       tags: ["claude-code"],
     },
     () => {
-      let parentCtx = context.active()
       for (const [i, message] of messages.entries()) {
         const map = annotated(message)
         const { input = "", output = "", error = "" } = Object.fromEntries(map)
@@ -340,13 +334,8 @@ const main = async () => {
         }
 
         using msg = defer(
-          tracer.startSpan(
-            `${hook.hook_event_name} - ${i}`,
-            undefined,
-            parentCtx,
-          ),
+          tracer.startSpan(`${hook.hook_event_name} - ${i}`, undefined),
         )
-        parentCtx = trace.setSpan(parentCtx, msg.span)
 
         if (input) {
           msg.span.setAttribute("langfuse.observation.input", input)
