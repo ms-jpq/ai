@@ -343,7 +343,9 @@ const main = async () => {
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
     : getSessionMessages(hook.session_id, opts))
 
-  const tracer = otel.provider.getTracer("claude-code")
+  log({ level: "debug", msg: `messages: ${messages.length}` })
+
+  const tracer = otel.provider.getTracer("langfuse-sdk")
 
   tracer.startActiveSpan(hook.hook_event_name, (root) => {
     root.setAttribute("langfuse.session.id", hook.session_id)
