@@ -353,7 +353,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
 
 const jsonValues = (items: Extracted[]): string | undefined => {
   const kill = new Set<unknown>([undefined, null, ""])
-  const nonEmpty = items.filter((item) => kill.has(item.value))
+  const nonEmpty = items.filter((item) => !kill.has(item.value))
 
   if (!nonEmpty.length) {
     return undefined
