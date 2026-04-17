@@ -9,6 +9,7 @@ import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { LangfuseSpanProcessor } from "@langfuse/otel"
 import { propagateAttributes } from "@langfuse/tracing"
+import { context, trace } from "@opentelemetry/api"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -329,36 +330,38 @@ const main = async () => {
       tags: ["claude-code"],
     },
     () => {
-      tracer.startActiveSpan(hook.hook_event_name, (root) => {
-        using _ = { [Symbol.dispose]: () => root.end() }
+      using _ = defer(tracer.startSpan(hook.hook_event_name))
 
-        for (const [i, message] of messages.entries()) {
-          const map = annotated(message)
-          const {
-            input = "",
-            output = "",
-            error = "",
-          } = Object.fromEntries(map)
-          if (!(input + output + error)) {
-            continue
-          }
-
-          using msg = defer(tracer.startSpan(`${hook.hook_event_name} - ${i}`))
-
-          if (input) {
-            msg.span.setAttribute("langfuse.observation.input", input)
-          }
-
-          if (output) {
-            msg.span.setAttribute("langfuse.observation.output", output)
-          }
-
-          if (error) {
-            msg.span.setAttribute("langfuse.observation.output", error)
-            msg.span.setAttribute("langfuse.observation.level", "ERROR")
-          }
+      let parentCtx = context.active()
+      for (const [i, message] of messages.entries()) {
+        const map = annotated(message)
+        const { input = "", output = "", error = "" } = Object.fromEntries(map)
+        if (!(input + output + error)) {
+          continue
         }
-      })
+
+        using msg = defer(
+          tracer.startSpan(
+            `${hook.hook_event_name} - ${i}`,
+            undefined,
+            parentCtx,
+          ),
+        )
+        parentCtx = trace.setSpan(parentCtx, msg.span)
+
+        if (input) {
+          msg.span.setAttribute("langfuse.observation.input", input)
+        }
+
+        if (output) {
+          msg.span.setAttribute("langfuse.observation.output", output)
+        }
+
+        if (error) {
+          msg.span.setAttribute("langfuse.observation.output", error)
+          msg.span.setAttribute("langfuse.observation.level", "ERROR")
+        }
+      }
     },
   )
 
