@@ -24,7 +24,10 @@ import { promisify } from "node:util"
 
 type Conf = { auth: string; host: string }
 type Block = string | BetaContentBlock | ContentBlockParam
-type Message = SessionMessage & { content: string | Block[]; timestamp: string }
+type Message = SessionMessage & {
+  message: { content: string | Block[] }
+  timestamp: string
+}
 type Role = SessionMessage["type"]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
@@ -126,7 +129,7 @@ const defer = <T extends { end: () => void }>(
   },
 })
 
-const contents = function* (message: Message): IteratorObject<Block> {
+const contents = function* ({ message }: Message): IteratorObject<Block> {
   const content = message.content
   if (typeof content === "string") {
     yield content
