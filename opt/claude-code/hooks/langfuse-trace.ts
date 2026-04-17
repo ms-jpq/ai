@@ -8,6 +8,7 @@ import {
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { LangfuseSpanProcessor } from "@langfuse/otel"
+import type { Span } from "@opentelemetry/api"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -105,6 +106,13 @@ const provider = (config: Conf) => {
     },
   }
 }
+
+const defer = (span: Span) => ({
+  span,
+  [Symbol.dispose]() {
+    span.end()
+  },
+})
 
 type Block = string | BetaContentBlock | ContentBlockParam
 
@@ -306,6 +314,7 @@ const main = async () => {
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
   tracer.startActiveSpan(hook.hook_event_name, (root) => {
+    using _ = defer(root)
     root.setAttribute("langfuse.session.id", hook.session_id)
 
     for (const message of messages) {
@@ -316,6 +325,8 @@ const main = async () => {
       })
 
       tracer.startActiveSpan(message.type, (span) => {
+        using _ = defer(span)
+
         if (input.length) {
           span.setAttribute(
             "langfuse.observation.input",
@@ -337,12 +348,8 @@ const main = async () => {
           )
           span.setAttribute("langfuse.observation.level", "ERROR")
         }
-
-        span.end()
       })
     }
-
-    root.end()
   })
 
   if (state) {
