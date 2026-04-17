@@ -1,6 +1,6 @@
 #!/usr/bin/env -S -- node
 
-import type { BaseHookInput } from "@anthropic-ai/claude-agent-sdk"
+import type { HookInput } from "@anthropic-ai/claude-agent-sdk"
 import type {
   ContentBlock,
   Message,
@@ -121,7 +121,7 @@ const readConfig = (): Config | null => {
 const readPayload = async () => {
   const data = await text(stdin)
   if (!data.trim()) return null
-  return JSON.parse(data) as BaseHookInput & { hook_event_name?: string }
+  return JSON.parse(data) as HookInput
 }
 
 // ── State ────────────────────────────────────────────
@@ -270,8 +270,8 @@ const assembleTurns = function* (
   messages: TranscriptLine[],
 ): IteratorObject<Turn> {
   let userMsg: TranscriptLine | null = null
-  let assistants = new Map<string, TranscriptLine>()
-  let toolResults = new Map<string, unknown>()
+  const assistants = new Map<string, TranscriptLine>()
+  const toolResults = new Map<string, unknown>()
 
   for (const msg of messages) {
     if (isToolResult(msg)) {
@@ -295,8 +295,8 @@ const assembleTurns = function* (
         }
       }
       userMsg = msg
-      assistants = new Map()
-      toolResults = new Map()
+      assistants.clear()
+      toolResults.clear()
       continue
     }
 
@@ -334,17 +334,25 @@ const emitTurn = ({
   turnNum,
   turn,
   transcriptPath,
+  lastAssistantMessage,
+  toolResponse,
+  error,
+  errorDetails,
 }: {
   sessionId: string
   turnNum: number
   turn: Turn
   transcriptPath: string
+  lastAssistantMessage?: string
+  toolResponse?: unknown
+  error?: string
+  errorDetails?: string
 }) => {
   const [userText, userMeta] = truncate(extractText(getContent(turn.userMsg)))
   const lastAssistant = turn.assistantMsgs.at(-1) ?? turn.userMsg
-  const [assistantText, assistantMeta] = truncate(
-    extractText(getContent(lastAssistant)),
-  )
+  const transcriptText = extractText(getContent(lastAssistant))
+  const outputText = transcriptText || lastAssistantMessage || ""
+  const [assistantText, assistantMeta] = truncate(outputText)
   const model = getModel(turn.assistantMsgs[0] ?? lastAssistant)
   const calls = toolCalls(turn.assistantMsgs)
 
@@ -372,6 +380,7 @@ const emitTurn = ({
           turn_number: turnNum,
           transcript_path: transcriptPath,
           user_text: userMeta,
+          ...(error ? { error, error_details: errorDetails } : {}),
         },
       })
 
@@ -416,9 +425,11 @@ const emitTurn = ({
       }
 
       for (const c of calls) {
-        if (c.name === "ExitPlanMode" && c.input) {
-          const planStr =
-            typeof c.input === "string" ? c.input : JSON.stringify(c.input)
+        if (c.name === "ExitPlanMode") {
+          const raw = c.output ?? toolResponse
+          if (!raw) continue
+          const planStr = typeof raw === "string" ? raw : JSON.stringify(raw)
+
           const [planTrunc, planMeta] = truncate(planStr)
           using _ = disposable(
             startObservation("Plan", {
@@ -429,7 +440,134 @@ const emitTurn = ({
         }
       }
 
-      trace.update({ output: { role: "assistant", content: assistantText } })
+      trace.update({
+        output: { role: "assistant", content: assistantText },
+        ...(error ? { level: "ERROR" as const } : {}),
+      })
+    }),
+  )
+}
+
+const emitSubagent = async ({
+  sessionId,
+  agentId,
+  agentType,
+  agentTranscriptPath,
+  lastAssistantMessage,
+}: {
+  sessionId: string
+  agentId: string
+  agentType: string
+  agentTranscriptPath: string
+  lastAssistantMessage?: string
+}) => {
+  const [msgs] = await readNewMessages(agentTranscriptPath, {
+    offset: 0,
+    buffer: "",
+    turnCount: 0,
+  })
+  if (!msgs.length) return
+
+  const turns = assembleTurns(msgs).toArray()
+  const [firstTurn] = turns
+  const firstUserText = firstTurn
+    ? extractText(getContent(firstTurn.userMsg))
+    : ""
+  const [inputText, inputMeta] = truncate(firstUserText)
+
+  const outputText =
+    lastAssistantMessage ??
+    (turns.length > 0
+      ? extractText(
+          getContent(
+            turns.at(-1)!.assistantMsgs.at(-1) ?? turns.at(-1)!.userMsg,
+          ),
+        )
+      : "")
+  const [outputTrunc, outputMeta] = truncate(outputText)
+
+  const traceName = `Claude Code - Subagent: ${agentType}`
+  const tags = ["claude-code", "subagent", agentType]
+
+  propagateAttributes({ sessionId, traceName, tags }, () =>
+    startActiveObservation(traceName, (trace) => {
+      trace.update({
+        input: { role: "user", content: inputText },
+        metadata: {
+          source: "claude-code",
+          session_id: sessionId,
+          agent_id: agentId,
+          agent_type: agentType,
+          agent_transcript_path: agentTranscriptPath,
+          input_meta: inputMeta,
+          output_meta: outputMeta,
+          turn_count: turns.length,
+        },
+      })
+
+      for (const [i, turn] of turns.entries()) {
+        const [userText] = truncate(extractText(getContent(turn.userMsg)))
+        const lastAst = turn.assistantMsgs.at(-1) ?? turn.userMsg
+        const [assistantText, assistantMeta] = truncate(
+          extractText(getContent(lastAst)),
+        )
+        const model = getModel(turn.assistantMsgs[0] ?? lastAst)
+        const calls = toolCalls(turn.assistantMsgs)
+
+        for (const c of calls) {
+          const raw = turn.toolResults.get(c.id)
+          if (raw !== undefined) {
+            const outStr = typeof raw === "string" ? raw : JSON.stringify(raw)
+            const [outTrunc, outMeta] = truncate(outStr)
+            c.output = outTrunc
+            c.output_meta = outMeta
+          } else {
+            c.output = null
+          }
+        }
+
+        {
+          using _ = disposable(
+            startObservation(
+              `Turn ${i + 1}`,
+              {
+                input: { role: "user", content: userText },
+                output: { role: "assistant", content: assistantText },
+                model,
+                metadata: {
+                  assistant_text: assistantMeta,
+                  tool_count: calls.length,
+                },
+              },
+              { asType: "generation" },
+            ),
+          )
+        }
+
+        for (const c of calls) {
+          const [inObj, inMeta] =
+            typeof c.input === "string" ? truncate(c.input) : [c.input, null]
+
+          using toolObs = disposable(
+            startObservation(
+              `Tool: ${c.name}`,
+              {
+                input: inObj,
+                metadata: {
+                  tool_name: c.name,
+                  tool_id: c.id,
+                  input_meta: inMeta,
+                  output_meta: c.output_meta,
+                },
+              },
+              { asType: "tool" },
+            ),
+          )
+          toolObs.update({ output: c.output })
+        }
+      }
+
+      trace.update({ output: { role: "assistant", content: outputTrunc } })
     }),
   )
 }
@@ -466,11 +604,24 @@ const main = async () => {
   const payload = await readPayload()
   if (!payload) return 0
 
-  const event = (payload.hook_event_name ?? "unknown").padEnd(
-    "PostToolUseFailure".length,
-  )
+  const event = payload.hook_event_name.padEnd("PostToolUseFailure".length)
   using _ = timed(`${event} (session=${payload.session_id})`)
   await using __ = createProvider(config)
+
+  if (payload.hook_event_name === "SubagentStop") {
+    try {
+      await emitSubagent({
+        sessionId: payload.session_id,
+        agentId: payload.agent_id,
+        agentType: payload.agent_type,
+        agentTranscriptPath: payload.agent_transcript_path,
+        lastAssistantMessage: payload.last_assistant_message,
+      })
+    } catch (e) {
+      log({ level: "error", msg: String(e) })
+    }
+    return 0
+  }
 
   await using state = await openState(payload.session_id)
 
@@ -492,6 +643,21 @@ const main = async () => {
         turnNum: state.turnCount + i + 1,
         turn,
         transcriptPath: payload.transcript_path,
+        lastAssistantMessage:
+          payload.hook_event_name === "Stop" ||
+          payload.hook_event_name === "StopFailure"
+            ? payload.last_assistant_message
+            : undefined,
+        toolResponse:
+          payload.hook_event_name === "PostToolUse"
+            ? payload.tool_response
+            : undefined,
+        error:
+          payload.hook_event_name === "StopFailure" ? payload.error : undefined,
+        errorDetails:
+          payload.hook_event_name === "StopFailure"
+            ? payload.error_details
+            : undefined,
       })
     } catch (e) {
       log({ level: "error", msg: String(e) })
