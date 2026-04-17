@@ -17,6 +17,7 @@ import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
 import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
+import { promisify } from "node:util"
 
 type Conf = { publicKey: string; secretKey: string; host: string }
 type Role = SessionMessage["type"]
@@ -50,11 +51,9 @@ const measure = (label: string) => {
 }
 
 const gitUserName = () =>
-  new Promise((resolve) => {
-    execFile("git", ["config", "user.name"], (err, stdout) => {
-      resolve(err ? "" : stdout.trim())
-    })
-  })
+  promisify(execFile)("git", ["config", "user.name"])
+    .then(({ stdout }) => stdout.trim())
+    .catch(() => "")
 
 const conf = (): Conf | undefined => {
   const [publicKey, secretKey, host] = [
