@@ -1,5 +1,5 @@
 [project]
-dependencies = ["gay", "langfuse"]
+dependencies = ["gay"]
 name         = "ai"
 version      = "0"
 

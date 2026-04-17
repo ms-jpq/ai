@@ -3,8 +3,6 @@
   "dependencies": {
     "@anthropic-ai/claude-agent-sdk": "*",
     "@google/gemini-cli": "*",
-    "@langfuse/otel": "*",
-    "@langfuse/tracing": "*",
     "@opentelemetry/sdk-node": "*",
     "opencode-ai": "*",
     "prettier": "*",
