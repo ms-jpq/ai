@@ -309,40 +309,33 @@ const main = async () => {
   log({ level: "debug", msg: `messages: ${messages.length}` })
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
+  using root = defer(tracer.startSpan(hook.hook_event_name))
 
-  tracer.startActiveSpan(hook.hook_event_name, (root) => {
-    using _ = defer(root)
-    root.setAttribute("langfuse.trace.name", hook.hook_event_name)
-    root.setAttribute("langfuse.session.id", hook.session_id)
+  root.span.setAttribute("langfuse.session.id", hook.session_id)
+  for (const [i, message] of messages.entries()) {
+    const { input = [], output = [], error = [] } = annotated(message)
 
-    for (const message of messages) {
-      const { input = [], output = [], error = [] } = annotated(message)
+    log({
+      level: "debug",
+      msg: JSON.stringify({ input, output, error }),
+    })
 
-      log({
-        level: "debug",
-        msg: JSON.stringify({ input, output, error }),
-      })
+    using msg = defer(tracer.startSpan(String(i)))
+    msg.span.setAttribute("langfuse.session.id", hook.session_id)
 
-      tracer.startActiveSpan(message.type, (span) => {
-        using _ = defer(span)
-        span.setAttribute("langfuse.session.id", hook.session_id)
-
-        if (input.length) {
-          span.setAttribute("langfuse.observation.input", jsonValues(input))
-        }
-
-        if (output.length) {
-          span.setAttribute("langfuse.observation.output", jsonValues(output))
-        }
-
-        if (error.length) {
-          span.setAttribute("langfuse.observation.output", jsonValues(error))
-          span.setAttribute("langfuse.observation.level", "ERROR")
-        }
-      })
+    if (input.length) {
+      msg.span.setAttribute("langfuse.observation.input", jsonValues(input))
     }
-  })
 
+    if (output.length) {
+      msg.span.setAttribute("langfuse.observation.output", jsonValues(output))
+    }
+
+    if (error.length) {
+      msg.span.setAttribute("langfuse.observation.output", jsonValues(error))
+      msg.span.setAttribute("langfuse.observation.level", "ERROR")
+    }
+  }
   if (state) {
     state.offset += messages.length
   }
