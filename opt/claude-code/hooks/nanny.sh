@@ -34,6 +34,10 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='do not install system packages'
   ;;
+'npx '* | 'bunx '* | 'pnpm dlx '* | 'yarn dlx '* | 'uvx '* | 'uv run '* | 'uv tool run '* | 'pipx run '*)
+  DECISION=deny
+  REASON='do not invoke tools through package-manager runners; install the tool locally and call it directly'
+  ;;
 'nohup '* | 'crontab '* | 'tmux '* | 'screen '* | 'zellij '*)
   DECISION=deny
   REASON='do not create persistent processes'

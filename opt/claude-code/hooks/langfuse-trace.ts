@@ -7,6 +7,7 @@ import {
 } from "@anthropic-ai/claude-agent-sdk"
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
+import { SpanStatusCode } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
   BasicTracerProvider,
@@ -442,16 +443,25 @@ const main = async (): Promise<void> => {
     )
 
     if (input) {
-      msg.span.setAttribute("langfuse.observation.input", input)
+      msg.span.setAttributes({
+        "input.value": input,
+        "input.mime_type": "application/json",
+      })
     }
 
     if (output) {
-      msg.span.setAttribute("langfuse.observation.output", output)
+      msg.span.setAttributes({
+        "output.value": output,
+        "output.mime_type": "application/json",
+      })
     }
 
     if (error) {
-      msg.span.setAttribute("langfuse.observation.output", error)
-      msg.span.setAttribute("langfuse.observation.level", "ERROR")
+      msg.span.setStatus({ code: SpanStatusCode.ERROR })
+      msg.span.setAttributes({
+        "output.value": error,
+        "output.mime_type": "application/json",
+      })
     }
   }
 
