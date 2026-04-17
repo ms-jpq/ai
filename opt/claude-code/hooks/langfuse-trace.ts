@@ -318,6 +318,10 @@ const main = async () => {
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
+  if (isSub) {
+    console.log(messages)
+  }
+
   propagateAttributes(
     {
       sessionId: hook.session_id,
@@ -339,7 +343,7 @@ const main = async () => {
             continue
           }
 
-          using msg = defer(tracer.startSpan(String(i)))
+          using msg = defer(tracer.startSpan(`${hook.hook_event_name} - ${i}`))
 
           if (input) {
             msg.span.setAttribute("langfuse.observation.input", input)
