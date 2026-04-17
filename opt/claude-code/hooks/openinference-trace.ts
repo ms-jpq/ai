@@ -22,7 +22,7 @@ import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
-type Conf = { publicKey: string; secretKey: string; host: string }
+type Conf = { auth: string; host: string }
 type Role = SessionMessage["type"]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
@@ -62,17 +62,13 @@ const gitUserName = (): Promise<string> =>
     .catch(() => "")
 
 const conf = (): Conf | undefined => {
-  const [publicKey, secretKey, host] = [
-    env["LANGFUSE_PUBLIC_KEY"],
-    env["LANGFUSE_SECRET_KEY"],
-    env["LANGFUSE_BASE_URL"],
-  ]
+  const [auth, host] = [env["LANGFUSE_AUTH"], env["LANGFUSE_BASE_URL"]]
 
-  if (!publicKey || !secretKey || !host) {
+  if (!auth || !host) {
     return undefined
   }
 
-  return { publicKey, secretKey, host }
+  return { auth, host }
 }
 
 const hookInput = async (): Promise<HookInput | undefined> => {
@@ -107,12 +103,9 @@ const openState = async (
 const provider = (
   config: Conf,
 ): AsyncDisposable & { provider: BasicTracerProvider } => {
-  const auth = Buffer.from(`${config.publicKey}:${config.secretKey}`).toString(
-    "base64",
-  )
   const exporter = new OTLPTraceExporter({
     url: join(config.host, `/api/public/otel/v1/traces`),
-    headers: { Authorization: `Basic ${auth}` },
+    headers: { Authorization: `Basic ${config.auth}` },
     timeoutMillis: 10_000,
   })
   const processor = new SimpleSpanProcessor(exporter)
