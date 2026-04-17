@@ -277,8 +277,10 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
 
     case "tool_search_tool_result":
       switch (block.content.type) {
-        case "tool_search_tool_result_error":
-          return { type: "error", value: block.content }
+        case "tool_search_tool_result_error": {
+          const { type: _, ...rest } = block.content
+          return { type: "error", value: rest }
+        }
         case "tool_search_tool_search_result":
           return { type: "output", value: block.content.tool_references }
         default:
@@ -323,7 +325,6 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
             value: {
               context: block.context,
               media_type: block.source.media_type,
-              source_type: block.source.type,
               title: block.title,
             },
           }
@@ -333,18 +334,13 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
             value: {
               context: block.context,
               title: block.title,
-              source_type: block.source.type,
               url: block.source.url,
             },
           }
         case "content":
           return {
             type: side,
-            value: {
-              context: block.context,
-              source_type: block.source.type,
-              title: block.title,
-            },
+            value: { context: block.context, title: block.title },
           }
         default:
           fail(block.source satisfies never)
@@ -353,21 +349,9 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "image":
       switch (block.source.type) {
         case "base64":
-          return {
-            type: side,
-            value: {
-              media_type: block.source.media_type,
-              source_type: block.source.type,
-            },
-          }
+          return { type: side, value: { media_type: block.source.media_type } }
         case "url":
-          return {
-            type: side,
-            value: {
-              source_type: block.source.type,
-              url: block.source.url,
-            },
-          }
+          return { type: side, value: { url: block.source.url } }
         default:
           fail(block.source satisfies never)
       }
