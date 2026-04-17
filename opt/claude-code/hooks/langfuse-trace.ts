@@ -12,7 +12,11 @@ import {
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { LangfuseSpanProcessor } from "@langfuse/otel"
-import { setLangfuseTracerProvider } from "@langfuse/tracing"
+import {
+  propagateAttributes,
+  setLangfuseTracerProvider,
+  startActiveObservation,
+} from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -23,7 +27,7 @@ import { fileURLToPath } from "node:url"
 
 type Conf = { publicKey: string; secretKey: string; host: string }
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..,", "..")
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
 
 const log = ({
@@ -294,48 +298,53 @@ const main = async () => {
 
   const tracer = otel.provider.getTracer("claude-code")
 
-  for (const message of messages) {
-    const msg = message.message as SDKMessage
-    tracer.startActiveSpan(
-      msg.type,
-      { attributes: { "session.id": hook.session_id } },
-      (span) => {
-        try {
-          for (const block of contents(message)) {
-            const extracted = extract(block)
-            if (!extracted) {
-              continue
-            }
+  startActiveObservation(hook.hook_event_name, () =>
+    propagateAttributes(
+      {
+        sessionId: hook.session_id,
+      },
+      () => {
+        for (const message of messages) {
+          const msg = message.message as SDKMessage
+          tracer.startActiveSpan(msg.type, (span) => {
+            try {
+              for (const block of contents(message)) {
+                const extracted = extract(block)
+                if (!extracted) {
+                  continue
+                }
 
-            switch (extracted.type) {
-              case "content":
-                span.addEvent("content", { value: extracted.content })
-                break
-              case "tool_use":
-                span.addEvent(`tool:${extracted.name}`, {
-                  input: JSON.stringify(extracted.input),
-                })
-                break
-              case "output":
-                span.addEvent("output", {
-                  value: JSON.stringify(extracted.output),
-                })
-                break
-              case "error":
-                span.addEvent("error", {
-                  value: JSON.stringify(extracted.error),
-                })
-                break
-              default:
-                fail(extracted satisfies never)
+                switch (extracted.type) {
+                  case "content":
+                    span.addEvent("content", { value: extracted.content })
+                    break
+                  case "tool_use":
+                    span.addEvent(`tool:${extracted.name}`, {
+                      input: JSON.stringify(extracted.input),
+                    })
+                    break
+                  case "output":
+                    span.addEvent("output", {
+                      value: JSON.stringify(extracted.output),
+                    })
+                    break
+                  case "error":
+                    span.addEvent("error", {
+                      value: JSON.stringify(extracted.error),
+                    })
+                    break
+                  default:
+                    fail(extracted satisfies never)
+                }
+              }
+            } finally {
+              span.end()
             }
-          }
-        } finally {
-          span.end()
+          })
         }
       },
-    )
-  }
+    ),
+  )
 
   if (state) {
     state.offset += messages.length
