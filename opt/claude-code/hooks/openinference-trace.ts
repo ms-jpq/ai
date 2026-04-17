@@ -508,23 +508,23 @@ const main = async (): Promise<void> => {
 
     if (input) {
       msg.span.setAttributes({
-        "input.value": input,
-        "input.mime_type": "application/json",
+        [SemanticConventions.INPUT_VALUE]: input,
+        [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
       })
     }
 
     if (output) {
       msg.span.setAttributes({
-        "output.value": output,
-        "output.mime_type": "application/json",
+        [SemanticConventions.OUTPUT_VALUE]: output,
+        [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
       })
     }
 
     if (error) {
       msg.span.setStatus({ code: SpanStatusCode.ERROR })
       msg.span.setAttributes({
-        "output.value": error,
-        "output.mime_type": "application/json",
+        [SemanticConventions.OUTPUT_VALUE]: error,
+        [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
       })
     }
   }
