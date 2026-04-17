@@ -14,7 +14,7 @@ import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/mes
 import { LangfuseSpanProcessor } from "@langfuse/otel"
 import { setLangfuseTracerProvider } from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
-import { ok } from "node:assert/strict"
+import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
@@ -133,14 +133,113 @@ const contents = function* (messages: SessionMessage[]): IteratorObject<Block> {
   return
 }
 
-const blockText = (block: Block): string | undefined => {
+const extractText = function* (block: Block): IteratorObject<string> {
   if (typeof block === "string") {
-    return block
+    yield block
+    return
   }
 
   switch (block.type) {
+    case "text":
+      yield block.text
+      return
+    case "thinking":
+      yield block.thinking
+      return
+    case "redacted_thinking":
+      yield block.data
+      return
+    case "tool_use":
+      break
+    case "server_tool_use":
+      break
+    case "web_search_tool_result":
+      break
+    case "web_fetch_tool_result":
+      break
+    case "code_execution_tool_result":
+      break
+    case "bash_code_execution_tool_result":
+      break
+    case "text_editor_code_execution_tool_result":
+      break
+    case "tool_search_tool_result":
+      break
+    case "mcp_tool_use":
+      break
+    case "mcp_tool_result":
+      break
+    case "container_upload":
+      break
+    case "compaction":
+      break
+    case "image":
+      break
+    case "document":
+      break
+    case "search_result":
+      break
+    case "tool_result":
+      break
+    default:
+      fail(block satisfies never)
   }
-  return ""
+
+  return
+}
+
+const extractTools = function* (block: Block): IteratorObject<string> {
+  if (typeof block === "string") {
+    return
+  }
+
+  switch (block.type) {
+    case "text":
+      yield block.text
+      return
+    case "thinking":
+      yield block.thinking
+      return
+    case "redacted_thinking":
+      yield block.data
+      return
+    case "tool_use":
+      break
+    case "server_tool_use":
+      break
+    case "web_search_tool_result":
+      break
+    case "web_fetch_tool_result":
+      break
+    case "code_execution_tool_result":
+      break
+    case "bash_code_execution_tool_result":
+      break
+    case "text_editor_code_execution_tool_result":
+      break
+    case "tool_search_tool_result":
+      break
+    case "mcp_tool_use":
+      break
+    case "mcp_tool_result":
+      break
+    case "container_upload":
+      break
+    case "compaction":
+      break
+    case "image":
+      break
+    case "document":
+      break
+    case "search_result":
+      break
+    case "tool_result":
+      break
+    default:
+      fail(block satisfies never)
+  }
+
+  return
 }
 
 const main = async () => {
