@@ -325,11 +325,6 @@ const main = async () => {
           continue
         }
 
-        log({
-          level: "debug",
-          msg: JSON.stringify({ input, output, error }),
-        })
-
         using msg = defer(tracer.startSpan(String(i)))
 
         if (input.length) {
