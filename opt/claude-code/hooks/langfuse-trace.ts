@@ -60,7 +60,10 @@ type ToolCall = {
   id: string
   name: string
   input: unknown
-  output?: string | null
+}
+
+type ResolvedToolCall = ToolCall & {
+  output?: string
   output_meta?: TruncMeta
 }
 
@@ -329,6 +332,71 @@ const toolCalls = (assistantMsgs: TranscriptLine[]): ToolCall[] =>
     })),
   )
 
+const resolveToolCalls = (turn: Turn): ResolvedToolCall[] =>
+  toolCalls(turn.assistantMsgs).map((c) => {
+    const raw = turn.toolResults.get(c.id)
+    if (raw === undefined) return c
+    const outStr = typeof raw === "string" ? raw : JSON.stringify(raw)
+    const [output, output_meta] = truncate(outStr)
+    return { ...c, output, output_meta }
+  })
+
+const emitTurnObservations = ({
+  generationName,
+  userText,
+  assistantText,
+  assistantMeta,
+  model,
+  calls,
+}: {
+  generationName: string
+  userText: string
+  assistantText: string
+  assistantMeta: TruncMeta
+  model: string
+  calls: ResolvedToolCall[]
+}) => {
+  {
+    using _ = disposable(
+      startObservation(
+        generationName,
+        {
+          input: { role: "user", content: userText },
+          output: { role: "assistant", content: assistantText },
+          model,
+          metadata: {
+            assistant_text: assistantMeta,
+            tool_count: calls.length,
+          },
+        },
+        { asType: "generation" },
+      ),
+    )
+  }
+
+  for (const c of calls) {
+    const [inObj, inMeta] =
+      typeof c.input === "string" ? truncate(c.input) : [c.input, null]
+
+    using toolObs = disposable(
+      startObservation(
+        `Tool: ${c.name}`,
+        {
+          input: inObj,
+          metadata: {
+            tool_name: c.name,
+            tool_id: c.id,
+            input_meta: inMeta,
+            output_meta: c.output_meta,
+          },
+        },
+        { asType: "tool" },
+      ),
+    )
+    toolObs.update({ output: c.output })
+  }
+}
+
 const emitTurn = ({
   sessionId,
   turnNum,
@@ -354,19 +422,7 @@ const emitTurn = ({
   const outputText = transcriptText || lastAssistantMessage || ""
   const [assistantText, assistantMeta] = truncate(outputText)
   const model = getModel(turn.assistantMsgs[0] ?? lastAssistant)
-  const calls = toolCalls(turn.assistantMsgs)
-
-  for (const c of calls) {
-    const raw = turn.toolResults.get(c.id)
-    if (raw !== undefined) {
-      const outStr = typeof raw === "string" ? raw : JSON.stringify(raw)
-      const [outTrunc, outMeta] = truncate(outStr)
-      c.output = outTrunc
-      c.output_meta = outMeta
-    } else {
-      c.output = null
-    }
-  }
+  const calls = resolveToolCalls(turn)
 
   const traceName = `Claude Code - Turn ${turnNum}`
 
@@ -384,52 +440,20 @@ const emitTurn = ({
         },
       })
 
-      {
-        using _ = disposable(
-          startObservation(
-            "Claude Response",
-            {
-              input: { role: "user", content: userText },
-              output: { role: "assistant", content: assistantText },
-              model,
-              metadata: {
-                assistant_text: assistantMeta,
-                tool_count: calls.length,
-              },
-            },
-            { asType: "generation" },
-          ),
-        )
-      }
-
-      for (const c of calls) {
-        const [inObj, inMeta] =
-          typeof c.input === "string" ? truncate(c.input) : [c.input, null]
-
-        using toolObs = disposable(
-          startObservation(
-            `Tool: ${c.name}`,
-            {
-              input: inObj,
-              metadata: {
-                tool_name: c.name,
-                tool_id: c.id,
-                input_meta: inMeta,
-                output_meta: c.output_meta,
-              },
-            },
-            { asType: "tool" },
-          ),
-        )
-        toolObs.update({ output: c.output })
-      }
+      emitTurnObservations({
+        generationName: "Claude Response",
+        userText,
+        assistantText,
+        assistantMeta,
+        model,
+        calls,
+      })
 
       for (const c of calls) {
         if (c.name === "ExitPlanMode") {
           const raw = c.output ?? toolResponse
           if (!raw) continue
           const planStr = typeof raw === "string" ? raw : JSON.stringify(raw)
-
           const [planTrunc, planMeta] = truncate(planStr)
           using _ = disposable(
             startObservation("Plan", {
@@ -442,7 +466,7 @@ const emitTurn = ({
 
       trace.update({
         output: { role: "assistant", content: assistantText },
-        ...(error ? { level: "ERROR" as const } : {}),
+        ...(error ? { level: "ERROR" } : {}),
       })
     }),
   )
@@ -475,13 +499,12 @@ const emitSubagent = async ({
     : ""
   const [inputText, inputMeta] = truncate(firstUserText)
 
+  const lastTurn = turns.at(-1)
   const outputText =
     lastAssistantMessage ??
-    (turns.length > 0
+    (lastTurn
       ? extractText(
-          getContent(
-            turns.at(-1)!.assistantMsgs.at(-1) ?? turns.at(-1)!.userMsg,
-          ),
+          getContent(lastTurn.assistantMsgs.at(-1) ?? lastTurn.userMsg),
         )
       : "")
   const [outputTrunc, outputMeta] = truncate(outputText)
@@ -512,59 +535,15 @@ const emitSubagent = async ({
           extractText(getContent(lastAst)),
         )
         const model = getModel(turn.assistantMsgs[0] ?? lastAst)
-        const calls = toolCalls(turn.assistantMsgs)
 
-        for (const c of calls) {
-          const raw = turn.toolResults.get(c.id)
-          if (raw !== undefined) {
-            const outStr = typeof raw === "string" ? raw : JSON.stringify(raw)
-            const [outTrunc, outMeta] = truncate(outStr)
-            c.output = outTrunc
-            c.output_meta = outMeta
-          } else {
-            c.output = null
-          }
-        }
-
-        {
-          using _ = disposable(
-            startObservation(
-              `Turn ${i + 1}`,
-              {
-                input: { role: "user", content: userText },
-                output: { role: "assistant", content: assistantText },
-                model,
-                metadata: {
-                  assistant_text: assistantMeta,
-                  tool_count: calls.length,
-                },
-              },
-              { asType: "generation" },
-            ),
-          )
-        }
-
-        for (const c of calls) {
-          const [inObj, inMeta] =
-            typeof c.input === "string" ? truncate(c.input) : [c.input, null]
-
-          using toolObs = disposable(
-            startObservation(
-              `Tool: ${c.name}`,
-              {
-                input: inObj,
-                metadata: {
-                  tool_name: c.name,
-                  tool_id: c.id,
-                  input_meta: inMeta,
-                  output_meta: c.output_meta,
-                },
-              },
-              { asType: "tool" },
-            ),
-          )
-          toolObs.update({ output: c.output })
-        }
+        emitTurnObservations({
+          generationName: `Turn ${i + 1}`,
+          userText,
+          assistantText,
+          assistantMeta,
+          model,
+          calls: resolveToolCalls(turn),
+        })
       }
 
       trace.update({ output: { role: "assistant", content: outputTrunc } })

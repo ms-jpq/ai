@@ -24,9 +24,11 @@ const fetch = ({
 
 - Async over sync when both exist.
 
+- `undefined` over `null`. Never `T | null | undefined` — pick one, and it's `undefined`.
+
 - `??` over `||` for nullish coalescing. `||` only for boolean short-circuit.
 
-- No `as` casts. Perform type narrowing instead.
+- No `as` casts except `as const`. Perform type narrowing instead.
 
 - Only annotate types where not inferable. Do keep annotations on function signatures.
 
