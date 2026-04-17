@@ -23,6 +23,8 @@ import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
 type Conf = { auth: string; host: string }
+type Block = string | BetaContentBlock | ContentBlockParam
+type Message = SessionMessage & { content: string | Block[]; timestamp: string }
 type Role = SessionMessage["type"]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
@@ -40,15 +42,11 @@ const log = ({
   }
 }
 
-const measure = (
-  label: string,
-): Disposable & { jesus: number; process: number } => {
+const measure = (label: string): Disposable => {
   const procT0 = performance.now()
   log({ level: "debug", msg: `${label} started` })
 
   return {
-    jesus: Date.now(),
-    process: procT0,
     [Symbol.dispose]() {
       const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
       log({ level: "info", msg: `${label} completed in ${elapsed}s` })
@@ -128,17 +126,12 @@ const defer = <T extends { end: () => void }>(
   },
 })
 
-type Block = string | BetaContentBlock | ContentBlockParam
-
-const contents = function* ({
-  message,
-}: SessionMessage): IteratorObject<Block> {
-  const msg = message as { content: string | Block[] }
-
-  if (typeof msg.content === "string") {
-    yield msg.content
-  } else {
-    yield* msg.content
+const contents = function* (message: Message): IteratorObject<Block> {
+  const content = message.content
+  if (typeof content === "string") {
+    yield content
+  } else if (Array.isArray(content)) {
+    yield* content
   }
 
   return
@@ -371,7 +364,7 @@ const jsonValues = (items: Extracted[]): string | undefined => {
 }
 
 const annotated = (
-  message: SessionMessage,
+  message: Message,
 ): Map<Extracted["type"], string | undefined> => {
   const blocks = contents(message)
     .map((b) => extract(message.type, b))
@@ -395,7 +388,7 @@ const main = async (): Promise<void> => {
     return
   }
 
-  using time = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
+  using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
   const isSub = hook.hook_event_name === "SubagentStop"
   const stateKey = isSub
@@ -407,9 +400,9 @@ const main = async (): Promise<void> => {
   await using otel = provider(config)
 
   const opts = { offset: state.offset }
-  const messages = await (isSub
+  const messages = (await (isSub
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
-    : getSessionMessages(hook.session_id, opts))
+    : getSessionMessages(hook.session_id, opts))) as Message[]
 
   log({ level: "debug", msg: `messages: ${messages.length}` })
 
@@ -430,7 +423,7 @@ const main = async (): Promise<void> => {
       continue
     }
 
-    const startTime = time.jesus + i * 10
+    const startTime = new Date(message.timestamp).getTime()
     using msg = defer(
       tracer.startSpan(`${traceName}: ${i}`, { startTime, attributes }),
     )
