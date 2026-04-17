@@ -40,14 +40,14 @@ const log = ({
 }
 
 const measure = (label: string) => {
-  const process = performance.now()
+  const procT0 = performance.now()
   log({ level: "debug", msg: `${label} started` })
 
   return {
     jesus: Date.now(),
-    process,
+    process: procT0,
     [Symbol.dispose]() {
-      const elapsed = ((performance.now() - process) / 1000).toFixed(2)
+      const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
       log({ level: "info", msg: `${label} completed in ${elapsed}s` })
     },
   }
