@@ -8,7 +8,7 @@ import {
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { LangfuseSpanProcessor } from "@langfuse/otel"
-import type { Span } from "@opentelemetry/api"
+import { propagateAttributes, startObservation } from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -106,7 +106,7 @@ const provider = (config: Conf) => {
   }
 }
 
-const defer = (span: Span) => ({
+const defer = <T extends { end: () => void }>(span: T) => ({
   span,
   [Symbol.dispose]() {
     span.end()
@@ -309,33 +309,51 @@ const main = async () => {
   log({ level: "debug", msg: `messages: ${messages.length}` })
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
-  using root = defer(tracer.startSpan(hook.hook_event_name))
 
-  root.span.setAttribute("langfuse.session.id", hook.session_id)
-  for (const [i, message] of messages.entries()) {
-    const { input = [], output = [], error = [] } = annotated(message)
+  propagateAttributes(
+    {
+      sessionId: hook.session_id,
+      traceName: hook.hook_event_name,
+      tags: ["claude-code"],
+    },
+    () => {
+      using _ = defer(startObservation(hook.hook_event_name))
 
-    log({
-      level: "debug",
-      msg: JSON.stringify({ input, output, error }),
-    })
+      for (const [i, message] of messages.entries()) {
+        const { input = [], output = [], error = [] } = annotated(message)
+        if (!(input.length + output.length + error.length)) {
+          continue
+        }
 
-    using msg = defer(tracer.startSpan(String(i)))
-    msg.span.setAttribute("langfuse.session.id", hook.session_id)
+        log({
+          level: "debug",
+          msg: JSON.stringify({ input, output, error }),
+        })
 
-    if (input.length) {
-      msg.span.setAttribute("langfuse.observation.input", jsonValues(input))
-    }
+        using msg = defer(tracer.startSpan(String(i)))
 
-    if (output.length) {
-      msg.span.setAttribute("langfuse.observation.output", jsonValues(output))
-    }
+        if (input.length) {
+          msg.span.setAttribute("langfuse.observation.input", jsonValues(input))
+        }
 
-    if (error.length) {
-      msg.span.setAttribute("langfuse.observation.output", jsonValues(error))
-      msg.span.setAttribute("langfuse.observation.level", "ERROR")
-    }
-  }
+        if (output.length) {
+          msg.span.setAttribute(
+            "langfuse.observation.output",
+            jsonValues(output),
+          )
+        }
+
+        if (error.length) {
+          msg.span.setAttribute(
+            "langfuse.observation.output",
+            jsonValues(error),
+          )
+          msg.span.setAttribute("langfuse.observation.level", "ERROR")
+        }
+      }
+    },
+  )
+
   if (state) {
     state.offset += messages.length
   }
