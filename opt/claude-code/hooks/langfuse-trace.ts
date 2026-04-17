@@ -292,6 +292,9 @@ const jsonValues = (items: Extracted[]) => {
   const kill = new Set<unknown>([undefined, null, ""])
   const nonEmpty = items.filter((item) => kill.has(item.value))
 
+  if (!nonEmpty.length) {
+    return undefined
+  }
   return JSON.stringify(
     nonEmpty.length === 1 ? nonEmpty[0]?.value : nonEmpty.map((b) => b.value),
   )
