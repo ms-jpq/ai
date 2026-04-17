@@ -504,19 +504,19 @@ const main = async (): Promise<void> => {
 
     let prev: Link | undefined
     for (const [j, block] of blocks.entries()) {
-      using span = defer(
+      using current = defer(
         tracer.startSpan(`${traceName}: ${i}.${j}`, {
           startTime,
           attributes,
           links: prev ? [prev] : [],
         }),
       )
-      prev = { context: span.span.spanContext() }
+      prev = { context: current.span.spanContext() }
 
       if (block.type === "error") {
-        span.span.setStatus({ code: SpanStatusCode.ERROR })
+        current.span.setStatus({ code: SpanStatusCode.ERROR })
       }
-      span.span.setAttributes({
+      current.span.setAttributes({
         "message.uuid": message.uuid,
         [MIME_KEY[block.type]]: MimeType.JSON,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
