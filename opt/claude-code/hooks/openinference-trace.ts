@@ -496,11 +496,11 @@ const main = async (): Promise<void> => {
   }
 
   for (const [i, message] of messages.entries()) {
+    const startTime = new Date(message.timestamp).getTime()
     const blocks = contents(message)
       .map((b) => extract(message.type, b))
       .filter((b): b is Extracted => b !== undefined && !isEmpty(b.value))
       .toArray()
-    const startTime = new Date(message.timestamp).getTime()
 
     for (const [j, block] of blocks.entries()) {
       using span = defer(
