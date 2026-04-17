@@ -12,11 +12,6 @@ import {
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { LangfuseSpanProcessor } from "@langfuse/otel"
-import {
-  propagateAttributes,
-  setLangfuseTracerProvider,
-  startActiveObservation,
-} from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -101,10 +96,9 @@ const provider = (config: Conf) => {
     timeout: 10,
     exportMode: "immediate",
   })
-  const provider = new NodeTracerProvider({ spanProcessors: [processor] })
 
+  const provider = new NodeTracerProvider({ spanProcessors: [processor] })
   provider.register()
-  setLangfuseTracerProvider(provider)
 
   return {
     provider,
@@ -351,42 +345,36 @@ const main = async () => {
 
   const tracer = otel.provider.getTracer("claude-code")
 
-  startActiveObservation(hook.hook_event_name, () =>
-    propagateAttributes(
-      {
-        sessionId: hook.session_id,
-      },
-      () => {
-        for (const message of messages) {
-          const msg = message.message as SDKMessage
-          const { input, output, errors } = annotated(message)
+  tracer.startActiveSpan(hook.hook_event_name, (root) => {
+    root.setAttribute("langfuse.session.id", hook.session_id)
 
-          tracer.startActiveSpan(msg.type, (span) => {
-            if (input !== undefined) {
-              span.setAttribute(
-                "langfuse.observation.input",
-                JSON.stringify(input),
-              )
-            }
-            if (output !== undefined) {
-              span.setAttribute(
-                "langfuse.observation.output",
-                JSON.stringify(output),
-              )
-            }
-            if (errors.length > 0) {
-              span.setAttribute("langfuse.observation.level", "ERROR")
-              span.setAttribute(
-                "langfuse.observation.status_message",
-                JSON.stringify(errors.length === 1 ? errors[0] : errors),
-              )
-            }
-            span.end()
-          })
+    for (const message of messages) {
+      const msg = message.message as SDKMessage
+      const { input, output, errors } = annotated(message)
+
+      tracer.startActiveSpan(msg.type, (span) => {
+        if (input !== undefined) {
+          span.setAttribute("langfuse.observation.input", JSON.stringify(input))
         }
-      },
-    ),
-  )
+        if (output !== undefined) {
+          span.setAttribute(
+            "langfuse.observation.output",
+            JSON.stringify(output),
+          )
+        }
+        if (errors.length > 0) {
+          span.setAttribute("langfuse.observation.level", "ERROR")
+          span.setAttribute(
+            "langfuse.observation.status_message",
+            JSON.stringify(errors.length === 1 ? errors[0] : errors),
+          )
+        }
+        span.end()
+      })
+    }
+
+    root.end()
+  })
 
   if (state) {
     state.offset += messages.length
