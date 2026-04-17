@@ -24,6 +24,14 @@ const fetch = ({
 
 - Async over sync when both exist.
 
+- `??` over `||` for nullish coalescing. `||` only for boolean short-circuit.
+
+- No `as` casts. Perform type narrowing instead.
+
+- Only annotate types where not inferable. Do keep annotations on function signatures.
+
+- `const` over `let`. Restructure with ternary destructuring, `.entries()`, or intermediate expressions to avoid mutation.
+
 - `import type` for type-only imports.
 
 - Modern builtins:
