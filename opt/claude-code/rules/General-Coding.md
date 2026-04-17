@@ -24,6 +24,8 @@
 
 - Lazy over eager; generators and streams over collections.
 
+- Always brace `if`/`else`/loop bodies. No single-line braceless forms in any language that supports blocks.
+
 ## Workflow
 
 - Start LSPs for the relevant languages before writing or changing code.

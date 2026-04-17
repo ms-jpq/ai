@@ -53,8 +53,6 @@ case "$VARIABLE" in
 esac
 ```
 
-- `if [[ ... ]]; then exit; fi` — not `[[ ... ]] || exit` or `[[ ... ]] && exit`.
-
 - No functions or traps — these make error propagation harder.
 
 - Null bytes as delimiters where possible — `find ... -print0 | xargs --null ...`

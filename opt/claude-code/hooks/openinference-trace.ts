@@ -34,8 +34,9 @@ type Message = SessionMessage & {
   timestamp: string
 }
 type Role = SessionMessage["type"]
+type Slot = "input" | "output" | "error"
 type Extracted = {
-  type: "input" | "output" | "error"
+  type: Slot
   kind: OpenInferenceSpanKind
   value: unknown
 }
@@ -430,7 +431,30 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
   }
 }
 
-const EMPTY = new Set<unknown>([undefined, null, ""])
+const isEmpty = (v: unknown): boolean => {
+  if (v === undefined || v === null || v === "") {
+    return true
+  }
+  if (Array.isArray(v)) {
+    return v.every(isEmpty)
+  }
+  if (typeof v === "object") {
+    return Object.values(v).every(isEmpty)
+  }
+  return false
+}
+
+const VALUE_KEY = {
+  input: SemanticConventions.INPUT_VALUE,
+  output: SemanticConventions.OUTPUT_VALUE,
+  error: SemanticConventions.OUTPUT_VALUE,
+} as const satisfies Record<Extracted["type"], string>
+
+const MIME_KEY = {
+  input: SemanticConventions.INPUT_MIME_TYPE,
+  output: SemanticConventions.OUTPUT_MIME_TYPE,
+  error: SemanticConventions.OUTPUT_MIME_TYPE,
+} as const satisfies Record<Extracted["type"], string>
 
 const main = async (): Promise<void> => {
   const config = conf()
@@ -474,7 +498,7 @@ const main = async (): Promise<void> => {
   for (const [i, message] of messages.entries()) {
     const blocks = contents(message)
       .map((b) => extract(message.type, b))
-      .filter((b): b is Extracted => b !== undefined && !EMPTY.has(b.value))
+      .filter((b): b is Extracted => b !== undefined && !isEmpty(b.value))
       .toArray()
     const startTime = new Date(message.timestamp).getTime()
 
@@ -482,35 +506,14 @@ const main = async (): Promise<void> => {
       using span = defer(
         tracer.startSpan(`${traceName}: ${i}.${j}`, { startTime, attributes }),
       )
-      span.span.setAttribute(
-        SemanticConventions.OPENINFERENCE_SPAN_KIND,
-        block.kind,
-      )
-
-      const value = JSON.stringify(block.value)
-      switch (block.type) {
-        case "input":
-          span.span.setAttributes({
-            [SemanticConventions.INPUT_VALUE]: value,
-            [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
-          })
-          break
-        case "output":
-          span.span.setAttributes({
-            [SemanticConventions.OUTPUT_VALUE]: value,
-            [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-          })
-          break
-        case "error":
-          span.span.setStatus({ code: SpanStatusCode.ERROR })
-          span.span.setAttributes({
-            [SemanticConventions.OUTPUT_VALUE]: value,
-            [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-          })
-          break
-        default:
-          fail(block satisfies never)
+      if (block.type === "error") {
+        span.span.setStatus({ code: SpanStatusCode.ERROR })
       }
+      span.span.setAttributes({
+        [MIME_KEY[block.type]]: MimeType.JSON,
+        [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
+        [VALUE_KEY[block.type]]: JSON.stringify(block.value),
+      })
     }
   }
 
