@@ -1,10 +1,6 @@
 #!/usr/bin/env -S -- node
 
-import type {
-  HookInput,
-  SDKMessage,
-  SessionMessage,
-} from "@anthropic-ai/claude-agent-sdk"
+import type { HookInput, SessionMessage } from "@anthropic-ai/claude-agent-sdk"
 import {
   getSessionMessages,
   getSubagentMessages,
@@ -110,20 +106,15 @@ const provider = (config: Conf) => {
 
 type Block = string | BetaContentBlock | ContentBlockParam
 
-const contents = function* (message: SessionMessage): IteratorObject<Block> {
-  const msg = message.message as SDKMessage
-  switch (msg.type) {
-    case "assistant":
-      yield* msg.message.content
-      break
-    case "user":
-      if (typeof msg.message.content === "string") {
-        yield msg.message.content
-      }
-      yield* msg.message.content
-      break
-    default:
-      break
+const contents = function* ({
+  message,
+}: SessionMessage): IteratorObject<Block> {
+  const msg = message as { content: string | Block[] }
+
+  if (typeof msg.content === "string") {
+    yield msg.content
+  } else {
+    yield* msg.content
   }
 
   return
@@ -276,6 +267,7 @@ const annotated = (message: SessionMessage) => {
 
   for (const block of contents(message)) {
     const extracted = extract(block)
+
     if (!extracted) {
       continue
     }
@@ -351,10 +343,9 @@ const main = async () => {
     root.setAttribute("langfuse.session.id", hook.session_id)
 
     for (const message of messages) {
-      const msg = message.message as SDKMessage
       const { input, output, errors } = annotated(message)
 
-      tracer.startActiveSpan(msg.type, (span) => {
+      tracer.startActiveSpan(message.type, (span) => {
         if (input !== undefined) {
           span.setAttribute("langfuse.observation.input", JSON.stringify(input))
         }
