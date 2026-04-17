@@ -8,7 +8,7 @@ import {
 import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
 import { LangfuseSpanProcessor } from "@langfuse/otel"
-import { propagateAttributes, startObservation } from "@langfuse/tracing"
+import { propagateAttributes } from "@langfuse/tracing"
 import { NodeTracerProvider } from "@opentelemetry/sdk-trace-node"
 import { fail, ok } from "node:assert/strict"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -63,9 +63,9 @@ const hookInput = async (): Promise<HookInput | undefined> => {
 }
 
 const openState = async (
-  sessionId: string,
+  key: string,
 ): Promise<AsyncDisposable & { offset: number }> => {
-  const path = resolve(SESSIONS_DIR, `${sessionId}.langfuse.json`)
+  const path = resolve(SESSIONS_DIR, `${key}.langfuse.json`)
   const state = await (async () => {
     try {
       const offset = Number(await readFile(path, "utf-8"))
@@ -281,7 +281,12 @@ const annotated = (message: SessionMessage) => {
   const blocks = contents(message)
     .map((b) => extract(message.type, b))
     .filter((b): b is Extracted => b !== undefined)
-  return Object.groupBy(blocks, (b) => b.type)
+  const group = Map.groupBy(blocks, (b) => b.type)
+  const gm = group
+    .entries()
+    .map(([k, v]) => [k, jsonValues(v)] as const)
+    .filter(([, v]) => v)
+  return new Map(gm)
 }
 
 const main = async () => {
@@ -298,10 +303,13 @@ const main = async () => {
   using _ = timed(`${hook.hook_event_name} (session=${hook.session_id})`)
 
   const isSub = hook.hook_event_name === "SubagentStop"
-  await using state = isSub ? undefined : await openState(hook.session_id)
+  const stateKey = isSub
+    ? `${hook.session_id}.${hook.agent_id}`
+    : hook.session_id
+  await using state = await openState(stateKey)
   await using otel = provider(config)
 
-  const opts = { offset: state?.offset }
+  const opts = { offset: state.offset }
   const messages = await (isSub
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
     : getSessionMessages(hook.session_id, opts))
@@ -317,41 +325,40 @@ const main = async () => {
       tags: ["claude-code"],
     },
     () => {
-      using _ = defer(startObservation(hook.hook_event_name))
+      tracer.startActiveSpan(hook.hook_event_name, (root) => {
+        using _ = { [Symbol.dispose]: () => root.end() }
 
-      for (const [i, message] of messages.entries()) {
-        const { input = [], output = [], error = [] } = annotated(message)
-        if (!(input.length + output.length + error.length)) {
-          continue
+        for (const [i, message] of messages.entries()) {
+          const map = annotated(message)
+          const {
+            input = "",
+            output = "",
+            error = "",
+          } = Object.fromEntries(map)
+          if (!(input + output + error)) {
+            continue
+          }
+
+          using msg = defer(tracer.startSpan(String(i)))
+
+          if (input) {
+            msg.span.setAttribute("langfuse.observation.input", input)
+          }
+
+          if (output) {
+            msg.span.setAttribute("langfuse.observation.output", output)
+          }
+
+          if (error) {
+            msg.span.setAttribute("langfuse.observation.output", error)
+            msg.span.setAttribute("langfuse.observation.level", "ERROR")
+          }
         }
-
-        using msg = defer(tracer.startSpan(String(i)))
-
-        if (input.length) {
-          msg.span.setAttribute("langfuse.observation.input", jsonValues(input))
-        }
-
-        if (output.length) {
-          msg.span.setAttribute(
-            "langfuse.observation.output",
-            jsonValues(output),
-          )
-        }
-
-        if (error.length) {
-          msg.span.setAttribute(
-            "langfuse.observation.output",
-            jsonValues(error),
-          )
-          msg.span.setAttribute("langfuse.observation.level", "ERROR")
-        }
-      }
+      })
     },
   )
 
-  if (state) {
-    state.offset += messages.length
-  }
+  state.offset += messages.length
 }
 
 await main()
