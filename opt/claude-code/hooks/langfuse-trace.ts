@@ -120,7 +120,7 @@ const readConfig = (): Config | null => {
 const readPayload = async () => {
   const data = await text(stdin)
   if (!data.trim()) return null
-  return JSON.parse(data) as BaseHookInput
+  return JSON.parse(data) as BaseHookInput & { hook_event_name?: string }
 }
 
 // ── State ────────────────────────────────────────────
@@ -465,9 +465,10 @@ const main = async () => {
   const payload = await readPayload()
   if (!payload) return 0
 
-  using _ = timed(
-    `${payload.hook_event_name.padEnd("PostToolUseFailure".length)} (session=${payload.session_id})`,
+  const event = (payload.hook_event_name ?? "unknown").padEnd(
+    "PostToolUseFailure".length,
   )
+  using _ = timed(`${event} (session=${payload.session_id})`)
   await using __ = createProvider(config)
 
   await using state = await openState(payload.session_id)
