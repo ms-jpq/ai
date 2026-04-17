@@ -12,6 +12,7 @@ import {
   OpenInferenceSpanKind,
   SemanticConventions,
 } from "@arizeai/openinference-semantic-conventions"
+import type { Link } from "@opentelemetry/api"
 import { SpanStatusCode } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
@@ -495,7 +496,6 @@ const main = async (): Promise<void> => {
     "langfuse.trace.name": traceName,
   }
 
-  // TODO: wrap each message's blocks in a parent span so they group as a tree.
   for (const [i, message] of messages.entries()) {
     const startTime = new Date(message.timestamp).getTime()
     const blocks = contents(message)
@@ -503,14 +503,22 @@ const main = async (): Promise<void> => {
       .filter((b): b is Extracted => b !== undefined && !isEmpty(b.value))
       .toArray()
 
+    let prev: Link | undefined
     for (const [j, block] of blocks.entries()) {
       using span = defer(
-        tracer.startSpan(`${traceName}: ${i}.${j}`, { startTime, attributes }),
+        tracer.startSpan(`${traceName}: ${i}.${j}`, {
+          startTime,
+          attributes,
+          links: prev ? [prev] : [],
+        }),
       )
+      prev = { context: span.span.spanContext() }
+
       if (block.type === "error") {
         span.span.setStatus({ code: SpanStatusCode.ERROR })
       }
       span.span.setAttributes({
+        "message.uuid": message.uuid,
         [MIME_KEY[block.type]]: MimeType.JSON,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
         [VALUE_KEY[block.type]]: JSON.stringify(block.value),
