@@ -488,7 +488,6 @@ const main = async (): Promise<void> => {
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
-  const traceName = `[${hook.session_id}] - ${hook.hook_event_name}`
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
     [SemanticConventions.SESSION_ID]: hook.session_id,
@@ -497,6 +496,7 @@ const main = async (): Promise<void> => {
 
   for (const [i, message] of messages.entries()) {
     const startTime = new Date(message.timestamp).getTime()
+    const traceName = `[${hook.session_id}] ${message.type} - ${state.offset + i}`
     const blocks = contents(message)
       .map((b) => extract(message.type, b))
       .filter((b): b is Extracted => b !== undefined && !isEmpty(b.value))
@@ -505,7 +505,7 @@ const main = async (): Promise<void> => {
     let prev: Link | undefined
     for (const [j, block] of blocks.entries()) {
       using current = defer(
-        tracer.startSpan(`${traceName}: ${i}.${j}`, {
+        tracer.startSpan(`${traceName}:${j}`, {
           startTime,
           attributes,
           links: prev ? [prev] : [],
