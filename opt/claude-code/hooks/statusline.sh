@@ -5,6 +5,9 @@ set -o pipefail
 # https://code.claude.com/docs/en/statusline
 
 ######################################
+OSC8=$'\033]8;;'
+ST=$'\033'"\\"
+
 RESET=$'\033[0m'
 DIM=$'\033[2m'
 BOLD=$'\033[1m'
@@ -30,6 +33,16 @@ CTX_SIZE="$(jq -e --raw-output '.context_window.context_window_size // 0' <<< "$
 CTX_PCT="$(jq -e --raw-output '.context_window.used_percentage // 0' <<< "$JSON" | cut -d. -f1)"
 WD_CURR="$(jq -e --raw-output '.workspace.current_dir' <<< "$JSON")"
 WD_PROJ="$(jq -e --raw-output '.workspace.project_dir' <<< "$JSON")"
+######################################
+
+SEP="${BOLD}⏐${RESET}"
+
+######################################
+TRACE_INFO=''
+if [[ -n ${LANGFUSE_BASE_URL:-} && -n ${LANGFUSE_PROJECT:-} && -n $SESSION_ID ]]; then
+  TRACE_URL="${LANGFUSE_BASE_URL}/project/${LANGFUSE_PROJECT}/sessions/${SESSION_ID}"
+  TRACE_INFO="${BOLD}${OSC8}${TRACE_URL}${ST}⌬tel${OSC8}${ST}${ST}${RESET} ${SEP} "
+fi
 ######################################
 
 ######################################
@@ -87,18 +100,6 @@ if ((LINES_REMOVED > 0)); then
     LINES_DELTA+=" "
   fi
   LINES_DELTA+="${RED}-${LINES_REMOVED}${RESET}"
-fi
-######################################
-
-SEP="${BOLD}⏐${RESET}"
-
-######################################
-TRACE_INFO=''
-if [[ -n ${LANGFUSE_BASE_URL:-} && -n ${LANGFUSE_PROJECT:-} && -n $SESSION_ID ]]; then
-  TRACE_URL="${LANGFUSE_BASE_URL}/project/${LANGFUSE_PROJECT}/sessions/${SESSION_ID}"
-  OSC8_START=$'\033]8;;'"${TRACE_URL}"$'\033\\'
-  OSC8_END=$'\033]8;;\033\\'
-  TRACE_INFO="${OSC8_START}${BOLD}⌬tel${RESET}${OSC8_END} ${SEP} "
 fi
 ######################################
 
