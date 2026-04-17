@@ -493,7 +493,6 @@ const main = async (): Promise<void> => {
     [SemanticConventions.USER_ID]: userId,
     [SemanticConventions.SESSION_ID]: hook.session_id,
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
-    "langfuse.trace.name": traceName,
   }
 
   for (const [i, message] of messages.entries()) {
