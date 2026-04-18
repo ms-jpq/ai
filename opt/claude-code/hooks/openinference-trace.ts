@@ -163,10 +163,7 @@ const contents = function* ({ message }: Message): IteratorObject<Block> {
   return
 }
 
-const extract = (
-  role: SessionMessage["type"],
-  block: Block,
-): Extracted | undefined => {
+const extract = (role: SessionMessage["type"], block: Block): Extracted => {
   const side =
     role === "assistant"
       ? SemanticConventions.OUTPUT_VALUE
@@ -539,7 +536,7 @@ const emit = ({
     const traceName = `[${sessionId}] ${message.type} - ${offset + i}`
     const blocks = contents(message)
       .map((b) => extract(message.type, b))
-      .filter((b): b is Extracted => b !== undefined && !isEmpty(b.value))
+      .filter((b) => !isEmpty(b.value))
       .toArray()
 
     let prev: Link | undefined
@@ -560,6 +557,7 @@ const emit = ({
         block.type === SemanticConventions.INPUT_VALUE
           ? SemanticConventions.INPUT_MIME_TYPE
           : SemanticConventions.OUTPUT_MIME_TYPE
+
       current.span.setAttributes({
         "message.uuid": message.uuid,
         ...(message.parentUuid && {
