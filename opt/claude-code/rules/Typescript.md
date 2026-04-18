@@ -53,3 +53,5 @@ const fetch = ({
   - `finished(stream)` from `node:stream/promises` — await stream end.
   - `once(emitter, event)` from `node:events` — event to promise.
   - `Readable.from(asyncIterable)` — async iterable to stream.
+
+- `tsc` over `npx tsc`.
