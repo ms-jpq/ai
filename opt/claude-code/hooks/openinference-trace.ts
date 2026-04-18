@@ -550,19 +550,20 @@ const extractContent = function* (
 const correlatedBlocks = function* (
   extracted: IteratorObject<[TranscriptMessage, ExtractedBlock]>,
 ): IteratorObject<Correlated> {
-  const items = extracted.toArray()
+  const blocks = extracted.toArray()
 
-  const acc = new Map<string, ExtractedBlock>()
-  for (const [, block] of items) {
+  const acc = new Map<string, [TranscriptMessage, ExtractedBlock]>()
+  for (const entry of blocks) {
+    const [, block] = entry
     if (
       block.correlationId !== undefined &&
       block.type === SemanticConventions.OUTPUT_VALUE
     ) {
-      acc.set(block.correlationId, block)
+      acc.set(block.correlationId, entry)
     }
   }
 
-  for (const [message, block] of items) {
+  for (const [message, block] of blocks) {
     const id = block.correlationId
     if (id === undefined) {
       yield {
@@ -591,9 +592,11 @@ const correlatedBlocks = function* (
       continue
     }
     acc.delete(id)
+    const [mateMessage, mateBlock] = mate
     yield {
       message,
-      blocks: [block, mate],
+      blocks: [block, mateBlock],
+      endTime: mateMessage[META].timestamp,
     }
   }
 
@@ -612,7 +615,11 @@ const emitSpans = ({
   prev?: Link
 }): Link => {
   const {
-    message,
+    message: {
+      session_id,
+      type,
+      [META]: { timestamp, debugExpr },
+    },
     blocks,
     blocks: [{ kind }],
     endTime,
@@ -620,12 +627,12 @@ const emitSpans = ({
 
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
-    [SemanticConventions.SESSION_ID]: message.session_id,
+    [SemanticConventions.SESSION_ID]: session_id,
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
-    "langfuse.observation.metadata.transcript_jq": message[META].debugExpr,
+    "langfuse.observation.metadata.transcript_jq": debugExpr,
   }
-  const span = tracer.startSpan(`[${message.session_id}] ${message.type}`, {
-    startTime: message[META].timestamp.getTime(),
+  const span = tracer.startSpan(`[${session_id}] ${type}`, {
+    startTime: timestamp.getTime(),
     attributes,
     links: prev ? [prev] : [],
   })
