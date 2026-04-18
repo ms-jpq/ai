@@ -40,6 +40,7 @@ type Extracted = {
   type: Slot
   kind: OpenInferenceSpanKind
   value: unknown
+  correlationId?: string
 }
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
@@ -241,6 +242,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       return {
         type: "output",
         kind: OpenInferenceSpanKind.TOOL,
+        correlationId: block.id,
         value: {
           name: block.name,
           input: block.input,
@@ -253,6 +255,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       return {
         type: "output",
         kind: OpenInferenceSpanKind.TOOL,
+        correlationId: block.id,
         value: { name: block.name, input: block.input },
       }
 
@@ -264,12 +267,14 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "error",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: block.content.error_code,
           }
         case "encrypted_code_execution_result":
           return {
             type: "output",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
@@ -280,6 +285,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "output",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
@@ -291,19 +297,69 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       }
 
     case "mcp_tool_result":
-    case "tool_result":
+    case "tool_result": {
+      const value = (() => {
+        const { content } = block
+        if (content === undefined || typeof content === "string") {
+          return content
+        }
+        return content.map((item) => {
+          switch (item.type) {
+            case "text":
+              return item.text
+            case "image":
+              switch (item.source.type) {
+                case "base64":
+                  return { media_type: item.source.media_type }
+                case "url":
+                  return { url: item.source.url }
+                default:
+                  fail(item.source satisfies never)
+              }
+            case "document":
+              switch (item.source.type) {
+                case "base64":
+                case "text":
+                  return {
+                    context: item.context,
+                    media_type: item.source.media_type,
+                    title: item.title,
+                  }
+                case "url":
+                  return {
+                    context: item.context,
+                    title: item.title,
+                    url: item.source.url,
+                  }
+                case "content":
+                  return { context: item.context, title: item.title }
+                default:
+                  fail(item.source satisfies never)
+              }
+            case "search_result":
+              return { source: item.source, title: item.title }
+            case "tool_reference":
+              return item.tool_name
+            default:
+              fail(item satisfies never)
+          }
+        })
+      })()
       if (block.is_error) {
         return {
           type: "error",
           kind: OpenInferenceSpanKind.TOOL,
-          value: block.content,
+          correlationId: block.tool_use_id,
+          value,
         }
       }
       return {
         type: "output",
         kind: OpenInferenceSpanKind.TOOL,
-        value: block.content,
+        correlationId: block.tool_use_id,
+        value,
       }
+    }
 
     case "search_result":
       return {
@@ -322,6 +378,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "error",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: {
               error_code: block.content.error_code,
               error_message: block.content.error_message,
@@ -331,6 +388,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: side,
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: {
               content: block.content.content,
               file_type: block.content.file_type,
@@ -343,12 +401,14 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "output",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: { is_file_update: block.content.is_file_update },
           }
         case "text_editor_code_execution_str_replace_result":
           return {
             type: "output",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: {
               lines: block.content.lines,
               new_lines: block.content.new_lines,
@@ -368,6 +428,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "error",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: rest,
           }
         }
@@ -375,6 +436,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "output",
             kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
             value: block.content.tool_references,
           }
         default:
@@ -386,6 +448,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         return {
           type: "output",
           kind: OpenInferenceSpanKind.RETRIEVER,
+          correlationId: block.tool_use_id,
           value: block.content.map((r) => ({
             page_age: r.page_age,
             title: r.title,
@@ -396,6 +459,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       return {
         type: "error",
         kind: OpenInferenceSpanKind.RETRIEVER,
+        correlationId: block.tool_use_id,
         value: block.content.error_code,
       }
 
@@ -405,12 +469,14 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           return {
             type: "error",
             kind: OpenInferenceSpanKind.RETRIEVER,
+            correlationId: block.tool_use_id,
             value: block.content.error_code,
           }
         case "web_fetch_result":
           return {
             type: "output",
             kind: OpenInferenceSpanKind.RETRIEVER,
+            correlationId: block.tool_use_id,
             value: {
               retrieved_at: block.content.retrieved_at,
               url: block.content.url,
