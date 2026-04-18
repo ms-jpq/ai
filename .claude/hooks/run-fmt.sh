@@ -12,6 +12,7 @@ case "$FILE_PATH" in
   black --quiet -- "$FILE_PATH" || exit 2
   ;;
 *.md | *.yml | *.ts)
+  FILE_PATH="$(realpath -- "$FILE_PATH")" || exit 2
   node_modules/.bin/prettier --write -- "$FILE_PATH" || exit 2
   ;;
 *)
