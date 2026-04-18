@@ -5,8 +5,12 @@ import {
   getSessionMessages,
   getSubagentMessages,
 } from "@anthropic-ai/claude-agent-sdk"
-import type { BetaContentBlock } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
-import type { ContentBlockParam } from "@anthropic-ai/sdk/resources/messages/messages.js"
+import type {
+  BetaContentBlock,
+  BetaContentBlockParam,
+  BetaMessage,
+  BetaMessageParam,
+} from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import {
   MimeType,
   OpenInferenceSpanKind,
@@ -30,10 +34,10 @@ import { promisify } from "node:util"
 
 type Conf = Readonly<{ auth: string; host: string }>
 
-type Block = string | BetaContentBlock | ContentBlockParam
-type Message = Readonly<
+type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
+type TranscriptMessage = Readonly<
   SessionMessage & {
-    message: { content: string | readonly Block[] }
+    message: BetaMessage | BetaMessageParam
     timestamp: string
   }
 >
@@ -149,7 +153,9 @@ const defer = <T extends { end: () => void }>(
   },
 })
 
-const contents = function* ({ message }: Message): IteratorObject<Block> {
+const contents = function* ({
+  message,
+}: TranscriptMessage): IteratorObject<MessageBlock> {
   if (!message || typeof message !== "object") {
     return
   }
@@ -166,7 +172,7 @@ const contents = function* ({ message }: Message): IteratorObject<Block> {
 
 const extract = (
   role: SessionMessage["type"],
-  block: Block,
+  block: MessageBlock,
 ): ExtractedBlock => {
   const side =
     role === "assistant"
@@ -212,6 +218,12 @@ const extract = (
             kind: OpenInferenceSpanKind.LLM,
             value: { url: block.source.url },
           }
+        case "file":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.LLM,
+            value: { file_id: block.source.file_id },
+          }
         default:
           fail(block.source satisfies never)
       }
@@ -253,6 +265,8 @@ const extract = (
                   return { media_type: item.source.media_type }
                 case "url":
                   return { url: item.source.url }
+                case "file":
+                  return { file_id: item.source.file_id }
                 default:
                   fail(item.source satisfies never)
               }
@@ -273,6 +287,12 @@ const extract = (
                   }
                 case "content":
                   return { context: item.context, title: item.title }
+                case "file":
+                  return {
+                    context: item.context,
+                    file_id: item.source.file_id,
+                    title: item.title,
+                  }
                 default:
                   fail(item.source satisfies never)
               }
@@ -434,6 +454,16 @@ const extract = (
             kind: OpenInferenceSpanKind.RETRIEVER,
             value: { context: block.context, title: block.title },
           }
+        case "file":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: {
+              context: block.context,
+              file_id: block.source.file_id,
+              title: block.title,
+            },
+          }
         default:
           fail(block.source satisfies never)
       }
@@ -504,8 +534,8 @@ const extract = (
 }
 
 const extractAll = function* (
-  messages: Message[],
-): IteratorObject<[Message, ExtractedBlock]> {
+  messages: TranscriptMessage[],
+): IteratorObject<[TranscriptMessage, ExtractedBlock]> {
   for (const message of messages) {
     for (const block of contents(message)) {
       const extracted = extract(message.type, block)
@@ -527,7 +557,7 @@ const emit = ({
   tracer: Tracer
   userId: string
   sessionId: string
-  message: Message
+  message: TranscriptMessage
   block: ExtractedBlock
   prev?: Link
 }): Link => {
@@ -586,7 +616,7 @@ const main = async (): Promise<void> => {
   const opts = { offset: state.offset }
   const messages = (await (isSub
     ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
-    : getSessionMessages(hook.session_id, opts))) as Message[]
+    : getSessionMessages(hook.session_id, opts))) as TranscriptMessage[]
 
   log({ level: "debug", msg: `messages: ${messages.length}` })
 
