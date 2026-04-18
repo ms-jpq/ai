@@ -35,9 +35,12 @@ type Message = SessionMessage & {
   timestamp: string
 }
 type Role = SessionMessage["type"]
-type Slot = "input" | "output" | "error"
+
 type Extracted = {
-  type: Slot
+  type:
+    | typeof SemanticConventions.INPUT_VALUE
+    | typeof SemanticConventions.OUTPUT_VALUE
+  error?: true
   kind: OpenInferenceSpanKind
   value: unknown
   correlationId?: string
@@ -158,7 +161,10 @@ const contents = function* ({ message }: Message): IteratorObject<Block> {
 }
 
 const extract = (role: Role, block: Block): Extracted | undefined => {
-  const side = role === "assistant" ? "output" : "input"
+  const side =
+    role === "assistant"
+      ? SemanticConventions.OUTPUT_VALUE
+      : SemanticConventions.INPUT_VALUE
 
   if (typeof block === "string") {
     return { type: side, kind: OpenInferenceSpanKind.LLM, value: block }
@@ -240,7 +246,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
 
     case "mcp_tool_use":
       return {
-        type: "output",
+        type: SemanticConventions.OUTPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
         value: {
@@ -253,7 +259,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "server_tool_use":
     case "tool_use":
       return {
-        type: "output",
+        type: SemanticConventions.OUTPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
         value: { name: block.name, input: block.input },
@@ -265,14 +271,15 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "bash_code_execution_tool_result_error":
         case "code_execution_tool_result_error":
           return {
-            type: "error",
+            type: SemanticConventions.OUTPUT_VALUE,
+            error: true,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: block.content.error_code,
           }
         case "encrypted_code_execution_result":
           return {
-            type: "output",
+            type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: {
@@ -283,7 +290,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "bash_code_execution_result":
         case "code_execution_result":
           return {
-            type: "output",
+            type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: {
@@ -347,14 +354,15 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       })()
       if (block.is_error) {
         return {
-          type: "error",
+          type: SemanticConventions.OUTPUT_VALUE,
+          error: true,
           kind: OpenInferenceSpanKind.TOOL,
           correlationId: block.tool_use_id,
           value,
         }
       }
       return {
-        type: "output",
+        type: SemanticConventions.OUTPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.tool_use_id,
         value,
@@ -363,7 +371,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
 
     case "search_result":
       return {
-        type: "output",
+        type: SemanticConventions.OUTPUT_VALUE,
         kind: OpenInferenceSpanKind.RETRIEVER,
         value: {
           content: block.content,
@@ -376,7 +384,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       switch (block.content.type) {
         case "text_editor_code_execution_tool_result_error":
           return {
-            type: "error",
+            type: SemanticConventions.OUTPUT_VALUE,
+            error: true,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: {
@@ -399,14 +408,14 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           }
         case "text_editor_code_execution_create_result":
           return {
-            type: "output",
+            type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: { is_file_update: block.content.is_file_update },
           }
         case "text_editor_code_execution_str_replace_result":
           return {
-            type: "output",
+            type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: {
@@ -426,7 +435,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         case "tool_search_tool_result_error": {
           const { type: _, ...rest } = block.content
           return {
-            type: "error",
+            type: SemanticConventions.OUTPUT_VALUE,
+            error: true,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: rest,
@@ -434,7 +444,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         }
         case "tool_search_tool_search_result":
           return {
-            type: "output",
+            type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: block.content.tool_references,
@@ -446,7 +456,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "web_search_tool_result":
       if (Array.isArray(block.content)) {
         return {
-          type: "output",
+          type: SemanticConventions.OUTPUT_VALUE,
           kind: OpenInferenceSpanKind.RETRIEVER,
           correlationId: block.tool_use_id,
           value: block.content.map((r) => ({
@@ -457,7 +467,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         }
       }
       return {
-        type: "error",
+        type: SemanticConventions.OUTPUT_VALUE,
+        error: true,
         kind: OpenInferenceSpanKind.RETRIEVER,
         correlationId: block.tool_use_id,
         value: block.content.error_code,
@@ -467,14 +478,15 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
           return {
-            type: "error",
+            type: SemanticConventions.OUTPUT_VALUE,
+            error: true,
             kind: OpenInferenceSpanKind.RETRIEVER,
             correlationId: block.tool_use_id,
             value: block.content.error_code,
           }
         case "web_fetch_result":
           return {
-            type: "output",
+            type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.RETRIEVER,
             correlationId: block.tool_use_id,
             value: {
@@ -510,18 +522,6 @@ const isEmpty = (v: unknown): boolean => {
   }
   return false
 }
-
-const VALUE_KEY = {
-  input: SemanticConventions.INPUT_VALUE,
-  output: SemanticConventions.OUTPUT_VALUE,
-  error: SemanticConventions.OUTPUT_VALUE,
-} as const satisfies Record<Extracted["type"], string>
-
-const MIME_KEY = {
-  input: SemanticConventions.INPUT_MIME_TYPE,
-  output: SemanticConventions.OUTPUT_MIME_TYPE,
-  error: SemanticConventions.OUTPUT_MIME_TYPE,
-} as const satisfies Record<Extracted["type"], string>
 
 const main = async (): Promise<void> => {
   const config = conf()
@@ -579,14 +579,18 @@ const main = async (): Promise<void> => {
       )
       prev = { context: current.span.spanContext() }
 
-      if (block.type === "error") {
+      if (block.error) {
         current.span.setStatus({ code: SpanStatusCode.ERROR })
       }
+      const mimeKey =
+        block.type === SemanticConventions.INPUT_VALUE
+          ? SemanticConventions.INPUT_MIME_TYPE
+          : SemanticConventions.OUTPUT_MIME_TYPE
       current.span.setAttributes({
         "message.uuid": message.uuid,
-        [MIME_KEY[block.type]]: MimeType.JSON,
+        [mimeKey]: MimeType.JSON,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
-        [VALUE_KEY[block.type]]: JSON.stringify(block.value),
+        [block.type]: JSON.stringify(block.value),
       })
     }
   }
