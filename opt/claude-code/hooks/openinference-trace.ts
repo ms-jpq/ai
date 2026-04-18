@@ -28,15 +28,18 @@ import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
-type Conf = { auth: string; host: string }
-type Block = string | BetaContentBlock | ContentBlockParam
-type Message = SessionMessage & {
-  message: { content: string | Block[] }
-  timestamp: string
-}
-type Role = SessionMessage["type"]
+type Conf = Readonly<{ auth: string; host: string }>
 
-type Extracted = {
+type Block = string | BetaContentBlock | ContentBlockParam
+type Message = Readonly<
+  SessionMessage & {
+    message: { content: string | Block[] }
+    parentUuid?: string
+    timestamp: string
+  }
+>
+
+type Extracted = Readonly<{
   type:
     | typeof SemanticConventions.INPUT_VALUE
     | typeof SemanticConventions.OUTPUT_VALUE
@@ -44,7 +47,7 @@ type Extracted = {
   kind: OpenInferenceSpanKind
   value: unknown
   correlationId?: string
-}
+}>
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -160,7 +163,10 @@ const contents = function* ({ message }: Message): IteratorObject<Block> {
   return
 }
 
-const extract = (role: Role, block: Block): Extracted | undefined => {
+const extract = (
+  role: SessionMessage["type"],
+  block: Block,
+): Extracted | undefined => {
   const side =
     role === "assistant"
       ? SemanticConventions.OUTPUT_VALUE
@@ -435,7 +441,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         type: SemanticConventions.OUTPUT_VALUE,
         kind: OpenInferenceSpanKind.RETRIEVER,
         value: {
-          content: block.content,
+          content: block.content.map((item) => item.text),
           source: block.source,
           title: block.title,
         },
@@ -556,6 +562,12 @@ const emit = ({
           : SemanticConventions.OUTPUT_MIME_TYPE
       current.span.setAttributes({
         "message.uuid": message.uuid,
+        ...(message.parentUuid && {
+          "message.parent_uuid": message.parentUuid,
+        }),
+        ...(block.correlationId && {
+          "tool_call.correlation_id": block.correlationId,
+        }),
         [mimeKey]: MimeType.JSON,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
         [block.type]: JSON.stringify(block.value),
