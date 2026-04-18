@@ -246,7 +246,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
 
     case "mcp_tool_use":
       return {
-        type: SemanticConventions.OUTPUT_VALUE,
+        type: SemanticConventions.INPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
         value: {
@@ -259,7 +259,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
     case "server_tool_use":
     case "tool_use":
       return {
-        type: SemanticConventions.OUTPUT_VALUE,
+        type: SemanticConventions.INPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
         value: { name: block.name, input: block.input },
@@ -303,8 +303,8 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           fail(block.content satisfies never)
       }
 
-    case "mcp_tool_result":
-    case "tool_result": {
+    case "tool_result":
+    case "mcp_tool_result": {
       const value = (() => {
         const { content } = block
         if (content === undefined || typeof content === "string") {
@@ -387,7 +387,7 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           }
         case "text_editor_code_execution_view_result":
           return {
-            type: side,
+            type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
             value: {
