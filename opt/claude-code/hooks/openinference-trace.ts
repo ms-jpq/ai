@@ -190,6 +190,9 @@ const extractBlock = (
     case "text":
       return { type: side, kind: OpenInferenceSpanKind.LLM, value: block.text }
     case "thinking":
+      if (!block.thinking) {
+        return undefined
+      }
       return {
         type: side,
         kind: OpenInferenceSpanKind.LLM,
@@ -680,7 +683,7 @@ const parseMessages = async function* (
 
   log({
     level: "debug",
-    msg: `messages: ${messages.length}, startIdx: ${startIdx}, lastUuid: ${lastUuid ?? "(none)"}, found: ${foundIdx >= 0}`,
+    msg: `messages: ${messages.length}, startIdx: ${startIdx}, found: ${foundIdx >= 0}`,
   })
 
   for (const message of messages.values().drop(startIdx)) {
