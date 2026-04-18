@@ -706,18 +706,17 @@ const main = async (): Promise<void> => {
 
   using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
-  const isSub = hook.hook_event_name === "SubagentStop"
-  const stateKey = isSub
-    ? `${hook.session_id}.${hook.agent_id}`
-    : hook.session_id
-
-  const userId = await gitUserName()
+  const stateKey =
+    hook.hook_event_name === "SubagentStop"
+      ? `${hook.session_id}.${hook.agent_id}`
+      : hook.session_id
 
   await using state = await openState(stateKey)
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
 
   const blocks = correlatedBlocks(extractContent(transcriptRows.values()))
 
+  const userId = await gitUserName()
   await using otel = provider(config)
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
