@@ -615,35 +615,29 @@ const emitSpans = ({
   prev?: Link
 }): Link => {
   const {
-    message: {
-      session_id,
-      type,
-      [META]: { timestamp, debugExpr },
-    },
-    blocks,
+    message,
     blocks: [{ kind }],
-    endTime,
   } = correlated
 
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
-    [SemanticConventions.SESSION_ID]: session_id,
+    [SemanticConventions.SESSION_ID]: message.session_id,
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
-    "langfuse.observation.metadata.transcript_jq": debugExpr,
+    "langfuse.observation.metadata.transcript_jq": message[META].debugExpr,
   }
-  const span = tracer.startSpan(`[${session_id}] ${type}`, {
-    startTime: timestamp.getTime(),
+  const span = tracer.startSpan(`[${message.session_id}] ${message.type}`, {
+    startTime: message[META].timestamp.getTime(),
     attributes,
     links: prev ? [prev] : [],
   })
 
-  if (blocks.some((b) => b?.error)) {
+  if (correlated.blocks.some((b) => b?.error)) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
   span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
 
-  for (const block of blocks) {
+  for (const block of correlated.blocks) {
     if (!block) {
       continue
     }
@@ -659,7 +653,7 @@ const emitSpans = ({
     })
   }
 
-  span.end(endTime)
+  span.end(correlated.endTime)
   return { context: span.spanContext() }
 }
 
