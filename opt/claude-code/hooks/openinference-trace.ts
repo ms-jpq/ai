@@ -35,10 +35,16 @@ import { promisify } from "node:util"
 type Conf = Readonly<{ auth: string; host: string }>
 
 type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
+type TranscriptMeta = Readonly<{
+  timestamp: Date
+  offset: number
+  debug_expr: string
+}>
+const META = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
   SessionMessage & {
     message: BetaMessage | BetaMessageParam
-    timestamp: string
+    [META]: TranscriptMeta
   }
 >
 
@@ -595,7 +601,7 @@ const emitSpans = ({
   prev?: Link
 }): Link => {
   const span = tracer.startSpan(`[${sessionId}] ${message.type}`, {
-    startTime: new Date(message.timestamp).getTime(),
+    startTime: message[META].timestamp.getTime(),
     attributes: {
       [SemanticConventions.USER_ID]: userId,
       [SemanticConventions.SESSION_ID]: sessionId,
@@ -627,6 +633,13 @@ const emitSpans = ({
 
   span.end()
   return { context: span.spanContext() }
+}
+
+const parseMessages = async function* ({}: {
+  offset: number
+  agentId: string | undefined
+}): AsyncIteratorObject<TranscriptMessage> {
+  return
 }
 
 const main = async (): Promise<void> => {
