@@ -52,7 +52,7 @@ type ExtractedBlock = Readonly<{
   correlationId?: string
 }>
 
-// type CorrelatedBlock = readonly [ExtractedBlock, ExtractedBlock]
+type CorrelatedBlock = readonly [ExtractedBlock, ExtractedBlock]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -170,7 +170,7 @@ const contents = function* ({
   return
 }
 
-const extract = (
+const extractBlock = (
   role: SessionMessage["type"],
   block: MessageBlock,
 ): ExtractedBlock => {
@@ -533,12 +533,12 @@ const extract = (
   }
 }
 
-const extractAll = function* (
+const extractContent = function* (
   messages: TranscriptMessage[],
 ): IteratorObject<[TranscriptMessage, ExtractedBlock]> {
   for (const message of messages) {
     for (const block of contents(message)) {
-      const extracted = extract(message.type, block)
+      const extracted = extractBlock(message.type, block)
       yield [message, extracted]
     }
   }
@@ -546,7 +546,16 @@ const extractAll = function* (
   return
 }
 
-const emit = ({
+const correlatedBlocks = function* (
+  extracted: Iterable<[TranscriptMessage, ExtractedBlock]>,
+): IteratorObject<[TranscriptMessage, CorrelatedBlock | ExtractedBlock]> {
+  for (const [message, block] of extracted) {
+    yield [message, block]
+  }
+  return
+}
+
+const emitSpans = ({
   tracer,
   userId,
   sessionId,
@@ -558,7 +567,7 @@ const emit = ({
   userId: string
   sessionId: string
   message: TranscriptMessage
-  block: ExtractedBlock
+  block: CorrelatedBlock | ExtractedBlock
   prev?: Link
 }): Link => {
   using current = defer(
@@ -573,20 +582,29 @@ const emit = ({
     }),
   )
 
-  if (block.error) {
+  const parts = Array.isArray(block) ? block : [block]
+  const [part] = parts
+
+  if (parts.some((p) => p.error)) {
     current.span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
-  const mimeKey =
-    block.type === SemanticConventions.INPUT_VALUE
-      ? SemanticConventions.INPUT_MIME_TYPE
-      : SemanticConventions.OUTPUT_MIME_TYPE
+  current.span.setAttribute(
+    SemanticConventions.OPENINFERENCE_SPAN_KIND,
+    part.kind,
+  )
 
-  current.span.setAttributes({
-    [mimeKey]: MimeType.JSON,
-    [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
-    [block.type]: JSON.stringify(block.value),
-  })
+  for (const part of parts) {
+    const mimeKey =
+      part.type === SemanticConventions.INPUT_VALUE
+        ? SemanticConventions.INPUT_MIME_TYPE
+        : SemanticConventions.OUTPUT_MIME_TYPE
+
+    current.span.setAttributes({
+      [mimeKey]: MimeType.JSON,
+      [part.type]: JSON.stringify(part.value),
+    })
+  }
 
   return { context: current.span.spanContext() }
 }
@@ -622,8 +640,8 @@ const main = async (): Promise<void> => {
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
   let prev: Link | undefined
-  for (const [message, block] of extractAll(messages)) {
-    prev = emit({
+  for (const [message, block] of correlatedBlocks(extractContent(messages))) {
+    prev = emitSpans({
       tracer,
       userId,
       sessionId: hook.session_id,
