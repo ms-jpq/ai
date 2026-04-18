@@ -72,9 +72,7 @@ const log = ({
   level: "debug" | "info" | "error"
   msg: string
 }): void => {
-  if (level === "error") {
-    console.error(`[${level}] ${msg}`)
-  }
+  console.error(`[${level}] ${msg}`)
 }
 
 const measure = (label: string): Disposable => {
@@ -601,14 +599,15 @@ const emitSpans = ({
   block: CorrelatedBlock | ExtractedBlock
   prev?: Link
 }): Link => {
+  const attributes = {
+    [SemanticConventions.USER_ID]: userId,
+    [SemanticConventions.SESSION_ID]: sessionId,
+    [SemanticConventions.TAG_TAGS]: ["claude-code"],
+    "langfuse.observation.metadata.transcript_jq": message[META].debugExpr,
+  }
   const span = tracer.startSpan(`[${sessionId}] ${message.type}`, {
     startTime: message[META].timestamp.getTime(),
-    attributes: {
-      [SemanticConventions.USER_ID]: userId,
-      [SemanticConventions.SESSION_ID]: sessionId,
-      [SemanticConventions.TAG_TAGS]: ["claude-code"],
-      "langfuse.observation.metadata.transcript_jq": message[META].debugExpr,
-    },
+    attributes,
     links: prev ? [prev] : [],
   })
 
