@@ -50,6 +50,7 @@ type ExtractedBlock = Readonly<{
   kind: OpenInferenceSpanKind
   value: unknown
   correlationId?: string
+  transcriptJq?: string
 }>
 
 type CorrelatedBlock = readonly [ExtractedBlock, ExtractedBlock]
@@ -143,15 +144,6 @@ const provider = (
     },
   }
 }
-
-const defer = <T extends { end: () => void }>(
-  span: T,
-): Disposable & { span: T } => ({
-  span,
-  [Symbol.dispose]() {
-    span.end()
-  },
-})
 
 const contents = function* ({
   message,
@@ -547,7 +539,7 @@ const extractContent = function* (
 }
 
 const correlatedBlocks = function* (
-  extracted: Iterable<[TranscriptMessage, ExtractedBlock]>,
+  extracted: IteratorObject<[TranscriptMessage, ExtractedBlock]>,
 ): IteratorObject<[TranscriptMessage, CorrelatedBlock | ExtractedBlock]> {
   const items = Array.from(extracted)
 
@@ -602,29 +594,24 @@ const emitSpans = ({
   block: CorrelatedBlock | ExtractedBlock
   prev?: Link
 }): Link => {
-  using current = defer(
-    tracer.startSpan(`[${sessionId}] ${message.type}`, {
-      startTime: new Date(message.timestamp).getTime(),
-      attributes: {
-        [SemanticConventions.USER_ID]: userId,
-        [SemanticConventions.SESSION_ID]: sessionId,
-        [SemanticConventions.TAG_TAGS]: ["claude-code"],
-      },
-      links: prev ? [prev] : [],
-    }),
-  )
+  const span = tracer.startSpan(`[${sessionId}] ${message.type}`, {
+    startTime: new Date(message.timestamp).getTime(),
+    attributes: {
+      [SemanticConventions.USER_ID]: userId,
+      [SemanticConventions.SESSION_ID]: sessionId,
+      [SemanticConventions.TAG_TAGS]: ["claude-code"],
+    },
+    links: prev ? [prev] : [],
+  })
 
   const parts = Array.isArray(block) ? block : [block]
   const [part] = parts
 
   if (parts.some((p) => p.error)) {
-    current.span.setStatus({ code: SpanStatusCode.ERROR })
+    span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
-  current.span.setAttribute(
-    SemanticConventions.OPENINFERENCE_SPAN_KIND,
-    part.kind,
-  )
+  span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, part.kind)
 
   for (const part of parts) {
     const mimeKey =
@@ -632,13 +619,14 @@ const emitSpans = ({
         ? SemanticConventions.INPUT_MIME_TYPE
         : SemanticConventions.OUTPUT_MIME_TYPE
 
-    current.span.setAttributes({
+    span.setAttributes({
       [mimeKey]: MimeType.JSON,
       [part.type]: JSON.stringify(part.value),
     })
   }
 
-  return { context: current.span.spanContext() }
+  span.end()
+  return { context: span.spanContext() }
 }
 
 const main = async (): Promise<void> => {

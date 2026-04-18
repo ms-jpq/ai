@@ -2,7 +2,7 @@
 
 - `const foo = () => {}` over `function foo() {}`.
 
-- `const foo = function*() {}` for generators. `IteratorObject<T>` sync, `AsyncGenerator<T>` async. Explicit `return` at body end.
+- `const foo = function*() {}` for generators. `IteratorObject<T>` sync, `AsyncIteratorObject<T>` async. Explicit `return` at body end.
 
 - `({ ... })` — single params object for multi-argument functions. Inline the type unless shared.
 
