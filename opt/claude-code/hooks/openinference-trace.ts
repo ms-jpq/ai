@@ -163,7 +163,10 @@ const contents = function* ({ message }: Message): IteratorObject<Block> {
   return
 }
 
-const extract = (role: SessionMessage["type"], block: Block): ExtractedBlock => {
+const extract = (
+  role: SessionMessage["type"],
+  block: Block,
+): ExtractedBlock => {
   const side =
     role === "assistant"
       ? SemanticConventions.OUTPUT_VALUE
@@ -512,18 +515,32 @@ const isEmpty = (v: unknown): boolean => {
   return false
 }
 
+const extractAll = function* (
+  messages: Message[],
+): IteratorObject<[Message, ExtractedBlock]> {
+  for (const message of messages) {
+    for (const block of contents(message)) {
+      const extracted = extract(message.type, block)
+      if (isEmpty(extracted.value)) {
+        continue
+      }
+      yield [message, extracted]
+    }
+  }
+
+  return
+}
+
 const emit = ({
   tracer,
   userId,
   sessionId,
-  offset,
-  messages,
+  blocks,
 }: {
   tracer: Tracer
   userId: string
   sessionId: string
-  offset: number
-  messages: Message[]
+  blocks: Iterable<[Message, ExtractedBlock]>
 }): void => {
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
@@ -531,46 +548,39 @@ const emit = ({
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
   }
 
-  for (const [i, message] of messages.entries()) {
+  let prev: Link | undefined
+  for (const [message, block] of blocks) {
     const startTime = new Date(message.timestamp).getTime()
-    const traceName = `[${sessionId}] ${message.type} - ${offset + i}`
-    const blocks = contents(message)
-      .map((b) => extract(message.type, b))
-      .filter((b) => !isEmpty(b.value))
-      .toArray()
+    using current = defer(
+      tracer.startSpan(`[${sessionId}] ${message.type}`, {
+        startTime,
+        attributes,
+        links: prev ? [prev] : [],
+      }),
+    )
+    prev = { context: current.span.spanContext() }
 
-    let prev: Link | undefined
-    for (const [j, block] of blocks.entries()) {
-      using current = defer(
-        tracer.startSpan(`${traceName}:${j}`, {
-          startTime,
-          attributes,
-          links: prev ? [prev] : [],
-        }),
-      )
-      const mimeKey =
-        block.type === SemanticConventions.INPUT_VALUE
-          ? SemanticConventions.INPUT_MIME_TYPE
-          : SemanticConventions.OUTPUT_MIME_TYPE
-      prev = { context: current.span.spanContext() }
-
-      if (block.error) {
-        current.span.setStatus({ code: SpanStatusCode.ERROR })
-      }
-
-      current.span.setAttributes({
-        "message.uuid": message.uuid,
-        ...(message.parentUuid && {
-          "message.parent_uuid": message.parentUuid,
-        }),
-        ...(block.correlationId && {
-          "tool_call.correlation_id": block.correlationId,
-        }),
-        [mimeKey]: MimeType.JSON,
-        [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
-        [block.type]: JSON.stringify(block.value),
-      })
+    if (block.error) {
+      current.span.setStatus({ code: SpanStatusCode.ERROR })
     }
+
+    const mimeKey =
+      block.type === SemanticConventions.INPUT_VALUE
+        ? SemanticConventions.INPUT_MIME_TYPE
+        : SemanticConventions.OUTPUT_MIME_TYPE
+
+    current.span.setAttributes({
+      "message.uuid": message.uuid,
+      ...(message.parentUuid && {
+        "message.parent_uuid": message.parentUuid,
+      }),
+      ...(block.correlationId && {
+        "tool_call.correlation_id": block.correlationId,
+      }),
+      [mimeKey]: MimeType.JSON,
+      [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
+      [block.type]: JSON.stringify(block.value),
+    })
   }
 }
 
@@ -605,10 +615,9 @@ const main = async (): Promise<void> => {
 
   emit({
     tracer: otel.provider.getTracer("langfuse-sdk"),
-    messages,
+    blocks: extractAll(messages),
     sessionId: hook.session_id,
     userId,
-    offset: state.offset,
   })
 
   state.offset += messages.length
