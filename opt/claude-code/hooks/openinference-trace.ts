@@ -60,7 +60,11 @@ type ExtractedBlock = Readonly<{
   transcriptJq?: string
 }>
 
-type CorrelatedBlock = readonly [ExtractedBlock, ExtractedBlock]
+type Correlated = Readonly<{
+  message: TranscriptMessage
+  blocks: readonly [ExtractedBlock, ExtractedBlock | undefined]
+  endTime?: Date
+}>
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -545,7 +549,7 @@ const extractContent = function* (
 
 const correlatedBlocks = function* (
   extracted: IteratorObject<[TranscriptMessage, ExtractedBlock]>,
-): IteratorObject<[TranscriptMessage, CorrelatedBlock | ExtractedBlock]> {
+): IteratorObject<Correlated> {
   const items = extracted.toArray()
 
   const acc = new Map<string, ExtractedBlock>()
@@ -561,24 +565,36 @@ const correlatedBlocks = function* (
   for (const [message, block] of items) {
     const id = block.correlationId
     if (id === undefined) {
-      yield [message, block]
+      yield {
+        message,
+        blocks: [block, undefined],
+      }
       continue
     }
 
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
-        yield [message, block]
+        yield {
+          message,
+          blocks: [block, undefined],
+        }
       }
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield [message, block]
+      yield {
+        message,
+        blocks: [block, undefined],
+      }
       continue
     }
     acc.delete(id)
-    yield [message, [block, mate]]
+    yield {
+      message,
+      blocks: [block, mate],
+    }
   }
 
   return
@@ -587,52 +603,56 @@ const correlatedBlocks = function* (
 const emitSpans = ({
   tracer,
   userId,
-  sessionId,
-  message,
-  block,
+  correlated,
   prev,
 }: {
   tracer: Tracer
   userId: string
-  sessionId: string
-  message: TranscriptMessage
-  block: CorrelatedBlock | ExtractedBlock
+  correlated: Correlated
   prev?: Link
 }): Link => {
+  const {
+    message,
+    blocks,
+    blocks: [{ kind }],
+    endTime,
+  } = correlated
+
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
-    [SemanticConventions.SESSION_ID]: sessionId,
+    [SemanticConventions.SESSION_ID]: message.session_id,
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
     "langfuse.observation.metadata.transcript_jq": message[META].debugExpr,
   }
-  const span = tracer.startSpan(`[${sessionId}] ${message.type}`, {
+  const span = tracer.startSpan(`[${message.session_id}] ${message.type}`, {
     startTime: message[META].timestamp.getTime(),
     attributes,
     links: prev ? [prev] : [],
   })
 
-  const parts = Array.isArray(block) ? block : [block]
-  const [part] = parts
-
-  if (parts.some((p) => p.error)) {
+  if (blocks.some((b) => b?.error)) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
-  span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, part.kind)
+  span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
 
-  for (const part of parts) {
+  for (const block of blocks) {
+    if (!block) {
+      continue
+    }
+
     const mimeKey =
-      part.type === SemanticConventions.INPUT_VALUE
+      block.type === SemanticConventions.INPUT_VALUE
         ? SemanticConventions.INPUT_MIME_TYPE
         : SemanticConventions.OUTPUT_MIME_TYPE
 
     span.setAttributes({
       [mimeKey]: MimeType.JSON,
-      [part.type]: JSON.stringify(part.value),
+      [block.type]: JSON.stringify(block.value),
     })
   }
 
-  span.end()
+  span.end(endTime)
   return { context: span.spanContext() }
 }
 
@@ -689,20 +709,14 @@ const main = async (): Promise<void> => {
   const transcriptRows = await Array.fromAsync(
     parseMessages(hook, state.offset),
   )
-  const messages = correlatedBlocks(extractContent(transcriptRows.values()))
+  const blocks = correlatedBlocks(extractContent(transcriptRows.values()))
 
   await using otel = provider(config)
   const tracer = otel.provider.getTracer("langfuse-sdk")
+
   let prev: Link | undefined
-  for (const [message, block] of messages) {
-    prev = emitSpans({
-      tracer,
-      userId,
-      sessionId: hook.session_id,
-      message,
-      block,
-      prev,
-    })
+  for (const correlated of blocks) {
+    prev = emitSpans({ tracer, userId, correlated, prev })
   }
 
   state.offset += transcriptRows.length
