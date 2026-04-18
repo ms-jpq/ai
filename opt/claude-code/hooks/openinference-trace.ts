@@ -171,6 +171,26 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
   }
 
   switch (block.type) {
+    case "text":
+      return { type: side, kind: OpenInferenceSpanKind.LLM, value: block.text }
+    case "thinking":
+      return {
+        type: side,
+        kind: OpenInferenceSpanKind.LLM,
+        value: block.thinking,
+      }
+    case "redacted_thinking":
+      return {
+        type: side,
+        kind: OpenInferenceSpanKind.LLM,
+        value: block.data,
+      }
+    case "compaction":
+      return {
+        type: side,
+        kind: OpenInferenceSpanKind.LLM,
+        value: block.content ?? "",
+      }
     case "image":
       switch (block.source.type) {
         case "base64":
@@ -189,61 +209,6 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           fail(block.source satisfies never)
       }
 
-    case "document":
-      switch (block.source.type) {
-        case "base64":
-        case "text":
-          return {
-            type: side,
-            kind: OpenInferenceSpanKind.RETRIEVER,
-            value: {
-              context: block.context,
-              media_type: block.source.media_type,
-              title: block.title,
-            },
-          }
-        case "url":
-          return {
-            type: side,
-            kind: OpenInferenceSpanKind.RETRIEVER,
-            value: {
-              context: block.context,
-              title: block.title,
-              url: block.source.url,
-            },
-          }
-        case "content":
-          return {
-            type: side,
-            kind: OpenInferenceSpanKind.RETRIEVER,
-            value: { context: block.context, title: block.title },
-          }
-        default:
-          fail(block.source satisfies never)
-      }
-
-    case "thinking":
-      return {
-        type: side,
-        kind: OpenInferenceSpanKind.LLM,
-        value: block.thinking,
-      }
-    case "redacted_thinking":
-      return {
-        type: side,
-        kind: OpenInferenceSpanKind.LLM,
-        value: block.data,
-      }
-
-    case "text":
-      return { type: side, kind: OpenInferenceSpanKind.LLM, value: block.text }
-    case "compaction":
-      return {
-        type: side,
-        kind: OpenInferenceSpanKind.LLM,
-        value: block.content ?? "",
-      }
-
     case "mcp_tool_use":
       return {
         type: SemanticConventions.INPUT_VALUE,
@@ -255,7 +220,6 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           server_name: block.server_name,
         },
       }
-
     case "server_tool_use":
     case "tool_use":
       return {
@@ -263,44 +227,6 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
         value: { name: block.name, input: block.input },
-      }
-
-    case "code_execution_tool_result":
-    case "bash_code_execution_tool_result":
-      switch (block.content.type) {
-        case "bash_code_execution_tool_result_error":
-        case "code_execution_tool_result_error":
-          return {
-            type: SemanticConventions.OUTPUT_VALUE,
-            error: true,
-            kind: OpenInferenceSpanKind.TOOL,
-            correlationId: block.tool_use_id,
-            value: block.content.error_code,
-          }
-        case "encrypted_code_execution_result":
-          return {
-            type: SemanticConventions.OUTPUT_VALUE,
-            kind: OpenInferenceSpanKind.TOOL,
-            correlationId: block.tool_use_id,
-            value: {
-              return_code: block.content.return_code,
-              stderr: block.content.stderr,
-            },
-          }
-        case "bash_code_execution_result":
-        case "code_execution_result":
-          return {
-            type: SemanticConventions.OUTPUT_VALUE,
-            kind: OpenInferenceSpanKind.TOOL,
-            correlationId: block.tool_use_id,
-            value: {
-              return_code: block.content.return_code,
-              stderr: block.content.stderr,
-              stdout: block.content.stdout,
-            },
-          }
-        default:
-          fail(block.content satisfies never)
       }
 
     case "tool_result":
@@ -361,15 +287,42 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
       }
     }
 
-    case "search_result":
-      return {
-        type: SemanticConventions.OUTPUT_VALUE,
-        kind: OpenInferenceSpanKind.RETRIEVER,
-        value: {
-          content: block.content,
-          source: block.source,
-          title: block.title,
-        },
+    case "code_execution_tool_result":
+    case "bash_code_execution_tool_result":
+      switch (block.content.type) {
+        case "bash_code_execution_tool_result_error":
+        case "code_execution_tool_result_error":
+          return {
+            type: SemanticConventions.OUTPUT_VALUE,
+            error: true,
+            kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
+            value: block.content.error_code,
+          }
+        case "encrypted_code_execution_result":
+          return {
+            type: SemanticConventions.OUTPUT_VALUE,
+            kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
+            value: {
+              return_code: block.content.return_code,
+              stderr: block.content.stderr,
+            },
+          }
+        case "bash_code_execution_result":
+        case "code_execution_result":
+          return {
+            type: SemanticConventions.OUTPUT_VALUE,
+            kind: OpenInferenceSpanKind.TOOL,
+            correlationId: block.tool_use_id,
+            value: {
+              return_code: block.content.return_code,
+              stderr: block.content.stderr,
+              stdout: block.content.stdout,
+            },
+          }
+        default:
+          fail(block.content satisfies never)
       }
 
     case "text_editor_code_execution_tool_result":
@@ -445,6 +398,48 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           fail(block.content satisfies never)
       }
 
+    case "document":
+      switch (block.source.type) {
+        case "base64":
+        case "text":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: {
+              context: block.context,
+              media_type: block.source.media_type,
+              title: block.title,
+            },
+          }
+        case "url":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: {
+              context: block.context,
+              title: block.title,
+              url: block.source.url,
+            },
+          }
+        case "content":
+          return {
+            type: side,
+            kind: OpenInferenceSpanKind.RETRIEVER,
+            value: { context: block.context, title: block.title },
+          }
+        default:
+          fail(block.source satisfies never)
+      }
+    case "search_result":
+      return {
+        type: SemanticConventions.OUTPUT_VALUE,
+        kind: OpenInferenceSpanKind.RETRIEVER,
+        value: {
+          content: block.content,
+          source: block.source,
+          title: block.title,
+        },
+      }
     case "web_search_tool_result":
       if (Array.isArray(block.content)) {
         return {
@@ -465,7 +460,6 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
         correlationId: block.tool_use_id,
         value: block.content.error_code,
       }
-
     case "web_fetch_tool_result":
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
