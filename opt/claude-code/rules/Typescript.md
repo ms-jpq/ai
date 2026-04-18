@@ -20,6 +20,13 @@ const fetch = ({
 
 - `satisfies` over type annotations where possible. Preserves literal/narrowed types.
 
+- `unique symbol` keys for metadata attached to domain types.
+
+```typescript
+const META: unique symbol = Symbol("meta")
+type Decorated = Base & { [META]: Meta }
+```
+
 - IIFEs `(() => {})()` to localize or eliminate mutable state.
 
 - Async over sync when both exist.

@@ -38,12 +38,13 @@ type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
 type TranscriptMeta = Readonly<{
   timestamp: Date
   offset: number
-  debug_expr: string
+  debugExpr: string
 }>
-const META = Symbol("transcript-meta")
+const META: unique symbol = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
   SessionMessage & {
     message: BetaMessage | BetaMessageParam
+    timestamp: string
     [META]: TranscriptMeta
   }
 >
@@ -532,7 +533,7 @@ const extractBlock = (
 }
 
 const extractContent = function* (
-  messages: TranscriptMessage[],
+  messages: IteratorObject<TranscriptMessage>,
 ): IteratorObject<[TranscriptMessage, ExtractedBlock]> {
   for (const message of messages) {
     for (const block of contents(message)) {
@@ -547,7 +548,7 @@ const extractContent = function* (
 const correlatedBlocks = function* (
   extracted: IteratorObject<[TranscriptMessage, ExtractedBlock]>,
 ): IteratorObject<[TranscriptMessage, CorrelatedBlock | ExtractedBlock]> {
-  const items = Array.from(extracted)
+  const items = extracted.toArray()
 
   const acc = new Map<string, ExtractedBlock>()
   for (const [, block] of items) {
@@ -606,6 +607,7 @@ const emitSpans = ({
       [SemanticConventions.USER_ID]: userId,
       [SemanticConventions.SESSION_ID]: sessionId,
       [SemanticConventions.TAG_TAGS]: ["claude-code"],
+      "langfuse.observation.metadata.transcript_jq": message[META].debugExpr,
     },
     links: prev ? [prev] : [],
   })
@@ -635,10 +637,32 @@ const emitSpans = ({
   return { context: span.spanContext() }
 }
 
-const parseMessages = async function* ({}: {
-  offset: number
-  agentId: string | undefined
-}): AsyncIteratorObject<TranscriptMessage> {
+const parseMessages = async function* (
+  hook: HookInput,
+  offset: number,
+): AsyncIteratorObject<TranscriptMessage> {
+  const isSubAgent = hook.hook_event_name === "SubagentStop"
+  const transcriptPath = isSubAgent
+    ? hook.agent_transcript_path
+    : hook.transcript_path
+
+  const opts = { offset }
+  const messages = (await (isSubAgent
+    ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
+    : getSessionMessages(hook.session_id, opts))) as TranscriptMessage[]
+
+  log({ level: "debug", msg: `messages: ${messages.length}` })
+
+  for (const [i, msg] of messages.entries()) {
+    const meta = {
+      offset: offset + i,
+      timestamp: new Date(msg.timestamp),
+      debugExpr: `jq -e --sort-keys 'select(.uuid == "${msg.uuid}")' '${transcriptPath}'`,
+    } satisfies TranscriptMeta
+
+    yield Object.assign(msg, { [META]: meta })
+  }
+
   return
 }
 
@@ -662,18 +686,16 @@ const main = async (): Promise<void> => {
 
   const userId = await gitUserName()
   await using state = await openState(stateKey)
+
+  const transcriptRows = await Array.fromAsync(
+    parseMessages(hook, state.offset),
+  )
+  const messages = correlatedBlocks(extractContent(transcriptRows.values()))
+
   await using otel = provider(config)
-
-  const opts = { offset: state.offset }
-  const messages = (await (isSub
-    ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
-    : getSessionMessages(hook.session_id, opts))) as TranscriptMessage[]
-
-  log({ level: "debug", msg: `messages: ${messages.length}` })
-
   const tracer = otel.provider.getTracer("langfuse-sdk")
   let prev: Link | undefined
-  for (const [message, block] of correlatedBlocks(extractContent(messages))) {
+  for (const [message, block] of messages) {
     prev = emitSpans({
       tracer,
       userId,
@@ -684,7 +706,7 @@ const main = async (): Promise<void> => {
     })
   }
 
-  state.offset += messages.length
+  state.offset += transcriptRows.length
 }
 
 await main()
