@@ -504,28 +504,12 @@ const extract = (
   }
 }
 
-const isEmpty = (v: unknown): boolean => {
-  if (v === undefined || v === null || v === "") {
-    return true
-  }
-  if (Array.isArray(v)) {
-    return v.every(isEmpty)
-  }
-  if (typeof v === "object") {
-    return Object.values(v).every(isEmpty)
-  }
-  return false
-}
-
 const extractAll = function* (
   messages: Message[],
 ): IteratorObject<[Message, ExtractedBlock]> {
   for (const message of messages) {
     for (const block of contents(message)) {
       const extracted = extract(message.type, block)
-      if (isEmpty(extracted.value)) {
-        continue
-      }
       yield [message, extracted]
     }
   }
