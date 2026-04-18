@@ -12,7 +12,7 @@ import {
   OpenInferenceSpanKind,
   SemanticConventions,
 } from "@arizeai/openinference-semantic-conventions"
-import type { Link } from "@opentelemetry/api"
+import type { Link, Tracer } from "@opentelemetry/api"
 import { SpanStatusCode } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
@@ -523,46 +523,28 @@ const isEmpty = (v: unknown): boolean => {
   return false
 }
 
-const main = async (): Promise<void> => {
-  const config = conf()
-  if (!config) {
-    return
-  }
-
-  const hook = await hookInput()
-  if (!hook) {
-    return
-  }
-
-  using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
-
-  const isSub = hook.hook_event_name === "SubagentStop"
-  const stateKey = isSub
-    ? `${hook.session_id}.${hook.agent_id}`
-    : hook.session_id
-
-  const userId = await gitUserName()
-  await using state = await openState(stateKey)
-  await using otel = provider(config)
-
-  const opts = { offset: state.offset }
-  const messages = (await (isSub
-    ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
-    : getSessionMessages(hook.session_id, opts))) as Message[]
-
-  log({ level: "debug", msg: `messages: ${messages.length}` })
-
-  const tracer = otel.provider.getTracer("langfuse-sdk")
-
+const emit = ({
+  tracer,
+  userId,
+  sessionId,
+  offset,
+  messages,
+}: {
+  tracer: Tracer
+  userId: string
+  sessionId: string
+  offset: number
+  messages: Message[]
+}): void => {
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
-    [SemanticConventions.SESSION_ID]: hook.session_id,
+    [SemanticConventions.SESSION_ID]: sessionId,
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
   }
 
   for (const [i, message] of messages.entries()) {
     const startTime = new Date(message.timestamp).getTime()
-    const traceName = `[${hook.session_id}] ${message.type} - ${state.offset + i}`
+    const traceName = `[${sessionId}] ${message.type} - ${offset + i}`
     const blocks = contents(message)
       .map((b) => extract(message.type, b))
       .filter((b): b is Extracted => b !== undefined && !isEmpty(b.value))
@@ -594,6 +576,44 @@ const main = async (): Promise<void> => {
       })
     }
   }
+}
+
+const main = async (): Promise<void> => {
+  const config = conf()
+  if (!config) {
+    return
+  }
+
+  const hook = await hookInput()
+  if (!hook) {
+    return
+  }
+
+  using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
+
+  const isSub = hook.hook_event_name === "SubagentStop"
+  const stateKey = isSub
+    ? `${hook.session_id}.${hook.agent_id}`
+    : hook.session_id
+
+  const userId = await gitUserName()
+  await using state = await openState(stateKey)
+  await using otel = provider(config)
+
+  const opts = { offset: state.offset }
+  const messages = (await (isSub
+    ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
+    : getSessionMessages(hook.session_id, opts))) as Message[]
+
+  log({ level: "debug", msg: `messages: ${messages.length}` })
+
+  emit({
+    tracer: otel.provider.getTracer("langfuse-sdk"),
+    messages,
+    sessionId: hook.session_id,
+    userId,
+    offset: state.offset,
+  })
 
   state.offset += messages.length
 }
