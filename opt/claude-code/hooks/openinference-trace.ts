@@ -23,7 +23,7 @@ import {
   BasicTracerProvider,
   SimpleSpanProcessor,
 } from "@opentelemetry/sdk-trace-base"
-import { fail, ok } from "node:assert/strict"
+import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, join, resolve } from "node:path"
@@ -37,7 +37,6 @@ type Conf = Readonly<{ auth: string; host: string }>
 type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
 type TranscriptMeta = Readonly<{
   timestamp: Date
-  offset: number
   debugExpr: string
 }>
 const META: unique symbol = Symbol("transcript-meta")
@@ -113,15 +112,18 @@ const hookInput = async (): Promise<HookInput | undefined> => {
 
 const openState = async (
   key: string,
-): Promise<AsyncDisposable & { offset: number }> => {
-  const path = resolve(SESSIONS_DIR, `${key}.langfuse.json`)
-  const state = await (async () => {
+): Promise<AsyncDisposable & { uuid?: string }> => {
+  const path = resolve(SESSIONS_DIR, `${key}.openinference.json`)
+  const state: { uuid?: string } = await (async () => {
     try {
-      const offset = Number(await readFile(path, "utf-8"))
-      ok(Number.isInteger(offset))
-      return { offset }
+      const raw = JSON.parse(await readFile(path, "utf-8")) as unknown
+      if (raw && typeof raw === "object" && "uuid" in raw) {
+        const { uuid } = raw as { uuid: unknown }
+        return { uuid: typeof uuid === "string" ? uuid : undefined }
+      }
+      return {}
     } catch {
-      return { offset: 0 }
+      return {}
     }
   })()
 
@@ -129,7 +131,7 @@ const openState = async (
     async [Symbol.asyncDispose]() {
       const tmp = `${path}.tmp`
       await mkdir(dirname(path), { recursive: true })
-      await writeFile(tmp, String(state.offset), "utf-8")
+      await writeFile(tmp, JSON.stringify({ uuid: state.uuid }), "utf-8")
       await rename(tmp, path)
     },
   })
@@ -174,7 +176,7 @@ const contents = function* ({
 const extractBlock = (
   role: SessionMessage["type"],
   block: MessageBlock,
-): ExtractedBlock => {
+): ExtractedBlock | undefined => {
   const side =
     role === "assistant"
       ? SemanticConventions.OUTPUT_VALUE
@@ -540,7 +542,9 @@ const extractContent = function* (
   for (const message of messages) {
     for (const block of contents(message)) {
       const extracted = extractBlock(message.type, block)
-      yield [message, extracted]
+      if (extracted) {
+        yield [message, extracted]
+      }
     }
   }
 
@@ -659,28 +663,33 @@ const emitSpans = ({
 
 const parseMessages = async function* (
   hook: HookInput,
-  offset: number,
+  lastUuid: string | undefined,
 ): AsyncIteratorObject<TranscriptMessage> {
   const isSubAgent = hook.hook_event_name === "SubagentStop"
   const transcriptPath = isSubAgent
     ? hook.agent_transcript_path
     : hook.transcript_path
 
-  const opts = { offset }
   const messages = (await (isSubAgent
-    ? getSubagentMessages(hook.session_id, hook.agent_id, opts)
-    : getSessionMessages(hook.session_id, opts))) as TranscriptMessage[]
+    ? getSubagentMessages(hook.session_id, hook.agent_id)
+    : getSessionMessages(hook.session_id))) as TranscriptMessage[]
 
-  log({ level: "debug", msg: `messages: ${messages.length}` })
+  const foundIdx =
+    lastUuid === undefined ? -1 : messages.findIndex((m) => m.uuid === lastUuid)
+  const startIdx = foundIdx + 1
 
-  for (const [i, msg] of messages.entries()) {
+  log({
+    level: "debug",
+    msg: `messages: ${messages.length}, startIdx: ${startIdx}, lastUuid: ${lastUuid ?? "(none)"}, found: ${foundIdx >= 0}`,
+  })
+
+  for (const message of messages.values().drop(startIdx)) {
     const meta = {
-      offset: offset + i,
-      timestamp: new Date(msg.timestamp),
-      debugExpr: `jq -e --sort-keys 'select(.uuid == "${msg.uuid}")' '${transcriptPath}'`,
+      timestamp: new Date(message.timestamp),
+      debugExpr: `jq -e --sort-keys 'select(.uuid == "${message.uuid}")' '${transcriptPath}'`,
     } satisfies TranscriptMeta
 
-    yield Object.assign(msg, { [META]: meta })
+    yield Object.assign(message, { [META]: meta })
   }
 
   return
@@ -705,11 +714,10 @@ const main = async (): Promise<void> => {
     : hook.session_id
 
   const userId = await gitUserName()
-  await using state = await openState(stateKey)
 
-  const transcriptRows = await Array.fromAsync(
-    parseMessages(hook, state.offset),
-  )
+  await using state = await openState(stateKey)
+  const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
+
   const blocks = correlatedBlocks(extractContent(transcriptRows.values()))
 
   await using otel = provider(config)
@@ -720,7 +728,10 @@ const main = async (): Promise<void> => {
     prev = emitSpans({ tracer, userId, correlated, prev })
   }
 
-  state.offset += transcriptRows.length
+  const last = transcriptRows.at(-1)
+  if (last !== undefined) {
+    state.uuid = last.uuid
+  }
 }
 
 await main()
