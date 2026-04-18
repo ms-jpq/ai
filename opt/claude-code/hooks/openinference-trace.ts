@@ -535,53 +535,52 @@ const emit = ({
   tracer,
   userId,
   sessionId,
-  blocks,
+  message,
+  block,
+  prev,
 }: {
   tracer: Tracer
   userId: string
   sessionId: string
-  blocks: Iterable<[Message, ExtractedBlock]>
-}): void => {
-  const attributes = {
-    [SemanticConventions.USER_ID]: userId,
-    [SemanticConventions.SESSION_ID]: sessionId,
-    [SemanticConventions.TAG_TAGS]: ["claude-code"],
+  message: Message
+  block: ExtractedBlock
+  prev?: Link
+}): Link => {
+  using current = defer(
+    tracer.startSpan(`[${sessionId}] ${message.type}`, {
+      startTime: new Date(message.timestamp).getTime(),
+      attributes: {
+        [SemanticConventions.USER_ID]: userId,
+        [SemanticConventions.SESSION_ID]: sessionId,
+        [SemanticConventions.TAG_TAGS]: ["claude-code"],
+      },
+      links: prev ? [prev] : [],
+    }),
+  )
+
+  if (block.error) {
+    current.span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
-  let prev: Link | undefined
-  for (const [message, block] of blocks) {
-    const startTime = new Date(message.timestamp).getTime()
-    using current = defer(
-      tracer.startSpan(`[${sessionId}] ${message.type}`, {
-        startTime,
-        attributes,
-        links: prev ? [prev] : [],
-      }),
-    )
-    prev = { context: current.span.spanContext() }
+  const mimeKey =
+    block.type === SemanticConventions.INPUT_VALUE
+      ? SemanticConventions.INPUT_MIME_TYPE
+      : SemanticConventions.OUTPUT_MIME_TYPE
 
-    if (block.error) {
-      current.span.setStatus({ code: SpanStatusCode.ERROR })
-    }
+  current.span.setAttributes({
+    "message.uuid": message.uuid,
+    ...(message.parentUuid && {
+      "message.parent_uuid": message.parentUuid,
+    }),
+    ...(block.correlationId && {
+      "tool_call.correlation_id": block.correlationId,
+    }),
+    [mimeKey]: MimeType.JSON,
+    [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
+    [block.type]: JSON.stringify(block.value),
+  })
 
-    const mimeKey =
-      block.type === SemanticConventions.INPUT_VALUE
-        ? SemanticConventions.INPUT_MIME_TYPE
-        : SemanticConventions.OUTPUT_MIME_TYPE
-
-    current.span.setAttributes({
-      "message.uuid": message.uuid,
-      ...(message.parentUuid && {
-        "message.parent_uuid": message.parentUuid,
-      }),
-      ...(block.correlationId && {
-        "tool_call.correlation_id": block.correlationId,
-      }),
-      [mimeKey]: MimeType.JSON,
-      [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
-      [block.type]: JSON.stringify(block.value),
-    })
-  }
+  return { context: current.span.spanContext() }
 }
 
 const main = async (): Promise<void> => {
@@ -613,12 +612,18 @@ const main = async (): Promise<void> => {
 
   log({ level: "debug", msg: `messages: ${messages.length}` })
 
-  emit({
-    tracer: otel.provider.getTracer("langfuse-sdk"),
-    blocks: extractAll(messages),
-    sessionId: hook.session_id,
-    userId,
-  })
+  const tracer = otel.provider.getTracer("langfuse-sdk")
+  let prev: Link | undefined
+  for (const [message, block] of extractAll(messages)) {
+    prev = emit({
+      tracer,
+      userId,
+      sessionId: hook.session_id,
+      message,
+      block,
+      prev,
+    })
+  }
 
   state.offset += messages.length
 }
