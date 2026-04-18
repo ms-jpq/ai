@@ -33,7 +33,7 @@ type Conf = Readonly<{ auth: string; host: string }>
 type Block = string | BetaContentBlock | ContentBlockParam
 type Message = Readonly<
   SessionMessage & {
-    message: { content: string | Block[] }
+    message: { content: string | readonly Block[] }
     parentUuid?: string
     timestamp: string
   }
@@ -48,6 +48,8 @@ type ExtractedBlock = Readonly<{
   value: unknown
   correlationId?: string
 }>
+
+type CorrelatedBlock = readonly [ExtractedBlock, ExtractedBlock]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -568,13 +570,6 @@ const emit = ({
       : SemanticConventions.OUTPUT_MIME_TYPE
 
   current.span.setAttributes({
-    "message.uuid": message.uuid,
-    ...(message.parentUuid && {
-      "message.parent_uuid": message.parentUuid,
-    }),
-    ...(block.correlationId && {
-      "tool_call.correlation_id": block.correlationId,
-    }),
     [mimeKey]: MimeType.JSON,
     [SemanticConventions.OPENINFERENCE_SPAN_KIND]: block.kind,
     [block.type]: JSON.stringify(block.value),
