@@ -48,7 +48,7 @@ type ExtractedBlock = Readonly<{
   correlationId?: string
 }>
 
-type CorrelatedBlock = readonly [ExtractedBlock, ExtractedBlock]
+// type CorrelatedBlock = readonly [ExtractedBlock, ExtractedBlock]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
