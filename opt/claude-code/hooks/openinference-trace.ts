@@ -726,10 +726,7 @@ const main = async (): Promise<void> => {
     prev = emitSpans({ tracer, userId, correlated, prev })
   }
 
-  const last = transcriptRows.at(-1)
-  if (last !== undefined) {
-    state.uuid = last.uuid
-  }
+  state.uuid = transcriptRows.at(-1)?.uuid
 }
 
 await main()
