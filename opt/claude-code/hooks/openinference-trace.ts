@@ -48,16 +48,21 @@ type TranscriptMessage = Readonly<
   }
 >
 
-type ExtractedBlock = Readonly<{
+type BaseExtractedBlock = Readonly<{
   type:
     | typeof SemanticConventions.INPUT_VALUE
     | typeof SemanticConventions.OUTPUT_VALUE
-  error?: boolean
   kind: OpenInferenceSpanKind
   value: unknown
-  correlationId?: string
-  transcriptJq?: string
 }>
+
+type ExtractedBlock =
+  | (BaseExtractedBlock & { category: "text" })
+  | (BaseExtractedBlock & {
+      category: "tool"
+      correlationId: string
+      error?: boolean
+    })
 
 type Correlated = Readonly<{
   message: TranscriptMessage
@@ -175,23 +180,35 @@ const extractBlock = (
       : SemanticConventions.INPUT_VALUE
 
   if (typeof block === "string") {
-    return { type: side, kind: OpenInferenceSpanKind.LLM, value: block }
+    return {
+      category: "text",
+      type: side,
+      kind: OpenInferenceSpanKind.LLM,
+      value: block,
+    }
   }
 
   switch (block.type) {
     case "text":
-      return { type: side, kind: OpenInferenceSpanKind.LLM, value: block.text }
+      return {
+        category: "text",
+        type: side,
+        kind: OpenInferenceSpanKind.LLM,
+        value: block.text,
+      }
     case "thinking":
       if (!block.thinking) {
         return undefined
       }
       return {
+        category: "text",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.thinking,
       }
     case "redacted_thinking":
       return {
+        category: "text",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.data,
@@ -201,6 +218,7 @@ const extractBlock = (
         return undefined
       }
       return {
+        category: "text",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.content,
@@ -209,18 +227,21 @@ const extractBlock = (
       switch (block.source.type) {
         case "base64":
           return {
+            category: "text",
             type: side,
             kind: OpenInferenceSpanKind.LLM,
             value: { media_type: block.source.media_type },
           }
         case "url":
           return {
+            category: "text",
             type: side,
             kind: OpenInferenceSpanKind.LLM,
             value: { url: block.source.url },
           }
         case "file":
           return {
+            category: "text",
             type: side,
             kind: OpenInferenceSpanKind.LLM,
             value: { file_id: block.source.file_id },
@@ -231,6 +252,7 @@ const extractBlock = (
 
     case "mcp_tool_use":
       return {
+        category: "tool",
         type: SemanticConventions.INPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
@@ -243,6 +265,7 @@ const extractBlock = (
     case "server_tool_use":
     case "tool_use":
       return {
+        category: "tool",
         type: SemanticConventions.INPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
@@ -307,6 +330,7 @@ const extractBlock = (
         })
       })()
       return {
+        category: "tool",
         type: SemanticConventions.OUTPUT_VALUE,
         error: block.is_error,
         kind: OpenInferenceSpanKind.TOOL,
@@ -321,6 +345,7 @@ const extractBlock = (
         case "bash_code_execution_tool_result_error":
         case "code_execution_tool_result_error":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             error: true,
             kind: OpenInferenceSpanKind.TOOL,
@@ -329,6 +354,7 @@ const extractBlock = (
           }
         case "encrypted_code_execution_result":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
@@ -340,6 +366,7 @@ const extractBlock = (
         case "bash_code_execution_result":
         case "code_execution_result":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
@@ -357,6 +384,7 @@ const extractBlock = (
       switch (block.content.type) {
         case "text_editor_code_execution_tool_result_error":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             error: true,
             kind: OpenInferenceSpanKind.TOOL,
@@ -368,6 +396,7 @@ const extractBlock = (
           }
         case "text_editor_code_execution_view_result":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
@@ -381,6 +410,7 @@ const extractBlock = (
           }
         case "text_editor_code_execution_create_result":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
@@ -388,6 +418,7 @@ const extractBlock = (
           }
         case "text_editor_code_execution_str_replace_result":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
@@ -408,6 +439,7 @@ const extractBlock = (
         case "tool_search_tool_result_error": {
           const { type: _, ...rest } = block.content
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             error: true,
             kind: OpenInferenceSpanKind.TOOL,
@@ -417,6 +449,7 @@ const extractBlock = (
         }
         case "tool_search_tool_search_result":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.TOOL,
             correlationId: block.tool_use_id,
@@ -431,6 +464,7 @@ const extractBlock = (
         case "base64":
         case "text":
           return {
+            category: "text",
             type: side,
             kind: OpenInferenceSpanKind.RETRIEVER,
             value: {
@@ -441,6 +475,7 @@ const extractBlock = (
           }
         case "url":
           return {
+            category: "text",
             type: side,
             kind: OpenInferenceSpanKind.RETRIEVER,
             value: {
@@ -451,12 +486,14 @@ const extractBlock = (
           }
         case "content":
           return {
+            category: "text",
             type: side,
             kind: OpenInferenceSpanKind.RETRIEVER,
             value: { context: block.context, title: block.title },
           }
         case "file":
           return {
+            category: "text",
             type: side,
             kind: OpenInferenceSpanKind.RETRIEVER,
             value: {
@@ -470,6 +507,7 @@ const extractBlock = (
       }
     case "search_result":
       return {
+        category: "text",
         type: side,
         kind: OpenInferenceSpanKind.RETRIEVER,
         value: {
@@ -481,6 +519,7 @@ const extractBlock = (
     case "web_search_tool_result":
       if (Array.isArray(block.content)) {
         return {
+          category: "tool",
           type: SemanticConventions.OUTPUT_VALUE,
           kind: OpenInferenceSpanKind.RETRIEVER,
           correlationId: block.tool_use_id,
@@ -492,6 +531,7 @@ const extractBlock = (
         }
       }
       return {
+        category: "tool",
         type: SemanticConventions.OUTPUT_VALUE,
         error: true,
         kind: OpenInferenceSpanKind.RETRIEVER,
@@ -502,6 +542,7 @@ const extractBlock = (
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             error: true,
             kind: OpenInferenceSpanKind.RETRIEVER,
@@ -510,6 +551,7 @@ const extractBlock = (
           }
         case "web_fetch_result":
           return {
+            category: "tool",
             type: SemanticConventions.OUTPUT_VALUE,
             kind: OpenInferenceSpanKind.RETRIEVER,
             correlationId: block.tool_use_id,
@@ -524,6 +566,7 @@ const extractBlock = (
 
     case "container_upload":
       return {
+        category: "text",
         type: side,
         kind: OpenInferenceSpanKind.TOOL,
         value: { file_id: block.file_id },
@@ -558,7 +601,7 @@ const correlatedBlocks = function* (
   for (const entry of blocks) {
     const [, block] = entry
     if (
-      block.correlationId !== undefined &&
+      block.category === "tool" &&
       block.type === SemanticConventions.OUTPUT_VALUE
     ) {
       acc.set(block.correlationId, entry)
@@ -566,8 +609,7 @@ const correlatedBlocks = function* (
   }
 
   for (const [message, block] of blocks) {
-    const id = block.correlationId
-    if (id === undefined) {
+    if (block.category !== "tool") {
       yield {
         message,
         blocks: [block, undefined],
@@ -575,6 +617,7 @@ const correlatedBlocks = function* (
       continue
     }
 
+    const id = block.correlationId
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
         yield {
@@ -633,7 +676,7 @@ const emitSpans = ({
     links: prev ? [prev] : [],
   })
 
-  if (correlated.blocks.some((b) => b?.error)) {
+  if (correlated.blocks.some((b) => b?.category === "tool" && b.error)) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
