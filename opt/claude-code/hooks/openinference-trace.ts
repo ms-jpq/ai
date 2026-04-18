@@ -34,7 +34,6 @@ type Block = string | BetaContentBlock | ContentBlockParam
 type Message = Readonly<
   SessionMessage & {
     message: { content: string | readonly Block[] }
-    parentUuid?: string
     timestamp: string
   }
 >
