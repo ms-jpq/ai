@@ -39,7 +39,7 @@ type Message = Readonly<
   }
 >
 
-type Extracted = Readonly<{
+type ExtractedBlock = Readonly<{
   type:
     | typeof SemanticConventions.INPUT_VALUE
     | typeof SemanticConventions.OUTPUT_VALUE
@@ -163,7 +163,7 @@ const contents = function* ({ message }: Message): IteratorObject<Block> {
   return
 }
 
-const extract = (role: SessionMessage["type"], block: Block): Extracted => {
+const extract = (role: SessionMessage["type"], block: Block): ExtractedBlock => {
   const side =
     role === "assistant"
       ? SemanticConventions.OUTPUT_VALUE
