@@ -113,28 +113,20 @@ const hookInput = async (): Promise<HookInput | undefined> => {
 const openState = async (
   key: string,
 ): Promise<AsyncDisposable & { uuid?: string }> => {
-  const path = resolve(SESSIONS_DIR, `${key}.openinference.json`)
-  const state: { uuid?: string } = await (async () => {
-    try {
-      const raw = JSON.parse(await readFile(path, "utf-8")) as unknown
-      if (raw && typeof raw === "object" && "uuid" in raw) {
-        const { uuid } = raw as { uuid: unknown }
-        return { uuid: typeof uuid === "string" ? uuid : undefined }
-      }
-      return {}
-    } catch {
-      return {}
-    }
-  })()
+  const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
+  const uuid =
+    (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
 
-  return Object.assign(state, {
+  const state = {
+    uuid,
     async [Symbol.asyncDispose]() {
       const tmp = `${path}.tmp`
       await mkdir(dirname(path), { recursive: true })
-      await writeFile(tmp, JSON.stringify({ uuid: state.uuid }), "utf-8")
+      await writeFile(tmp, state.uuid ?? "", "utf-8")
       await rename(tmp, path)
     },
-  })
+  }
+  return state
 }
 
 const provider = (
@@ -205,10 +197,13 @@ const extractBlock = (
         value: block.data,
       }
     case "compaction":
+      if (!block.content) {
+        return undefined
+      }
       return {
         type: side,
         kind: OpenInferenceSpanKind.LLM,
-        value: block.content ?? "",
+        value: block.content,
       }
     case "image":
       switch (block.source.type) {
@@ -475,7 +470,7 @@ const extractBlock = (
       }
     case "search_result":
       return {
-        type: SemanticConventions.OUTPUT_VALUE,
+        type: side,
         kind: OpenInferenceSpanKind.RETRIEVER,
         value: {
           content: block.content.map((item) => item.text),
