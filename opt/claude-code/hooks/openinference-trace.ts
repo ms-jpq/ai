@@ -549,9 +549,41 @@ const extractContent = function* (
 const correlatedBlocks = function* (
   extracted: Iterable<[TranscriptMessage, ExtractedBlock]>,
 ): IteratorObject<[TranscriptMessage, CorrelatedBlock | ExtractedBlock]> {
-  for (const [message, block] of extracted) {
-    yield [message, block]
+  const items = Array.from(extracted)
+
+  const acc = new Map<string, ExtractedBlock>()
+  for (const [, block] of items) {
+    if (
+      block.correlationId !== undefined &&
+      block.type === SemanticConventions.OUTPUT_VALUE
+    ) {
+      acc.set(block.correlationId, block)
+    }
   }
+
+  for (const [message, block] of items) {
+    const id = block.correlationId
+    if (id === undefined) {
+      yield [message, block]
+      continue
+    }
+
+    if (block.type === SemanticConventions.OUTPUT_VALUE) {
+      if (acc.delete(id)) {
+        yield [message, block]
+      }
+      continue
+    }
+
+    const mate = acc.get(id)
+    if (mate === undefined) {
+      yield [message, block]
+      continue
+    }
+    acc.delete(id)
+    yield [message, [block, mate]]
+  }
+
   return
 }
 
