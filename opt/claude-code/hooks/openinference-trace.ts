@@ -548,15 +548,15 @@ const emit = ({
           links: prev ? [prev] : [],
         }),
       )
+      const mimeKey =
+        block.type === SemanticConventions.INPUT_VALUE
+          ? SemanticConventions.INPUT_MIME_TYPE
+          : SemanticConventions.OUTPUT_MIME_TYPE
       prev = { context: current.span.spanContext() }
 
       if (block.error) {
         current.span.setStatus({ code: SpanStatusCode.ERROR })
       }
-      const mimeKey =
-        block.type === SemanticConventions.INPUT_VALUE
-          ? SemanticConventions.INPUT_MIME_TYPE
-          : SemanticConventions.OUTPUT_MIME_TYPE
 
       current.span.setAttributes({
         "message.uuid": message.uuid,
