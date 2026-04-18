@@ -40,7 +40,7 @@ type Extracted = {
   type:
     | typeof SemanticConventions.INPUT_VALUE
     | typeof SemanticConventions.OUTPUT_VALUE
-  error?: true
+  error?: boolean
   kind: OpenInferenceSpanKind
   value: unknown
   correlationId?: string
@@ -352,17 +352,9 @@ const extract = (role: Role, block: Block): Extracted | undefined => {
           }
         })
       })()
-      if (block.is_error) {
-        return {
-          type: SemanticConventions.OUTPUT_VALUE,
-          error: true,
-          kind: OpenInferenceSpanKind.TOOL,
-          correlationId: block.tool_use_id,
-          value,
-        }
-      }
       return {
         type: SemanticConventions.OUTPUT_VALUE,
+        error: block.is_error,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.tool_use_id,
         value,
