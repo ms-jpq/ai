@@ -26,6 +26,8 @@
 
 - Always brace `if`/`else`/loop bodies. No single-line braceless forms in any language that supports blocks.
 
-## Workflow
+## Workflow & Iterations
 
 - Start LSPs for the relevant languages before writing or changing code.
+
+- Narrow toward the problem. Evaluate each change independently; reject ones that scope creep.
