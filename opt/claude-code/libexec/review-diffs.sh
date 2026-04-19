@@ -8,8 +8,7 @@ if ! SESSION_ID="$("$BASE/which-session.sh")"; then
   exit
 fi
 
-DELTAS="$(realpath --no-symlinks -- "$BASE/../../../var/deltas")"
-SESSION_DIR="$DELTAS/$SESSION_ID"
+SESSION_DIR="$(realpath --no-symlinks -- "$BASE/../../../var/sessions")/$SESSION_ID"
 mkdir -p -- "$SESSION_DIR"
 
 DELTA="$SESSION_DIR/$SESSION_ID.delta.json"
