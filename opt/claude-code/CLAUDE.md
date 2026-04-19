@@ -24,6 +24,8 @@
 
 - Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
 
+---
+
 # Systems Design
 
 - Model the system as a series of stages (Input -> Output). Decompose along stage boundaries.
