@@ -32,7 +32,7 @@
 
 - Types model the domain. Each stage has a single type definition file, complete enough to describe the problem.
 
-- Transforms or effects. Not both.
+- Transforms xor effects. Not both.
 
 - Persistent state lives at stage boundaries — files, queues, databases.
 
