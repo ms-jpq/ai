@@ -9,13 +9,13 @@
 
 # Communication
 
-- Bullets over prose. No preamble, no recap.
+- Bullets over prose, analytical. See [refined spec](./skills/refine/SKILL.md).
 
 - State the why before non-obvious edits. Let the user steer, not react.
 
 # Tools
 
-- Firecrawl over built-in tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
+- Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
 
 # Iteration Loop
 
