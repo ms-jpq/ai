@@ -662,15 +662,17 @@ const emitForGrouped = ({
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
   }
 
+  const times = groupTimes(grouped).toArray()
+  if (!times.length) {
+    return
+  }
+
+  const startTime = times.reduce((a, b) => Math.min(a, b))
+  const endTime = times.reduce((a, b) => Math.max(a, b))
+
   if (!Array.isArray(grouped)) {
-    if (!grouped.children.length) {
-      return
-    }
-
-    const times = groupTimes(grouped).toArray()
-
     const parent = tracer.startSpan(`[${sessionId}] agent`, {
-      startTime: times.reduce((a, b) => Math.min(a, b)),
+      startTime,
       attributes: {
         ...sharedAttributes,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]:
@@ -684,12 +686,11 @@ const emitForGrouped = ({
       }
     })
 
-    parent.end(times.reduce((a, b) => Math.max(a, b)))
+    parent.end(endTime)
     return
   }
 
-  const [[startMsg, { kind }], [endMsg] = []] = grouped
-
+  const [[startMsg, { kind }]] = grouped
   const attributes = {
     ...sharedAttributes,
     "langfuse.observation.metadata.transcript_jq": startMsg[META].debugExpr,
@@ -699,35 +700,37 @@ const emitForGrouped = ({
     attributes,
   })
 
-  if (
-    grouped.some((pair) => {
-      const [, block] = pair ?? []
-      return block?.category === "tool" && block.error
-    })
-  ) {
+  if (grouped.some(([, block]) => block?.category === "tool" && block.error)) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
-  span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
+  {
+    span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
 
-  for (const pair of grouped) {
-    if (!pair) {
-      continue
+    const input = grouped.find(
+      ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
+    )
+    if (input) {
+      const [, block] = input
+      span.setAttributes({
+        [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
+        [SemanticConventions.INPUT_VALUE]: JSON.stringify(block.value),
+      })
     }
-    const [, block] = pair
 
-    const mimeKey =
-      block.type === SemanticConventions.INPUT_VALUE
-        ? SemanticConventions.INPUT_MIME_TYPE
-        : SemanticConventions.OUTPUT_MIME_TYPE
+    const output = grouped.findLast(
+      ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
+    )
+    if (output) {
+      const [, block] = output
+      span.setAttributes({
+        [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
+        [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(block.value),
+      })
+    }
 
-    span.setAttributes({
-      [mimeKey]: MimeType.JSON,
-      [block.type]: JSON.stringify(block.value),
-    })
+    span.end(endTime)
   }
-
-  span.end(endMsg?.[META].timestamp)
 }
 
 const parseMessages = async function* (
