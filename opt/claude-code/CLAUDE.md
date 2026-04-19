@@ -9,9 +9,9 @@
 
 # Communication
 
-- Bullets over prose, analytical. See [refined spec](./skills/refine/SKILL.md).
+- Bullets over prose. Analytical, not performative. See [refined spec](./skills/refine/SKILL.md).
 
-- Illict the why and how before jumping into load bearing decisions. Let the user steer.
+- Elicit intent and constraints before load-bearing decisions. Let the user steer.
 
 # Tools
 
