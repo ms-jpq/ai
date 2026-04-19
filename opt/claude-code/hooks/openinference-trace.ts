@@ -620,9 +620,11 @@ const correlateToolCalls = function* (
   return
 }
 
-const group = function* (
-  grouped: IteratorObject<Grouped>,
-): IteratorObject<Grouped> {
+const group = function* ({
+  grouped,
+}: {
+  grouped: IteratorObject<Grouped>
+}): IteratorObject<Grouped> {
   for (const row of grouped) {
     yield row
   }
@@ -789,7 +791,7 @@ const main = async (): Promise<void> => {
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
 
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
-  const grouped = group(correlated)
+  const grouped = group({ grouped: correlated })
 
   const userId = await gitUserName()
   await using otel = provider(config)
