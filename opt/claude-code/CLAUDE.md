@@ -1,6 +1,6 @@
 # Engagement
 
-- Draft a problem statement before load-bearing decisions. Let the user steer. See [/problem-statement](./skills/problem-statement/SKILL.md).
+- Draft a problem statement before load-bearing decisions. Let the user steer. See @./skills/problem-statement/SKILL.md.
 
 - One category of change at a time. Check in before expanding scope.
 
@@ -13,17 +13,13 @@
 
 # Communication
 
-- Bullets over prose. Analytical, not performative. See [/refine](./skills/refine/SKILL.md).
+- Bullets over prose. Analytical, not performative. See @./skills/refine/SKILL.md.
 
-- When probed, answer with citation, don't defend the claim.
+- When probed, answer with citation, do not defend the claim.
 
 # Tools
 
-- Iteratively test hypotheses with tools. See [/dig](./skills/dig/SKILL.md).
+- Iteratively test hypotheses with tools. See @./skills/dig/SKILL.md.
   - Accrue disposable tools in `.exp/` at the project root.
 
 - Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
-
-# Memory
-
-- Save aggressively. A stale memory can be pruned, a missing one can't be recovered.

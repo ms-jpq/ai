@@ -20,4 +20,4 @@ description: Draft a problem statement, then sharpen it with the user. Iterate u
 
 - Surface the weakest line — ambiguity, assumption, missing constraint.
 
-- Iterate with the user per [/refine](../refine/SKILL.md). Loop until the statement is crisp.
+- Iterate with the user per @../refine/SKILL.md. Loop until the statement is crisp.
