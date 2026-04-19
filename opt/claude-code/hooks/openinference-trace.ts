@@ -69,7 +69,7 @@ type ExtractedBlock =
 type SourcedBlock = readonly [TranscriptMessage, ExtractedBlock]
 
 type Grouped =
-  | Readonly<{ children: Grouped[] }>
+  | Readonly<{ kind: OpenInferenceSpanKind; children: Grouped[] }>
   | [SourcedBlock, ...SourcedBlock[]]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
@@ -620,12 +620,16 @@ const correlateToolCalls = function* (
   return
 }
 
-const group = function* ({
-  grouped,
-}: {
-  grouped: IteratorObject<Grouped>
-}): IteratorObject<Grouped> {
-  for (const row of grouped) {
+const groupCorrelated = function* (
+  hook: HookInput,
+  correlated: IteratorObject<Grouped>,
+): IteratorObject<Grouped> {
+  if (hook.hook_event_name === "SubagentStop") {
+    yield { kind: OpenInferenceSpanKind.AGENT, children: correlated.toArray() }
+    return
+  }
+
+  for (const row of correlated) {
     yield row
   }
 
@@ -675,8 +679,7 @@ const emitForGrouped = ({
       startTime,
       attributes: {
         ...sharedAttributes,
-        [SemanticConventions.OPENINFERENCE_SPAN_KIND]:
-          OpenInferenceSpanKind.AGENT,
+        [SemanticConventions.OPENINFERENCE_SPAN_KIND]: grouped.kind,
       },
     })
 
@@ -788,7 +791,7 @@ const main = async (): Promise<void> => {
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
 
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
-  const grouped = group({ grouped: correlated })
+  const grouped = groupCorrelated(hook, correlated)
 
   const userId = await gitUserName()
   await using otel = provider(config)
