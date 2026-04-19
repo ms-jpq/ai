@@ -40,7 +40,9 @@ SEP="${BOLD}⏐${RESET}"
 ######################################
 TRACE_INFO=''
 if [[ -n ${LANGFUSE_TRACE_URL:-} ]] && [[ -n ${LANGFUSE_PROJECT:-} ]]; then
-  TRACE_URL="${LANGFUSE_TRACE_URL}/project/${LANGFUSE_PROJECT}/sessions/${SESSION_ID}"
+  LANGFUSE_REST="${LANGFUSE_TRACE_URL#*://}"
+  LANGFUSE_HOST="${LANGFUSE_TRACE_URL%%://*}://${LANGFUSE_REST%%/*}"
+  TRACE_URL="${LANGFUSE_HOST}/project/${LANGFUSE_PROJECT}/sessions/${SESSION_ID}"
   TRACE_INFO="${BOLD}${OSC8}${TRACE_URL}${ST}⌬tel${OSC8}${ST}${ST}${RESET} ${SEP} "
 fi
 ######################################

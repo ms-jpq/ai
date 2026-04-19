@@ -110,7 +110,7 @@ const gitUserName = (): Promise<string> =>
     .then(({ stdout }) => stdout.trim())
     .catch(() => "")
 
-const hookInput = async (): Promise<HookInput | undefined> =>
+const hookInput = async (): Promise<HookInput> =>
   JSON.parse(await text(stdin)) as HookInput
 
 const openState = async (
@@ -604,6 +604,10 @@ const correlateToolCalls = function* (
     const id = block.correlationId
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
+        log({
+          level: "debug",
+          msg: `orphan tool_result: correlationId=${id}`,
+        })
         yield { type: "correlated", correlated: [entry] }
       }
       continue
@@ -611,6 +615,10 @@ const correlateToolCalls = function* (
 
     const mate = acc.get(id)
     if (mate === undefined) {
+      log({
+        level: "debug",
+        msg: `orphan tool_use: correlationId=${id}`,
+      })
       yield { type: "correlated", correlated: [entry] }
       continue
     }
@@ -688,36 +696,26 @@ const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
 }
 
 const attachIO = (span: Span, correlated: readonly SourcedBlock[]) => {
-  {
-    if (
-      correlated.some(([, block]) => block.category === "tool" && block.error)
-    ) {
-      span.setStatus({ code: SpanStatusCode.ERROR })
-    }
+  const input = correlated.find(
+    ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
+  )
+  if (input) {
+    const [, block] = input
+    span.setAttributes({
+      [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
+      [SemanticConventions.INPUT_VALUE]: JSON.stringify(block.value),
+    })
+  }
 
-    {
-      const input = correlated.find(
-        ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
-      )
-      if (input) {
-        const [, block] = input
-        span.setAttributes({
-          [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
-          [SemanticConventions.INPUT_VALUE]: JSON.stringify(block.value),
-        })
-      }
-
-      const output = correlated.findLast(
-        ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
-      )
-      if (output) {
-        const [, block] = output
-        span.setAttributes({
-          [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-          [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(block.value),
-        })
-      }
-    }
+  const output = correlated.findLast(
+    ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
+  )
+  if (output) {
+    const [, block] = output
+    span.setAttributes({
+      [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
+      [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(block.value),
+    })
   }
 }
 
@@ -749,7 +747,7 @@ const emitGrouped = ({
   }
 
   switch (grouped.type) {
-    case "correlated":
+    case "correlated": {
       const [[startMsg, { kind }]] = grouped.correlated
       const span = tracer.startSpan(
         `[${sessionId}] ${startMsg.type}`,
@@ -765,12 +763,21 @@ const emitGrouped = ({
         parentCtx,
       )
 
+      if (
+        grouped.correlated.some(
+          ([, block]) => block.category === "tool" && block.error,
+        )
+      ) {
+        span.setStatus({ code: SpanStatusCode.ERROR })
+      }
+
       attachIO(span, grouped.correlated)
       span.end(endTime)
       return
+    }
     case "grouped": {
       const span = tracer.startSpan(
-        `[${sessionId}] group`,
+        `[${sessionId}] ${grouped.kind.toLowerCase()}`,
         {
           startTime,
           attributes: {
@@ -818,9 +825,17 @@ const parseMessages = async function* (
     lastUuid === undefined ? -1 : messages.findIndex((m) => m.uuid === lastUuid)
   const startIdx = foundIdx + 1
 
+  if (lastUuid !== undefined && foundIdx < 0) {
+    log({
+      level: "info",
+      msg: `lastUuid ${lastUuid} not in transcript — treating as caught up`,
+    })
+    return
+  }
+
   log({
     level: "debug",
-    msg: `messages: ${messages.length}, startIdx: ${startIdx}, found: ${foundIdx >= 0}`,
+    msg: `messages: ${messages.length}, startIdx: ${startIdx}`,
   })
 
   for (const message of messages.values().drop(startIdx)) {
@@ -842,9 +857,6 @@ const main = async (): Promise<void> => {
   }
 
   const [hook, userId] = await Promise.all([hookInput(), gitUserName()])
-  if (!hook) {
-    return
-  }
 
   using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
