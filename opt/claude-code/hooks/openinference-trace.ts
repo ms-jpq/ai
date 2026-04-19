@@ -18,8 +18,8 @@ import {
   OpenInferenceSpanKind,
   SemanticConventions,
 } from "@arizeai/openinference-semantic-conventions"
-import type { Tracer } from "@opentelemetry/api"
-import { SpanStatusCode } from "@opentelemetry/api"
+import type { Context, Tracer } from "@opentelemetry/api"
+import { ROOT_CONTEXT, SpanStatusCode, trace } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
   BasicTracerProvider,
@@ -667,6 +667,7 @@ const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
 
 const emitCorrelated = ({
   tracer,
+  parentCtx,
   sharedAttributes,
   sessionId,
   correlated,
@@ -674,6 +675,7 @@ const emitCorrelated = ({
   endTime,
 }: {
   tracer: Tracer
+  parentCtx: Context
   sharedAttributes: Record<string, unknown>
   sessionId: string
   correlated: readonly [SourcedBlock, ...SourcedBlock[]]
@@ -681,58 +683,63 @@ const emitCorrelated = ({
   endTime: number
 }) => {
   const [[startMsg, { kind }]] = correlated
-  tracer.startActiveSpan(
+  const span = tracer.startSpan(
     `[${sessionId}] ${startMsg.type}`,
-    { startTime },
-    (span) => {
-      span.setAttributes({
+    {
+      startTime,
+      attributes: {
         ...sharedAttributes,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: kind,
         "langfuse.observation.metadata.transcript_jq": startMsg[META].debugExpr,
-      })
-
-      if (
-        correlated.some(([, block]) => block.category === "tool" && block.error)
-      ) {
-        span.setStatus({ code: SpanStatusCode.ERROR })
-      }
-
-      {
-        const input = correlated.find(
-          ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
-        )
-        if (input) {
-          const [, block] = input
-          span.setAttributes({
-            [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
-            [SemanticConventions.INPUT_VALUE]: JSON.stringify(block.value),
-          })
-        }
-
-        const output = correlated.findLast(
-          ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
-        )
-        if (output) {
-          const [, block] = output
-          span.setAttributes({
-            [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-            [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(block.value),
-          })
-        }
-      }
-
-      span.end(endTime)
+      },
     },
+    parentCtx,
   )
+
+  {
+    if (
+      correlated.some(([, block]) => block.category === "tool" && block.error)
+    ) {
+      span.setStatus({ code: SpanStatusCode.ERROR })
+    }
+
+    {
+      const input = correlated.find(
+        ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
+      )
+      if (input) {
+        const [, block] = input
+        span.setAttributes({
+          [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
+          [SemanticConventions.INPUT_VALUE]: JSON.stringify(block.value),
+        })
+      }
+
+      const output = correlated.findLast(
+        ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
+      )
+      if (output) {
+        const [, block] = output
+        span.setAttributes({
+          [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
+          [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(block.value),
+        })
+      }
+    }
+  }
+
+  span.end(endTime)
 }
 
 const emitGrouped = ({
   tracer,
+  parentCtx,
   userId,
   sessionId,
   grouped,
 }: {
   tracer: Tracer
+  parentCtx: Context
   userId: string
   sessionId: string
   grouped: Grouped
@@ -756,6 +763,7 @@ const emitGrouped = ({
     case "correlated":
       emitCorrelated({
         tracer,
+        parentCtx,
         sessionId,
         sharedAttributes,
         startTime,
@@ -763,21 +771,33 @@ const emitGrouped = ({
         correlated: grouped.correlated,
       })
       return
-    case "grouped":
-      tracer.startActiveSpan(`[${sessionId}] agent`, (span) => {
-        span.setAttributes({
-          ...sharedAttributes,
-          [SemanticConventions.OPENINFERENCE_SPAN_KIND satisfies string]:
-            grouped.kind,
+    case "grouped": {
+      const span = tracer.startSpan(
+        `[${sessionId}] agent`,
+        {
+          startTime,
+          attributes: {
+            ...sharedAttributes,
+            [SemanticConventions.OPENINFERENCE_SPAN_KIND]: grouped.kind,
+          },
+        },
+        parentCtx,
+      )
+
+      const childCtx = trace.setSpan(parentCtx, span)
+      for (const child of grouped.children) {
+        emitGrouped({
+          tracer,
+          parentCtx: childCtx,
+          userId,
+          sessionId,
+          grouped: child,
         })
+      }
 
-        for (const child of grouped.children) {
-          emitGrouped({ tracer, userId, sessionId, grouped: child })
-        }
-
-        span.end(endTime)
-      })
+      span.end(endTime)
       return
+    }
     default:
       fail(grouped satisfies never)
   }
@@ -848,6 +868,7 @@ const main = async (): Promise<void> => {
   for (const group of grouped) {
     emitGrouped({
       tracer,
+      parentCtx: ROOT_CONTEXT,
       userId,
       sessionId: hook.session_id,
       grouped: group,
