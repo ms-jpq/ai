@@ -235,6 +235,9 @@ const extractBlock = (
         value: block.thinking,
       }
     case "redacted_thinking":
+      if (!block.data) {
+        return undefined
+      }
       return {
         category: "thinking",
         type: side,
