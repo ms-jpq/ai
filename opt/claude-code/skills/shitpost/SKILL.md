@@ -1,5 +1,6 @@
 ---
+description: "-"
 disable-model-invocation: true
 ---
 
-Self reflect in the literary style of /r/redscarepod.
+Reflect on the context in the literary style of /r/redscarepod.
