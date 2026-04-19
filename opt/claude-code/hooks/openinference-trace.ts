@@ -28,13 +28,11 @@ import {
 import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
-import { dirname, join, resolve } from "node:path"
+import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
 import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
-
-type Conf = Readonly<{ auth: string; host: string }>
 
 type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
 
@@ -112,20 +110,8 @@ const gitUserName = (): Promise<string> =>
     .then(({ stdout }) => stdout.trim())
     .catch(() => "")
 
-const conf = (): Conf | undefined => {
-  const [auth, host] = [env["LANGFUSE_AUTH"], env["LANGFUSE_BASE_URL"]]
-
-  if (!auth || !host) {
-    return undefined
-  }
-
-  return { auth, host }
-}
-
-const hookInput = async (): Promise<HookInput | undefined> => {
-  const data = await text(stdin)
-  return data.trim() ? (JSON.parse(data) as HookInput) : undefined
-}
+const hookInput = async (): Promise<HookInput | undefined> =>
+  JSON.parse(await text(stdin)) as HookInput
 
 const openState = async (
   key: string,
@@ -146,12 +132,17 @@ const openState = async (
   return state
 }
 
-const provider = (
-  config: Conf,
-): AsyncDisposable & { provider: BasicTracerProvider } => {
+const provider = ():
+  | (AsyncDisposable & { provider: BasicTracerProvider })
+  | undefined => {
+  const [auth, url] = [env["LANGFUSE_AUTH"], env["LANGFUSE_TRACE_URL"]]
+  if (!auth || !url) {
+    return undefined
+  }
+
   const exporter = new OTLPTraceExporter({
-    url: join(config.host, `/api/public/otel/v1/traces`),
-    headers: { Authorization: `Basic ${config.auth}` },
+    url,
+    headers: { Authorization: auth },
     timeoutMillis: 10_000,
   })
   const processor = new SimpleSpanProcessor(exporter)
@@ -630,103 +621,28 @@ const correlateToolCalls = function* (
   return
 }
 
-type Phase =
-  | typeof OpenInferenceSpanKind.AGENT
-  | typeof OpenInferenceSpanKind.CHAIN
-  | typeof OpenInferenceSpanKind.LLM
+const groupTurns = function* (
+  entries: IteratorObject<Grouped>,
+): IteratorObject<Grouped> {
+  yield* entries
+  return
+}
 
 const groupHierarchical = function* (
   hook: HookInput,
   entries: IteratorObject<Grouped>,
-  phase: Phase = hook.hook_event_name === "SubagentStop"
-    ? OpenInferenceSpanKind.AGENT
-    : OpenInferenceSpanKind.CHAIN,
 ): IteratorObject<Grouped> {
-  switch (phase) {
-    case OpenInferenceSpanKind.AGENT:
-      yield {
-        type: "grouped",
-        kind: phase,
-        children: groupHierarchical(
-          hook,
-          entries,
-          OpenInferenceSpanKind.CHAIN,
-        ).toArray(),
-      }
-      return
-
-    case OpenInferenceSpanKind.CHAIN: {
-      let bucket: Grouped[] = []
-      const flush = function* (): IteratorObject<Grouped> {
-        if (bucket.length > 0) {
-          yield {
-            type: "grouped",
-            kind: phase,
-            children: groupHierarchical(
-              hook,
-              bucket.values(),
-              OpenInferenceSpanKind.LLM,
-            ).toArray(),
-          }
-        }
-        bucket = []
-        return
-      }
-      for (const entry of entries) {
-        if (
-          entry.type === "correlated" &&
-          entry.correlated[0][0].type === "user"
-        ) {
-          yield* flush()
-        }
-        bucket.push(entry)
-      }
-      yield* flush()
-      return
+  if (hook.hook_event_name === "SubagentStop") {
+    yield {
+      type: "grouped",
+      kind: OpenInferenceSpanKind.CHAIN,
+      children: entries.toArray(),
     }
-
-    case OpenInferenceSpanKind.LLM: {
-      let bucket: Grouped[] = []
-      let uuid: string | undefined
-      const flush = function* (): IteratorObject<Grouped> {
-        if (bucket.length > 0) {
-          yield {
-            type: "grouped",
-            kind: phase,
-            children: bucket,
-          }
-        }
-        bucket = []
-        uuid = undefined
-        return
-      }
-      for (const entry of entries) {
-        const next = (() => {
-          if (entry.type !== "correlated") {
-            return undefined
-          }
-          const [[msg]] = entry.correlated
-          return msg.type === "assistant" ? msg.uuid : undefined
-        })()
-
-        if (next === undefined) {
-          yield* flush()
-          yield entry
-          continue
-        }
-        if (uuid !== undefined && uuid !== next) {
-          yield* flush()
-        }
-        uuid = next
-        bucket.push(entry)
-      }
-      yield* flush()
-      return
-    }
-
-    default:
-      fail(phase satisfies never)
+    return
   }
+
+  yield* groupTurns(entries)
+  return
 }
 
 const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
@@ -827,7 +743,7 @@ const emitGrouped = ({
       return
     case "grouped": {
       const span = tracer.startSpan(
-        `[${sessionId}] agent`,
+        `[${sessionId}] group`,
         {
           startTime,
           attributes: {
@@ -886,19 +802,19 @@ const parseMessages = async function* (
       debugExpr: `jq -e --sort-keys 'select(.uuid == "${message.uuid}")' '${transcriptPath}'`,
     } satisfies TranscriptMeta
 
-    yield Object.assign(message, { [META]: meta })
+    yield { ...message, [META]: meta }
   }
 
   return
 }
 
 const main = async (): Promise<void> => {
-  const config = conf()
-  if (!config) {
+  await using otel = provider()
+  if (!otel) {
     return
   }
 
-  const hook = await hookInput()
+  const [hook, userId] = await Promise.all([hookInput(), gitUserName()])
   if (!hook) {
     return
   }
@@ -916,8 +832,6 @@ const main = async (): Promise<void> => {
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
   const grouped = groupHierarchical(hook, correlated)
 
-  const userId = await gitUserName()
-  await using otel = provider(config)
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
   for (const group of grouped) {
