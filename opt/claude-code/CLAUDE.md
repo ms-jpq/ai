@@ -28,7 +28,7 @@
 
 - Model the system as a series of stages (Input -> Output). Decompose along stage boundaries.
 
-- Types model the domain. Each stage has a single types file, complete enough to describe the problem.
+- Types model the domain. Each stage has a single type definition file, complete enough to describe the problem.
 
 - Transforms or effects. Not both.
 
