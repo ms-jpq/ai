@@ -665,10 +665,11 @@ const emitForGrouped = ({
   }
 
   if (!Array.isArray(grouped)) {
-    const times = groupTimes(grouped).toArray()
-    if (!times.length) {
+    if (!grouped.children.length) {
       return
     }
+
+    const times = groupTimes(grouped).toArray()
 
     const parent = tracer.startSpan(`[${sessionId}] agent`, {
       startTime: times.reduce((a, b) => Math.min(a, b)),
