@@ -632,12 +632,10 @@ const group = function* (
 
 const groupTimes = function* (grouped: Grouped): IteratorObject<number> {
   if (Array.isArray(grouped)) {
-    const [[startMsg], [endMsg] = []] = grouped
-
-    yield startMsg[META].timestamp.getTime()
-    if (endMsg) {
-      yield endMsg[META].timestamp.getTime()
+    for (const [message] of grouped) {
+      yield message[META].timestamp.getTime()
     }
+
     return
   }
 
