@@ -700,7 +700,7 @@ const emitForGrouped = ({
     attributes,
   })
 
-  if (grouped.some(([, block]) => block?.category === "tool" && block.error)) {
+  if (grouped.some(([, block]) => block.category === "tool" && block.error)) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
@@ -804,7 +804,10 @@ const main = async (): Promise<void> => {
     })
   }
 
-  state.uuid = transcriptRows.at(-1)?.uuid
+  const tailUuid = transcriptRows.at(-1)?.uuid
+  if (tailUuid !== undefined) {
+    state.uuid = tailUuid
+  }
 }
 
 await main()
