@@ -68,10 +68,7 @@ type ExtractedBlock =
 
 type SourcedBlock = readonly [TranscriptMessage, ExtractedBlock]
 
-type Correlated = Readonly<{
-  pairs: readonly [SourcedBlock, SourcedBlock | undefined]
-  endTime?: Date
-}>
+type Correlated = readonly [SourcedBlock, SourcedBlock | undefined]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -577,7 +574,7 @@ const extractContent = function* (
   return
 }
 
-const correlatedBlocks = function* (
+const correlateToolCalls = function* (
   extracted: IteratorObject<SourcedBlock>,
 ): IteratorObject<Correlated> {
   const entries = extracted.toArray()
@@ -597,29 +594,25 @@ const correlatedBlocks = function* (
   for (const entry of entries) {
     const [, block] = entry
     if (block.category !== "tool") {
-      yield { pairs: [entry, undefined] }
+      yield [entry, undefined]
       continue
     }
 
     const id = block.correlationId
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
-        yield { pairs: [entry, undefined] }
+        yield [entry, undefined]
       }
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield { pairs: [entry, undefined] }
+      yield [entry, undefined]
       continue
     }
     acc.delete(id)
-    const [mateMessage] = mate
-    yield {
-      pairs: [entry, mate],
-      endTime: mateMessage[META].timestamp,
-    }
+    yield [entry, mate]
   }
 
   return
@@ -636,9 +629,7 @@ const emitSpans = ({
   correlated: Correlated
   prev?: Link
 }): Link => {
-  const {
-    pairs: [[message, { kind }]],
-  } = correlated
+  const [[message, { kind }], [endMessage] = []] = correlated
 
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
@@ -653,7 +644,7 @@ const emitSpans = ({
   })
 
   if (
-    correlated.pairs.some((pair) => {
+    correlated.some((pair) => {
       const [, block] = pair ?? []
       return block?.category === "tool" && block.error
     })
@@ -663,7 +654,7 @@ const emitSpans = ({
 
   span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
 
-  for (const pair of correlated.pairs) {
+  for (const pair of correlated) {
     if (!pair) {
       continue
     }
@@ -680,7 +671,7 @@ const emitSpans = ({
     })
   }
 
-  span.end(correlated.endTime)
+  span.end(endMessage?.[META].timestamp)
   return { context: span.spanContext() }
 }
 
@@ -739,7 +730,7 @@ const main = async (): Promise<void> => {
   await using state = await openState(stateKey)
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
 
-  const blocks = correlatedBlocks(extractContent(transcriptRows.values()))
+  const blocks = correlateToolCalls(extractContent(transcriptRows.values()))
 
   const userId = await gitUserName()
   await using otel = provider(config)
