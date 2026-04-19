@@ -589,6 +589,28 @@ const extractContent = function* (
   return
 }
 
+const groupBuffer = (kind: OpenInferenceSpanKind) => {
+  const acc = new Array<Grouped>()
+  return {
+    push: (...group: Grouped[]) => acc.push(...group),
+    pop: function* (flatten = false): IteratorObject<Grouped> {
+      if (acc.length) {
+        if (acc.length === 1 || flatten) {
+          yield* acc
+        } else {
+          yield {
+            type: "grouped",
+            kind,
+            children: [...acc],
+          }
+        }
+      }
+      acc.length = 0
+      return
+    },
+  }
+}
+
 const correlateToolCalls = function* (
   extracted: IteratorObject<SourcedBlock>,
 ): IteratorObject<Grouped> {
@@ -638,7 +660,7 @@ const soleCategory = (
 const consolidateThinking = function* (
   entries: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
-  const acc = new Array<Grouped>()
+  const acc = groupBuffer(OpenInferenceSpanKind.LLM)
 
   for (const entry of entries) {
     const category = soleCategory(entry)
@@ -647,21 +669,17 @@ const consolidateThinking = function* (
       continue
     }
 
-    if (category === "text" && acc.length) {
-      yield {
-        type: "grouped",
-        kind: OpenInferenceSpanKind.LLM,
-        children: [...acc, entry],
-      }
-      acc.length = 0
+    if (category === "text") {
+      acc.push(entry)
+      yield* acc.pop()
       continue
     }
 
-    yield* acc
-    acc.length = 0
+    yield* acc.pop(true)
     yield entry
   }
-  yield* acc
+
+  yield* acc.pop(true)
   return
 }
 
@@ -676,30 +694,15 @@ const isUserTurnStart = (entry: Grouped): boolean => {
 const groupTurns = function* (
   entries: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
-  const acc: Grouped[] = []
-  const flush = function* (): IteratorObject<Grouped> {
-    if (acc.length) {
-      if (acc.length === 1) {
-        yield* acc
-      } else {
-        yield {
-          type: "grouped",
-          kind: OpenInferenceSpanKind.CHAIN,
-          children: [...acc],
-        }
-      }
-    }
-    acc.length = 0
-    return
-  }
+  const acc = groupBuffer(OpenInferenceSpanKind.CHAIN)
 
   for (const entry of entries) {
     if (isUserTurnStart(entry)) {
-      yield* flush()
+      yield* acc.pop()
     }
     acc.push(entry)
   }
-  yield* flush()
+  yield* acc.pop()
   return
 }
 
