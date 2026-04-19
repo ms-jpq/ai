@@ -66,9 +66,10 @@ type ExtractedBlock =
       error?: boolean
     })
 
+type SourcedBlock = readonly [TranscriptMessage, ExtractedBlock]
+
 type Correlated = Readonly<{
-  message: TranscriptMessage
-  blocks: readonly [ExtractedBlock, ExtractedBlock | undefined]
+  pairs: readonly [SourcedBlock, SourcedBlock | undefined]
   endTime?: Date
 }>
 
@@ -563,7 +564,7 @@ const extractBlock = (
 
 const extractContent = function* (
   messages: IteratorObject<TranscriptMessage>,
-): IteratorObject<[TranscriptMessage, ExtractedBlock]> {
+): IteratorObject<SourcedBlock> {
   for (const message of messages) {
     for (const block of contents(message)) {
       const extracted = extractBlock(message.type, block)
@@ -577,12 +578,12 @@ const extractContent = function* (
 }
 
 const correlatedBlocks = function* (
-  extracted: IteratorObject<[TranscriptMessage, ExtractedBlock]>,
+  extracted: IteratorObject<SourcedBlock>,
 ): IteratorObject<Correlated> {
-  const blocks = extracted.toArray()
+  const entries = extracted.toArray()
 
-  const acc = new Map<string | undefined, [TranscriptMessage, ExtractedBlock]>()
-  for (const entry of blocks) {
+  const acc = new Map<string | undefined, SourcedBlock>()
+  for (const entry of entries) {
     const [, block] = entry
     if (
       block.category === "tool" &&
@@ -593,39 +594,30 @@ const correlatedBlocks = function* (
     }
   }
 
-  for (const [message, block] of blocks) {
+  for (const entry of entries) {
+    const [, block] = entry
     if (block.category !== "tool") {
-      yield {
-        message,
-        blocks: [block, undefined],
-      }
+      yield { pairs: [entry, undefined] }
       continue
     }
 
     const id = block.correlationId
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
-        yield {
-          message,
-          blocks: [block, undefined],
-        }
+        yield { pairs: [entry, undefined] }
       }
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield {
-        message,
-        blocks: [block, undefined],
-      }
+      yield { pairs: [entry, undefined] }
       continue
     }
     acc.delete(id)
-    const [mateMessage, mateBlock] = mate
+    const [mateMessage] = mate
     yield {
-      message,
-      blocks: [block, mateBlock],
+      pairs: [entry, mate],
       endTime: mateMessage[META].timestamp,
     }
   }
@@ -645,8 +637,7 @@ const emitSpans = ({
   prev?: Link
 }): Link => {
   const {
-    message,
-    blocks: [{ kind }],
+    pairs: [[message, { kind }]],
   } = correlated
 
   const attributes = {
@@ -661,16 +652,22 @@ const emitSpans = ({
     links: prev ? [prev] : [],
   })
 
-  if (correlated.blocks.some((b) => b?.category === "tool" && b.error)) {
+  if (
+    correlated.pairs.some((pair) => {
+      const [, block] = pair ?? []
+      return block?.category === "tool" && block.error
+    })
+  ) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
   span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
 
-  for (const block of correlated.blocks) {
-    if (!block) {
+  for (const pair of correlated.pairs) {
+    if (!pair) {
       continue
     }
+    const [, block] = pair
 
     const mimeKey =
       block.type === SemanticConventions.INPUT_VALUE
