@@ -70,7 +70,7 @@ type SourcedBlock = readonly [TranscriptMessage, ExtractedBlock]
 
 type Grouped =
   | Readonly<{ children: Grouped[] }>
-  | [SourcedBlock, SourcedBlock | undefined]
+  | [SourcedBlock, ...SourcedBlock[]]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -596,21 +596,21 @@ const correlateToolCalls = function* (
   for (const entry of entries) {
     const [, block] = entry
     if (block.category !== "tool") {
-      yield [entry, undefined]
+      yield [entry]
       continue
     }
 
     const id = block.correlationId
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
-        yield [entry, undefined]
+        yield [entry]
       }
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield [entry, undefined]
+      yield [entry]
       continue
     }
     acc.delete(id)
@@ -650,14 +650,17 @@ const groupTimes = function* (grouped: Grouped): IteratorObject<number> {
 const emitForGrouped = ({
   tracer,
   userId,
+  sessionId,
   grouped,
 }: {
   tracer: Tracer
   userId: string
+  sessionId: string
   grouped: Grouped
 }): void => {
   const sharedAttributes = {
     [SemanticConventions.USER_ID]: userId,
+    [SemanticConventions.SESSION_ID]: sessionId,
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
   }
 
@@ -678,7 +681,7 @@ const emitForGrouped = ({
 
     context.with(trace.setSpan(context.active(), parent), () => {
       for (const child of grouped.children) {
-        emitForGrouped({ tracer, userId, grouped: child })
+        emitForGrouped({ tracer, userId, sessionId, grouped: child })
       }
     })
 
@@ -690,10 +693,9 @@ const emitForGrouped = ({
 
   const attributes = {
     ...sharedAttributes,
-    [SemanticConventions.SESSION_ID]: startMsg.session_id,
     "langfuse.observation.metadata.transcript_jq": startMsg[META].debugExpr,
   }
-  const span = tracer.startSpan(`[${startMsg.session_id}] ${startMsg.type}`, {
+  const span = tracer.startSpan(`[${sessionId}] ${startMsg.type}`, {
     startTime: startMsg[META].timestamp.getTime(),
     attributes,
   })
@@ -792,7 +794,12 @@ const main = async (): Promise<void> => {
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
   for (const group of grouped) {
-    emitForGrouped({ tracer, userId, grouped: group })
+    emitForGrouped({
+      tracer,
+      userId,
+      sessionId: hook.session_id,
+      grouped: group,
+    })
   }
 
   state.uuid = transcriptRows.at(-1)?.uuid
