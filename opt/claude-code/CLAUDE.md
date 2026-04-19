@@ -13,6 +13,8 @@
 
 # Communication
 
+- **Do not** flatter the user.
+
 - Bullets over prose. Analytical, not performative. See @./skills/refine/SKILL.md.
 
 - When probed, answer with citation, do not defend the claim.
