@@ -630,24 +630,103 @@ const correlateToolCalls = function* (
   return
 }
 
+type Phase =
+  | typeof OpenInferenceSpanKind.AGENT
+  | typeof OpenInferenceSpanKind.CHAIN
+  | typeof OpenInferenceSpanKind.LLM
+
 const groupHierarchical = function* (
   hook: HookInput,
-  correlated: IteratorObject<Grouped>,
+  entries: IteratorObject<Grouped>,
+  phase: Phase = hook.hook_event_name === "SubagentStop"
+    ? OpenInferenceSpanKind.AGENT
+    : OpenInferenceSpanKind.CHAIN,
 ): IteratorObject<Grouped> {
-  if (hook.hook_event_name === "SubagentStop") {
-    yield {
-      type: "grouped",
-      kind: OpenInferenceSpanKind.AGENT,
-      children: correlated.toArray(),
+  switch (phase) {
+    case OpenInferenceSpanKind.AGENT:
+      yield {
+        type: "grouped",
+        kind: phase,
+        children: groupHierarchical(
+          hook,
+          entries,
+          OpenInferenceSpanKind.CHAIN,
+        ).toArray(),
+      }
+      return
+
+    case OpenInferenceSpanKind.CHAIN: {
+      let bucket: Grouped[] = []
+      const flush = function* (): IteratorObject<Grouped> {
+        if (bucket.length > 0) {
+          yield {
+            type: "grouped",
+            kind: phase,
+            children: groupHierarchical(
+              hook,
+              bucket.values(),
+              OpenInferenceSpanKind.LLM,
+            ).toArray(),
+          }
+        }
+        bucket = []
+        return
+      }
+      for (const entry of entries) {
+        if (
+          entry.type === "correlated" &&
+          entry.correlated[0][0].type === "user"
+        ) {
+          yield* flush()
+        }
+        bucket.push(entry)
+      }
+      yield* flush()
+      return
     }
-    return
-  }
 
-  for (const row of correlated) {
-    yield row
-  }
+    case OpenInferenceSpanKind.LLM: {
+      let bucket: Grouped[] = []
+      let uuid: string | undefined
+      const flush = function* (): IteratorObject<Grouped> {
+        if (bucket.length > 0) {
+          yield {
+            type: "grouped",
+            kind: phase,
+            children: bucket,
+          }
+        }
+        bucket = []
+        uuid = undefined
+        return
+      }
+      for (const entry of entries) {
+        const next = (() => {
+          if (entry.type !== "correlated") {
+            return undefined
+          }
+          const [[msg]] = entry.correlated
+          return msg.type === "assistant" ? msg.uuid : undefined
+        })()
 
-  return
+        if (next === undefined) {
+          yield* flush()
+          yield entry
+          continue
+        }
+        if (uuid !== undefined && uuid !== next) {
+          yield* flush()
+        }
+        uuid = next
+        bucket.push(entry)
+      }
+      yield* flush()
+      return
+    }
+
+    default:
+      fail(phase satisfies never)
+  }
 }
 
 const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
