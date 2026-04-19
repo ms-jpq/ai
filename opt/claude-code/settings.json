@@ -3,7 +3,6 @@
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "stable",
-  "disableDeepLinkRegistration": "disable",
   "effortLevel": "high",
   "enabledPlugins": {},
   "env": {
@@ -615,7 +614,6 @@
       "allowedDomains": []
     }
   },
-  "showThinkingSummaries": true,
   "spinnerTipsEnabled": false,
   "spinnerVerbs": {
     "mode": "replace",
@@ -675,7 +673,6 @@
     "type": "command"
   },
   "teammateMode": "in-process",
-  "voiceEnabled": false,
   "worktree": {
     "symlinkDirectories": [
       ".cache/",
