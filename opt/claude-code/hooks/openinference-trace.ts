@@ -37,10 +37,12 @@ import { promisify } from "node:util"
 type Conf = Readonly<{ auth: string; host: string }>
 
 type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
+
 type TranscriptMeta = Readonly<{
   timestamp: Date
   debugExpr: string
 }>
+
 const META: unique symbol = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
   SessionMessage & {
@@ -68,9 +70,17 @@ type ExtractedBlock =
 
 type SourcedBlock = readonly [TranscriptMessage, ExtractedBlock]
 
-type Grouped =
-  | Readonly<{ kind: OpenInferenceSpanKind; children: Grouped[] }>
-  | [SourcedBlock, ...SourcedBlock[]]
+type Grouped = Readonly<
+  | {
+      type: "grouped"
+      kind: OpenInferenceSpanKind
+      children: readonly Grouped[]
+    }
+  | {
+      type: "correlated"
+      correlated: readonly [SourcedBlock, ...SourcedBlock[]]
+    }
+>
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -596,25 +606,25 @@ const correlateToolCalls = function* (
   for (const entry of entries) {
     const [, block] = entry
     if (block.category !== "tool" || block.correlationId === undefined) {
-      yield [entry]
+      yield { type: "correlated", correlated: [entry] }
       continue
     }
 
     const id = block.correlationId
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
-        yield [entry]
+        yield { type: "correlated", correlated: [entry] }
       }
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield [entry]
+      yield { type: "correlated", correlated: [entry] }
       continue
     }
     acc.delete(id)
-    yield [entry, mate]
+    yield { type: "correlated", correlated: [entry, mate] }
   }
 
   return
@@ -625,7 +635,11 @@ const groupCorrelated = function* (
   correlated: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
-    yield { kind: OpenInferenceSpanKind.AGENT, children: correlated.toArray() }
+    yield {
+      type: "grouped",
+      kind: OpenInferenceSpanKind.AGENT,
+      children: correlated.toArray(),
+    }
     return
   }
 
@@ -637,33 +651,36 @@ const groupCorrelated = function* (
 }
 
 const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
-  if (Array.isArray(grouped)) {
-    yield* grouped
-    return
+  switch (grouped.type) {
+    case "correlated":
+      yield* grouped.correlated
+      return
+    case "grouped":
+      for (const child of grouped.children) {
+        yield* iterGrouped(child)
+      }
+      return
+    default:
+      fail(grouped satisfies never)
   }
-
-  for (const child of grouped.children) {
-    yield* iterGrouped(child)
-  }
-  return
 }
 
-const emit = ({
+const emitCorrelated = ({
   tracer,
   sharedAttributes,
   sessionId,
-  grouped,
+  correlated,
   startTime,
   endTime,
 }: {
   tracer: Tracer
   sharedAttributes: Record<string, unknown>
   sessionId: string
-  grouped: [SourcedBlock, ...SourcedBlock[]]
+  correlated: readonly [SourcedBlock, ...SourcedBlock[]]
   startTime: number
   endTime: number
 }) => {
-  const [[startMsg, { kind }]] = grouped
+  const [[startMsg, { kind }]] = correlated
   tracer.startActiveSpan(
     `[${sessionId}] ${startMsg.type}`,
     { startTime },
@@ -675,13 +692,13 @@ const emit = ({
       })
 
       if (
-        grouped.some(([, block]) => block.category === "tool" && block.error)
+        correlated.some(([, block]) => block.category === "tool" && block.error)
       ) {
         span.setStatus({ code: SpanStatusCode.ERROR })
       }
 
       {
-        const input = grouped.find(
+        const input = correlated.find(
           ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
         )
         if (input) {
@@ -692,7 +709,7 @@ const emit = ({
           })
         }
 
-        const output = grouped.findLast(
+        const output = correlated.findLast(
           ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
         )
         if (output) {
@@ -709,7 +726,7 @@ const emit = ({
   )
 }
 
-const emitForGrouped = ({
+const emitGrouped = ({
   tracer,
   userId,
   sessionId,
@@ -735,24 +752,35 @@ const emitForGrouped = ({
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
   }
 
-  if (Array.isArray(grouped)) {
-    emit({ tracer, sessionId, sharedAttributes, startTime, endTime, grouped })
-    return
+  switch (grouped.type) {
+    case "correlated":
+      emitCorrelated({
+        tracer,
+        sessionId,
+        sharedAttributes,
+        startTime,
+        endTime,
+        correlated: grouped.correlated,
+      })
+      return
+    case "grouped":
+      tracer.startActiveSpan(`[${sessionId}] agent`, (span) => {
+        span.setAttributes({
+          ...sharedAttributes,
+          [SemanticConventions.OPENINFERENCE_SPAN_KIND satisfies string]:
+            grouped.kind,
+        })
+
+        for (const child of grouped.children) {
+          emitGrouped({ tracer, userId, sessionId, grouped: child })
+        }
+
+        span.end(endTime)
+      })
+      return
+    default:
+      fail(grouped satisfies never)
   }
-
-  tracer.startActiveSpan(`[${sessionId}] agent`, (span) => {
-    span.setAttributes({
-      ...sharedAttributes,
-      [SemanticConventions.OPENINFERENCE_SPAN_KIND satisfies string]:
-        grouped.kind,
-    })
-
-    for (const child of grouped.children) {
-      emitForGrouped({ tracer, userId, sessionId, grouped: child })
-    }
-
-    span.end(endTime)
-  })
 }
 
 const parseMessages = async function* (
@@ -818,7 +846,7 @@ const main = async (): Promise<void> => {
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
   for (const group of grouped) {
-    emitForGrouped({
+    emitGrouped({
       tracer,
       userId,
       sessionId: hook.session_id,
