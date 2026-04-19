@@ -632,17 +632,14 @@ const group = function* ({
   return
 }
 
-const groupTimes = function* (grouped: Grouped): IteratorObject<number> {
+const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
   if (Array.isArray(grouped)) {
-    for (const [message] of grouped) {
-      yield message[META].timestamp.getTime()
-    }
-
+    yield* grouped
     return
   }
 
   for (const child of grouped.children) {
-    yield* groupTimes(child)
+    yield* iterGrouped(child)
   }
   return
 }
@@ -658,19 +655,20 @@ const emitForGrouped = ({
   sessionId: string
   grouped: Grouped
 }): void => {
+  const times = iterGrouped(grouped)
+    .map(([m]) => m[META].timestamp.getTime())
+    .toArray()
+  if (!times.length) {
+    return
+  }
+
+  const startTime = Math.min(...times)
+  const endTime = Math.max(...times)
   const sharedAttributes = {
     [SemanticConventions.USER_ID]: userId,
     [SemanticConventions.SESSION_ID]: sessionId,
     [SemanticConventions.TAG_TAGS]: ["claude-code"],
   }
-
-  const times = groupTimes(grouped).toArray()
-  if (!times.length) {
-    return
-  }
-
-  const startTime = times.reduce((a, b) => Math.min(a, b))
-  const endTime = times.reduce((a, b) => Math.max(a, b))
 
   if (!Array.isArray(grouped)) {
     const parent = tracer.startSpan(`[${sessionId}] agent`, {
