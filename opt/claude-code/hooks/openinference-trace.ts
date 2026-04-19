@@ -630,7 +630,7 @@ const correlateToolCalls = function* (
   return
 }
 
-const groupCorrelated = function* (
+const groupHierarchical = function* (
   hook: HookInput,
   correlated: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
@@ -835,7 +835,7 @@ const main = async (): Promise<void> => {
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
 
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
-  const grouped = groupCorrelated(hook, correlated)
+  const grouped = groupHierarchical(hook, correlated)
 
   const userId = await gitUserName()
   await using otel = provider(config)
