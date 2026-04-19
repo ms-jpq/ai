@@ -76,6 +76,7 @@ type Grouped = Readonly<
     }
   | {
       type: "correlated"
+      orphaned?: "tool_use" | "tool_result"
       correlated: readonly [SourcedBlock, ...SourcedBlock[]]
     }
 >
@@ -604,22 +605,18 @@ const correlateToolCalls = function* (
     const id = block.correlationId
     if (block.type === SemanticConventions.OUTPUT_VALUE) {
       if (acc.delete(id)) {
-        log({
-          level: "debug",
-          msg: `orphan tool_result: correlationId=${id}`,
-        })
-        yield { type: "correlated", correlated: [entry] }
+        yield {
+          type: "correlated",
+          orphaned: "tool_result",
+          correlated: [entry],
+        }
       }
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      log({
-        level: "debug",
-        msg: `orphan tool_use: correlationId=${id}`,
-      })
-      yield { type: "correlated", correlated: [entry] }
+      yield { type: "correlated", orphaned: "tool_use", correlated: [entry] }
       continue
     }
     acc.delete(id)
