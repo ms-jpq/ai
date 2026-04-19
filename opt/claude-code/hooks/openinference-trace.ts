@@ -684,7 +684,7 @@ const consolidateThinking = function* (
   return
 }
 
-const isUserTurnStart = (entry: Grouped): boolean => {
+const isTurnStart = (entry: Grouped): boolean => {
   if (entry.type !== "correlated") {
     return false
   }
@@ -698,7 +698,7 @@ const groupTurns = function* (
   const acc = groupBuffer(OpenInferenceSpanKind.CHAIN)
 
   for (const entry of entries) {
-    if (isUserTurnStart(entry)) {
+    if (isTurnStart(entry)) {
       yield* acc.pop()
     }
     acc.push(entry)
