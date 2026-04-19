@@ -1,8 +1,8 @@
 ---
-description: Enumerate the problem before acting. Ask the user to steer.
+description: Draft a problem statement, then sharpen it with the user. Iterate until crisp.
 ---
 
-# Enumerate
+# Draft
 
 - Problem: what are you solving?
 
@@ -14,10 +14,10 @@ description: Enumerate the problem before acting. Ask the user to steer.
 
 - Approach: the high-level direction you're leaning.
 
-# Visualize
-
 - Draw a diagram if it clarifies. Mermaid preferred.
 
-# Steer
+# Sharpen
 
-- Ask the user to confirm, redirect, or fill gaps.
+- Surface the weakest line — ambiguity, assumption, missing constraint.
+
+- Iterate with the user per [/refine](../refine/SKILL.md). Loop until the statement is crisp.
