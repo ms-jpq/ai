@@ -18,8 +18,8 @@ import {
   OpenInferenceSpanKind,
   SemanticConventions,
 } from "@arizeai/openinference-semantic-conventions"
-import type { Link, Tracer } from "@opentelemetry/api"
-import { SpanStatusCode } from "@opentelemetry/api"
+import type { Tracer } from "@opentelemetry/api"
+import { SpanStatusCode, context, trace } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
   BasicTracerProvider,
@@ -68,7 +68,9 @@ type ExtractedBlock =
 
 type SourcedBlock = readonly [TranscriptMessage, ExtractedBlock]
 
-type Correlated = readonly [SourcedBlock, SourcedBlock | undefined]
+type Grouped =
+  | Readonly<{ children: Grouped[] }>
+  | [SourcedBlock, SourcedBlock | undefined]
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -576,7 +578,7 @@ const extractContent = function* (
 
 const correlateToolCalls = function* (
   extracted: IteratorObject<SourcedBlock>,
-): IteratorObject<Correlated> {
+): IteratorObject<Grouped> {
   const entries = extracted.toArray()
 
   const acc = new Map<string | undefined, SourcedBlock>()
@@ -618,18 +620,69 @@ const correlateToolCalls = function* (
   return
 }
 
-const emitSpans = ({
+const group = function* (
+  grouped: IteratorObject<Grouped>,
+): IteratorObject<Grouped> {
+  for (const row of grouped) {
+    yield row
+  }
+
+  return
+}
+
+const groupTimes = function* (grouped: Grouped): IteratorObject<number> {
+  if (Array.isArray(grouped)) {
+    const [[startMsg], [endMsg] = []] = grouped
+
+    yield startMsg[META].timestamp.getTime()
+    if (endMsg) {
+      yield endMsg[META].timestamp.getTime()
+    }
+    return
+  }
+
+  for (const child of grouped.children) {
+    yield* groupTimes(child)
+  }
+  return
+}
+
+const emitForGrouped = ({
   tracer,
   userId,
-  correlated,
-  prev,
+  grouped,
 }: {
   tracer: Tracer
   userId: string
-  correlated: Correlated
-  prev?: Link
-}): Link => {
-  const [[message, { kind }], [endMessage] = []] = correlated
+  grouped: Grouped
+}): void => {
+  if (!Array.isArray(grouped)) {
+    const times = groupTimes(grouped).toArray()
+    if (!times.length) {
+      return
+    }
+
+    const parent = tracer.startSpan("group", {
+      startTime: times.reduce((a, b) => Math.min(a, b)),
+      attributes: {
+        [SemanticConventions.USER_ID]: userId,
+        [SemanticConventions.OPENINFERENCE_SPAN_KIND]:
+          OpenInferenceSpanKind.AGENT,
+        [SemanticConventions.TAG_TAGS]: ["claude-code"],
+      },
+    })
+
+    context.with(trace.setSpan(context.active(), parent), () => {
+      for (const child of grouped.children) {
+        emitForGrouped({ tracer, userId, grouped: child })
+      }
+    })
+
+    parent.end(times.reduce((a, b) => Math.max(a, b)))
+    return
+  }
+
+  const [[message, { kind }], [endMessage] = []] = grouped
 
   const attributes = {
     [SemanticConventions.USER_ID]: userId,
@@ -640,11 +693,10 @@ const emitSpans = ({
   const span = tracer.startSpan(`[${message.session_id}] ${message.type}`, {
     startTime: message[META].timestamp.getTime(),
     attributes,
-    links: prev ? [prev] : [],
   })
 
   if (
-    correlated.some((pair) => {
+    grouped.some((pair) => {
       const [, block] = pair ?? []
       return block?.category === "tool" && block.error
     })
@@ -654,7 +706,7 @@ const emitSpans = ({
 
   span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
 
-  for (const pair of correlated) {
+  for (const pair of grouped) {
     if (!pair) {
       continue
     }
@@ -672,7 +724,6 @@ const emitSpans = ({
   }
 
   span.end(endMessage?.[META].timestamp)
-  return { context: span.spanContext() }
 }
 
 const parseMessages = async function* (
@@ -730,15 +781,15 @@ const main = async (): Promise<void> => {
   await using state = await openState(stateKey)
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
 
-  const blocks = correlateToolCalls(extractContent(transcriptRows.values()))
+  const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
+  const grouped = group(correlated)
 
   const userId = await gitUserName()
   await using otel = provider(config)
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
-  let prev: Link | undefined
-  for (const correlated of blocks) {
-    prev = emitSpans({ tracer, userId, correlated, prev })
+  for (const group of grouped) {
+    emitForGrouped({ tracer, userId, grouped: group })
   }
 
   state.uuid = transcriptRows.at(-1)?.uuid
