@@ -60,6 +60,7 @@ type BaseExtractedBlock = Readonly<{
 
 type ExtractedBlock =
   | (BaseExtractedBlock & { category: "text" })
+  | (BaseExtractedBlock & { category: "thinking" })
   | (BaseExtractedBlock & {
       category: "tool"
       correlationId: string | undefined
@@ -224,14 +225,14 @@ const extractBlock = (
         return undefined
       }
       return {
-        category: "text",
+        category: "thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.thinking,
       }
     case "redacted_thinking":
       return {
-        category: "text",
+        category: "thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.data,
@@ -626,6 +627,47 @@ const correlateToolCalls = function* (
   return
 }
 
+const soleCategory = (
+  grouped: Grouped,
+): ExtractedBlock["category"] | undefined => {
+  const members = iterGrouped(grouped).toArray()
+  if (members.length !== 1) {
+    return undefined
+  }
+  const [[_, block] = []] = members
+  return block?.category
+}
+
+const consolidateThinking = function* (
+  entries: IteratorObject<Grouped>,
+): IteratorObject<Grouped> {
+  const acc = new Array<Grouped>()
+
+  for (const entry of entries) {
+    const category = soleCategory(entry)
+    if (category === "thinking") {
+      acc.push(entry)
+      continue
+    }
+
+    if (category === "text" && acc.length) {
+      yield {
+        type: "grouped",
+        kind: OpenInferenceSpanKind.LLM,
+        children: [...acc, entry],
+      }
+      acc.length = 0
+      continue
+    }
+
+    yield* acc
+    acc.length = 0
+    yield entry
+  }
+  yield* acc
+  return
+}
+
 const isUserTurnStart = (entry: Grouped): boolean => {
   if (entry.type !== "correlated") {
     return false
@@ -866,7 +908,8 @@ const main = async (): Promise<void> => {
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
 
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
-  const grouped = groupHierarchical(hook, correlated)
+  const consolidated = consolidateThinking(correlated)
+  const grouped = groupHierarchical(hook, consolidated)
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
