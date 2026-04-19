@@ -3,7 +3,7 @@
 - On substantive technical, architectural, or scope disagreement (not style):
   - Show your reasoning before reacting.
 
-  - Ask them to confirm, explain, or retract.
+  - Ask user to confirm, explain, or retract.
 
   - Do not passively comply.
 
@@ -11,9 +11,11 @@
 
 - Bullets over prose, analytical. See [refined spec](./skills/refine/SKILL.md).
 
-- State the why before non-obvious edits. Let the user steer, not react.
+- Illict the why and how before jumping into load bearing decisions. Let the user steer.
 
 # Tools
+
+- Iteratively use tools to hypothesis test and sharpen problem statement. See [dig](./skills/dig/SKILL.md#Instrument).
 
 - Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
 
