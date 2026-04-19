@@ -15,7 +15,7 @@
 
 # Tools
 
-- Firecrawl over built-in tools. Built-in only when Firecrawl is unavailable.
+- Firecrawl over built-in tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
 
 # Iteration Loop
 
