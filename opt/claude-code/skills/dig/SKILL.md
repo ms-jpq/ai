@@ -1,5 +1,5 @@
 ---
-description: Hypothesis test by instrumenting and observing. Write disposable tools — don't theorize.
+description: Hypothesis test by experimenting. Write disposable tools — don't theorize.
 ---
 
 # Clarify
@@ -10,28 +10,18 @@ description: Hypothesis test by instrumenting and observing. Write disposable to
 
 - If the direction is vague, propose 2–3 candidate hypotheses. Ask which to dig first.
 
-# Instrument
+# Experiment
 
-- Write a disposable tool that produces observable evidence. `tmp/claude/<name>.{sh,jq,ts,py}`.
-
-- Does the tool's output cleanly distinguish confirm from refute?
-
-- Prefer small scripts.
+- Write disposable tools that produces observable evidence. Prefer small scripts.
 
 - Describe what you're about to run before running it — one sentence, so the user can redirect.
 
-# Observe
-
-- Run it. Quote the output verbatim.
-
-- If the answer is unclear or surprising, instrument more before concluding.
+- Quote the output verbatim.
 
 # Conclude
 
-- Result: confirmed / refuted / inconclusive.
-
-- Evidence: quoted output.
+- Report: result (confirmed / refuted / inconclusive) with quoted evidence.
 
 - If refuted or inconclusive, propose 1–3 follow-up hypotheses. Ask which to dig next.
 
-- Don't ship a fix. If you added diagnostic edits to application code, revert them.
+- Don't ship a fix. Revert any diagnostic edits.
