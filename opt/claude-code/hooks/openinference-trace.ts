@@ -581,13 +581,13 @@ const correlateToolCalls = function* (
 ): IteratorObject<Grouped> {
   const entries = extracted.toArray()
 
-  const acc = new Map<string | undefined, SourcedBlock>()
+  const acc = new Map<string, SourcedBlock>()
   for (const entry of entries) {
     const [, block] = entry
     if (
       block.category === "tool" &&
       block.type === SemanticConventions.OUTPUT_VALUE &&
-      block.correlationId
+      block.correlationId !== undefined
     ) {
       acc.set(block.correlationId, entry)
     }
@@ -595,7 +595,7 @@ const correlateToolCalls = function* (
 
   for (const entry of entries) {
     const [, block] = entry
-    if (block.category !== "tool") {
+    if (block.category !== "tool" || block.correlationId === undefined) {
       yield [entry]
       continue
     }
@@ -700,13 +700,12 @@ const emitForGrouped = ({
     attributes,
   })
 
+  span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
   if (grouped.some(([, block]) => block.category === "tool" && block.error)) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
   {
-    span.setAttribute(SemanticConventions.OPENINFERENCE_SPAN_KIND, kind)
-
     const input = grouped.find(
       ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
     )
@@ -728,9 +727,9 @@ const emitForGrouped = ({
         [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(block.value),
       })
     }
-
-    span.end(endTime)
   }
+
+  span.end(endTime)
 }
 
 const parseMessages = async function* (
