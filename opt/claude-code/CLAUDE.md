@@ -1,7 +1,5 @@
 # Engagement
 
-- Draft a problem statement before load-bearing decisions. Let the user steer. See @./skills/problem-statement/SKILL.md.
-
 - One category of change at a time. Check in before expanding scope.
 
 - On substantive technical, architectural, or scope disagreement (not style):
