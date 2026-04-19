@@ -35,6 +35,7 @@ import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
 type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
+type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
 
 type TranscriptMeta = Readonly<{
   timestamp: Date
@@ -67,7 +68,10 @@ type ExtractedBlock =
       error?: boolean
     })
 
-type SourcedBlock = readonly [TranscriptMessage, ExtractedBlock]
+type SourcedBlock = readonly [
+  TranscriptMessage,
+  ExtractedBlock & { [META]: { block: BlockType } },
+]
 
 type Grouped = Readonly<
   | {
@@ -571,7 +575,8 @@ const extractContent = function* (
     for (const block of contents(message)) {
       const extracted = extractBlock(message.type, block)
       if (extracted) {
-        yield [message, extracted]
+        const blockType = typeof block === "string" ? "string" : block.type
+        yield [message, { ...extracted, [META]: { block: blockType } }]
       }
     }
   }
@@ -682,10 +687,14 @@ const groupTurns = function* (
   const acc: Grouped[] = []
   const flush = function* (): IteratorObject<Grouped> {
     if (acc.length) {
-      yield {
-        type: "grouped",
-        kind: OpenInferenceSpanKind.CHAIN,
-        children: [...acc],
+      if (acc.length === 1) {
+        yield* acc
+      } else {
+        yield {
+          type: "grouped",
+          kind: OpenInferenceSpanKind.CHAIN,
+          children: [...acc],
+        }
       }
     }
     acc.length = 0
@@ -702,7 +711,7 @@ const groupTurns = function* (
   return
 }
 
-const groupHierarchical = function* (
+const groupChains = function* (
   hook: HookInput,
   entries: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
@@ -797,6 +806,9 @@ const emitGrouped = ({
             [SemanticConventions.OPENINFERENCE_SPAN_KIND]: kind,
             "langfuse.observation.metadata.transcript_jq":
               startMsg[META].debugExpr,
+            "langfuse.observation.metadata.block_types": grouped.correlated.map(
+              ([, block]) => block[META].block,
+            ),
           },
         },
         parentCtx,
@@ -909,7 +921,7 @@ const main = async (): Promise<void> => {
 
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
   const consolidated = consolidateThinking(correlated)
-  const grouped = groupHierarchical(hook, consolidated)
+  const grouped = groupChains(hook, consolidated)
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
 
