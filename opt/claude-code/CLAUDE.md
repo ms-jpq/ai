@@ -23,3 +23,17 @@
   - Accrue disposable tools in `.exp/` at the project root.
 
 - Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
+
+# Systems Design
+
+- Model the system as a series of stages (Input -> Output). Decompose along stage boundaries.
+
+- Types model the domain. Each stage has a single types file, complete enough to describe the problem.
+
+- Transforms or effects. Not both.
+
+- Persistent state lives at stage boundaries — files, queues, databases.
+
+- Every component testable by direct call and return value.
+
+- Generic interfaces at stage boundaries. Concrete (most specific) within a stage.
