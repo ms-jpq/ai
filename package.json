@@ -4,6 +4,7 @@
     "@anthropic-ai/claude-agent-sdk": "*",
     "@arizeai/openinference-semantic-conventions": "*",
     "@google/gemini-cli": "*",
+    "@opentelemetry/exporter-trace-otlp-http": "*",
     "@opentelemetry/exporter-trace-otlp-proto": "*",
     "@opentelemetry/sdk-trace-base": "*",
     "@types/node": "*",
