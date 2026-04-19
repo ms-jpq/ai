@@ -587,46 +587,33 @@ const extractContent = function* (
 const correlateToolCalls = function* (
   extracted: IteratorObject<SourcedBlock>,
 ): IteratorObject<Grouped> {
-  const entries = extracted.toArray()
-
   const acc = new Map<string, SourcedBlock>()
-  for (const entry of entries) {
-    const [, block] = entry
-    if (
-      block.category === "tool" &&
-      block.type === SemanticConventions.OUTPUT_VALUE &&
-      block.correlationId !== undefined
-    ) {
-      acc.set(block.correlationId, entry)
-    }
-  }
 
-  for (const entry of entries) {
+  for (const entry of extracted) {
     const [, block] = entry
+
     if (block.category !== "tool" || block.correlationId === undefined) {
       yield { type: "correlated", correlated: [entry] }
       continue
     }
 
     const id = block.correlationId
-    if (block.type === SemanticConventions.OUTPUT_VALUE) {
-      if (acc.delete(id)) {
-        yield {
-          type: "correlated",
-          orphaned: "tool_result",
-          correlated: [entry],
-        }
-      }
+    if (block.type === SemanticConventions.INPUT_VALUE) {
+      acc.set(id, entry)
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield { type: "correlated", orphaned: "tool_use", correlated: [entry] }
+      yield { type: "correlated", orphaned: "tool_result", correlated: [entry] }
       continue
     }
     acc.delete(id)
-    yield { type: "correlated", correlated: [entry, mate] }
+    yield { type: "correlated", correlated: [mate, entry] }
+  }
+
+  for (const entry of acc.values()) {
+    yield { type: "correlated", orphaned: "tool_use", correlated: [entry] }
   }
 
   return
@@ -678,7 +665,7 @@ const isUserTurnStart = (entry: Grouped): boolean => {
     return false
   }
   const [[msg, block]] = entry.correlated
-  return msg.type === "user" && block.category === "text"
+  return msg.type === "user" && block.category !== "tool"
 }
 
 const groupTurns = function* (
@@ -809,6 +796,9 @@ const emitGrouped = ({
             "langfuse.observation.metadata.block_types": grouped.correlated.map(
               ([, block]) => block[META].block,
             ),
+            ...(grouped.orphaned
+              ? { "langfuse.observation.metadata.orphaned": grouped.orphaned }
+              : {}),
           },
         },
         parentCtx,
