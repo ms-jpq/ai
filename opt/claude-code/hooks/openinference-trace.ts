@@ -621,10 +621,37 @@ const correlateToolCalls = function* (
   return
 }
 
+const isUserTurnStart = (entry: Grouped): boolean => {
+  if (entry.type !== "correlated") {
+    return false
+  }
+  const [[msg, block]] = entry.correlated
+  return msg.type === "user" && block.category === "text"
+}
+
 const groupTurns = function* (
   entries: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
-  yield* entries
+  const acc: Grouped[] = []
+  const flush = function* (): IteratorObject<Grouped> {
+    if (acc.length) {
+      yield {
+        type: "grouped",
+        kind: OpenInferenceSpanKind.CHAIN,
+        children: [...acc],
+      }
+    }
+    acc.length = 0
+    return
+  }
+
+  for (const entry of entries) {
+    if (isUserTurnStart(entry)) {
+      yield* flush()
+    }
+    acc.push(entry)
+  }
+  yield* flush()
   return
 }
 
