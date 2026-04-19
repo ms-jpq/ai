@@ -793,7 +793,7 @@ const emitGrouped = ({
     case "correlated": {
       const [[startMsg, { kind }]] = grouped.correlated
       const span = tracer.startSpan(
-        `[${sessionId}] ${startMsg.type}`,
+        startMsg.type,
         {
           startTime,
           attributes: {
@@ -826,7 +826,7 @@ const emitGrouped = ({
     }
     case "grouped": {
       const span = tracer.startSpan(
-        `[${sessionId}] ${grouped.kind.toLowerCase()}`,
+        grouped.kind,
         {
           startTime,
           attributes: {
