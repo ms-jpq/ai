@@ -711,7 +711,7 @@ const groupChains = function* (
     yield {
       type: "grouped",
       kind: OpenInferenceSpanKind.CHAIN,
-      children: entries.toArray(),
+      children: groupTurns(entries).toArray(),
     }
     return
   }
