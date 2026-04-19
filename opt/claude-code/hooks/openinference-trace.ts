@@ -18,7 +18,7 @@ import {
   OpenInferenceSpanKind,
   SemanticConventions,
 } from "@arizeai/openinference-semantic-conventions"
-import type { Context, Tracer } from "@opentelemetry/api"
+import type { Context, Span, Tracer } from "@opentelemetry/api"
 import { ROOT_CONTEXT, SpanStatusCode, trace } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
@@ -665,37 +665,7 @@ const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
   }
 }
 
-const emitCorrelated = ({
-  tracer,
-  parentCtx,
-  sharedAttributes,
-  sessionId,
-  correlated,
-  startTime,
-  endTime,
-}: {
-  tracer: Tracer
-  parentCtx: Context
-  sharedAttributes: Record<string, unknown>
-  sessionId: string
-  correlated: readonly [SourcedBlock, ...SourcedBlock[]]
-  startTime: number
-  endTime: number
-}) => {
-  const [[startMsg, { kind }]] = correlated
-  const span = tracer.startSpan(
-    `[${sessionId}] ${startMsg.type}`,
-    {
-      startTime,
-      attributes: {
-        ...sharedAttributes,
-        [SemanticConventions.OPENINFERENCE_SPAN_KIND]: kind,
-        "langfuse.observation.metadata.transcript_jq": startMsg[META].debugExpr,
-      },
-    },
-    parentCtx,
-  )
-
+const attachIO = (span: Span, correlated: readonly SourcedBlock[]) => {
   {
     if (
       correlated.some(([, block]) => block.category === "tool" && block.error)
@@ -727,8 +697,6 @@ const emitCorrelated = ({
       }
     }
   }
-
-  span.end(endTime)
 }
 
 const emitGrouped = ({
@@ -744,9 +712,8 @@ const emitGrouped = ({
   sessionId: string
   grouped: Grouped
 }): void => {
-  const times = iterGrouped(grouped)
-    .map(([m]) => m[META].timestamp.getTime())
-    .toArray()
+  const flattened = iterGrouped(grouped).toArray()
+  const times = flattened.map(([m]) => m[META].timestamp.getTime())
   if (!times.length) {
     return
   }
@@ -761,15 +728,23 @@ const emitGrouped = ({
 
   switch (grouped.type) {
     case "correlated":
-      emitCorrelated({
-        tracer,
+      const [[startMsg, { kind }]] = grouped.correlated
+      const span = tracer.startSpan(
+        `[${sessionId}] ${startMsg.type}`,
+        {
+          startTime,
+          attributes: {
+            ...sharedAttributes,
+            [SemanticConventions.OPENINFERENCE_SPAN_KIND]: kind,
+            "langfuse.observation.metadata.transcript_jq":
+              startMsg[META].debugExpr,
+          },
+        },
         parentCtx,
-        sessionId,
-        sharedAttributes,
-        startTime,
-        endTime,
-        correlated: grouped.correlated,
-      })
+      )
+
+      attachIO(span, grouped.correlated)
+      span.end(endTime)
       return
     case "grouped": {
       const span = tracer.startSpan(
@@ -795,6 +770,7 @@ const emitGrouped = ({
         })
       }
 
+      attachIO(span, flattened)
       span.end(endTime)
       return
     }
