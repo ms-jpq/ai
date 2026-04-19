@@ -103,6 +103,10 @@
       {
         "hooks": [
           {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/approve-rw.sh",
+            "type": "command"
+          },
+          {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/save-diffs.sh",
             "type": "command"
