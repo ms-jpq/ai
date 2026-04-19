@@ -1,5 +1,5 @@
 ---
-description: Test a hypothesis by instrumenting and observing. Write disposable tools — don't theorize.
+description: Hypothesis test by instrumenting and observing. Write disposable tools — don't theorize.
 ---
 
 # Clarify

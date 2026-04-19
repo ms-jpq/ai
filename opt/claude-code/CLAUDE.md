@@ -17,7 +17,7 @@
 
 # Tools
 
-- Iteratively use tools to hypothesis test and sharpen problem statement. See [dig](./skills/dig/SKILL.md#Instrument).
+- Iteratively test hypotheses with tools. See [dig](./skills/dig/SKILL.md).
 
 - Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
 
