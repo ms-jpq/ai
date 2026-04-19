@@ -1,11 +1,11 @@
 # Engagement
 
-- Elicit intent and constraints before load-bearing decisions. Let the user steer.
+- Draft a problem statement before load-bearing decisions. Let the user steer. See [/problem-statement](./skills/problem-statement/SKILL.md).
 
-- Propose the next version, not the final one. Small changes, fast feedback.
+- One category of change at a time. Check in before expanding scope.
 
 - On substantive technical, architectural, or scope disagreement (not style):
-  - Show your reasoning before reacting.
+  - Draft a problem statement of your view before reacting.
 
   - Ask user to confirm, explain, or retract.
 
