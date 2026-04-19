@@ -8,8 +8,10 @@ import {
 import type {
   BetaContentBlock,
   BetaContentBlockParam,
+  BetaDocumentBlock,
   BetaMessage,
   BetaMessageParam,
+  BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import {
   MimeType,
@@ -60,7 +62,7 @@ type ExtractedBlock =
   | (BaseExtractedBlock & { category: "text" })
   | (BaseExtractedBlock & {
       category: "tool"
-      correlationId: string
+      correlationId: string | undefined
       error?: boolean
     })
 
@@ -170,6 +172,23 @@ const contents = function* ({
   return
 }
 
+const documentValue = (doc: BetaDocumentBlock | BetaRequestDocumentBlock) => {
+  const context = "context" in doc ? doc.context : undefined
+  switch (doc.source.type) {
+    case "base64":
+    case "text":
+      return { context, media_type: doc.source.media_type, title: doc.title }
+    case "url":
+      return { context, title: doc.title, url: doc.source.url }
+    case "content":
+      return { context, title: doc.title }
+    case "file":
+      return { context, file_id: doc.source.file_id, title: doc.title }
+    default:
+      fail(doc.source satisfies never)
+  }
+}
+
 const extractBlock = (
   role: SessionMessage["type"],
   block: MessageBlock,
@@ -194,7 +213,9 @@ const extractBlock = (
         category: "text",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
-        value: block.text,
+        value: block.citations?.length
+          ? { text: block.text, citations: block.citations }
+          : block.text,
       }
     case "thinking":
       if (!block.thinking) {
@@ -460,50 +481,11 @@ const extractBlock = (
       }
 
     case "document":
-      switch (block.source.type) {
-        case "base64":
-        case "text":
-          return {
-            category: "text",
-            type: side,
-            kind: OpenInferenceSpanKind.RETRIEVER,
-            value: {
-              context: block.context,
-              media_type: block.source.media_type,
-              title: block.title,
-            },
-          }
-        case "url":
-          return {
-            category: "text",
-            type: side,
-            kind: OpenInferenceSpanKind.RETRIEVER,
-            value: {
-              context: block.context,
-              title: block.title,
-              url: block.source.url,
-            },
-          }
-        case "content":
-          return {
-            category: "text",
-            type: side,
-            kind: OpenInferenceSpanKind.RETRIEVER,
-            value: { context: block.context, title: block.title },
-          }
-        case "file":
-          return {
-            category: "text",
-            type: side,
-            kind: OpenInferenceSpanKind.RETRIEVER,
-            value: {
-              context: block.context,
-              file_id: block.source.file_id,
-              title: block.title,
-            },
-          }
-        default:
-          fail(block.source satisfies never)
+      return {
+        category: "text",
+        type: side,
+        kind: OpenInferenceSpanKind.RETRIEVER,
+        value: documentValue(block),
       }
     case "search_result":
       return {
@@ -558,6 +540,7 @@ const extractBlock = (
             value: {
               retrieved_at: block.content.retrieved_at,
               url: block.content.url,
+              content: documentValue(block.content.content),
             },
           }
         default:
@@ -566,9 +549,10 @@ const extractBlock = (
 
     case "container_upload":
       return {
-        category: "text",
+        category: "tool",
         type: side,
         kind: OpenInferenceSpanKind.TOOL,
+        correlationId: undefined,
         value: { file_id: block.file_id },
       }
 
@@ -597,12 +581,13 @@ const correlatedBlocks = function* (
 ): IteratorObject<Correlated> {
   const blocks = extracted.toArray()
 
-  const acc = new Map<string, [TranscriptMessage, ExtractedBlock]>()
+  const acc = new Map<string | undefined, [TranscriptMessage, ExtractedBlock]>()
   for (const entry of blocks) {
     const [, block] = entry
     if (
       block.category === "tool" &&
-      block.type === SemanticConventions.OUTPUT_VALUE
+      block.type === SemanticConventions.OUTPUT_VALUE &&
+      block.correlationId
     ) {
       acc.set(block.correlationId, entry)
     }
