@@ -237,14 +237,14 @@ const extractBlock = (
         category: "thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
-        value: block.thinking || "[hidden]",
+        value: block.thinking || "[thinking - hidden]",
       }
     case "redacted_thinking":
       return {
         category: "thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
-        value: block.data || "[redacted]",
+        value: block.data || "[thinking - redacted]",
       }
     case "compaction":
       if (!block.content) {
