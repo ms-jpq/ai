@@ -225,24 +225,18 @@ const extractBlock = (
           : block.text,
       }
     case "thinking":
-      if (!block.thinking) {
-        return undefined
-      }
       return {
         category: "thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
-        value: block.thinking,
+        value: block.thinking || "[hidden]",
       }
     case "redacted_thinking":
-      if (!block.data) {
-        return undefined
-      }
       return {
         category: "thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
-        value: block.data,
+        value: block.data || "[redacted]",
       }
     case "compaction":
       if (!block.content) {
