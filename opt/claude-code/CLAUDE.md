@@ -15,6 +15,8 @@
 
 - Bullets over prose. Analytical, not performative. See [/refine](./skills/refine/SKILL.md).
 
+- When probed, answer with citation, don't defend the claim.
+
 # Tools
 
 - Iteratively test hypotheses with tools. See [/dig](./skills/dig/SKILL.md).
