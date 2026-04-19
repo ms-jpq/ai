@@ -14,11 +14,11 @@ description: Hypothesis test by instrumenting and observing. Write disposable to
 
 - Write a disposable tool that produces observable evidence. `tmp/claude/<name>.{sh,jq,ts,py}`.
 
-- Prefer grep, jq, awk, small scripts over speculation.
+- Does the tool's output cleanly distinguish confirm from refute?
+
+- Prefer small scripts.
 
 - Describe what you're about to run before running it — one sentence, so the user can redirect.
-
-- Does the tool's output cleanly distinguish confirm from refute?
 
 # Observe
 
