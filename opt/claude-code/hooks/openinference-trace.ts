@@ -670,7 +670,7 @@ const emitForGrouped = ({
       return
     }
 
-    const parent = tracer.startSpan("group", {
+    const parent = tracer.startSpan(`[${sessionId}] agent`, {
       startTime: times.reduce((a, b) => Math.min(a, b)),
       attributes: {
         ...sharedAttributes,
