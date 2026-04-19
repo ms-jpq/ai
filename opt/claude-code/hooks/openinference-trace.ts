@@ -148,18 +148,19 @@ const provider = ():
     return undefined
   }
 
-  const exporter = new OTLPTraceExporter({
-    url,
-    headers: { Authorization: auth },
-    timeoutMillis: 10_000,
-  })
-  const processor = new SimpleSpanProcessor(exporter)
-  const resource = resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: "claude-code",
-  })
   const provider = new BasicTracerProvider({
-    resource,
-    spanProcessors: [processor],
+    resource: resourceFromAttributes({
+      [ATTR_SERVICE_NAME]: "claude-code",
+    }),
+    spanProcessors: [
+      new SimpleSpanProcessor(
+        new OTLPTraceExporter({
+          url,
+          headers: { Authorization: auth },
+          timeoutMillis: 10_000,
+        }),
+      ),
+    ],
   })
 
   return {
