@@ -21,10 +21,12 @@ import {
 import type { Context, Span, Tracer } from "@opentelemetry/api"
 import { ROOT_CONTEXT, SpanStatusCode, trace } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
+import { resourceFromAttributes } from "@opentelemetry/resources"
 import {
   BasicTracerProvider,
   SimpleSpanProcessor,
 } from "@opentelemetry/sdk-trace-base"
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions"
 import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
@@ -152,7 +154,13 @@ const provider = ():
     timeoutMillis: 10_000,
   })
   const processor = new SimpleSpanProcessor(exporter)
-  const provider = new BasicTracerProvider({ spanProcessors: [processor] })
+  const resource = resourceFromAttributes({
+    [ATTR_SERVICE_NAME]: "claude-code",
+  })
+  const provider = new BasicTracerProvider({
+    resource,
+    spanProcessors: [processor],
+  })
 
   return {
     provider,
@@ -775,7 +783,6 @@ const emitGrouped = ({
   const sharedAttributes = {
     [SemanticConventions.USER_ID]: userId,
     [SemanticConventions.SESSION_ID]: sessionId,
-    [SemanticConventions.TAG_TAGS]: ["claude-code"],
   }
 
   switch (grouped.type) {
