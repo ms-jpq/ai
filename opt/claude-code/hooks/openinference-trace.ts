@@ -656,6 +656,11 @@ const emitForGrouped = ({
   userId: string
   grouped: Grouped
 }): void => {
+  const sharedAttributes = {
+    [SemanticConventions.USER_ID]: userId,
+    [SemanticConventions.TAG_TAGS]: ["claude-code"],
+  }
+
   if (!Array.isArray(grouped)) {
     const times = groupTimes(grouped).toArray()
     if (!times.length) {
@@ -665,10 +670,9 @@ const emitForGrouped = ({
     const parent = tracer.startSpan("group", {
       startTime: times.reduce((a, b) => Math.min(a, b)),
       attributes: {
-        [SemanticConventions.USER_ID]: userId,
+        ...sharedAttributes,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]:
           OpenInferenceSpanKind.AGENT,
-        [SemanticConventions.TAG_TAGS]: ["claude-code"],
       },
     })
 
@@ -682,16 +686,15 @@ const emitForGrouped = ({
     return
   }
 
-  const [[message, { kind }], [endMessage] = []] = grouped
+  const [[startMsg, { kind }], [endMsg] = []] = grouped
 
   const attributes = {
-    [SemanticConventions.USER_ID]: userId,
-    [SemanticConventions.SESSION_ID]: message.session_id,
-    [SemanticConventions.TAG_TAGS]: ["claude-code"],
-    "langfuse.observation.metadata.transcript_jq": message[META].debugExpr,
+    ...sharedAttributes,
+    [SemanticConventions.SESSION_ID]: startMsg.session_id,
+    "langfuse.observation.metadata.transcript_jq": startMsg[META].debugExpr,
   }
-  const span = tracer.startSpan(`[${message.session_id}] ${message.type}`, {
-    startTime: message[META].timestamp.getTime(),
+  const span = tracer.startSpan(`[${startMsg.session_id}] ${startMsg.type}`, {
+    startTime: startMsg[META].timestamp.getTime(),
     attributes,
   })
 
@@ -723,7 +726,7 @@ const emitForGrouped = ({
     })
   }
 
-  span.end(endMessage?.[META].timestamp)
+  span.end(endMsg?.[META].timestamp)
 }
 
 const parseMessages = async function* (
