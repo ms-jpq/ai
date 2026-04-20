@@ -8,6 +8,7 @@
     "@opentelemetry/exporter-trace-otlp-proto": "*",
     "@opentelemetry/sdk-trace-base": "*",
     "@types/node": "*",
+    "langfuse-cli": "*",
     "opencode-ai": "*",
     "prettier": "*",
     "typescript": "*"
