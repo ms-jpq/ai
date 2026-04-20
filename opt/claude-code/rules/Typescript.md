@@ -38,7 +38,7 @@ const buffer = <T>() => {
 }
 ```
 
-- Resources as factory-returned `AsyncDisposable` records — state lives inside the disposable, not in the caller's scope.
+- Resources as factory-returned `AsyncDisposable` records — state captured in the closure, teardown in `[Symbol.asyncDispose]`.
 
 - `unique symbol` keys for metadata attached to domain types.
 
@@ -79,5 +79,3 @@ type Decorated = Base & { [META]: Meta }
   - `finished(stream)` from `node:stream/promises` — await stream end.
   - `once(emitter, event)` from `node:events` — event to promise.
   - `Readable.from(asyncIterable)` — async iterable to stream.
-
-- `tsc` over `npx tsc`.
