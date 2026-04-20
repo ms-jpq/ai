@@ -93,55 +93,6 @@ type Grouped = Readonly<
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
 
-const log = ({
-  level,
-  msg,
-}: {
-  level: "debug" | "info" | "error"
-  msg: string
-}): void => {
-  console.error(`[${level}] ${msg}`)
-}
-
-const measure = (label: string): Disposable => {
-  const procT0 = performance.now()
-  log({ level: "debug", msg: `${label} started` })
-
-  return {
-    [Symbol.dispose]() {
-      const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
-      log({ level: "info", msg: `${label} completed in ${elapsed}s` })
-    },
-  }
-}
-
-const gitUserName = (): Promise<string> =>
-  promisify(execFile)("git", ["config", "user.name"])
-    .then(({ stdout }) => stdout.trim())
-    .catch(() => "")
-
-const hookInput = async (): Promise<HookInput> =>
-  JSON.parse(await text(stdin)) as HookInput
-
-const openState = async (
-  key: string,
-): Promise<AsyncDisposable & { uuid?: string }> => {
-  const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
-  const uuid =
-    (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
-
-  const state = {
-    uuid,
-    async [Symbol.asyncDispose]() {
-      const tmp = `${path}.tmp`
-      await mkdir(dirname(path), { recursive: true })
-      await writeFile(tmp, state.uuid ?? "", "utf-8")
-      await rename(tmp, path)
-    },
-  }
-  return state
-}
-
 const provider = ():
   | (AsyncDisposable & { provider: BasicTracerProvider })
   | undefined => {
@@ -174,6 +125,132 @@ const provider = ():
       await provider.shutdown()
     },
   }
+}
+
+const hookInput = async (): Promise<HookInput> =>
+  JSON.parse(await text(stdin)) as HookInput
+
+const gitUserName = (): Promise<string> =>
+  promisify(execFile)("git", ["config", "user.name"])
+    .then(({ stdout }) => stdout.trim())
+    .catch(() => "")
+
+const log = ({
+  level,
+  msg,
+}: {
+  level: "debug" | "info" | "error"
+  msg: string
+}): void => {
+  console.error(`[${level}] ${msg}`)
+}
+
+const measure = (label: string): Disposable => {
+  const procT0 = performance.now()
+  log({ level: "debug", msg: `${label} started` })
+
+  return {
+    [Symbol.dispose]() {
+      const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
+      log({ level: "info", msg: `${label} completed in ${elapsed}s` })
+    },
+  }
+}
+
+const openState = async (
+  key: string,
+): Promise<AsyncDisposable & { uuid?: string }> => {
+  const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
+  const uuid =
+    (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
+
+  const state = {
+    uuid,
+    async [Symbol.asyncDispose]() {
+      const tmp = `${path}.tmp`
+      await mkdir(dirname(path), { recursive: true })
+      await writeFile(tmp, state.uuid ?? "", "utf-8")
+      await rename(tmp, path)
+    },
+  }
+  return state
+}
+
+const parseMessages = async function* (
+  hook: HookInput,
+  lastUuid: string | undefined,
+): AsyncIteratorObject<TranscriptMessage> {
+  const isSubAgent = hook.hook_event_name === "SubagentStop"
+  const transcriptPath = isSubAgent
+    ? hook.agent_transcript_path
+    : hook.transcript_path
+
+  const messages = (await (isSubAgent
+    ? getSubagentMessages(hook.session_id, hook.agent_id)
+    : getSessionMessages(hook.session_id))) as TranscriptMessage[]
+
+  const foundIdx =
+    lastUuid === undefined ? -1 : messages.findIndex((m) => m.uuid === lastUuid)
+  const startIdx = foundIdx + 1
+
+  if (lastUuid !== undefined && foundIdx < 0) {
+    log({
+      level: "info",
+      msg: `lastUuid ${lastUuid} not in transcript — treating as caught up`,
+    })
+    return
+  }
+
+  log({
+    level: "debug",
+    msg: `messages: ${messages.length}, startIdx: ${startIdx}`,
+  })
+
+  for (const message of messages.values().drop(startIdx)) {
+    const meta = {
+      timestamp: new Date(message.timestamp),
+      debugExpr: `jq -e --sort-keys 'select(.uuid == "${message.uuid}")' '${transcriptPath}'`,
+    } satisfies TranscriptMeta
+
+    yield { ...message, [META]: meta }
+  }
+
+  return
+}
+
+const correlateToolCalls = function* (
+  extracted: IteratorObject<SourcedBlock>,
+): IteratorObject<Grouped> {
+  const acc = new Map<string, SourcedBlock>()
+
+  for (const entry of extracted) {
+    const [, block] = entry
+
+    if (block.category !== "tool" || block.correlationId === undefined) {
+      yield { type: "correlated", correlated: [entry] }
+      continue
+    }
+
+    const id = block.correlationId
+    if (block.type === SemanticConventions.INPUT_VALUE) {
+      acc.set(id, entry)
+      continue
+    }
+
+    const mate = acc.get(id)
+    if (mate === undefined) {
+      yield { type: "correlated", orphaned: "tool_result", correlated: [entry] }
+      continue
+    }
+    acc.delete(id)
+    yield { type: "correlated", correlated: [mate, entry] }
+  }
+
+  for (const entry of acc.values()) {
+    yield { type: "correlated", orphaned: "tool_use", correlated: [entry] }
+  }
+
+  return
 }
 
 const contents = function* ({
@@ -601,6 +678,32 @@ const extractContent = function* (
   return
 }
 
+const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
+  switch (grouped.type) {
+    case "correlated":
+      yield* grouped.correlated
+      return
+    case "grouped":
+      for (const child of grouped.children) {
+        yield* iterGrouped(child)
+      }
+      return
+    default:
+      fail(grouped satisfies never)
+  }
+}
+
+const soleCategory = (
+  grouped: Grouped,
+): ExtractedBlock["category"] | undefined => {
+  const members = iterGrouped(grouped).toArray()
+  if (members.length !== 1) {
+    return undefined
+  }
+  const [[_, block] = []] = members
+  return block?.category
+}
+
 const groupBuffer = (kind: OpenInferenceSpanKind) => {
   const acc = new Array<Grouped>()
   return {
@@ -621,52 +724,6 @@ const groupBuffer = (kind: OpenInferenceSpanKind) => {
       return
     },
   }
-}
-
-const correlateToolCalls = function* (
-  extracted: IteratorObject<SourcedBlock>,
-): IteratorObject<Grouped> {
-  const acc = new Map<string, SourcedBlock>()
-
-  for (const entry of extracted) {
-    const [, block] = entry
-
-    if (block.category !== "tool" || block.correlationId === undefined) {
-      yield { type: "correlated", correlated: [entry] }
-      continue
-    }
-
-    const id = block.correlationId
-    if (block.type === SemanticConventions.INPUT_VALUE) {
-      acc.set(id, entry)
-      continue
-    }
-
-    const mate = acc.get(id)
-    if (mate === undefined) {
-      yield { type: "correlated", orphaned: "tool_result", correlated: [entry] }
-      continue
-    }
-    acc.delete(id)
-    yield { type: "correlated", correlated: [mate, entry] }
-  }
-
-  for (const entry of acc.values()) {
-    yield { type: "correlated", orphaned: "tool_use", correlated: [entry] }
-  }
-
-  return
-}
-
-const soleCategory = (
-  grouped: Grouped,
-): ExtractedBlock["category"] | undefined => {
-  const members = iterGrouped(grouped).toArray()
-  if (members.length !== 1) {
-    return undefined
-  }
-  const [[_, block] = []] = members
-  return block?.category
 }
 
 const consolidateThinking = function* (
@@ -733,21 +790,6 @@ const groupChains = function* (
 
   yield* groupTurns(entries)
   return
-}
-
-const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
-  switch (grouped.type) {
-    case "correlated":
-      yield* grouped.correlated
-      return
-    case "grouped":
-      for (const child of grouped.children) {
-        yield* iterGrouped(child)
-      }
-      return
-    default:
-      fail(grouped satisfies never)
-  }
 }
 
 const attachIO = (span: Span, correlated: readonly SourcedBlock[]) => {
@@ -885,48 +927,6 @@ const emitGrouped = ({
 
   attachIO(span, flattened)
   span.end(endTime)
-  return
-}
-
-const parseMessages = async function* (
-  hook: HookInput,
-  lastUuid: string | undefined,
-): AsyncIteratorObject<TranscriptMessage> {
-  const isSubAgent = hook.hook_event_name === "SubagentStop"
-  const transcriptPath = isSubAgent
-    ? hook.agent_transcript_path
-    : hook.transcript_path
-
-  const messages = (await (isSubAgent
-    ? getSubagentMessages(hook.session_id, hook.agent_id)
-    : getSessionMessages(hook.session_id))) as TranscriptMessage[]
-
-  const foundIdx =
-    lastUuid === undefined ? -1 : messages.findIndex((m) => m.uuid === lastUuid)
-  const startIdx = foundIdx + 1
-
-  if (lastUuid !== undefined && foundIdx < 0) {
-    log({
-      level: "info",
-      msg: `lastUuid ${lastUuid} not in transcript — treating as caught up`,
-    })
-    return
-  }
-
-  log({
-    level: "debug",
-    msg: `messages: ${messages.length}, startIdx: ${startIdx}`,
-  })
-
-  for (const message of messages.values().drop(startIdx)) {
-    const meta = {
-      timestamp: new Date(message.timestamp),
-      debugExpr: `jq -e --sort-keys 'select(.uuid == "${message.uuid}")' '${transcriptPath}'`,
-    } satisfies TranscriptMeta
-
-    yield { ...message, [META]: meta }
-  }
-
   return
 }
 
