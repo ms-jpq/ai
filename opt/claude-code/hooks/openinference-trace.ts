@@ -969,9 +969,11 @@ const main = async (): Promise<void> => {
   }
 
   await otel.provider.forceFlush()
-  const tailUuid = transcriptRows.at(-1)?.uuid
-  if (tailUuid !== undefined) {
-    state.uuid = tailUuid
+  if (hook.hook_event_name !== "SubagentStop") {
+    const tailUuid = transcriptRows.at(-1)?.uuid
+    if (tailUuid !== undefined) {
+      state.uuid = tailUuid
+    }
   }
 }
 
