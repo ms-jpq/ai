@@ -161,6 +161,9 @@ const provider = ():
           headers: { Authorization: auth },
           timeoutMillis: 10_000,
         }),
+        {
+          maxQueueSize: 1_000_000,
+        },
       ),
     ],
   })
