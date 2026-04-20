@@ -36,9 +36,6 @@ import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
-type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
-type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
-
 type TranscriptMeta = Readonly<{
   timestamp: Date
   debugExpr: string
@@ -70,6 +67,8 @@ type ExtractedBlock =
       error?: boolean
     })
 
+type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
+
 type SourcedBlock = readonly [
   TranscriptMessage,
   ExtractedBlock & { [META]: { block: BlockType } },
@@ -89,6 +88,8 @@ type Grouped = Readonly<
     }
   | AtomicGroup
 >
+
+type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
