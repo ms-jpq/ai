@@ -63,9 +63,9 @@ type Decorated = Base & { [META]: Meta }
   - `using` / `Symbol.dispose` over `try/finally` for cleanup.
   - `Array.fromAsync()` to collect async iterables.
   - Iterator helpers (`.map()`, `.filter()`, `.toArray()`, etc.) over spreading into arrays.
-    - Compose `function*` pipelines by direct chaining — `f(g(h(xs.values())))`. Delegate inner iterables with `yield*`.
-    - `.toArray()` only at the leaf where aggregation (min/max, indexed access, re-iteration) forces materialization.
-    - Arrays enter a pipeline via `.values()`.
+    - Arrays enter via `.values()`.
+    - `function*` pipelines compose by direct chaining — `f(g(h(xs.values())))`. `yield*` to delegate inner iterables.
+    - `.toArray()` only at the leaf — random access, multiple passes, or scalar fold.
   - `Set` methods: `.union()`, `.intersection()`, `.difference()`, `.symmetricDifference()`, `.isSubsetOf()`.
   - `Object.groupBy()` / `Map.groupBy()` over manual reduce.
   - `Promise.withResolvers()` over manual constructor wrapping.
