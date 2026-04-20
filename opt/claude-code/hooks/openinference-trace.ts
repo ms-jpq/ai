@@ -983,8 +983,9 @@ const main = async (): Promise<void> => {
 
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
-  const consolidated = consolidateThinking(correlated)
-  const grouped = groupChains(hook, consolidated)
+  const consolidatedThought = consolidateThinking(correlated)
+  const consolidatedTools = consolidateAgenticToolUse(consolidatedThought)
+  const grouped = groupChains(hook, consolidatedTools)
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
   for (const group of grouped) {
