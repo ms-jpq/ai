@@ -184,7 +184,6 @@
       }
     ]
   },
-  "model": "opus",
   "otelHeadersHelper": "~/.local/opt/ai/opt/claude-code/libexec/otel-headers-helper.sh",
   "permissions": {
     "allow": [
