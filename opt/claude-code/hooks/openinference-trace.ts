@@ -862,7 +862,6 @@ const emitCorrelated = ({
 
   attachIO(span, grouped.correlated)
   span.end(endTime)
-  return
 }
 
 const emitGrouped = ({
