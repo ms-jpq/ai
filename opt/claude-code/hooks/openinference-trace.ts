@@ -853,15 +853,12 @@ const attachIO = ({
       if (block.category === "tool") {
         return block.correlationId === lastCorrelationId
       }
-
       if (block.type === SemanticConventions.INPUT_VALUE) {
         return true
       }
-
       if (block.category === "agent-text") {
         return block !== lastOutputBlock
       }
-
       return false
     }) ?? []
 
