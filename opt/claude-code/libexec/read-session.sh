@@ -23,4 +23,4 @@ fi
 RECUR=1 flock "$MARKDOWN" "$0"
 
 # shellcheck disable=SC2154
-tmux new-window -a -c "$PWD" -- nvim -M -c "?\V# >>>" -c "norm! zz" -- "$MARKDOWN"
+tmux new-window -a -c "$PWD" -- nvim -M -c "norm! G" -c "?\V# >>>" -c "norm! zz" -- "$MARKDOWN"
