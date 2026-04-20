@@ -71,9 +71,9 @@ BAR="${BAR// /'█'}"
 printf -v _EMPTY -- '%*s' $((BAR_LEN - FILLED)) ''
 BAR+="${_EMPTY// /'░'}"
 
-if ((CTX_PCT >= 90)); then
+if ((CTX_PCT >= 80)); then
   BAR_COLOUR="$RED"
-elif ((CTX_PCT >= 70)); then
+elif ((CTX_PCT >= 60)); then
   BAR_COLOUR="$YELLOW"
 else
   BAR_COLOUR="$GREEN"
