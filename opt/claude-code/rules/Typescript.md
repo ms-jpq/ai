@@ -2,7 +2,8 @@
 
 - `const foo = () => {}` over `function foo() {}`.
 
-- `const foo = function*() {}` for generators. `IteratorObject<T>` sync, `AsyncIteratorObject<T>` async. Explicit `return` at body end.
+- `const foo = function*() {}` for generators. Must use `IteratorObject<T>` for sync, `AsyncIteratorObject<T>` for async.
+  - Explicit `return` at body end.
 
 - `({ ... })` — single params object for multi-argument functions. Inline the type unless shared.
 
@@ -29,6 +30,23 @@ type Decorated = Base & { [META]: Meta }
 
 - IIFEs `(() => {})()` to localize or eliminate mutable state.
 
+- Closures over classes for stateful objects:
+
+```typescript
+const buffer = <T>() => {
+  const acc: T[] = []
+  return {
+    push: (x: T) => acc.push(x),
+    drain: function* () {
+      yield* acc
+      acc.length = 0
+    },
+  }
+}
+```
+
+- Resources as factory-returned `AsyncDisposable` records — state lives inside the disposable, not in the caller's scope.
+
 - Async over sync when both exist.
 
 - `undefined` over `null`. Never `T | null | undefined` — pick one, and it's `undefined`.
@@ -49,6 +67,9 @@ type Decorated = Base & { [META]: Meta }
   - `using` / `Symbol.dispose` over `try/finally` for cleanup.
   - `Array.fromAsync()` to collect async iterables.
   - Iterator helpers (`.map()`, `.filter()`, `.toArray()`, etc.) over spreading into arrays.
+    - Compose `function*` pipelines by direct chaining — `f(g(h(xs.values())))`. Delegate inner iterables with `yield*`.
+    - `.toArray()` only at the leaf where aggregation (min/max, indexed access, re-iteration) forces materialization.
+    - Arrays enter a pipeline via `.values()`.
   - `Set` methods: `.union()`, `.intersection()`, `.difference()`, `.symmetricDifference()`, `.isSubsetOf()`.
   - `Object.groupBy()` / `Map.groupBy()` over manual reduce.
   - `Promise.withResolvers()` over manual constructor wrapping.
