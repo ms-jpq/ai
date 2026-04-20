@@ -709,12 +709,14 @@ const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
 const soleCategory = (
   grouped: Grouped,
 ): ExtractedBlock["category"] | undefined => {
-  const members = iterGrouped(grouped).toArray()
-  if (members.length !== 1) {
-    return undefined
-  }
-  const [[_, block] = []] = members
-  return block?.category
+  const keys = Map.groupBy(
+    iterGrouped(grouped),
+    ([_, block]) => block?.category,
+  )
+    .keys()
+    .toArray()
+
+  return keys.length === 1 ? keys.at(0) : undefined
 }
 
 const groupBuffer = (kind: OpenInferenceSpanKind) => {
