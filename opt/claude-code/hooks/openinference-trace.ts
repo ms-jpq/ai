@@ -69,6 +69,8 @@ type ExtractedBlock =
       error?: boolean
     })
 
+type ExtractedBlockCategory = ExtractedBlock["category"]
+
 type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
 
 type SourcedBlock = readonly [
@@ -330,7 +332,7 @@ const extractBlock = (
           ? { text: block.text, citations: block.citations }
           : block.text,
       }
-    case "agent-thinking":
+    case "thinking":
       if (!block.thinking) {
         return undefined
       }
@@ -708,18 +710,8 @@ const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
   }
 }
 
-const soleCategory = (
-  grouped: Grouped,
-): ExtractedBlock["category"] | undefined => {
-  const keys = Map.groupBy(
-    iterGrouped(grouped),
-    ([_, block]) => block?.category,
-  )
-    .keys()
-    .toArray()
-
-  return keys.length === 1 ? keys.at(0) : undefined
-}
+const categories = (grouped: Grouped): Set<ExtractedBlockCategory> =>
+  new Set(iterGrouped(grouped).map(([_, block]) => block?.category))
 
 const groupBuffer = (kind: OpenInferenceSpanKind) => {
   const acc = new Array<Grouped>()
@@ -746,16 +738,49 @@ const groupBuffer = (kind: OpenInferenceSpanKind) => {
 const consolidateThinking = function* (
   entries: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
+  const thinking = new Set<ExtractedBlockCategory>(["agent-thinking"])
+  const talking = new Set<ExtractedBlockCategory>(["agent-text"])
   const acc = groupBuffer(OpenInferenceSpanKind.LLM)
 
   for (const entry of entries) {
-    const category = soleCategory(entry)
-    if (category === "agent-thinking") {
+    const set = categories(entry)
+    if (set.isSubsetOf(thinking)) {
       acc.push(entry)
       continue
     }
 
-    if (category === "agent-text") {
+    if (set.isSubsetOf(talking)) {
+      acc.push(entry)
+      yield* acc.pop()
+      continue
+    }
+
+    yield* acc.pop(true)
+    yield entry
+  }
+
+  yield* acc.pop(true)
+  return
+}
+
+const consolidateAgenticToolUse = function* (
+  entries: IteratorObject<Grouped>,
+): IteratorObject<Grouped> {
+  const texting = new Set<ExtractedBlockCategory>([
+    "agent-thinking",
+    "agent-text",
+  ])
+  const tooling = new Set<ExtractedBlockCategory>(["tool"])
+  const acc = groupBuffer(OpenInferenceSpanKind.LLM)
+
+  for (const entry of entries) {
+    const set = categories(entry)
+    if (set.isSubsetOf(texting)) {
+      acc.push(entry)
+      continue
+    }
+
+    if (set.isSubsetOf(tooling)) {
       acc.push(entry)
       yield* acc.pop()
       continue
