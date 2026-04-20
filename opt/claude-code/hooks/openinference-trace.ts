@@ -855,11 +855,11 @@ const attachIO = ({
       }
 
       if (block.type === SemanticConventions.INPUT_VALUE) {
-        return block !== lastOutputBlock
+        return true
       }
 
       if (block.category === "agent-text") {
-        return true
+        return block !== lastOutputBlock
       }
 
       return false
