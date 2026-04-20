@@ -21,13 +21,6 @@ const fetch = ({
 
 - `satisfies` over type annotations where possible. Preserves literal/narrowed types.
 
-- `unique symbol` keys for metadata attached to domain types.
-
-```typescript
-const META: unique symbol = Symbol("meta")
-type Decorated = Base & { [META]: Meta }
-```
-
 - IIFEs `(() => {})()` to localize or eliminate mutable state.
 
 - Closures over classes for stateful objects:
@@ -47,13 +40,16 @@ const buffer = <T>() => {
 
 - Resources as factory-returned `AsyncDisposable` records — state lives inside the disposable, not in the caller's scope.
 
-- Async over sync when both exist.
+- `unique symbol` keys for metadata attached to domain types.
+
+```typescript
+const META: unique symbol = Symbol("meta")
+type Decorated = Base & { [META]: Meta }
+```
 
 - `undefined` over `null`. Never `T | null | undefined` — pick one, and it's `undefined`.
 
 - `??` over `||` for nullish coalescing. `||` only for boolean short-circuit.
-
-- Exhaustive `switch` via `default: fail(value satisfies never)` — `fail` from `node:assert/strict`.
 
 - No `as` casts except `as const`. Perform type narrowing instead.
 
@@ -75,6 +71,8 @@ const buffer = <T>() => {
   - `Promise.withResolvers()` over manual constructor wrapping.
 
 - Node stdlib:
+  - Async over sync when both exist.
+  - Exhaustive `switch` via `default: fail(value satisfies never)` — `fail` from `node:assert/strict`.
   - `node:*` imports — `import { env, exit } from "node:process"` over `process.*` globals.
   - `ok()` from `node:assert/strict` over `if/throw`.
   - `text(stream)` from `node:stream/consumers` — stream to string.
