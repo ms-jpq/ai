@@ -823,22 +823,25 @@ const attachIO = (span: Span, correlated: readonly SourcedBlock[]) => {
   const output = correlated.findLast(
     ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
   )
-  if (output) {
-    const [, block] = output
+  const [, outputBlock] = output ?? []
+  if (outputBlock) {
     span.setAttributes({
       [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-      [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(block.value),
+      [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(outputBlock.value),
     })
   }
+
+  outputBlock?.category === "tool"
 
   const input = correlated.find(
     ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
   )
-  if (input) {
-    const [, block] = input
+
+  const [, inputBlock] = input ?? []
+  if (inputBlock) {
     span.setAttributes({
       [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
-      [SemanticConventions.INPUT_VALUE]: JSON.stringify(block.value),
+      [SemanticConventions.INPUT_VALUE]: JSON.stringify(inputBlock.value),
     })
   }
 }
