@@ -29,6 +29,7 @@ import {
 import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions"
 import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
+import { randomUUID } from "node:crypto"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
@@ -168,7 +169,7 @@ const openState = async (
   const state = {
     uuid,
     async [Symbol.asyncDispose]() {
-      const tmp = `${path}.tmp`
+      const tmp = `${path}.${randomUUID()}.tmp`
       await mkdir(dirname(path), { recursive: true })
       await writeFile(tmp, state.uuid ?? "", "utf-8")
       await rename(tmp, path)
@@ -271,20 +272,25 @@ const contents = function* ({
   return
 }
 
-const documentValue = (doc: BetaDocumentBlock | BetaRequestDocumentBlock) => {
-  const context = "context" in doc ? doc.context : undefined
-  switch (doc.source.type) {
+const documentValue = ({
+  source,
+  context,
+  title,
+}:
+  | (BetaDocumentBlock & { context?: undefined })
+  | BetaRequestDocumentBlock) => {
+  switch (source.type) {
     case "base64":
     case "text":
-      return { context, media_type: doc.source.media_type, title: doc.title }
+      return { context, media_type: source.media_type, title }
     case "url":
-      return { context, title: doc.title, url: doc.source.url }
+      return { context, title, url: source.url }
     case "content":
-      return { context, title: doc.title }
+      return { context, title }
     case "file":
-      return { context, file_id: doc.source.file_id, title: doc.title }
+      return { context, file_id: source.file_id, title }
     default:
-      fail(doc.source satisfies never)
+      fail(source satisfies never)
   }
 }
 
@@ -931,14 +937,13 @@ const emitGrouped = ({
 }
 
 const main = async (): Promise<void> => {
+  const [hook, userId] = await Promise.all([hookInput(), gitUserName()])
+  using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
+
   await using otel = provider()
   if (!otel) {
     return
   }
-
-  const [hook, userId] = await Promise.all([hookInput(), gitUserName()])
-
-  using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
   const stateKey =
     hook.hook_event_name === "SubagentStop"
