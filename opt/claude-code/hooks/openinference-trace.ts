@@ -836,6 +836,7 @@ const attachIO = ({
     ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
   )
   const [, lastOutputBlock] = output ?? []
+
   if (lastOutputBlock) {
     span.setAttributes({
       [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
@@ -843,35 +844,31 @@ const attachIO = ({
     })
   }
 
-  const inputs = sourceBlocks.filter(
-    ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
-  )
-  const [[_, firstInputBlock] = []] = inputs
-  const inputUsable =
-    firstInputBlock !== undefined &&
-    (lastOutputBlock === undefined ||
-      firstInputBlock.category !== "tool" ||
-      lastOutputBlock.category !== "tool" ||
-      firstInputBlock.correlationId === lastOutputBlock.correlationId)
+  const lastCorrelationId =
+    lastOutputBlock?.category === "tool"
+      ? lastOutputBlock.correlationId
+      : undefined
+  const [_, firstInputBlock] =
+    sourceBlocks.find(([, block]) => {
+      if (block.category === "tool") {
+        return block.correlationId === lastCorrelationId
+      }
 
-  if (inputUsable) {
+      if (block.type === SemanticConventions.INPUT_VALUE) {
+        return true
+      }
+
+      if (block.category === "agent-text") {
+        return true
+      }
+
+      return false
+    }) ?? []
+
+  if (firstInputBlock) {
     span.setAttributes({
       [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
       [SemanticConventions.INPUT_VALUE]: JSON.stringify(firstInputBlock.value),
-    })
-    return
-  }
-
-  const fallback = sourceBlocks.find(
-    ([_, block]) => block.category === "agent-text",
-  )
-  const [, fallbackBlock] = fallback ?? []
-  const fallbackUsable = fallbackBlock && fallbackBlock !== lastOutputBlock
-
-  if (fallbackUsable) {
-    span.setAttributes({
-      [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
-      [SemanticConventions.INPUT_VALUE]: JSON.stringify(fallbackBlock.value),
     })
   }
 }
