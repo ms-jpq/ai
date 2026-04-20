@@ -95,6 +95,60 @@ type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
 
+const hookInput = async (): Promise<HookInput> =>
+  JSON.parse(await text(stdin)) as HookInput
+
+const gitUserName = (): Promise<string> =>
+  promisify(execFile)("git", ["config", "user.name"])
+    .then(({ stdout }) => stdout.trim())
+    .catch(() => "")
+
+const log = ({
+  level,
+  msg,
+}: {
+  level: "debug" | "info" | "error"
+  msg: string
+}): void => {
+  console.error(`[${level}] ${msg}`)
+}
+
+const measure = (label: string): Disposable => {
+  const procT0 = performance.now()
+  log({ level: "debug", msg: `${label} started` })
+
+  return {
+    [Symbol.dispose]() {
+      const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
+      log({ level: "info", msg: `${label} completed in ${elapsed}s` })
+    },
+  }
+}
+
+const openState = async (
+  hook: HookInput,
+): Promise<AsyncDisposable & { uuid?: string }> => {
+  const key =
+    hook.hook_event_name === "SubagentStop"
+      ? `${hook.session_id}.${hook.agent_id}`
+      : hook.session_id
+  const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
+
+  const uuid =
+    (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
+
+  const state = {
+    uuid,
+    async [Symbol.asyncDispose]() {
+      const tmp = `${path}.${randomUUID()}.tmp`
+      await mkdir(dirname(path), { recursive: true })
+      await writeFile(tmp, state.uuid ?? "", "utf-8")
+      await rename(tmp, path)
+    },
+  }
+  return state
+}
+
 const provider = ():
   | (AsyncDisposable & { provider: BasicTracerProvider })
   | undefined => {
@@ -129,55 +183,6 @@ const provider = ():
   }
 }
 
-const hookInput = async (): Promise<HookInput> =>
-  JSON.parse(await text(stdin)) as HookInput
-
-const gitUserName = (): Promise<string> =>
-  promisify(execFile)("git", ["config", "user.name"])
-    .then(({ stdout }) => stdout.trim())
-    .catch(() => "")
-
-const log = ({
-  level,
-  msg,
-}: {
-  level: "debug" | "info" | "error"
-  msg: string
-}): void => {
-  console.error(`[${level}] ${msg}`)
-}
-
-const measure = (label: string): Disposable => {
-  const procT0 = performance.now()
-  log({ level: "debug", msg: `${label} started` })
-
-  return {
-    [Symbol.dispose]() {
-      const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
-      log({ level: "info", msg: `${label} completed in ${elapsed}s` })
-    },
-  }
-}
-
-const openState = async (
-  key: string,
-): Promise<AsyncDisposable & { uuid?: string }> => {
-  const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
-  const uuid =
-    (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
-
-  const state = {
-    uuid,
-    async [Symbol.asyncDispose]() {
-      const tmp = `${path}.${randomUUID()}.tmp`
-      await mkdir(dirname(path), { recursive: true })
-      await writeFile(tmp, state.uuid ?? "", "utf-8")
-      await rename(tmp, path)
-    },
-  }
-  return state
-}
-
 const parseMessages = async function* (
   hook: HookInput,
   lastUuid: string | undefined,
@@ -209,12 +214,13 @@ const parseMessages = async function* (
   })
 
   for (const message of messages.values().drop(startIdx)) {
-    const meta = {
-      timestamp: new Date(message.timestamp),
-      debugExpr: `jq -e --sort-keys 'select(.uuid == "${message.uuid}")' '${transcriptPath}'`,
-    } satisfies TranscriptMeta
-
-    yield { ...message, [META]: meta }
+    yield {
+      ...message,
+      [META]: {
+        timestamp: new Date(message.timestamp),
+        debugExpr: `jq -e --sort-keys 'select(.uuid == "${message.uuid}")' '${transcriptPath}'`,
+      } satisfies TranscriptMeta,
+    }
   }
 
   return
@@ -940,25 +946,18 @@ const main = async (): Promise<void> => {
   const [hook, userId] = await Promise.all([hookInput(), gitUserName()])
   using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
+  await using state = await openState(hook)
   await using otel = provider()
   if (!otel) {
     return
   }
 
-  const stateKey =
-    hook.hook_event_name === "SubagentStop"
-      ? `${hook.session_id}.${hook.agent_id}`
-      : hook.session_id
-
-  await using state = await openState(stateKey)
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
-
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
   const consolidated = consolidateThinking(correlated)
   const grouped = groupChains(hook, consolidated)
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
-
   for (const group of grouped) {
     emitGrouped({
       tracer,
@@ -969,6 +968,7 @@ const main = async (): Promise<void> => {
     })
   }
 
+  await otel.provider.forceFlush()
   const tailUuid = transcriptRows.at(-1)?.uuid
   if (tailUuid !== undefined) {
     state.uuid = tailUuid
