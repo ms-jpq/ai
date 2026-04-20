@@ -823,7 +823,15 @@ const groupChains = function* (
   return
 }
 
-const attachIO = (span: Span, sourceBlocks: readonly SourcedBlock[]) => {
+const attachIO = ({
+  span,
+  grouped,
+  sourceBlocks = iterGrouped(grouped).toArray(),
+}: {
+  span: Span
+  grouped: Grouped
+  sourceBlocks?: readonly SourcedBlock[]
+}) => {
   const output = sourceBlocks.findLast(
     ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
   )
@@ -911,7 +919,7 @@ const emitCorrelated = ({
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
-  attachIO(span, grouped.correlated)
+  attachIO({ span, grouped })
   span.end(endTime)
 }
 
@@ -976,7 +984,7 @@ const emitGrouped = ({
     })
   }
 
-  attachIO(span, flattened)
+  attachIO({ span, grouped, sourceBlocks: flattened })
   span.end(endTime)
   return
 }
