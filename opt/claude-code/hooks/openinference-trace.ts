@@ -69,8 +69,6 @@ type ExtractedBlock =
       error?: boolean
     })
 
-type ExtractedBlockCategory = ExtractedBlock["category"]
-
 type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
 
 type SourcedBlock = readonly [
@@ -710,9 +708,6 @@ const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
   }
 }
 
-const categories = (grouped: Grouped): Set<ExtractedBlockCategory> =>
-  new Set(iterGrouped(grouped).map(([_, block]) => block?.category))
-
 const groupBuffer = (kind: OpenInferenceSpanKind) => {
   const acc = new Array<Grouped>()
   return {
@@ -735,62 +730,52 @@ const groupBuffer = (kind: OpenInferenceSpanKind) => {
   }
 }
 
-const consolidateThinking = function* (
-  entries: IteratorObject<Grouped>,
-): IteratorObject<Grouped> {
-  const thinking = new Set<ExtractedBlockCategory>(["agent-thinking"])
-  const talking = new Set<ExtractedBlockCategory>(["agent-text"])
-  const acc = groupBuffer(OpenInferenceSpanKind.LLM)
-
-  for (const entry of entries) {
-    const set = categories(entry)
-    if (set.isSubsetOf(thinking)) {
-      acc.push(entry)
-      continue
+const generationId = (grouped: Grouped): string | undefined => {
+  for (const [msg] of iterGrouped(grouped)) {
+    if ("id" in msg.message) {
+      return msg.message.id
     }
-
-    if (set.isSubsetOf(talking)) {
-      acc.push(entry)
-      yield* acc.pop()
-      continue
-    }
-
-    yield* acc.pop(true)
-    yield entry
   }
 
-  yield* acc.pop(true)
-  return
+  return undefined
 }
 
-const consolidateAgenticToolUse = function* (
+const groupByGeneration = function* (
   entries: IteratorObject<Grouped>,
 ): IteratorObject<Grouped> {
-  const texting = new Set<ExtractedBlockCategory>([
-    "agent-thinking",
-    "agent-text",
-  ])
-  const tooling = new Set<ExtractedBlockCategory>(["tool"])
-  const acc = groupBuffer(OpenInferenceSpanKind.LLM)
+  type Tagged = { genId: string | undefined; entry: Grouped }
+  const tagged = entries
+    .map((entry) => ({ genId: generationId(entry), entry }) satisfies Tagged)
+    .toArray()
 
-  for (const entry of entries) {
-    const set = categories(entry)
-    if (set.isSubsetOf(texting)) {
-      acc.push(entry)
+  const buckets = Map.groupBy(
+    tagged.filter((t) => t.genId !== undefined),
+    ({ genId }) => genId,
+  )
+
+  const seen = new Set<string>()
+  for (const { genId, entry } of tagged) {
+    if (genId === undefined) {
+      yield entry
       continue
     }
-
-    if (set.isSubsetOf(tooling)) {
-      acc.push(entry)
-      yield* acc.pop()
+    if (seen.has(genId)) {
       continue
     }
+    seen.add(genId)
 
-    yield* acc.pop(true)
-    yield entry
+    const children = (buckets.get(genId) ?? []).map((c) => c.entry)
+    if (children.length === 1) {
+      yield* children
+      continue
+    }
+    yield {
+      type: "grouped",
+      kind: OpenInferenceSpanKind.LLM,
+      children,
+    }
   }
 
-  yield* acc.pop(true)
   return
 }
 
@@ -983,9 +968,8 @@ const main = async (): Promise<void> => {
 
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
   const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
-  const consolidatedThought = consolidateThinking(correlated)
-  const consolidatedTools = consolidateAgenticToolUse(consolidatedThought)
-  const grouped = groupChains(hook, consolidatedTools)
+  const generations = groupByGeneration(correlated)
+  const grouped = groupChains(hook, generations)
 
   const tracer = otel.provider.getTracer("langfuse-sdk")
   for (const group of grouped) {
