@@ -73,7 +73,7 @@ BAR+="${_EMPTY// /'░'}"
 
 if ((CTX_PCT >= 80)); then
   BAR_COLOUR="$RED"
-elif ((CTX_PCT >= 60)); then
+elif ((CTX_PCT >= 70)); then
   BAR_COLOUR="$YELLOW"
 else
   BAR_COLOUR="$GREEN"
