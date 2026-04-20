@@ -26,7 +26,10 @@ import {
   BasicTracerProvider,
   BatchSpanProcessor,
 } from "@opentelemetry/sdk-trace-base"
-import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions"
+import {
+  ATTR_SERVICE_INSTANCE_ID,
+  ATTR_SERVICE_NAME,
+} from "@opentelemetry/semantic-conventions"
 import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { randomUUID } from "node:crypto"
@@ -150,9 +153,9 @@ const openState = async (
   return state
 }
 
-const provider = ():
-  | (AsyncDisposable & { provider: BasicTracerProvider })
-  | undefined => {
+const provider = (
+  hook: HookInput,
+): (AsyncDisposable & { provider: BasicTracerProvider }) | undefined => {
   const [auth, url] = [env["LANGFUSE_AUTH"], env["LANGFUSE_TRACE_URL"]]
   if (!auth || !url) {
     return undefined
@@ -160,6 +163,7 @@ const provider = ():
 
   const provider = new BasicTracerProvider({
     resource: resourceFromAttributes({
+      [ATTR_SERVICE_INSTANCE_ID]: hook.session_id,
       [ATTR_SERVICE_NAME]: "claude-code",
     }),
     spanProcessors: [
@@ -982,7 +986,7 @@ const main = async (): Promise<void> => {
   using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
   await using state = await openState(hook)
-  await using otel = provider()
+  await using otel = provider(hook)
   if (!otel) {
     return
   }
