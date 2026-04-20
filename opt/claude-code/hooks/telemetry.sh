@@ -5,4 +5,4 @@ set -o pipefail
 # JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
-exec -- "${0%/*}/openinference-trace.ts"
+exec -- "${0%/*}/openinference-trace.ts" # >> langfuse.log 2>&1
