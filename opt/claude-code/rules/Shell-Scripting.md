@@ -95,8 +95,6 @@ EOF >&2
 
 - `exec --` when no code follows.
 
-- Flags (`--quiet`, `--silent`) over `> /dev/null` to silence output.
-
 - `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
 
 - Parameter expansion (`${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}`) over `basename`, `dirname`, or `cut` for string decomposition.
