@@ -60,8 +60,9 @@ type BaseExtractedBlock = Readonly<{
 }>
 
 type ExtractedBlock =
-  | (BaseExtractedBlock & { category: "text" })
-  | (BaseExtractedBlock & { category: "thinking" })
+  | (BaseExtractedBlock & { category: "user-text" })
+  | (BaseExtractedBlock & { category: "agent-text" })
+  | (BaseExtractedBlock & { category: "agent-thinking" })
   | (BaseExtractedBlock & {
       category: "tool"
       correlationId: string | undefined
@@ -308,10 +309,11 @@ const extractBlock = (
     role === "assistant"
       ? SemanticConventions.OUTPUT_VALUE
       : SemanticConventions.INPUT_VALUE
+  const textCategory = role === "assistant" ? "agent-text" : "user-text"
 
   if (typeof block === "string") {
     return {
-      category: "text",
+      category: textCategory,
       type: side,
       kind: OpenInferenceSpanKind.LLM,
       value: block,
@@ -321,19 +323,19 @@ const extractBlock = (
   switch (block.type) {
     case "text":
       return {
-        category: "text",
+        category: textCategory,
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.citations?.length
           ? { text: block.text, citations: block.citations }
           : block.text,
       }
-    case "thinking":
+    case "agent-thinking":
       if (!block.thinking) {
         return undefined
       }
       return {
-        category: "thinking",
+        category: "agent-thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.thinking,
@@ -343,7 +345,7 @@ const extractBlock = (
         return undefined
       }
       return {
-        category: "thinking",
+        category: "agent-thinking",
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.data,
@@ -353,7 +355,7 @@ const extractBlock = (
         return undefined
       }
       return {
-        category: "text",
+        category: textCategory,
         type: side,
         kind: OpenInferenceSpanKind.LLM,
         value: block.content,
@@ -362,21 +364,21 @@ const extractBlock = (
       switch (block.source.type) {
         case "base64":
           return {
-            category: "text",
+            category: textCategory,
             type: side,
             kind: OpenInferenceSpanKind.LLM,
             value: { media_type: block.source.media_type },
           }
         case "url":
           return {
-            category: "text",
+            category: textCategory,
             type: side,
             kind: OpenInferenceSpanKind.LLM,
             value: { url: block.source.url },
           }
         case "file":
           return {
-            category: "text",
+            category: textCategory,
             type: side,
             kind: OpenInferenceSpanKind.LLM,
             value: { file_id: block.source.file_id },
@@ -596,14 +598,14 @@ const extractBlock = (
 
     case "document":
       return {
-        category: "text",
+        category: textCategory,
         type: side,
         kind: OpenInferenceSpanKind.RETRIEVER,
         value: documentValue(block),
       }
     case "search_result":
       return {
-        category: "text",
+        category: textCategory,
         type: side,
         kind: OpenInferenceSpanKind.RETRIEVER,
         value: {
@@ -748,12 +750,12 @@ const consolidateThinking = function* (
 
   for (const entry of entries) {
     const category = soleCategory(entry)
-    if (category === "thinking") {
+    if (category === "agent-thinking") {
       acc.push(entry)
       continue
     }
 
-    if (category === "text") {
+    if (category === "agent-text") {
       acc.push(entry)
       yield* acc.pop()
       continue
