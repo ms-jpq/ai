@@ -819,29 +819,47 @@ const groupChains = function* (
   return
 }
 
-const attachIO = (span: Span, correlated: readonly SourcedBlock[]) => {
-  const output = correlated.findLast(
+const attachIO = (span: Span, sourceBlocks: readonly SourcedBlock[]) => {
+  const output = sourceBlocks.findLast(
     ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
   )
-  const [, outputBlock] = output ?? []
-  if (outputBlock) {
+  const [, lastOutputBlock] = output ?? []
+  if (lastOutputBlock) {
     span.setAttributes({
       [SemanticConventions.OUTPUT_MIME_TYPE]: MimeType.JSON,
-      [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(outputBlock.value),
+      [SemanticConventions.OUTPUT_VALUE]: JSON.stringify(lastOutputBlock.value),
     })
   }
 
-  outputBlock?.category === "tool"
-
-  const input = correlated.find(
+  const inputs = sourceBlocks.filter(
     ([, block]) => block.type === SemanticConventions.INPUT_VALUE,
   )
+  const [[_, firstInputBlock] = []] = inputs
+  const inputUsable =
+    firstInputBlock !== undefined &&
+    (lastOutputBlock === undefined ||
+      firstInputBlock.category !== "tool" ||
+      lastOutputBlock.category !== "tool" ||
+      firstInputBlock.correlationId === lastOutputBlock.correlationId)
 
-  const [, inputBlock] = input ?? []
-  if (inputBlock) {
+  if (inputUsable) {
     span.setAttributes({
       [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
-      [SemanticConventions.INPUT_VALUE]: JSON.stringify(inputBlock.value),
+      [SemanticConventions.INPUT_VALUE]: JSON.stringify(firstInputBlock.value),
+    })
+    return
+  }
+
+  const fallback = sourceBlocks.find(
+    ([_, block]) => block.category === "agent-text",
+  )
+  const [, fallbackBlock] = fallback ?? []
+  const fallbackUsable = fallbackBlock && fallbackBlock !== lastOutputBlock
+
+  if (fallbackUsable) {
+    span.setAttributes({
+      [SemanticConventions.INPUT_MIME_TYPE]: MimeType.JSON,
+      [SemanticConventions.INPUT_VALUE]: JSON.stringify(fallbackBlock.value),
     })
   }
 }
