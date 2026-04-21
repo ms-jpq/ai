@@ -13,7 +13,7 @@ with nullcontext():
     basicConfig(format="%(message)s", level=INFO)
 ```
 
-- `from module import name` for all imports — never bare `import module`.
+- `from module import name` for all imports.
 
 - Functions with multiple parameters use `*` after the first positional argument — forces keyword passing for the rest.
 
@@ -26,8 +26,8 @@ def render(template, *, context, strict=False): ...
   - `match/case` over `isinstance` chains and nested `if/elif` on type or shape.
   - `:=` to collapse assign-then-test into one expression.
   - `suppress()` over bare `try/except`.
-  - `...` for noop bodies, not `pass`.
-  - No `if __name__ == "__main__":` guard — scripts execute at module scope.
+  - `...` for noop bodies.
+  - Scripts execute at module scope — top-level code runs on invocation.
   - `with nullcontext(): ...` to group related statements.
   - Single `with a, b:` over nested `with a: with b:`.
 
@@ -45,7 +45,7 @@ def render(template, *, context, strict=False): ...
 
 - Generators over closure/nonlocal for stateful iteration that yields results incrementally.
 
-- `getLogger()` over `print`. Call `getLogger()` at the site of logging — never store or pass a logger. `"%s"` as the format string, f-string as the argument: `getLogger().info("%s", f"{count} entries")`. For errors, log `e` directly: `getLogger().error("%s", e, exc_info=True)`.
+- `getLogger()` over `print`. Call inline at each site. `"%s"` format, f-string argument: `getLogger().info("%s", f"{count} entries")`. Errors: `getLogger().error("%s", e, exc_info=True)`.
 
 - `argparse` for CLIs.
   - Spell out keyword arguments: `action=`, `type=`, `default=`, `nargs=`, `required=`.

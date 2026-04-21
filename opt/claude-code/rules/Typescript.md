@@ -52,13 +52,13 @@ const META: unique symbol = Symbol("meta")
 type Decorated = Base & { [META]: Meta }
 ```
 
-- `undefined` over `null`. Never `T | null | undefined` — pick one, and it's `undefined`.
+- `undefined` over `null`. Pick one nullable form — `undefined` — and stick to it.
 
 - `??` over `||` for nullish coalescing. `||` only for boolean short-circuit.
 
-- No `as` casts except `as const`. Perform type narrowing instead.
+- Narrow types to refine them. `as` casts only for `as const`.
 
-- Only annotate types where not inferable. Do keep annotations on function signatures.
+- Annotate types where inference fails. Always annotate function signatures.
 
 - `const` over `let`. Restructure with ternary destructuring, `.entries()`, or intermediate expressions to avoid mutation.
 

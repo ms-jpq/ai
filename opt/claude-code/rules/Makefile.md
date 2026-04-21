@@ -6,7 +6,7 @@ paths:
 
 # Makefile
 
-- GNU Make only. No POSIX make compatibility.
+- GNU Make only.
 
 - Recipes are multiline bash scripts. `.ONESHELL` is always active — heredocs work. Shell-Scripting rules apply in recipes.
 

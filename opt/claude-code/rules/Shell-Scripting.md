@@ -25,8 +25,8 @@ shopt -s dotglob nullglob extglob globstar
 ```
 
 - Reusable arguments in arrays: `GREP=(grep --recursive ...)`, `${GREP[@]}`.
-  - Instead of `\ ` escaping for long / many arguments
-  - Instead of functions for code reuse
+  - For long or numerous arguments (over `\ ` escaping)
+  - For code reuse across invocations (over functions)
   - When branches invoke the same command with different arguments
   - Build arrays incrementally with `+=()` based on conditionals
 
@@ -53,7 +53,7 @@ case "$VARIABLE" in
 esac
 ```
 
-- No functions or traps — these make error propagation harder.
+- Inline code over functions. Explicit error checks over traps. Both functions and traps obscure error propagation under `set -e`.
 
 - Null bytes as delimiters where possible — `find ... -print0 | xargs --null ...`
 
@@ -90,8 +90,8 @@ EOF >&2
 ```
 
 - Redirects over `echo`/`printf` pipes.
-  - `jq <<< "$JSON"` instead of `echo "$JSON" | jq`
-  - `cmd < "$FILE"` or `$(< "$FILE")` instead of `cat "$FILE" | cmd`
+  - `jq <<< "$JSON"` over `echo "$JSON" | jq`
+  - `cmd < "$FILE"` or `$(< "$FILE")` over `cat "$FILE" | cmd`
 
 - `exec --` when no code follows.
 
@@ -105,9 +105,9 @@ BASENAME="${BASENAME%.git}"
 DIR="${FILE%/*}"
 ```
 
-- `(( ))` for math comparisons, not `[[ ]]`.
+- `(( ))` for math comparisons. `[[ ]]` reserved for string and file tests.
 
-- `readarray -t` to capture multi-line output into arrays, not subshell loops or word splitting.
+- `readarray -t` to capture multi-line output into arrays. Single process, newline-safe — subshell loops and word splitting both mangle whitespace.
 
 - `${ARRAY[*]}` over `${ARRAY[0]}` to stringify a single-element array.
 
@@ -137,6 +137,6 @@ exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 
 - `shopt -u failglob` after the prelude when globs may legitimately match nothing.
 
-- `command -v --` or `hash --` to check command existence, not `which` or `type`.
+- `command -v --` or `hash --` to check command existence.
 
 - `set -a` / `set +a` to scope exports when sourcing an env file.

@@ -10,7 +10,7 @@
 
 - Detached over earnest. Say less than you mean.
 
-- Aesthetic judgments stated as fact, not opinion.
+- State aesthetic judgments as fact — declarative, unhedged.
 
 - Sentimentality is the only real failure mode. Sincerity is fine if it arrives deadpan.
 

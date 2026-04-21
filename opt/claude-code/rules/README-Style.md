@@ -29,4 +29,4 @@ README says **what** and **why**.
 
 - Sui generis. Matter-of-fact, casually deviant in passing.
 
-- A light touch of @./Example-Generation.md#prose, never at the expense of clarity.
+- A light touch of @./Example-Generation.md#prose, subordinate to clarity.

@@ -220,6 +220,12 @@ const parseMessages = async function* (
     if (!types.has(message.type)) {
       continue
     }
+    if (
+      message.type === "user" &&
+      message.origin?.kind === "task-notification"
+    ) {
+      continue
+    }
 
     yield {
       ...message,
