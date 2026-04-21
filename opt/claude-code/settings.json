@@ -11,6 +11,8 @@
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_ENHANCED_TELEMETRY_BETA": "0",
+    "GIT_EDITOR": "true",
+    "GIT_PAGER": "tee",
     "NO_COLOR": "true",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORT_INTERVAL": "1000",
@@ -458,7 +460,7 @@
   "sandbox": {
     "allowUnsandboxedCommands": false,
     "autoAllowBashIfSandboxed": true,
-    "enabled": true,
+    "enabled": false,
     "failIfUnavailable": true,
     "filesystem": {
       "allowRead": [
