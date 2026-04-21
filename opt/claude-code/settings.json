@@ -7,12 +7,13 @@
   "enabledPlugins": {},
   "env": {
     "ANTHROPIC_API_KEY": "",
+    "CLAUDE_AUTO_BACKGROUND_TASKS": "1",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_ENHANCED_TELEMETRY_BETA": "0",
-    "GIT_EDITOR": "true",
-    "GIT_PAGER": "tee",
+    "DISABLE_FEEDBACK_COMMAND": "1",
+    "EDITOR": "true",
     "NO_COLOR": "true",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORT_INTERVAL": "1000",
@@ -22,7 +23,8 @@
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_METRIC_EXPORT_INTERVAL": "1000",
     "OTEL_TRACES_EXPORTER": "otlp",
-    "OTEL_TRACES_EXPORT_INTERVAL": "1000"
+    "OTEL_TRACES_EXPORT_INTERVAL": "1000",
+    "PAGER": "tee"
   },
   "feedbackSurveyRate": 0,
   "hooks": {
