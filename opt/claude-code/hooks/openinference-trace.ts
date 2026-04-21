@@ -192,10 +192,9 @@ const readJsonL = async function* (
     crlfDelay: Infinity,
   })
   for await (const line of rl) {
-    if (!line) {
-      continue
+    if (line) {
+      yield JSON.parse(line)
     }
-    yield JSON.parse(line)
   }
   return
 }
@@ -211,7 +210,7 @@ const parseMessages = async function* (
 
   const types = new Set(["user", "assistant"] as const)
 
-  let found = false
+  let found = lastUuid === undefined
   for await (const message of readJsonL(transcriptPath)) {
     if (!found) {
       found ||= message.uuid === lastUuid
