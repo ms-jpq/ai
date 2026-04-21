@@ -16,7 +16,6 @@
     "CLAUDE_CODE_ENHANCED_TELEMETRY_BETA": "0",
     "DISABLE_UPGRADE_COMMAND": "1",
     "EDITOR": "true",
-    "IS_DEMO": "1",
     "NO_COLOR": "true",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORT_INTERVAL": "1000",
