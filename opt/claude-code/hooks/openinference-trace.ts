@@ -817,7 +817,7 @@ const groupChains = function* (
   if (hook.hook_event_name === "SubagentStop") {
     yield {
       type: "grouped",
-      kind: OpenInferenceSpanKind.CHAIN,
+      kind: OpenInferenceSpanKind.AGENT,
       children: entries.toArray(),
     }
     return
