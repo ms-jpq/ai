@@ -1,5 +1,5 @@
 ---
-description: Delegate task to a background sub-agent.
+description: Delegate a task to a background sub-agent.
 agent: general-purpose
 disable-model-invocation: true
 ---
