@@ -270,10 +270,6 @@ const correlateToolCalls = function* (
 const contents = function* (
   msg: TranscriptMessage,
 ): IteratorObject<MessageBlock> {
-  if (!("message" in msg)) {
-    return
-  }
-
   const content = msg.message.content
   if (typeof content === "string") {
     yield content
