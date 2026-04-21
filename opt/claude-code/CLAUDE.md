@@ -22,7 +22,7 @@
 - Iteratively test hypotheses with tools. See @./skills/dig/SKILL.md.
   - Accrue disposable tools in `.exp/` at the project root.
 
-- Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
+- Delegate web search and fetch to the `web-search` subagent with `run_in_background`.
 
 ---
 
