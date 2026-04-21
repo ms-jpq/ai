@@ -852,10 +852,13 @@ const attachIO = ({
   const [_, firstInputBlock] =
     sourceBlocks.find(([, block]) => {
       if (block.category === "tool") {
+        if (block.correlationId === lastCorrelationId) {
+          return true
+        }
         if (grouped.type === "correlated" && grouped.orphaned) {
           return block.type === SemanticConventions.INPUT_VALUE
         }
-        return block.correlationId === lastCorrelationId
+        return false
       }
       if (block.type === SemanticConventions.INPUT_VALUE) {
         return true
