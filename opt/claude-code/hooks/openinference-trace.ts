@@ -13,6 +13,7 @@ import type {
   BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import {
+  AGENT_NAME,
   MimeType,
   OpenInferenceSpanKind,
   SemanticConventions,
@@ -88,6 +89,7 @@ type Grouped = Readonly<
   | {
       type: "grouped"
       kind: OpenInferenceSpanKind
+      attributes: Attributes
       children: readonly Grouped[]
     }
   | AtomicGroup
@@ -716,7 +718,10 @@ const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
   }
 }
 
-const groupBuffer = (kind: OpenInferenceSpanKind) => {
+const groupBuffer = (
+  kind: OpenInferenceSpanKind,
+  attributes: Attributes = {},
+) => {
   const acc = new Array<Grouped>()
   return {
     push: (...group: Grouped[]) => acc.push(...group),
@@ -728,6 +733,7 @@ const groupBuffer = (kind: OpenInferenceSpanKind) => {
           yield {
             type: "grouped",
             kind,
+            attributes,
             children: [...acc],
           }
         }
@@ -780,6 +786,7 @@ const groupByGeneration = function* (
     yield {
       type: "grouped",
       kind: OpenInferenceSpanKind.LLM,
+      attributes: {},
       children,
     }
   }
@@ -818,6 +825,7 @@ const groupChains = function* (
     yield {
       type: "grouped",
       kind: OpenInferenceSpanKind.AGENT,
+      attributes: { [AGENT_NAME]: hook.agent_type },
       children: entries.toArray(),
     }
     return
@@ -973,6 +981,7 @@ const emitGrouped = ({
       attributes: {
         ...sharedAttributes,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: grouped.kind,
+        ...grouped.attributes,
       },
     },
     parentCtx,
