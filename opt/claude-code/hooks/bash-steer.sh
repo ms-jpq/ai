@@ -34,7 +34,7 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='install locally, or ask the user to install system packages'
   ;;
-'npx '* | 'bunx '* | 'pnpm dlx '* | 'yarn dlx '* | 'uvx '* | 'uv run '* | 'uv tool run '* | 'pipx run '*)
+'npx '* | 'bunx '* | 'pnpm dlx '* | 'yarn dlx '* | 'uvx '* | 'pipx run '*)
   DECISION=deny
   REASON='use locally installed tools, install as required'
   ;;
