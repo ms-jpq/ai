@@ -1,3 +1,8 @@
+---
+paths:
+  - "**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"
+---
+
 # TypeScript
 
 - `const foo = () => {}` over `function foo() {}`.

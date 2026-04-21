@@ -1,3 +1,9 @@
+---
+paths:
+  - "**/Makefile"
+  - "**/*.mk"
+---
+
 # Makefile
 
 - GNU Make only. No POSIX make compatibility.

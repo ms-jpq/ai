@@ -1,3 +1,8 @@
+---
+paths:
+  - "**/*.lua"
+---
+
 # Lua
 
 - Closure factories for stateful objects. Plain tables for stateless modules.

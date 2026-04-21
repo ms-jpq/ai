@@ -1,3 +1,8 @@
+---
+paths:
+  - "**/*.md"
+---
+
 # README Style
 
 README says **what** and **why**.
