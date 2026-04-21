@@ -1,10 +1,6 @@
 #!/usr/bin/env -S -- node
 
 import type { HookInput, SDKMessage } from "@anthropic-ai/claude-agent-sdk"
-import {
-  getSessionMessages,
-  getSubagentMessages,
-} from "@anthropic-ai/claude-agent-sdk"
 import type {
   BetaContentBlock,
   BetaContentBlockParam,
@@ -33,9 +29,11 @@ import {
 import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { randomUUID } from "node:crypto"
+import { createReadStream } from "node:fs"
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
+import { createInterface } from "node:readline"
 import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
@@ -98,8 +96,7 @@ type Grouped = Readonly<
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
 
-const hookInput = async (): Promise<HookInput> =>
-  JSON.parse(await text(stdin)) as HookInput
+const hookInput = async (): Promise<HookInput> => JSON.parse(await text(stdin))
 
 const gitUserName = (): Promise<string> =>
   promisify(execFile)("git", ["config", "user.name"])
@@ -187,6 +184,22 @@ const provider = (
   }
 }
 
+const readJsonL = async function* (
+  path: string,
+): AsyncIteratorObject<TranscriptMessage> {
+  const rl = createInterface({
+    input: createReadStream(path, { encoding: "utf-8" }),
+    crlfDelay: Infinity,
+  })
+  for await (const line of rl) {
+    if (!line) {
+      continue
+    }
+    yield JSON.parse(line)
+  }
+  return
+}
+
 const parseMessages = async function* (
   hook: HookInput,
   lastUuid: string | undefined,
@@ -196,29 +209,14 @@ const parseMessages = async function* (
     ? hook.agent_transcript_path
     : hook.transcript_path
 
-  const messages = (await (isSubAgent
-    ? getSubagentMessages(hook.session_id, hook.agent_id)
-    : getSessionMessages(hook.session_id))) as TranscriptMessage[]
-
-  const foundIdx =
-    lastUuid === undefined ? -1 : messages.findIndex((m) => m.uuid === lastUuid)
-  const startIdx = foundIdx + 1
-
-  if (lastUuid !== undefined && foundIdx < 0) {
-    log({
-      level: "info",
-      msg: `lastUuid ${lastUuid} not in transcript — treating as caught up`,
-    })
-    return
-  }
-
-  log({
-    level: "debug",
-    msg: `messages: ${messages.length}, startIdx: ${startIdx}`,
-  })
-
   const types = new Set(["user", "assistant"] as const)
-  for (const message of messages.values().drop(startIdx)) {
+
+  let found = false
+  for await (const message of readJsonL(transcriptPath)) {
+    if (!found) {
+      found ||= message.uuid === lastUuid
+      continue
+    }
     if (!types.has(message.type)) {
       continue
     }
