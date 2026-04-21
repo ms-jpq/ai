@@ -88,7 +88,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/nanny.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/bash-steer.sh",
             "type": "command"
           }
         ],
