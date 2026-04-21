@@ -17,7 +17,14 @@ import {
 import type { Attributes, Context, Span, Tracer } from "@opentelemetry/api"
 import { ROOT_CONTEXT, SpanStatusCode, trace } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
-import { resourceFromAttributes } from "@opentelemetry/resources"
+import {
+  defaultResource,
+  detectResources,
+  hostDetector,
+  osDetector,
+  processDetector,
+  resourceFromAttributes,
+} from "@opentelemetry/resources"
 import {
   BasicTracerProvider,
   BatchSpanProcessor,
@@ -158,10 +165,18 @@ const provider = (
   }
 
   const provider = new BasicTracerProvider({
-    resource: resourceFromAttributes({
-      [ATTR_SERVICE_INSTANCE_ID]: hook.session_id,
-      [ATTR_SERVICE_NAME]: "claude-code",
-    }),
+    resource: defaultResource()
+      .merge(
+        detectResources({
+          detectors: [hostDetector, osDetector, processDetector],
+        }),
+      )
+      .merge(
+        resourceFromAttributes({
+          [ATTR_SERVICE_INSTANCE_ID]: hook.session_id,
+          [ATTR_SERVICE_NAME]: "claude-code",
+        }),
+      ),
     spanProcessors: [
       new BatchSpanProcessor(
         new OTLPTraceExporter({
