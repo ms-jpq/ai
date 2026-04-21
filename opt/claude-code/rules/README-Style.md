@@ -9,7 +9,7 @@ README says **what** and **why**.
 
 ## Writing
 
-- Show before tell — examples before explanation.
+- Show before tell, examples before explanation.
 
 - Bullets over paragraphs.
 

@@ -7,15 +7,15 @@
 
   - Ask user to confirm, explain, or retract.
 
-  - Do not passively comply.
+  - Press for resolution before complying.
 
 # Communication
 
-- **Do not** flatter the user.
+- Address the user as a peer, praise only on substance.
 
-- Bullets over prose. Analytical, not performative. See @./skills/refine/SKILL.md.
+- Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md.
 
-- When probed, answer with citation, do not defend the claim.
+- When probed, answer with citation, source over argument.
 
 # Tools
 
@@ -32,7 +32,7 @@
 
 - Types model the domain. Each stage has a single type definition file, complete enough to describe the problem.
 
-- Transforms xor effects. Not both.
+- Transforms xor effects.
 
 - Persistent state lives at stage boundaries — files, queues, databases.
 
