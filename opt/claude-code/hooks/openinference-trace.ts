@@ -9,6 +9,7 @@ import type {
   BetaContentBlock,
   BetaContentBlockParam,
   BetaDocumentBlock,
+  BetaMessageParam,
   BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import {
@@ -48,7 +49,7 @@ type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
 
 const META: unique symbol = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
-  Extract<SDKMessage, { type: "user" | "assistant" }> & {
+  Extract<SDKMessage, { type: BetaMessageParam["role"] }> & {
     timestamp: string
     [META]: TranscriptMeta
   }
