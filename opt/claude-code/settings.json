@@ -464,7 +464,7 @@
   "sandbox": {
     "allowUnsandboxedCommands": false,
     "autoAllowBashIfSandboxed": true,
-    "enabled": false,
+    "enabled": true,
     "failIfUnavailable": true,
     "filesystem": {
       "allowRead": [
