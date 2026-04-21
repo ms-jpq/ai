@@ -439,11 +439,6 @@
       "Glob(~/Public/**)",
       "Write(~/Public/**)",
       "Edit(~/Public/**)",
-      "Read(~/wallpapers.localized/**)",
-      "Grep(~/wallpapers.localized/**)",
-      "Glob(~/wallpapers.localized/**)",
-      "Write(~/wallpapers.localized/**)",
-      "Edit(~/wallpapers.localized/**)",
       "Write(~/.local/bin/**)",
       "Edit(~/.local/bin/**)",
       "Write(~/.local/lbin/**)",
@@ -540,7 +535,6 @@
         "~/Notes/",
         "~/Pictures/",
         "~/Public/",
-        "~/wallpapers.localized/",
         "~/.local/secrets/"
       ],
       "denyWrite": [
@@ -600,7 +594,6 @@
         "~/Notes/",
         "~/Pictures/",
         "~/Public/",
-        "~/wallpapers.localized/",
         "~/.local/bin/",
         "~/.local/lbin/",
         "~/.local/libexec/",
