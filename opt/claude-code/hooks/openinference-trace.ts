@@ -851,7 +851,10 @@ const attachIO = ({
 
   const [_, firstInputBlock] =
     sourceBlocks.find(([, block]) => {
-      if (block.category === "tool" && block.correlationId) {
+      if (block.category === "tool") {
+        if (grouped.type === "correlated" && grouped.orphaned) {
+          return block.type === SemanticConventions.INPUT_VALUE
+        }
         return block.correlationId === lastCorrelationId
       }
       if (block.type === SemanticConventions.INPUT_VALUE) {
@@ -860,7 +863,7 @@ const attachIO = ({
       if (block.category === "agent-text") {
         return block !== lastOutputBlock
       }
-      return sourceBlocks.length === 1
+      return false
     }) ?? []
 
   if (firstInputBlock) {
