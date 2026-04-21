@@ -1,6 +1,6 @@
 #!/usr/bin/env -S -- node
 
-import type { HookInput, SessionMessage } from "@anthropic-ai/claude-agent-sdk"
+import type { HookInput, SDKMessage } from "@anthropic-ai/claude-agent-sdk"
 import {
   getSessionMessages,
   getSubagentMessages,
@@ -9,8 +9,6 @@ import type {
   BetaContentBlock,
   BetaContentBlockParam,
   BetaDocumentBlock,
-  BetaMessage,
-  BetaMessageParam,
   BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import {
@@ -45,10 +43,12 @@ type TranscriptMeta = Readonly<{
   debugExpr: string
 }>
 
+type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
+type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
+
 const META: unique symbol = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
-  SessionMessage & {
-    message: BetaMessage | BetaMessageParam
+  Extract<SDKMessage, { type: "user" | "assistant" }> & {
     timestamp: string
     [META]: TranscriptMeta
   }
@@ -72,8 +72,6 @@ type ExtractedBlock =
       error?: boolean
     })
 
-type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
-
 type SourcedBlock = readonly [
   TranscriptMessage,
   ExtractedBlock & { [META]: { block: BlockType } },
@@ -93,8 +91,6 @@ type Grouped = Readonly<
     }
   | AtomicGroup
 >
-
-type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -218,7 +214,12 @@ const parseMessages = async function* (
     msg: `messages: ${messages.length}, startIdx: ${startIdx}`,
   })
 
+  const types = new Set(["user", "assistant"] as const)
   for (const message of messages.values().drop(startIdx)) {
+    if (!types.has(message.type)) {
+      continue
+    }
+
     yield {
       ...message,
       [META]: {
@@ -266,14 +267,14 @@ const correlateToolCalls = function* (
   return
 }
 
-const contents = function* ({
-  message,
-}: TranscriptMessage): IteratorObject<MessageBlock> {
-  if (!message || typeof message !== "object") {
+const contents = function* (
+  msg: TranscriptMessage,
+): IteratorObject<MessageBlock> {
+  if (!("message" in msg)) {
     return
   }
 
-  const content = message.content
+  const content = msg.message.content
   if (typeof content === "string") {
     yield content
   } else if (Array.isArray(content)) {
@@ -306,7 +307,7 @@ const documentValue = ({
 }
 
 const extractBlock = (
-  role: SessionMessage["type"],
+  role: SDKMessage["type"],
   block: MessageBlock,
 ): ExtractedBlock | undefined => {
   const side =
@@ -736,7 +737,7 @@ const groupBuffer = (kind: OpenInferenceSpanKind) => {
 
 const generationId = (grouped: Grouped): string | undefined => {
   for (const [msg] of iterGrouped(grouped)) {
-    if ("id" in msg.message) {
+    if ("message" in msg && "id" in msg.message) {
       return msg.message.id
     }
   }
