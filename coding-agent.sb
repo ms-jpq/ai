@@ -1,3 +1,0 @@
-(import (string-append (param "PROFILES") "/0-cli.sb"))
-(import (string-append (param "PROFILES") "/1-auth.sb"))
-(import (string-append (param "PROFILES") "/3-git.sb"))
