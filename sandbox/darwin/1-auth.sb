@@ -17,4 +17,8 @@
 
 (allow file-read*
   (subpath (home ".ssh")
-           (xdg-config "ssh")))
+           (xdg-config "ssh")
+           (local-share "ssh")))
+
+(allow file-read* file-write*
+  (subpath (xdg-cache "ssh")))

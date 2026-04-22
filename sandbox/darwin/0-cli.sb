@@ -51,3 +51,6 @@
   (string-append (home "Library/Caches") "/" path))
 
 (define (xdg-state path) (xdg-cache path))
+
+(define (local-share path)
+  (string-append (home "Library/Application Support") "/" path))
