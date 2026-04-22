@@ -1,14 +1,3 @@
-(import (string-append (param "SANDBOX") "/0-cli.sb"))
-(import (string-append (param "SANDBOX") "/1-auth.sb"))
-(import (string-append (param "SANDBOX") "/3-git.sb"))
-
-;; coding-agent.sb
-;; Invoke:
-;;   sandbox-exec \
-;;     -f coding-agent.sb \
-;;     -D SANDBOX="$PWD/sandbox/darwin" \
-;;     -D HOME="$HOME" \
-;;     -D CWD="$PWD" \
-;;     -D TMPDIR="${TMPDIR%/}" \
-;;     -D SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
-;;     -- <command> [args...]
+(import (string-append (param "PROFILES") "/0-cli.sb"))
+(import (string-append (param "PROFILES") "/1-auth.sb"))
+(import (string-append (param "PROFILES") "/3-git.sb"))

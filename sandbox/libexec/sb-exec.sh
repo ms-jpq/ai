@@ -3,22 +3,16 @@
 set -o pipefail
 
 OPTS=''
-LONG_OPTS=''
+LONG_OPTS='path:,network:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
 while true; do
   case "$1" in
-  -u | --user)
-    shift -- 2
+  --path)
+    shift -- 1
     ;;
-  -p | --pass)
-    shift -- 2
-    ;;
-  -h | --host)
-    shift -- 2
-    ;;
-  --video)
+  --network)
     shift -- 1
     ;;
   --)
@@ -44,4 +38,4 @@ ARGV=(
   -D SSH_AUTH_SOCK="$SSH_AUTH_SOCK"
 )
 
-exec -- "${ARGV[@]}" "$@"
+exec -- "${ARGV[@]}" -- "$@"
