@@ -20,7 +20,8 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
-export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
+VAR="$ROOT/var"
+export -- CLAUDE_CONFIG_DIR="$VAR/claude"
 SANDBOX=()
 case "$OSTYPE" in
 darwin*)
@@ -29,7 +30,8 @@ darwin*)
     ~/.local/opt/sandbox/libexec/sb-exec.sh
     --auth
     --network
-    --dir "$CLAUDE_CONFIG_DIR"
+    --dir "$VAR"
+    --dir "$ROOT/opt/claude-code"
     --
   )
   ;;
