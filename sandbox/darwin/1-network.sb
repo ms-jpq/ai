@@ -7,5 +7,5 @@
   (literal "/private/var/run/resolv.conf"))
 
 (allow file-read*
-  (subpath (preferences "curl")
-           (preferences "wget")))
+  (subpath (xdg-config "curl")
+           (xdg-config "wget")))
