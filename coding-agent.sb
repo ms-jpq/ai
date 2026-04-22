@@ -6,6 +6,10 @@
 
 ;; ---- ---- ---- ----
 
+(define (home path) (string-append (param "HOME") path))
+
+;; ---- ---- ---- ----
+
 (allow mach-lookup)
 (allow process-exec)
 (allow process-fork)
@@ -32,14 +36,14 @@
 ;; ---- ---- ---- ----
 
 (allow file-read* file-write*
-  (subpath (string-append (param "HOME") "/.gnupg")))
+  (subpath (home "/.gnupg")))
 
 (allow network-outbound
-  (literal (string-append (param "HOME") "/.gnupg/S.gpg-agent.extra"))
-  (literal (string-append (param "HOME") "/.gnupg/S.gpg-agent.ssh")))
+  (literal (home "/.gnupg/S.gpg-agent.extra"))
+  (literal (home "/.gnupg/S.gpg-agent.ssh")))
 
 (allow file-read*
-  (subpath (string-append (param "HOME") "/.ssh")))
+  (subpath (home "/.ssh")))
 
 (allow network-outbound
   (literal (param "SSH_AUTH_SOCK"))
