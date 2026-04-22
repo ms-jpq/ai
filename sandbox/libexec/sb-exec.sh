@@ -56,4 +56,8 @@ if ((NETWORK)); then
   ARGV+=(-p '(import (string-append (param "PROFILES") "/1-auth.sb"))')
 fi
 
+for _ in "${FILESYSTEM[@]}"; do
+  :
+done
+
 exec -- "${ARGV[@]}" -- "$@"
