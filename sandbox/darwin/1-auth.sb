@@ -12,8 +12,9 @@
 
 ;; ---- ---- ---- ----
 
-(allow file-read*
-  (subpath (home ".ssh")))
-
 (allow network-outbound
   (literal (param "SSH_AUTH_SOCK")))
+
+(allow file-read*
+  (subpath (home ".ssh")
+           (preferences "ssh")))

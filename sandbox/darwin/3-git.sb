@@ -1,5 +1,0 @@
-(version 1)
-
-(allow file-read*
-  (subpath (home ".config/git")))
-

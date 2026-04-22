@@ -5,3 +5,7 @@
 
 (allow file-read*
   (literal "/private/var/run/resolv.conf"))
+
+(allow file-read*
+  (subpath (preferences "curl")
+           (preferences "wget")))

@@ -1,0 +1,7 @@
+(version 1)
+
+(allow file-read*
+  (subpath (preferences "git")
+           (preferences "asdf")
+           (preferences "mypy")
+           (preferences "npm")))
