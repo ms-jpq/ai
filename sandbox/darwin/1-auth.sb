@@ -17,4 +17,4 @@
 
 (allow file-read*
   (subpath (home ".ssh")
-           (preferences "ssh")))
+           (xdg-config "ssh")))
