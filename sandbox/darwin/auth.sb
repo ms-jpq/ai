@@ -1,0 +1,20 @@
+(version 1)
+
+;; Depends on base.sb for (home ...).
+
+;; ---- ---- ---- ----
+
+(allow file-read* file-write*
+  (subpath (home "/.gnupg")))
+
+(allow network-outbound
+  (literal (home "/.gnupg/S.gpg-agent.extra"))
+  (literal (home "/.gnupg/S.gpg-agent.ssh")))
+
+;; ---- ---- ---- ----
+
+(allow file-read*
+  (subpath (home "/.ssh")))
+
+(allow network-outbound
+  (literal (param "SSH_AUTH_SOCK")))

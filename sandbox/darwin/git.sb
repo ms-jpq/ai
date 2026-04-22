@@ -1,0 +1,11 @@
+(version 1)
+
+;; Depends on base.sb for (home ...).
+
+;; ---- ---- ---- ----
+
+(allow file-read*
+  (subpath (home "/.config/git")))
+
+(allow file-read* file-write*
+  (subpath (home "/.config/gh")))

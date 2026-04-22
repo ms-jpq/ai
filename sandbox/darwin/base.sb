@@ -1,0 +1,43 @@
+(version 1)
+
+(import "bsd.sb")
+
+(define (home path) (string-append (param "HOME") path))
+
+;; ---- ---- ---- ----
+
+(allow mach-lookup)
+(allow process-exec)
+(allow process-fork)
+
+;; ---- ---- ---- ----
+
+(allow file-read* file-write*
+  (literal "/dev/tty"))
+
+;; ---- ---- ---- ----
+
+(allow file-read*
+  (subpath "/bin")
+  (subpath "/private/etc")
+  (subpath "/sbin")
+  (subpath "/usr/bin")
+  (subpath "/usr/libexec")
+  (subpath "/usr/local")
+  (subpath "/usr/sbin"))
+
+(allow file-read* file-map-executable
+  (subpath "/opt/homebrew"))
+
+;; ---- ---- ---- ----
+
+(allow file-read* file-write*
+  (subpath (param "CWD"))
+  (subpath (param "TMPDIR"))
+  (subpath "/private/tmp")
+  (subpath "/private/var/tmp"))
+
+;; ---- ---- ---- ----
+
+(allow network-outbound
+  (remote tcp))
