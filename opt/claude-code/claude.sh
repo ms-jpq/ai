@@ -20,9 +20,18 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
+export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
+SANDBOX=()
 case "$OSTYPE" in
 darwin*)
   CC='/opt/homebrew/bin/claude'
+  SANDBOX+=(
+    ~/.local/opt/sandbox/libexec/sb-exec.sh
+    --auth
+    --network
+    --dir "$CLAUDE_CONFIG_DIR"
+    --
+  )
   ;;
 linux*)
   CC='/usr/bin/claude-code'
@@ -31,8 +40,6 @@ linux*)
   exit 2
   ;;
 esac
-
-export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 
 ARGV=("$@")
 
@@ -43,7 +50,13 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
-EXEC=(nice -n 19 -- ~/.local/bin/hp "$CC" "${ARGV[@]}")
+EXEC=(
+  nice
+  -n 19
+  -- "${SANDBOX[@]}"
+  ~/.local/bin/hp
+  "$CC" "${ARGV[@]}"
+)
 if [[ -t 0 ]]; then
   clear -x
   printf -- '%s' "/color $RANDOM_COLOR" | "${EXEC[@]}"

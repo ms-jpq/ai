@@ -7,4 +7,3 @@ $(CC)/local-plugins/omnibus/.lsp.json: ~/.config/nvim/lsp.lua
 	'$<' > '$@'
 
 cc: lsp
-	$(CC)/libexec/settings.py
