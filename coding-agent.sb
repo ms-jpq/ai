@@ -1,10 +1,6 @@
-(version 1)
-(deny default)
-(debug deny)
-
-(import (string-append (param "SANDBOX") "/base.sb"))
-(import (string-append (param "SANDBOX") "/auth.sb"))
-(import (string-append (param "SANDBOX") "/git.sb"))
+(import (string-append (param "SANDBOX") "/0-cli.sb"))
+(import (string-append (param "SANDBOX") "/1-auth.sb"))
+(import (string-append (param "SANDBOX") "/3-git.sb"))
 
 ;; coding-agent.sb
 ;; Invoke:

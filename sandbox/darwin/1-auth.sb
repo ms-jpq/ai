@@ -8,8 +8,11 @@
   (subpath (home "/.gnupg")))
 
 (allow network-outbound
+  (literal (home "/.gnupg/S.gpg-agent"))
+  (literal (home "/.gnupg/S.gpg-agent.browser"))
   (literal (home "/.gnupg/S.gpg-agent.extra"))
-  (literal (home "/.gnupg/S.gpg-agent.ssh")))
+  (literal (home "/.gnupg/S.gpg-agent.ssh"))
+  (literal (home "/.gnupg/S.scdaemon")))
 
 ;; ---- ---- ---- ----
 

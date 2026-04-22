@@ -1,8 +1,7 @@
 (version 1)
+(deny default)
 
 (import "bsd.sb")
-
-(define (home path) (string-append (param "HOME") path))
 
 ;; ---- ---- ---- ----
 
@@ -39,5 +38,4 @@
 
 ;; ---- ---- ---- ----
 
-(allow network-outbound
-  (remote tcp))
+(define (home path) (string-append (param "HOME") path))
