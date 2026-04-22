@@ -57,6 +57,7 @@ EXEC=(
   ~/.local/bin/hp
   "$CC" "${ARGV[@]}"
 )
+
 if [[ -t 0 ]]; then
   clear -x
   printf -- '%s' "/color $RANDOM_COLOR" | "${EXEC[@]}"
