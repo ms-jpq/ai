@@ -35,14 +35,12 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
-VAR="$ROOT/var"
-export -- CLAUDE_CONFIG_DIR="$VAR/claude"
+export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 SANDBOX=(
   ~/.local/opt/sandbox/libexec/dispatch.sh
   --auth
   --network
-  --dir "$VAR"
-  --dir "$ROOT/opt/claude-code"
+  --dir "$ROOT"
   --
 )
 
