@@ -194,7 +194,6 @@
   "permissions": {
     "allow": [
       "Bash",
-      "Edit",
       "Glob",
       "Grep",
       "mcp__plugin_omnibus_firecrawl__*",
@@ -202,8 +201,7 @@
       "Read",
       "Skill(tip)",
       "WebFetch",
-      "WebSearch",
-      "Write"
+      "WebSearch"
     ]
   },
   "spinnerTipsEnabled": false,
