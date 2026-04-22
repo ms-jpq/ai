@@ -60,10 +60,10 @@
 ;; ---- ---- ---- ----
 
 (allow file-read*
-  (subpath (string-append (param "HOME") "/.config/git")))
+  (subpath (home "/.config/git")))
 
 (allow file-read* file-write*
-  (subpath (string-append (param "HOME") "/.config/gh")))
+  (subpath (home "/.config/gh")))
 
 ;; coding-agent.sb
 ;; Invoke:
