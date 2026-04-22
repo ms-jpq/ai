@@ -44,5 +44,10 @@
 (define (home path)
   (string-append (param "HOME") "/" path))
 
-(define (preferences path)
+(define (xdg-config path)
   (string-append (home "Library/Preferences") "/" path))
+
+(define (xdg-cache path)
+  (string-append (home "Library/Caches") "/" path))
+
+(define (xdg-state path) (xdg-cache path))
