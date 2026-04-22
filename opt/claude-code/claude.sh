@@ -4,12 +4,6 @@ set -Eeu
 set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 
-if [[ $PWD == "$HOME" ]]; then
-  TMP="$(mktemp -d)"
-  cd -- "$TMP"
-  exec -- "$0" "$@"
-fi
-
 BASE="$(realpath -- "$0")"
 BASE="${BASE%/*}"
 PATH="$BASE/bin:$PATH"
