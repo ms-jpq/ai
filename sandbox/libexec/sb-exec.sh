@@ -56,7 +56,7 @@ if ((AUTH)); then
 fi
 
 if ((NETWORK)); then
-  PROFILES+=('(import-profile "1-auth.sb")')
+  PROFILES+=('(import-profile "1-network.sb")')
 fi
 
 for _ in "${FILESYSTEM[@]}"; do
