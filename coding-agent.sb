@@ -1,0 +1,72 @@
+(version 1)
+(deny default)
+(debug deny)
+
+(import "bsd.sb")
+
+;; ---- ---- ---- ----
+
+(allow mach-lookup)
+(allow process-exec)
+(allow process-fork)
+
+;; ---- ---- ---- ----
+
+(allow file-read* file-write*
+  (literal "/dev/tty"))
+
+;; ---- ---- ---- ----
+
+(allow file-read*
+  (subpath "/bin")
+  (subpath "/private/etc")
+  (subpath "/sbin")
+  (subpath "/usr/bin")
+  (subpath "/usr/libexec")
+  (subpath "/usr/local")
+  (subpath "/usr/sbin"))
+
+(allow file-read* file-map-executable
+  (subpath "/opt/homebrew"))
+
+;; ---- ---- ---- ----
+
+(allow file-read* file-write*
+  (subpath (string-append (param "HOME") "/.gnupg")))
+
+(allow network-outbound
+  (literal (string-append (param "HOME") "/.gnupg/S.gpg-agent.extra"))
+  (literal (string-append (param "HOME") "/.gnupg/S.gpg-agent.ssh")))
+
+(allow file-read*
+  (subpath (string-append (param "HOME") "/.ssh")))
+
+(allow network-outbound
+  (literal (param "SSH_AUTH_SOCK"))
+  (remote tcp))
+
+;; ---- ---- ---- ----
+
+(allow file-read* file-write*
+  (subpath (param "CWD"))
+  (subpath (param "TMPDIR"))
+  (subpath "/private/tmp")
+  (subpath "/private/var/tmp"))
+
+;; ---- ---- ---- ----
+
+(allow file-read*
+  (subpath (string-append (param "HOME") "/.config/git")))
+
+(allow file-read* file-write*
+  (subpath (string-append (param "HOME") "/.config/gh")))
+
+;; coding-agent.sb
+;; Invoke:
+;;   sandbox-exec \
+;;     -f coding-agent.sb \
+;;     -D HOME="$HOME" \
+;;     -D CWD="$PWD" \
+;;     -D TMPDIR="${TMPDIR%/}" \
+;;     -D SSH_AUTH_SOCK="$SSH_AUTH_SOCK" \
+;;     -- <command> [args...]
