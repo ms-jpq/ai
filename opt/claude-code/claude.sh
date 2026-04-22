@@ -20,20 +20,9 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
-VAR="$ROOT/var"
-export -- CLAUDE_CONFIG_DIR="$VAR/claude"
-SANDBOX=()
 case "$OSTYPE" in
 darwin*)
   CC='/opt/homebrew/bin/claude'
-  SANDBOX+=(
-    ~/.local/opt/sandbox/libexec/sb-exec.sh
-    --auth
-    --network
-    --dir "$VAR"
-    --dir "$ROOT/opt/claude-code"
-    --
-  )
   ;;
 linux*)
   CC='/usr/bin/claude-code'
@@ -51,6 +40,17 @@ RANDOM_COLOR="${COLOURS[RANDOM % ${#COLOURS[@]}]}"
 for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
+
+VAR="$ROOT/var"
+export -- CLAUDE_CONFIG_DIR="$VAR/claude"
+SANDBOX=(
+  ~/.local/opt/sandbox/libexec/dispatch.sh
+  --auth
+  --network
+  --dir "$VAR"
+  --dir "$ROOT/opt/claude-code"
+  --
+)
 
 EXEC=(
   nice
