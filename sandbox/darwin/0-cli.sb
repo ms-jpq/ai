@@ -38,4 +38,7 @@
 
 ;; ---- ---- ---- ----
 
-(define (home path) (string-append (param "HOME") path))
+(define (home path) (string-append (param "HOME") "/" path))
+
+(define (import-profile profile)
+  (import (string-append (param "PROFILES") "/" profile)))

@@ -37,27 +37,35 @@ done
 
 ROOT="$(realpath -- "${0%/*}/..")"
 
-# shellcheck disable=SC2154
 ARGV=(
   sandbox-exec
   -D PROFILES="$ROOT/darwin"
   -D TMPDIR="$TMPDIR"
   -D HOME="$HOME"
   -D CWD="$PWD"
-  -D SSH_AUTH_SOCK="$SSH_AUTH_SOCK"
-  -p '(import (string-append (param "PROFILES") "/0-cli.sb"))'
+)
+
+PROFILES=(
+  '(import (string-append (param "PROFILES") "/0-cli.sb"))'
 )
 
 if ((AUTH)); then
-  ARGV+=(-p '(import (string-append (param "PROFILES") "/1-auth.sb"))')
+  # shellcheck disable=SC2154
+  ARGV+=(-D SSH_AUTH_SOCK="$SSH_AUTH_SOCK")
+  PROFILES+=('(import-profile "1-auth.sb")')
 fi
 
 if ((NETWORK)); then
-  ARGV+=(-p '(import (string-append (param "PROFILES") "/1-auth.sb"))')
+  PROFILES+=('(import-profile "1-auth.sb")')
 fi
 
 for _ in "${FILESYSTEM[@]}"; do
   :
 done
+
+IFS=$'\n'
+PROFILE="${PROFILES[*]}"
+unset -- IFS
+ARGV+=(-p "$PROFILE")
 
 exec -- "${ARGV[@]}" -- "$@"
