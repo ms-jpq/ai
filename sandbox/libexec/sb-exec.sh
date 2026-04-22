@@ -3,17 +3,26 @@
 set -o pipefail
 
 OPTS=''
-LONG_OPTS='path:,network:'
+LONG_OPTS='auth,network,path:'
 GO="$(getopt --options="$OPTS" --longoptions="$LONG_OPTS" --name="$0" -- "$@")"
 eval -- set -- "$GO"
 
+AUTH=0
+NETWORK=0
+FILESYSTEM=()
 while true; do
   case "$1" in
-  --path)
+  --auth)
+    AUTH=1
     shift -- 1
     ;;
   --network)
+    NETWORK=1
     shift -- 1
+    ;;
+  --path)
+    FILESYSTEM+=("$2")
+    shift -- 2
     ;;
   --)
     shift -- 1
@@ -36,6 +45,15 @@ ARGV=(
   -D HOME="$HOME"
   -D CWD="$PWD"
   -D SSH_AUTH_SOCK="$SSH_AUTH_SOCK"
+  -p '(import (string-append (param "PROFILES") "/0-cli.sb"))'
 )
+
+if ((AUTH)); then
+  ARGV+=(-p '(import (string-append (param "PROFILES") "/1-auth.sb"))')
+fi
+
+if ((NETWORK)); then
+  ARGV+=(-p '(import (string-append (param "PROFILES") "/1-auth.sb"))')
+fi
 
 exec -- "${ARGV[@]}" -- "$@"
