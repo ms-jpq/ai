@@ -1,7 +1,0 @@
-(version 1)
-
-(allow file-read*
-  (subpath (xdg-config "git")
-           (xdg-config "asdf")
-           (xdg-config "mypy")
-           (xdg-config "npm")))
