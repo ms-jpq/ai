@@ -31,10 +31,10 @@
 ;; ---- ---- ---- ----
 
 (allow file-read* file-write*
-  (subpath (param "CWD"))
-  (subpath (param "TMPDIR"))
   (subpath "/private/tmp")
-  (subpath "/private/var/tmp"))
+  (subpath "/private/var/tmp")
+  (subpath (param "TMPDIR"))
+  (subpath (param "CWD")))
 
 ;; ---- ---- ---- ----
 
