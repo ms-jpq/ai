@@ -42,7 +42,6 @@ SANDBOX=(
   --network
   --dir "$ROOT"
   --dir "$VAR:rw"
-  --dir "$ROOT/opt/claude-code"
 )
 
 if CWD="$(~/.local/libexec/dnif.sh "$PWD")" && [[ $CWD != "$PWD" ]]; then
