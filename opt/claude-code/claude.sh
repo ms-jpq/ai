@@ -36,7 +36,6 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
 done
 
 VAR="$ROOT/var"
-export -- CLAUDE_CONFIG_DIR="$VAR/claude"
 SANDBOX=(
   ~/.local/opt/sandbox/libexec/dispatch.sh
   --auth
@@ -44,17 +43,21 @@ SANDBOX=(
   --dir "$ROOT"
   --dir "$VAR:rw"
   --dir "$ROOT/opt/claude-code"
-  --
 )
+
+if CWD="$(~/.local/libexec/dnif.sh "$PWD")" && [[ $CWD != "$PWD" ]]; then
+  SANDBOX+=(--dir "$CWD")
+fi
 
 EXEC=(
   nice
   -n 19
   -- "${SANDBOX[@]}"
-  ~/.local/bin/hp
+  -- ~/.local/bin/hp
   "$CC" "${ARGV[@]}"
 )
 
+export -- CLAUDE_CONFIG_DIR="$VAR/claude"
 if [[ -t 0 ]]; then
   clear -x
   printf -- '%s' "/color $RANDOM_COLOR" | "${EXEC[@]}"
