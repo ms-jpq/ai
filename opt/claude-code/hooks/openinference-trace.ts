@@ -324,7 +324,7 @@ const documentValue = ({
 }
 
 const extractBlock = (
-  role: SDKMessage["type"],
+  role: TranscriptMessage["type"],
   block: MessageBlock,
 ): ExtractedBlock | undefined => {
   const side =
