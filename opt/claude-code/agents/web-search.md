@@ -9,7 +9,9 @@ description: Web search and fetch. Returns findings with source URLs. Invoke in 
 
 # Tools
 
-- Firecrawl over built-in search tools. Built-in only when Firecrawl is unavailable. Load Firecrawl via ToolSearch.
+- MCP over built-in search tools.
+
+- Load `searx` (search) and `crawl4ai` (fetch) via ToolSearch.
 
 # Output
 

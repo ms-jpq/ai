@@ -1,6 +1,10 @@
 {
-  "firecrawl": {
+  "crawl4ai": {
+    "type": "sse",
+    "url": "https://crawl4ai.${MCP_DOMAIN}/mcp/sse"
+  },
+  "searx": {
     "type": "http",
-    "url": "https://mcp-firecrawl.${MCP_DOMAIN}/mcp"
+    "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
   }
 }

@@ -196,13 +196,15 @@
       "Bash",
       "Glob",
       "Grep",
-      "mcp__plugin_omnibus_firecrawl__*",
+      "mcp__plugin_omnibus_crawl4ai__*",
+      "mcp__plugin_omnibus_searx__searxng_web_search",
       "Monitor",
       "Read",
       "Skill(tip)",
       "WebFetch",
       "WebSearch"
-    ]
+    ],
+    "deny": ["mcp__plugin_omnibus_searx__web_url_read"]
   },
   "spinnerTipsEnabled": false,
   "spinnerVerbs": {
