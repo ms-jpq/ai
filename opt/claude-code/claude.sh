@@ -40,13 +40,16 @@ SANDBOX=(
   ~/.local/opt/sandbox/libexec/dispatch.sh
   --auth
   --network
-  --dir "$ROOT"
-  --dir "$VAR:rw"
 )
 
 if CWD="$(~/.local/libexec/dnif.sh "$PWD" '.git' | tac | grep -E --max-count 1 -e '.')" && [[ $CWD != "$PWD" ]]; then
   SANDBOX+=(--dir "$CWD:rw")
 fi
+
+SANDBOX+=(
+  --dir "$ROOT"
+  --dir "$VAR:rw"
+)
 
 EXEC=(
   nice
