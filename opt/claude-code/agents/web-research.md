@@ -1,5 +1,5 @@
 ---
-name: web-search
+name: web-research
 description: Web search and fetch. Returns findings with source URLs. Invoke in background.
 ---
 
