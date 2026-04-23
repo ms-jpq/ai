@@ -45,7 +45,7 @@ SANDBOX=(
 )
 
 if CWD="$(~/.local/libexec/dnif.sh "$PWD" '.git' | tac | grep -E --max-count 1 -e '.')" && [[ $CWD != "$PWD" ]]; then
-  SANDBOX+=(--dir "$CWD")
+  SANDBOX+=(--dir "$CWD:rw")
 fi
 
 EXEC=(
