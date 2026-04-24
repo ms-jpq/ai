@@ -141,4 +141,4 @@ exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 
 - `set -a` / `set +a` to scope exports when sourcing an env file.
 
-- No `\`-continuation. One-line statements (`export --`, `set --`, pipelines) or arrays for conditional extension.
+- No `\`-continuation. Arrays for conditional extension.

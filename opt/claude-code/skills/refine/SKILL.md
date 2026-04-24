@@ -31,3 +31,5 @@ description: Iteratively improve writing.
 - One question per turn.
 
 - Propose options with tradeoffs.
+
+- `auto` argument: skip questions, pick the strongest option each turn, apply. Stop when further iteration is churn.
