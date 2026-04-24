@@ -140,3 +140,5 @@ exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 - `command -v --` or `hash --` to check command existence.
 
 - `set -a` / `set +a` to scope exports when sourcing an env file.
+
+- No `\`-continuation. One-line statements (`export --`, `set --`, pipelines) or arrays for conditional extension.
