@@ -26,8 +26,8 @@ LIB="$HOME/Library"
 SANDBOX+=(
   --dir "$ROOT"
   --dir "$VAR:rw"
-  --dir "$LIB/Application Support/opencode:rw"
   --dir "$LIB/Preferences/opencode:rw"
+  --dir "$LIB/Application Support/opencode:rw"
 )
 
 exec -- nice -n 19 -- "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
