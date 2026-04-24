@@ -28,7 +28,6 @@ SANDBOX+=(
   --dir "$VAR:rw"
   --dir "$LIB/Application Support/opencode:rw"
   --dir "$LIB/Preferences/opencode:rw"
-  --dir "$LIB/Caches/opencode:rw"
 )
 
 exec -- nice -n 19 -- "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
