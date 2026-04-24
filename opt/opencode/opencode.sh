@@ -12,5 +12,4 @@ source -- "$ROOT/.env"
 set +a
 
 export -- LC_ALL='en_CA.UTF-8' OPENCODE_CONFIG="$BASE/opencode.json"
-
 exec -- "$BASE/../libexec/harness.sh" "$ROOT/node_modules/.bin/opencode" "$@"
