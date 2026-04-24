@@ -35,31 +35,12 @@ for PLUGIN in "$BASE/local-plugins"/*/; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
-VAR="$ROOT/var"
-SANDBOX=(
-  ~/.local/opt/sandbox/libexec/dispatch.sh
-  --auth
-  --network
-)
-
-if CWD="$(~/.local/libexec/dnif.sh "$PWD" '.git' | tac | grep -E --max-count 1 -e '.')" && [[ $CWD != "$PWD" ]]; then
-  SANDBOX+=(--dir "$CWD:rw")
-fi
-
-SANDBOX+=(
-  --dir "$ROOT"
-  --dir "$VAR:rw"
-)
-
 EXEC=(
-  nice
-  -n 19
-  -- "${SANDBOX[@]}"
-  -- ~/.local/bin/hp
+  "$BASE/../libexec/harness.sh"
   "$CC" "${ARGV[@]}"
 )
 
-export -- CLAUDE_CONFIG_DIR="$VAR/claude"
+export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 if [[ -t 0 ]]; then
   clear -x
   printf -- '%s' "/color $RANDOM_COLOR" | "${EXEC[@]}"
