@@ -10,5 +10,5 @@ set -a
 source -- "$ROOT/.env"
 set +a
 
-export -- LC_ALL='en_CA.UTF-8' OPENCODE_CONFIG_DIR="$ROOT/var/opencode"
+export -- LC_ALL='en_CA.UTF-8' OPENCODE_CONFIG_DIR="$ROOT/var/opencode" OPENCODE_DISABLE_LSP_DOWNLOAD=1
 exec -- "$ROOT/opt/libexec/harness.sh" "$ROOT/node_modules/.bin/opencode" "$@"
