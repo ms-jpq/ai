@@ -2,8 +2,7 @@
 
 set -o pipefail
 
-BASE="$(realpath -- "$0")"
-BASE="${BASE%/*}"
+BASE="${0%/*}"
 ROOT="$(realpath -- "$BASE/../..")"
 VAR="$ROOT/var"
 
