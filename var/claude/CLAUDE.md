@@ -1,1 +1,1 @@
-../../opt/claude-code/CLAUDE.md
+../../opt/claude-code/AGENT.md
