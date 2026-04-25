@@ -40,6 +40,9 @@ EXEC=(
   "$CC" "${ARGV[@]}"
 )
 
+# shellcheck disable=SC1003
+printf -- '\033]0;%s\033\\' '- (cc)'
+
 export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 if [[ -t 0 ]]; then
   clear -x
