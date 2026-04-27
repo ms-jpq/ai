@@ -31,7 +31,11 @@ ARGV=("$@")
 COLOURS=(blue green yellow purple orange pink cyan)
 RANDOM_COLOR="${COLOURS[RANDOM % ${#COLOURS[@]}]}"
 
-for PLUGIN in "$BASE/local-plugins"/*/; do
+PLUGINS=(
+  "$BASE/local-plugins"/*/
+  "$ROOT/var/claude-plugins"/*/
+)
+for PLUGIN in "${PLUGINS[@]}"; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
