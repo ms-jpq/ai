@@ -3,7 +3,7 @@
 set -o pipefail
 
 if ! [[ -v TMUX ]]; then
-  set -x
+  set -v
   exit 2
 fi
 

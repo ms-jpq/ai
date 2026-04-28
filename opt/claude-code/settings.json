@@ -272,7 +272,11 @@
     ]
   },
   "statusLine": {
-    "command": "~/.local/opt/ai/opt/claude-code/hooks/statusline.sh",
+    "command": "CC_MODE=main ~/.local/opt/ai/opt/claude-code/hooks/statusline.sh",
+    "type": "command"
+  },
+  "subagentStatusLine": {
+    "command": "CC_MODE=agent ~/.local/opt/ai/opt/claude-code/hooks/statusline.sh",
     "type": "command"
   },
   "teammateMode": "in-process",

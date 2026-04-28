@@ -38,7 +38,7 @@ case "${1:-""}" in
       exec -- cat -- "$TXT"
     fi
   done
-  set -x
+  set -v
   exit 1
   ;;
 esac

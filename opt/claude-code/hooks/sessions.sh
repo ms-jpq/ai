@@ -60,7 +60,7 @@ StopFailure)
   "${NOTIFY[@]}" --arg field 'error' <<< "$JSON" | "$BASE/notification.sh"
   ;;
 *)
-  set -x
+  set -v
   exit 2
   ;;
 esac
