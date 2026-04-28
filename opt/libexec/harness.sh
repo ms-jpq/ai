@@ -12,6 +12,19 @@ BASE="${0%/*}"
 ROOT="$(realpath -- "$BASE/../..")"
 VAR="$ROOT/var"
 
+OOM=()
+case "$OSTYPE" in
+linux*)
+  OOM+=(
+    choom
+    --adjust 1000
+    --
+  )
+  ;;
+*)
+  ;;
+esac
+
 SANDBOX=(
   ~/.local/opt/sandbox/libexec/dispatch.sh
   --auth
@@ -30,4 +43,4 @@ SANDBOX+=(
 )
 
 export -- BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
-exec -- nice -n 19 -- "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
+exec -- nice -n 19 -- "${OOM[@]}" "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
