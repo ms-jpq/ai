@@ -30,7 +30,7 @@ agent)
 .tasks[] | {id, content: (">>> " + (.label | gsub("\\s+"; " ")))}
 JQ
 
-  exec -- jq -e --compact-output "$JQ"
+  exec -- jq --compact-output "$JQ"
   ;;
 main)
   JSON="$(tee)"
