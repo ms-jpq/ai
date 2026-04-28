@@ -18,13 +18,6 @@ NOTIFY=(jq -e --compact-output --argjson n 28 '{ title: null, message: (.[$field
 
 case "$EVENT" in
 SessionStart)
-  if [[ -v CLAUDE_ENV_FILE ]]; then
-    {
-      printf -- '%q ' 'export' '--' "__CLAUDE_SESSION_ID=$SESSION_ID"
-      printf -- '\n'
-    } >> "$CLAUDE_ENV_FILE"
-  fi
-
   if [[ -v TMUX_PANE ]]; then
     tmux set-option -t "$TMUX_PANE" -p @claude_session "$SESSION_ID"
 
