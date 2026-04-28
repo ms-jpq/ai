@@ -3,6 +3,10 @@
     "type": "sse",
     "url": "https://crawl4ai.${MCP_DOMAIN}/mcp/sse"
   },
+  "playwright": {
+    "type": "http",
+    "url": "https://mcp-playwright.${MCP_DOMAIN}/mcp"
+  },
   "searx": {
     "type": "http",
     "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
