@@ -73,11 +73,21 @@ type ExtractedBlock =
   | (BaseExtractedBlock & { category: "user-text" })
   | (BaseExtractedBlock & { category: "agent-text" })
   | (BaseExtractedBlock & { category: "agent-thinking" })
-  | (BaseExtractedBlock & {
-      category: "tool"
-      correlationId: string | undefined
-      error?: boolean
-    })
+  | (BaseExtractedBlock &
+      (
+        | {
+            category: "tool"
+            correlationId: string | undefined
+            toolName: string
+            error?: undefined
+          }
+        | {
+            category: "tool"
+            correlationId: string | undefined
+            toolName?: undefined
+            error?: boolean
+          }
+      ))
 
 type SourcedBlock = readonly [
   TranscriptMessage,
@@ -415,6 +425,7 @@ const extractBlock = (
         type: SemanticConventions.INPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
+        toolName: `mcp__${block.server_name}__${block.name}`,
         value: {
           name: block.name,
           input: block.input,
@@ -428,6 +439,7 @@ const extractBlock = (
         type: SemanticConventions.INPUT_VALUE,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: block.id,
+        toolName: block.name,
         value: { name: block.name, input: block.input },
       }
 
@@ -691,6 +703,7 @@ const extractBlock = (
         type: side,
         kind: OpenInferenceSpanKind.TOOL,
         correlationId: undefined,
+        toolName: block.type,
         value: { file_id: block.file_id },
       }
 
@@ -901,6 +914,8 @@ const attachIO = ({
   }
 }
 
+const metadata = (label: string) => `langfuse.observation.metadata.${label}`
+
 const emitCorrelated = ({
   tracer,
   parentCtx,
@@ -917,6 +932,13 @@ const emitCorrelated = ({
   endTime: number
 }) => {
   const [[startMsg, { kind }]] = grouped.correlated
+  const toolName = grouped.correlated
+    .values()
+    .map(([, block]) =>
+      block.category === "tool" ? block.toolName : undefined,
+    )
+    .find((n) => n)
+
   const span = tracer.startSpan(
     startMsg.type,
     {
@@ -924,8 +946,9 @@ const emitCorrelated = ({
       attributes: {
         ...sharedAttributes,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: kind,
-        "langfuse.observation.metadata.transcript_jq": startMsg[META].debugExpr,
-        "langfuse.observation.metadata.block_types": grouped.correlated.map(
+        ...(toolName ? { [SemanticConventions.TOOL_NAME]: toolName } : {}),
+        [metadata("transcript_jq")]: startMsg[META].debugExpr,
+        [metadata("block_types")]: grouped.correlated.map(
           ([, block]) => block[META].block,
         ),
         ...(grouped.orphaned
@@ -1030,7 +1053,7 @@ const main = async (): Promise<void> => {
   const generations = groupByGeneration(correlated)
   const grouped = groupChains(hook, generations)
 
-  const tracer = otel.provider.getTracer("langfuse-sdk")
+  const tracer = otel.provider.getTracer("claude-code")
   for (const group of grouped) {
     emitGrouped({
       tracer,
