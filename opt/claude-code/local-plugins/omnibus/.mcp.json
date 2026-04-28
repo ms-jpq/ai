@@ -5,10 +5,10 @@
   },
   "playwright": {
     "type": "http",
-    "url": "https://mcp-playwright.${MCP_DOMAIN}/mcp"
+    "url": "https://playwright.mcp.${MCP_DOMAIN}/mcp"
   },
   "searx": {
     "type": "http",
-    "url": "https://mcp-searx.${MCP_DOMAIN}/mcp"
+    "url": "https://searx.mcp.${MCP_DOMAIN}/mcp"
   }
 }
