@@ -55,7 +55,7 @@ main)
     LANGFUSE_REST="${LANGFUSE_TRACE_URL#*://}"
     LANGFUSE_HOST="${LANGFUSE_TRACE_URL%%://*}://${LANGFUSE_REST%%/*}"
     TRACE_URL="${LANGFUSE_HOST}/project/${LANGFUSE_PROJECT}/sessions/${SESSION_ID}"
-    TRACE_INFO="${BOLD}${OSC8}${TRACE_URL}${ST}⌬tel${OSC8}${ST}${ST}${RESET} ${SEP} "
+    TRACE_INFO="${BOLD}${OSC8}${TRACE_URL}${ST}⌬tel${OSC8}${ST}${RESET} ${SEP} "
   fi
   ######################################
 
@@ -79,9 +79,9 @@ main)
   FILLED=$((CTX_PCT * BAR_LEN / 100))
 
   printf -v BAR -- '%*s' $((FILLED)) ''
-  BAR="${BAR// /'█'}"
+  BAR="${BAR// /"█"}"
   printf -v _EMPTY -- '%*s' $((BAR_LEN - FILLED)) ''
-  BAR+="${_EMPTY// /'░'}"
+  BAR+="${_EMPTY// /"░"}"
 
   if ((CTX_PCT >= 80)); then
     BAR_COLOUR="$RED"
