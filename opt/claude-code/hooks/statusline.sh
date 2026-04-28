@@ -21,24 +21,20 @@ YELLOW=$'\033[33m'
 ######################################
 
 ######################################
-JSON="$(tee)"
-SESSION_ID="$(jq -e --raw-output '.session_id // ""' <<< "$JSON")"
 ######################################
 
 # shellcheck disable=SC2154
 case "$CC_MODE" in
 agent)
-  # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
-  TASKS="$(jq -e --raw-output '.tasks[].label | gsub("\n"; " ")' <<< "$JSON")"
-  readarray -t -- TS <<< "$TASKS"
-  TASK_INFO=''
-  for TASK in "${TS[@]}"; do
-    TASK_INFO+="> $TASK "
-  done
+  read -r -d '' -- JQ <<- 'JQ' || true
+.tasks[] | {id, content: (">>> " + (.label | gsub("\\s+"; " ")))}
+JQ
 
-  printf -- '%s' "$TASK_INFO"
+  exec -- jq -e --compact-output "$JQ"
   ;;
 main)
+  JSON="$(tee)"
+  SESSION_ID="$(jq -e --raw-output '.session_id // ""' <<< "$JSON")"
   API_MS="$(jq -e --raw-output '.cost.total_api_duration_ms // 0' <<< "$JSON")"
   COST="$(jq -e --raw-output '.cost.total_cost_usd // 0' <<< "$JSON")"
   LINES_ADDED="$(jq -e --raw-output '.cost.total_lines_added // 0' <<< "$JSON")"
