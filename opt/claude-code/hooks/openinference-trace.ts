@@ -902,11 +902,21 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
 
 const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   const seen = new Set<string>()
-  const { input, output } = iterGrouped(grouped)
+  const uniq = iterGrouped(grouped)
     .map(([message]) => message)
     .filter((m) => m.type === "assistant")
-    .filter((m) => !seen.has(m.message.id) && (seen.add(m.message.id), true))
-    .map((m) => m.message.usage)
+    .map((m) => m.message)
+    .filter((m) => !seen.has(m.id) && (seen.add(m.id), true))
+    .toArray()
+
+  const model = uniq.at(-1)?.model
+  if (model) {
+    span.setAttribute(SemanticConventions.LLM_MODEL_NAME, model)
+  }
+
+  const { input, output } = uniq
+    .values()
+    .map((m) => m.usage)
     .reduce(
       (acc, usage) => ({
         input:
