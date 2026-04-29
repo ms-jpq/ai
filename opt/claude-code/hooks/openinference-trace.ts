@@ -901,19 +901,33 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
 }
 
 const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
+  const seen = new Set<string>()
   const { input, output } = iterGrouped(grouped)
     .map(([message]) => message)
     .filter((m) => m.type === "assistant")
+    .filter((m) => !seen.has(m.message.id) && (seen.add(m.message.id), true))
     .map((m) => m.message.usage)
     .reduce(
       (acc, usage) => ({
-        input: acc.input + usage.input_tokens,
+        input:
+          acc.input +
+          usage.input_tokens +
+          (usage.cache_read_input_tokens ?? 0) +
+          (usage.cache_creation_input_tokens ?? 0),
         output: acc.output + usage.output_tokens,
       }),
       { input: 0, output: 0 },
     )
 
-  span.setAttributes({})
+  if (input === 0 && output === 0) {
+    return
+  }
+
+  span.setAttributes({
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: input,
+    [SemanticConventions.LLM_TOKEN_COUNT_COMPLETION]: output,
+    [SemanticConventions.LLM_TOKEN_COUNT_TOTAL]: input + output,
+  })
 }
 
 const emitCorrelated = ({
