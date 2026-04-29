@@ -901,10 +901,10 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   }
 }
 
-const combineUsage = (
+const accumulateUsage = (
   a: Partial<BetaUsage>,
   b: Partial<BetaUsage>,
-): Partial<BetaUsage> => ({
+): Partial<{ [K in keyof BetaUsage]: NonNullable<BetaUsage[K]> }> => ({
   cache_creation_input_tokens:
     (a.cache_creation_input_tokens ?? 0) + (b.cache_creation_input_tokens ?? 0),
   cache_read_input_tokens:
@@ -935,21 +935,23 @@ const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   } = uniq
     .values()
     .map((m) => m.usage)
-    .reduce(combineUsage, {})
+    .reduce(accumulateUsage, {})
 
-  if (input_tokens === 0 && output_tokens === 0) {
+  const prompt =
+    input_tokens + cache_creation_input_tokens + cache_read_input_tokens
+  if (prompt === 0 && output_tokens === 0) {
     return
   }
 
   span.setAttributes({
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: input_tokens,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: prompt,
     [SemanticConventions.LLM_TOKEN_COUNT_COMPLETION]: output_tokens,
-    [SemanticConventions.LLM_TOKEN_COUNT_TOTAL]: input_tokens + output_tokens,
+    [SemanticConventions.LLM_TOKEN_COUNT_TOTAL]: prompt + output_tokens,
 
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_INPUT]:
-      cache_creation_input_tokens ?? 0,
     [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_READ]:
-      cache_read_input_tokens ?? 0,
+      cache_read_input_tokens,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_WRITE]:
+      cache_creation_input_tokens,
   })
 }
 
