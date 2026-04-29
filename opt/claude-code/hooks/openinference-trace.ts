@@ -851,15 +851,10 @@ const groupChains = function* (
   return
 }
 
-const attachIO = ({
-  span,
-  grouped,
-  sourceBlocks = iterGrouped(grouped).toArray(),
-}: {
-  span: Span
-  grouped: Grouped
-  sourceBlocks?: readonly SourcedBlock[]
-}) => {
+const metadata = (label: string) => `langfuse.observation.metadata.${label}`
+
+const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
+  const sourceBlocks = iterGrouped(grouped).toArray()
   const output = sourceBlocks.findLast(
     ([, block]) => block.type === SemanticConventions.OUTPUT_VALUE,
   )
@@ -905,7 +900,21 @@ const attachIO = ({
   }
 }
 
-const metadata = (label: string) => `langfuse.observation.metadata.${label}`
+const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
+  const { input, output } = iterGrouped(grouped)
+    .map(([message]) => message)
+    .filter((m) => m.type === "assistant")
+    .map((m) => m.message.usage)
+    .reduce(
+      (acc, usage) => ({
+        input: acc.input + usage.input_tokens,
+        output: acc.output + usage.output_tokens,
+      }),
+      { input: 0, output: 0 },
+    )
+
+  span.setAttributes({})
+}
 
 const emitCorrelated = ({
   tracer,
@@ -960,6 +969,7 @@ const emitCorrelated = ({
   }
 
   attachIO({ span, grouped })
+  attachUsage({ span, grouped })
   span.end(endTime)
 }
 
@@ -1025,7 +1035,8 @@ const emitGrouped = ({
     })
   }
 
-  attachIO({ span, grouped, sourceBlocks: flattened })
+  attachIO({ span, grouped })
+  attachUsage({ span, grouped })
   span.end(endTime)
   return
 }
