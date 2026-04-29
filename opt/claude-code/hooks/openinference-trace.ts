@@ -7,6 +7,7 @@ import type {
   BetaDocumentBlock,
   BetaMessageParam,
   BetaRequestDocumentBlock,
+  BetaUsage,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import {
   AGENT_NAME,
@@ -900,6 +901,18 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   }
 }
 
+const combineUsage = (
+  a: Partial<BetaUsage>,
+  b: Partial<BetaUsage>,
+): Partial<BetaUsage> => ({
+  cache_creation_input_tokens:
+    (a.cache_creation_input_tokens ?? 0) + (b.cache_creation_input_tokens ?? 0),
+  cache_read_input_tokens:
+    (a.cache_read_input_tokens ?? 0) + (b.cache_read_input_tokens ?? 0),
+  input_tokens: (a?.input_tokens ?? 0) + (b?.input_tokens ?? 0),
+  output_tokens: (a?.output_tokens ?? 0) + (b?.output_tokens ?? 0),
+})
+
 const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   const seen = new Set<string>()
   const uniq = iterGrouped(grouped)
@@ -914,33 +927,29 @@ const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
     span.setAttribute(SemanticConventions.LLM_MODEL_NAME, model)
   }
 
-  const { cacheInput, cacheRead, cacheWrite, output } = uniq
+  const {
+    cache_creation_input_tokens = 0,
+    cache_read_input_tokens = 0,
+    input_tokens = 0,
+    output_tokens = 0,
+  } = uniq
     .values()
     .map((m) => m.usage)
-    .reduce(
-      (acc, usage) => ({
-        cacheInput: acc.cacheInput + usage.input_tokens,
-        cacheRead: acc.cacheRead + (usage.cache_read_input_tokens ?? 0),
-        cacheWrite: acc.cacheWrite + (usage.cache_creation_input_tokens ?? 0),
-        output: acc.output + usage.output_tokens,
-      }),
-      { cacheInput: 0, cacheRead: 0, cacheWrite: 0, output: 0 },
-    )
+    .reduce(combineUsage, {})
 
-  const input = cacheInput + cacheRead + cacheWrite
-  if (input === 0 && output === 0) {
+  if (input_tokens === 0 && output_tokens === 0) {
     return
   }
 
   span.setAttributes({
-    [SemanticConventions.LLM_TOKEN_COUNT_COMPLETION]: output,
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: input,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: input_tokens,
+    [SemanticConventions.LLM_TOKEN_COUNT_COMPLETION]: output_tokens,
+    [SemanticConventions.LLM_TOKEN_COUNT_TOTAL]: input_tokens + output_tokens,
+
     [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_INPUT]:
-      cacheInput,
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_READ]: cacheRead,
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_WRITE]:
-      cacheWrite,
-    [SemanticConventions.LLM_TOKEN_COUNT_TOTAL]: input + output,
+      cache_creation_input_tokens ?? 0,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_READ]:
+      cache_read_input_tokens ?? 0,
   })
 }
 
