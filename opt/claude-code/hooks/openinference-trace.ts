@@ -930,8 +930,9 @@ const emitCorrelated = ({
     )
     .find((n) => n)
 
+  const name = [startMsg.type, toolName].filter((n) => n).join("-")
   const span = tracer.startSpan(
-    startMsg.type,
+    name,
     {
       startTime,
       attributes: {
