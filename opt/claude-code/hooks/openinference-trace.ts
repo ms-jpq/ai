@@ -914,28 +914,32 @@ const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
     span.setAttribute(SemanticConventions.LLM_MODEL_NAME, model)
   }
 
-  const { input, output } = uniq
+  const { cacheInput, cacheRead, cacheWrite, output } = uniq
     .values()
     .map((m) => m.usage)
     .reduce(
       (acc, usage) => ({
-        input:
-          acc.input +
-          usage.input_tokens +
-          (usage.cache_read_input_tokens ?? 0) +
-          (usage.cache_creation_input_tokens ?? 0),
+        cacheInput: acc.cacheInput + usage.input_tokens,
+        cacheRead: acc.cacheRead + (usage.cache_read_input_tokens ?? 0),
+        cacheWrite: acc.cacheWrite + (usage.cache_creation_input_tokens ?? 0),
         output: acc.output + usage.output_tokens,
       }),
-      { input: 0, output: 0 },
+      { cacheInput: 0, cacheRead: 0, cacheWrite: 0, output: 0 },
     )
 
+  const input = cacheInput + cacheRead + cacheWrite
   if (input === 0 && output === 0) {
     return
   }
 
   span.setAttributes({
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: input,
     [SemanticConventions.LLM_TOKEN_COUNT_COMPLETION]: output,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: input,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_INPUT]:
+      cacheInput,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_READ]: cacheRead,
+    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_WRITE]:
+      cacheWrite,
     [SemanticConventions.LLM_TOKEN_COUNT_TOTAL]: input + output,
   })
 }
