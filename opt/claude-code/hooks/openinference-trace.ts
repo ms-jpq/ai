@@ -1078,7 +1078,6 @@ const emitGrouped = ({
   }
 
   attachIO({ span, grouped })
-  attachUsage({ span, grouped })
   span.end(endTime)
   return
 }
