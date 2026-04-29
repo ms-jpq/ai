@@ -7,7 +7,6 @@ import type {
   BetaDocumentBlock,
   BetaMessageParam,
   BetaRequestDocumentBlock,
-  BetaUsage,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import {
   AGENT_NAME,
@@ -901,58 +900,17 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   }
 }
 
-const accumulateUsage = (
-  a: Partial<BetaUsage>,
-  b: Partial<BetaUsage>,
-): Partial<{ [K in keyof BetaUsage]: NonNullable<BetaUsage[K]> }> => ({
-  cache_creation_input_tokens:
-    (a.cache_creation_input_tokens ?? 0) + (b.cache_creation_input_tokens ?? 0),
-  cache_read_input_tokens:
-    (a.cache_read_input_tokens ?? 0) + (b.cache_read_input_tokens ?? 0),
-  input_tokens: (a?.input_tokens ?? 0) + (b?.input_tokens ?? 0),
-  output_tokens: (a?.output_tokens ?? 0) + (b?.output_tokens ?? 0),
-})
-
-const attachUsage = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
-  const seen = new Set<string>()
-  const uniq = iterGrouped(grouped)
+const attachModel = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
+  const model = iterGrouped(grouped)
     .map(([message]) => message)
     .filter((m) => m.type === "assistant")
-    .map((m) => m.message)
-    .filter((m) => !seen.has(m.id) && (seen.add(m.id), true))
+    .map((m) => m.message.model)
     .toArray()
+    .at(-1)
 
-  const model = uniq.at(-1)?.model
   if (model) {
     span.setAttribute(SemanticConventions.LLM_MODEL_NAME, model)
   }
-
-  const {
-    cache_creation_input_tokens = 0,
-    cache_read_input_tokens = 0,
-    input_tokens = 0,
-    output_tokens = 0,
-  } = uniq
-    .values()
-    .map((m) => m.usage)
-    .reduce(accumulateUsage, {})
-
-  const prompt =
-    input_tokens + cache_creation_input_tokens + cache_read_input_tokens
-  if (prompt === 0 && output_tokens === 0) {
-    return
-  }
-
-  span.setAttributes({
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT]: prompt,
-    [SemanticConventions.LLM_TOKEN_COUNT_COMPLETION]: output_tokens,
-    [SemanticConventions.LLM_TOKEN_COUNT_TOTAL]: prompt + output_tokens,
-
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_READ]:
-      cache_read_input_tokens,
-    [SemanticConventions.LLM_TOKEN_COUNT_PROMPT_DETAILS_CACHE_WRITE]:
-      cache_creation_input_tokens,
-  })
 }
 
 const emitCorrelated = ({
@@ -1011,7 +969,7 @@ const emitCorrelated = ({
   }
 
   attachIO({ span, grouped })
-  attachUsage({ span, grouped })
+  attachModel({ span, grouped })
   span.end(endTime)
 }
 
@@ -1078,6 +1036,7 @@ const emitGrouped = ({
   }
 
   attachIO({ span, grouped })
+  attachModel({ span, grouped })
   span.end(endTime)
   return
 }
