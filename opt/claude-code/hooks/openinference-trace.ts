@@ -971,12 +971,15 @@ const emitCorrelated = ({
   endTime: number
 }) => {
   const [[startMsg, { kind }]] = grouped.correlated
-  const toolName = grouped.correlated
-    .values()
-    .map(([, block]) =>
-      block.category === "tool" ? block.toolName : undefined,
-    )
-    .find((n) => n)
+  const { toolName, toolCallId } =
+    grouped.correlated
+      .values()
+      .map(([, block]) =>
+        block.category === "tool"
+          ? { toolName: block.toolName, toolCallId: block.correlationId }
+          : undefined,
+      )
+      .find((t) => t) ?? {}
 
   const name = [startMsg.type, toolName].filter((n) => n).join(": ")
   const span = tracer.startSpan(
@@ -987,6 +990,7 @@ const emitCorrelated = ({
         ...sharedAttributes,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: kind,
         ...(toolName ? { [SemanticConventions.TOOL_NAME]: toolName } : {}),
+        ...(toolCallId ? { [SemanticConventions.TOOL_ID]: toolCallId } : {}),
         [metadata("transcript_jq")]: startMsg[META].debugExpr,
         [metadata("block_types")]: grouped.correlated.map(
           ([, block]) => block[META].block,
