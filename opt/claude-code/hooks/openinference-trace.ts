@@ -982,6 +982,7 @@ const emitCorrelated = ({
       .find((t) => t) ?? {}
 
   const name = [startMsg.type, toolName].filter((n) => n).join(": ")
+  const blockTypes = grouped.correlated.map(([, block]) => block[META].block)
   const span = tracer.startSpan(
     name,
     {
@@ -989,15 +990,13 @@ const emitCorrelated = ({
       attributes: {
         ...sharedAttributes,
         [SemanticConventions.OPENINFERENCE_SPAN_KIND]: kind,
+        [metadata("transcript_jq")]: startMsg[META].debugExpr,
+        [metadata("block_types")]: blockTypes,
+        ...(grouped.orphaned
+          ? { [metadata("orphaned")]: grouped.orphaned }
+          : {}),
         ...(toolName ? { [SemanticConventions.TOOL_NAME]: toolName } : {}),
         ...(toolCallId ? { [SemanticConventions.TOOL_ID]: toolCallId } : {}),
-        [metadata("transcript_jq")]: startMsg[META].debugExpr,
-        [metadata("block_types")]: grouped.correlated.map(
-          ([, block]) => block[META].block,
-        ),
-        ...(grouped.orphaned
-          ? { "langfuse.observation.metadata.orphaned": grouped.orphaned }
-          : {}),
       },
     },
     parentCtx,
