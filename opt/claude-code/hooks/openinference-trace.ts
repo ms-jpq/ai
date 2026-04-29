@@ -73,21 +73,12 @@ type ExtractedBlock =
   | (BaseExtractedBlock & { category: "user-text" })
   | (BaseExtractedBlock & { category: "agent-text" })
   | (BaseExtractedBlock & { category: "agent-thinking" })
-  | (BaseExtractedBlock &
-      (
-        | {
-            category: "tool"
-            correlationId: string | undefined
-            toolName: string
-            error?: undefined
-          }
-        | {
-            category: "tool"
-            correlationId: string | undefined
-            toolName?: undefined
-            error?: boolean
-          }
-      ))
+  | (BaseExtractedBlock & {
+      category: "tool"
+      correlationId: string | undefined
+      toolName?: string
+      error?: boolean
+    })
 
 type SourcedBlock = readonly [
   TranscriptMessage,
