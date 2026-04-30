@@ -40,6 +40,7 @@ import {
   ATTR_GEN_AI_INPUT_MESSAGES,
   ATTR_GEN_AI_OPERATION_NAME,
   ATTR_GEN_AI_OUTPUT_MESSAGES,
+  ATTR_GEN_AI_PROVIDER_NAME,
   ATTR_GEN_AI_REQUEST_MODEL,
   ATTR_GEN_AI_RESPONSE_FINISH_REASONS,
   ATTR_GEN_AI_RESPONSE_ID,
@@ -48,11 +49,17 @@ import {
   ATTR_GEN_AI_TOOL_CALL_ID,
   ATTR_GEN_AI_TOOL_CALL_RESULT,
   ATTR_GEN_AI_TOOL_NAME,
+  ATTR_GEN_AI_TOOL_TYPE,
+  ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS,
+  ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
+  ATTR_GEN_AI_USAGE_INPUT_TOKENS,
+  ATTR_GEN_AI_USAGE_OUTPUT_TOKENS,
   ATTR_USER_ID,
   GEN_AI_OPERATION_NAME_VALUE_CHAT,
   GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
   GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
   GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
+  GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
 } from "@opentelemetry/semantic-conventions/incubating"
 import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
@@ -103,6 +110,7 @@ type ExtractedBlock =
       category: "tool"
       correlationId: string | undefined
       toolName?: string
+      toolType?: "function" | "extension"
       error?: string
     })
 
@@ -297,14 +305,38 @@ const contents = function* (
   return
 }
 
-const extractChat = (
-  side: BaseExtractedBlock["type"],
-  category: Exclude<ExtractedBlock["category"], "tool">,
-  value: unknown,
-): ExtractedBlock => ({
+const extractChat = ({
+  side,
+  category,
+  value,
+}: {
+  side: BaseExtractedBlock["type"]
+  category: Exclude<ExtractedBlock["category"], "tool">
+  value: unknown
+}): ExtractedBlock => ({
   category,
   type: side,
   kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
+  value,
+})
+
+const extractToolUse = ({
+  toolName,
+  toolType,
+  correlationId,
+  value,
+}: {
+  toolName: string
+  toolType: "function" | "extension"
+  correlationId: string
+  value: unknown
+}): ExtractedBlock => ({
+  category: "tool",
+  type: "input",
+  kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+  correlationId,
+  toolName,
+  toolType,
   value,
 })
 
@@ -358,56 +390,66 @@ const extractBlock = (
   const textCategory = role === "assistant" ? "agent-text" : "user-text"
 
   if (typeof block === "string") {
-    return extractChat(side, textCategory, block)
+    return extractChat({ side, category: textCategory, value: block })
   }
 
   switch (block.type) {
     case "text":
-      return extractChat(
+      return extractChat({
         side,
-        textCategory,
-        block.citations?.length
+        category: textCategory,
+        value: block.citations?.length
           ? { text: block.text, citations: block.citations }
           : block.text,
-      )
+      })
     case "thinking":
       return block.thinking
-        ? extractChat(side, "agent-thinking", block.thinking)
+        ? extractChat({
+            side,
+            category: "agent-thinking",
+            value: block.thinking,
+          })
         : undefined
     case "redacted_thinking":
       return block.data
-        ? extractChat(side, "agent-thinking", block.data)
+        ? extractChat({ side, category: "agent-thinking", value: block.data })
         : undefined
     case "compaction":
       return block.content
-        ? extractChat(side, textCategory, block.content)
+        ? extractChat({ side, category: textCategory, value: block.content })
         : undefined
     case "image":
-      return extractChat(side, textCategory, imageValue(block))
+      return extractChat({
+        side,
+        category: textCategory,
+        value: imageValue(block),
+      })
 
     case "mcp_tool_use":
-      return {
-        category: "tool",
-        type: "input",
-        kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
-        correlationId: block.id,
+      return extractToolUse({
         toolName: `mcp__${block.server_name}__${block.name}`,
+        toolType: "extension",
+        correlationId: block.id,
         value: {
           name: block.name,
           input: block.input,
           server_name: block.server_name,
         },
-      }
+      })
     case "server_tool_use":
-    case "tool_use":
-      return {
-        category: "tool",
-        type: "input",
-        kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
-        correlationId: block.id,
+      return extractToolUse({
         toolName: block.name,
+        toolType: "extension",
+        correlationId: block.id,
         value: { name: block.name, input: block.input },
-      }
+      })
+    case "tool_use":
+      return extractToolUse({
+        toolName: block.name,
+        toolType: "function",
+        correlationId: block.id,
+        value: { name: block.name, input: block.input },
+      })
 
     case "tool_result":
     case "mcp_tool_result": {
@@ -661,8 +703,6 @@ const extractContent = function* (
   return
 }
 
-const metadata = (label: string) => `langfuse.observation.metadata.${label}`
-
 const messagePart = (block: ExtractedBlock) => ({
   type: block.category === "agent-thinking" ? "reasoning" : "text",
   content:
@@ -769,16 +809,39 @@ type AggregateFacts = {
   model: string | undefined
   responseId: string | undefined
   stopReasons: string[]
+  inputTokens: number
+  outputTokens: number
+  cacheReadInputTokens: number
+  cacheCreationInputTokens: number
 }
 
 const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
   const assistants = uniqueAssistants(blocks)
+  const usage = assistants.reduce(
+    (acc, m) => ({
+      inputTokens: acc.inputTokens + m.message.usage.input_tokens,
+      outputTokens: acc.outputTokens + m.message.usage.output_tokens,
+      cacheReadInputTokens:
+        acc.cacheReadInputTokens +
+        (m.message.usage.cache_read_input_tokens ?? 0),
+      cacheCreationInputTokens:
+        acc.cacheCreationInputTokens +
+        (m.message.usage.cache_creation_input_tokens ?? 0),
+    }),
+    {
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheReadInputTokens: 0,
+      cacheCreationInputTokens: 0,
+    },
+  )
   return {
     model: assistants.at(-1)?.message.model,
     responseId: assistants.at(-1)?.message.id,
     stopReasons: assistants
       .map((m) => m.message.stop_reason)
       .filter((r) => r != null),
+    ...usage,
   }
 }
 
@@ -796,24 +859,57 @@ const aggregateAttrs = (
   ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.stopReasons.length
     ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons }
     : {}),
+  ...(facts.inputTokens
+    ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: facts.inputTokens }
+    : {}),
+  ...(facts.outputTokens
+    ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: facts.outputTokens }
+    : {}),
+  ...(facts.cacheReadInputTokens
+    ? {
+        [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: facts.cacheReadInputTokens,
+      }
+    : {}),
+  ...(facts.cacheCreationInputTokens
+    ? {
+        [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
+          facts.cacheCreationInputTokens,
+      }
+    : {}),
 })
 
-const commonAttrs = (
-  kind: GroupedKind,
-  ctx: Ctx,
-  isOperation: boolean,
-  facts: AggregateFacts,
-): Attributes => ({
+const commonAttrs = ({
+  kind,
+  ctx,
+  isOperation,
+  facts,
+}: {
+  kind: GroupedKind
+  ctx: Ctx
+  isOperation: boolean
+  facts: AggregateFacts
+}): Attributes => ({
   ...sharedAttrs(ctx),
-  ...(isOperation ? { [ATTR_GEN_AI_OPERATION_NAME]: kind } : {}),
+  ...(isOperation
+    ? {
+        [ATTR_GEN_AI_OPERATION_NAME]: kind,
+        [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
+      }
+    : {}),
   ...aggregateAttrs(kind, facts),
 })
 
-const leaf = (
-  blocks: readonly [SourcedBlock, ...SourcedBlock[]],
-  ctx: Ctx,
-  orphaned?: "tool_use" | "tool_result",
-): LeafGrouped => {
+const metadata = (label: string) => `langfuse.observation.metadata.${label}`
+
+const leaf = ({
+  blocks,
+  ctx,
+  orphaned,
+}: {
+  blocks: readonly [SourcedBlock, ...SourcedBlock[]]
+  ctx: Ctx
+  orphaned?: "tool_use" | "tool_result"
+}): LeafGrouped => {
   const [[startMsg, firstBlock]] = blocks
   const kind = firstBlock.kind
   const isOperation = firstBlock.category === "tool"
@@ -839,12 +935,15 @@ const leaf = (
     startTime: Math.min(...times),
     endTime: Math.max(...times),
     attributes: {
-      ...commonAttrs(kind, ctx, isOperation, facts),
+      ...commonAttrs({ kind, ctx, isOperation, facts }),
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
       [metadata("block_types")]: blocks.map(([, b]) => b[META].block),
       ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
       ...(toolBlock?.toolName
         ? { [ATTR_GEN_AI_TOOL_NAME]: toolBlock.toolName }
+        : {}),
+      ...(toolBlock?.toolType
+        ? { [ATTR_GEN_AI_TOOL_TYPE]: toolBlock.toolType }
         : {}),
       ...(toolBlock?.correlationId
         ? { [ATTR_GEN_AI_TOOL_CALL_ID]: toolBlock.correlationId }
@@ -859,12 +958,17 @@ const leaf = (
   }
 }
 
-const branch = (
-  kind: GroupedKind,
-  partialAttrs: Attributes,
-  children: readonly Grouped[],
-  ctx: Ctx,
-): BranchGrouped | undefined => {
+const branch = ({
+  kind,
+  partialAttrs,
+  children,
+  ctx,
+}: {
+  kind: GroupedKind
+  partialAttrs: Attributes
+  children: readonly Grouped[]
+  ctx: Ctx
+}): BranchGrouped | undefined => {
   if (!children.length) {
     return undefined
   }
@@ -892,7 +996,7 @@ const branch = (
     startTime: Math.min(...children.map((c) => c.startTime)),
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
-      ...commonAttrs(kind, ctx, true, facts),
+      ...commonAttrs({ kind, ctx, isOperation: true, facts }),
       ...partialAttrs,
     },
     ...(inputAttr ? { inputAttr } : {}),
@@ -913,7 +1017,7 @@ const correlateToolCalls = function* (
     const [, block] = entry
 
     if (block.category !== "tool" || block.correlationId === undefined) {
-      yield leaf([entry], ctx)
+      yield leaf({ blocks: [entry], ctx })
       continue
     }
 
@@ -925,26 +1029,31 @@ const correlateToolCalls = function* (
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield leaf([entry], ctx, "tool_result")
+      yield leaf({ blocks: [entry], ctx, orphaned: "tool_result" })
       continue
     }
     acc.delete(id)
-    yield leaf([mate, entry], ctx)
+    yield leaf({ blocks: [mate, entry], ctx })
   }
 
   for (const entry of acc.values()) {
-    yield leaf([entry], ctx, "tool_use")
+    yield leaf({ blocks: [entry], ctx, orphaned: "tool_use" })
   }
 
   return
 }
 
-const wrapOrPass = function* (
-  kind: GroupedKind,
-  attrs: Attributes,
-  items: readonly Grouped[],
-  ctx: Ctx,
-): IteratorObject<Grouped> {
+const wrapOrPass = function* ({
+  kind,
+  attrs,
+  items,
+  ctx,
+}: {
+  kind: GroupedKind
+  attrs: Attributes
+  items: readonly Grouped[]
+  ctx: Ctx
+}): IteratorObject<Grouped> {
   const [first, ...rest] = items
   if (!first) {
     return
@@ -953,7 +1062,7 @@ const wrapOrPass = function* (
     yield first
     return
   }
-  const wrapped = branch(kind, attrs, items, ctx)
+  const wrapped = branch({ kind, partialAttrs: attrs, children: items, ctx })
   if (wrapped) yield wrapped
   return
 }
@@ -1002,8 +1111,13 @@ const groupByGeneration = function* (
     }
     emitted.add(genId)
 
-    const children = (chatBuckets.get(genId) ?? []).map((c) => c.entry)
-    yield* wrapOrPass(GEN_AI_OPERATION_NAME_VALUE_CHAT, {}, children, ctx)
+    const children = chatBuckets.get(genId)?.map((c) => c.entry) ?? []
+    yield* wrapOrPass({
+      kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
+      attrs: {},
+      items: children,
+      ctx,
+    })
   }
 
   return
@@ -1029,40 +1143,44 @@ const groupTurns = function* (
   let buffer: Grouped[] = []
   for (const entry of entries) {
     if (isTurnStart(entry)) {
-      yield* wrapOrPass(
-        GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-        turnAttrs,
-        buffer,
+      yield* wrapOrPass({
+        kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+        attrs: turnAttrs,
+        items: buffer,
         ctx,
-      )
+      })
       buffer = []
     }
     buffer.push(entry)
   }
-  yield* wrapOrPass(
-    GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-    turnAttrs,
-    buffer,
+  yield* wrapOrPass({
+    kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+    attrs: turnAttrs,
+    items: buffer,
     ctx,
-  )
+  })
   return
 }
 
-const groupAgents = function* (
-  hook: HookInput,
-  entries: IteratorObject<Grouped>,
-  ctx: Ctx,
-): IteratorObject<Grouped> {
+const groupAgents = function* ({
+  hook,
+  entries,
+  ctx,
+}: {
+  hook: HookInput
+  entries: IteratorObject<Grouped>
+  ctx: Ctx
+}): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
-    const wrapped = branch(
-      GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-      {
+    const wrapped = branch({
+      kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+      partialAttrs: {
         [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
         [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
       },
-      entries.toArray(),
+      children: entries.toArray(),
       ctx,
-    )
+    })
     if (wrapped) yield wrapped
     return
   }
@@ -1071,7 +1189,15 @@ const groupAgents = function* (
   return
 }
 
-const emit = (tracer: Tracer, parentCtx: Context, grouped: Grouped): void => {
+const emit = ({
+  tracer,
+  parentCtx,
+  grouped,
+}: {
+  tracer: Tracer
+  parentCtx: Context
+  grouped: Grouped
+}): void => {
   const span = tracer.startSpan(
     grouped.spanName,
     {
@@ -1093,7 +1219,7 @@ const emit = (tracer: Tracer, parentCtx: Context, grouped: Grouped): void => {
   if (!isLeaf(grouped)) {
     const childCtx = trace.setSpan(parentCtx, span)
     for (const child of grouped.children) {
-      emit(tracer, childCtx, child)
+      emit({ tracer, parentCtx: childCtx, grouped: child })
     }
   }
   span.end(grouped.endTime)
@@ -1114,11 +1240,11 @@ const main = async (): Promise<void> => {
   const extracted = extractContent(transcriptRows.values())
   const correlated = correlateToolCalls(extracted, ctx)
   const generations = groupByGeneration(correlated, ctx)
-  const grouped = groupAgents(hook, generations, ctx)
+  const grouped = groupAgents({ hook, entries: generations, ctx })
 
   const tracer = otel.provider.getTracer("claude-code")
   for (const group of grouped) {
-    emit(tracer, ROOT_CONTEXT, group)
+    emit({ tracer, parentCtx: ROOT_CONTEXT, grouped: group })
   }
 
   await otel.provider.forceFlush()
