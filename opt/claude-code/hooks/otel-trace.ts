@@ -312,6 +312,26 @@ const documentValue = ({
   }
 }
 
+const imageValue = ({
+  source,
+}: {
+  source:
+    | { type: "base64"; media_type: string }
+    | { type: "url"; url: string }
+    | { type: "file"; file_id: string }
+}) => {
+  switch (source.type) {
+    case "base64":
+      return { media_type: source.media_type }
+    case "url":
+      return { url: source.url }
+    case "file":
+      return { file_id: source.file_id }
+    default:
+      fail(source satisfies never)
+  }
+}
+
 const extractBlock = (
   role: TranscriptMessage["type"],
   block: MessageBlock,
@@ -369,30 +389,11 @@ const extractBlock = (
         value: block.content,
       }
     case "image":
-      switch (block.source.type) {
-        case "base64":
-          return {
-            category: textCategory,
-            type: side,
-            kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-            value: { media_type: block.source.media_type },
-          }
-        case "url":
-          return {
-            category: textCategory,
-            type: side,
-            kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-            value: { url: block.source.url },
-          }
-        case "file":
-          return {
-            category: textCategory,
-            type: side,
-            kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-            value: { file_id: block.source.file_id },
-          }
-        default:
-          fail(block.source satisfies never)
+      return {
+        category: textCategory,
+        type: side,
+        kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
+        value: imageValue(block),
       }
 
     case "mcp_tool_use":
@@ -431,42 +432,9 @@ const extractBlock = (
             case "text":
               return item.text
             case "image":
-              switch (item.source.type) {
-                case "base64":
-                  return { media_type: item.source.media_type }
-                case "url":
-                  return { url: item.source.url }
-                case "file":
-                  return { file_id: item.source.file_id }
-                default:
-                  fail(item.source satisfies never)
-              }
+              return imageValue(item)
             case "document":
-              switch (item.source.type) {
-                case "base64":
-                case "text":
-                  return {
-                    context: item.context,
-                    media_type: item.source.media_type,
-                    title: item.title,
-                  }
-                case "url":
-                  return {
-                    context: item.context,
-                    title: item.title,
-                    url: item.source.url,
-                  }
-                case "content":
-                  return { context: item.context, title: item.title }
-                case "file":
-                  return {
-                    context: item.context,
-                    file_id: item.source.file_id,
-                    title: item.title,
-                  }
-                default:
-                  fail(item.source satisfies never)
-              }
+              return documentValue(item)
             case "search_result":
               return { source: item.source, title: item.title }
             case "tool_reference":
@@ -935,21 +903,15 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
 
   const inputEntry = sourceBlocks.find(([, block]) => {
     if (block.category === "tool") {
-      if (block.correlationId === lastCorrelationId) {
-        return true
-      }
-      if (isOrphanedLeaf) {
-        return block.type === "input"
-      }
-      return false
+      return (
+        block.correlationId === lastCorrelationId ||
+        (isOrphanedLeaf && block.type === "input")
+      )
     }
-    if (block.type === "input") {
-      return true
-    }
-    if (block.category === "agent-text") {
-      return block !== lastOutputBlock
-    }
-    return false
+    return (
+      block.type === "input" ||
+      (block.category === "agent-text" && block !== lastOutputBlock)
+    )
   })
 
   if (inputEntry) {
@@ -968,12 +930,16 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   }
 }
 
-const assistantMessages = (grouped: Grouped) => {
+type AssistantMessage = Extract<TranscriptMessage, { type: "assistant" }>
+
+const assistantMessages = (grouped: Grouped): AssistantMessage[] => {
   const seen = new Set<string>()
   return iterGrouped(grouped)
-    .map(([message]) => message)
-    .filter((m) => m.type === "assistant")
-    .filter((m) => !seen.has(m.uuid) && !!seen.add(m.uuid))
+    .map(([m]) => m)
+    .filter(
+      (m): m is AssistantMessage =>
+        m.type === "assistant" && !seen.has(m.uuid) && !!seen.add(m.uuid),
+    )
     .toArray()
 }
 
@@ -992,17 +958,82 @@ const findFinishReasons = (grouped: Grouped): string[] =>
     .map((m) => m.message.stop_reason)
     .filter((r) => r != null)
 
-const findToolError = (grouped: Grouped): string | undefined =>
-  iterGrouped(grouped)
-    .map(([, block]) =>
-      block.category === "tool" && block.error ? block.error : undefined,
-    )
-    .find((e) => e)
+const findToolError = (grouped: Grouped): string | undefined => {
+  for (const [, block] of iterGrouped(grouped)) {
+    if (block.category === "tool" && block.error) {
+      return block.error
+    }
+  }
+  return undefined
+}
 
 const otelKind = (kind: GroupedKind): SpanKind =>
   kind === GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
     ? SpanKind.INTERNAL
     : SpanKind.CLIENT
+
+type SpanInfo = {
+  spanName: string
+  spanKind: SpanKind
+  operationName: string | undefined
+  toolError: string | undefined
+  leafAttrs: Attributes
+}
+
+const leafInfo = (grouped: LeafGrouped): SpanInfo | undefined => {
+  const first = grouped.children[0]
+  if (!first) {
+    return undefined
+  }
+  const [startMsg, firstBlock] = first
+  const isOperation = firstBlock.category === "tool"
+  type ToolBlock = Extract<SourcedBlock[1], { category: "tool" }>
+  const toolBlock = grouped.children
+    .map(([, b]) => b)
+    .find((b): b is ToolBlock => b.category === "tool")
+  const toolError = findToolError(grouped)
+
+  return {
+    spanName: toolBlock?.toolName
+      ? `execute_tool ${toolBlock.toolName}`
+      : startMsg.type,
+    spanKind: isOperation ? otelKind(grouped.kind) : SpanKind.INTERNAL,
+    operationName: isOperation ? grouped.kind : undefined,
+    toolError,
+    leafAttrs: {
+      [metadata("transcript_jq")]: startMsg[META].debugExpr,
+      [metadata("block_types")]: grouped.children.map(([, b]) => b[META].block),
+      ...(toolBlock?.toolName
+        ? { [ATTR_GEN_AI_TOOL_NAME]: toolBlock.toolName }
+        : {}),
+      ...(toolBlock?.correlationId
+        ? { [ATTR_GEN_AI_TOOL_CALL_ID]: toolBlock.correlationId }
+        : {}),
+      ...(toolError ? { [ATTR_ERROR_TYPE]: toolError } : {}),
+    },
+  }
+}
+
+const branchInfo = (
+  grouped: BranchGrouped,
+  model: string | undefined,
+): SpanInfo => {
+  const agentName = grouped.attributes[ATTR_GEN_AI_AGENT_NAME]
+  const target =
+    grouped.kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+      ? model
+      : grouped.kind === GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT &&
+          typeof agentName === "string"
+        ? agentName
+        : undefined
+  return {
+    spanName: [grouped.kind, target].filter((n) => n).join(" "),
+    spanKind: otelKind(grouped.kind),
+    operationName: grouped.kind,
+    toolError: undefined,
+    leafAttrs: {},
+  }
+}
 
 const emit = ({
   tracer,
@@ -1024,10 +1055,6 @@ const emit = ({
     return
   }
 
-  const sharedAttributes = {
-    [ATTR_USER_ID]: userId,
-    [ATTR_GEN_AI_CONVERSATION_ID]: sessionId,
-  }
   const model = findModel(grouped)
   const responseId = findResponseId(grouped)
   const finishReasons =
@@ -1035,61 +1062,21 @@ const emit = ({
       ? findFinishReasons(grouped)
       : []
 
-  let spanName: string
-  let spanKind: SpanKind
-  let operationName: string | undefined = grouped.kind
-  let leafAttrs: Attributes = {}
-  let toolError: string | undefined
-
-  if (isLeaf(grouped)) {
-    const first = grouped.children[0]
-    if (!first) {
-      return
-    }
-    const [startMsg, firstBlock] = first
-    const isOperation = firstBlock.category === "tool"
-    operationName = isOperation ? grouped.kind : undefined
-    spanKind = isOperation ? otelKind(grouped.kind) : SpanKind.INTERNAL
-
-    const toolEntry = grouped.children.find(([, b]) => b.category === "tool")
-    const toolName =
-      toolEntry?.[1].category === "tool" ? toolEntry[1].toolName : undefined
-    const toolCallId =
-      toolEntry?.[1].category === "tool"
-        ? toolEntry[1].correlationId
-        : undefined
-    toolError = findToolError(grouped)
-
-    spanName = toolName ? `execute_tool ${toolName}` : startMsg.type
-    leafAttrs = {
-      [metadata("transcript_jq")]: startMsg[META].debugExpr,
-      [metadata("block_types")]: grouped.children.map(([, b]) => b[META].block),
-      ...(toolName ? { [ATTR_GEN_AI_TOOL_NAME]: toolName } : {}),
-      ...(toolCallId ? { [ATTR_GEN_AI_TOOL_CALL_ID]: toolCallId } : {}),
-      ...(toolError ? { [ATTR_ERROR_TYPE]: toolError } : {}),
-    }
-  } else {
-    spanKind = otelKind(grouped.kind)
-    const agentName = grouped.attributes[ATTR_GEN_AI_AGENT_NAME]
-    const target =
-      grouped.kind === "chat"
-        ? model
-        : grouped.kind === GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT &&
-            typeof agentName === "string"
-          ? agentName
-          : undefined
-    spanName = [grouped.kind, target].filter((n) => n).join(" ")
+  const info = isLeaf(grouped) ? leafInfo(grouped) : branchInfo(grouped, model)
+  if (!info) {
+    return
   }
 
   const span = tracer.startSpan(
-    spanName,
+    info.spanName,
     {
       startTime: Math.min(...times),
-      kind: spanKind,
+      kind: info.spanKind,
       attributes: {
-        ...sharedAttributes,
-        ...(operationName
-          ? { [ATTR_GEN_AI_OPERATION_NAME]: operationName }
+        [ATTR_USER_ID]: userId,
+        [ATTR_GEN_AI_CONVERSATION_ID]: sessionId,
+        ...(info.operationName
+          ? { [ATTR_GEN_AI_OPERATION_NAME]: info.operationName }
           : {}),
         ...(model
           ? {
@@ -1102,13 +1089,13 @@ const emit = ({
           ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: finishReasons }
           : {}),
         ...grouped.attributes,
-        ...leafAttrs,
+        ...info.leafAttrs,
       },
     },
     parentCtx,
   )
 
-  if (toolError) {
+  if (info.toolError) {
     span.setStatus({ code: SpanStatusCode.ERROR })
   }
 
