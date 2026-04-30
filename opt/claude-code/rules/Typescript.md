@@ -62,6 +62,13 @@ type Decorated = Base & { [META]: Meta }
 
 - `const` over `let`. Restructure with ternary destructuring, `.entries()`, or intermediate expressions to avoid mutation.
 
+- Destructure over index access — names beat positions.
+
+```typescript
+const [key, value] = entry
+const [, year, month] = match
+```
+
 - `import type` for type-only imports.
 
 - Modern builtins:
