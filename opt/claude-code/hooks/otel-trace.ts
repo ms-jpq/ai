@@ -743,12 +743,16 @@ const ioAttr = (
 
 const computeIoAttrs = (
   blocks: readonly SourcedBlock[],
-  isOrphanedLeaf: boolean,
+  flags: { isOrphanedLeaf: boolean; excludeTool: boolean },
 ): {
   inputAttr?: readonly [string, string]
   outputAttr?: readonly [string, string]
 } => {
-  const output = blocks.findLast(([, b]) => b.type === "output")
+  const { isOrphanedLeaf, excludeTool } = flags
+
+  const output = blocks.findLast(
+    ([, b]) => b.type === "output" && (!excludeTool || b.category !== "tool"),
+  )
   const [outputMsg, lastOutputBlock] = output ?? []
   const outputAttr =
     outputMsg && lastOutputBlock
@@ -765,6 +769,7 @@ const computeIoAttrs = (
       return false
     }
     if (block.category === "tool") {
+      if (excludeTool) return false
       return block.correlationId === lastCorrelationId || isOrphanedLeaf
     }
     return true
@@ -899,7 +904,10 @@ const leaf = ({
 
   const times = blocks.map(([m]) => m[META].timestamp.getTime())
   const facts = aggregateFacts(blocks)
-  const { inputAttr, outputAttr } = computeIoAttrs(blocks, !!orphaned)
+  const { inputAttr, outputAttr } = computeIoAttrs(blocks, {
+    isOrphanedLeaf: !!orphaned,
+    excludeTool: false,
+  })
 
   return {
     kind,
@@ -965,7 +973,10 @@ const branch = ({
     }
   })()
 
-  const { inputAttr, outputAttr } = computeIoAttrs(blocks, false)
+  const { inputAttr, outputAttr } = computeIoAttrs(blocks, {
+    isOrphanedLeaf: false,
+    excludeTool: true,
+  })
 
   return {
     kind,
