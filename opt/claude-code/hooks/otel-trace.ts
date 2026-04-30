@@ -965,6 +965,18 @@ const generationId = (grouped: Grouped): string | undefined => {
   return undefined
 }
 
+const isOperationLeaf = (g: Grouped): boolean => {
+  if (!isLeaf(g)) {
+    return false
+  }
+  const [first] = g.blocks
+  if (!first) {
+    return false
+  }
+  const [, block] = first
+  return block.category === "tool"
+}
+
 const groupByGeneration = function* (
   entries: IteratorObject<Grouped>,
   ctx: Ctx,
@@ -974,14 +986,14 @@ const groupByGeneration = function* (
     .map((entry) => ({ genId: generationId(entry), entry }) satisfies Tagged)
     .toArray()
 
-  const buckets = Map.groupBy(
-    tagged.filter((t) => t.genId !== undefined),
+  const chatBuckets = Map.groupBy(
+    tagged.filter((t) => t.genId !== undefined && !isOperationLeaf(t.entry)),
     ({ genId }) => genId,
   )
 
   const emitted = new Set<string>()
   for (const { genId, entry } of tagged) {
-    if (genId === undefined) {
+    if (genId === undefined || isOperationLeaf(entry)) {
       yield entry
       continue
     }
@@ -990,7 +1002,7 @@ const groupByGeneration = function* (
     }
     emitted.add(genId)
 
-    const children = (buckets.get(genId) ?? []).map((c) => c.entry)
+    const children = (chatBuckets.get(genId) ?? []).map((c) => c.entry)
     yield* wrapOrPass(GEN_AI_OPERATION_NAME_VALUE_CHAT, {}, children, ctx)
   }
 
