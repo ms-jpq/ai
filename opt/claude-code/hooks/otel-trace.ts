@@ -703,6 +703,23 @@ const uniqueAssistants = (
     )
 }
 
+const ioAttr = (
+  msg: TranscriptMessage,
+  block: ExtractedBlock,
+): readonly [string, string] => {
+  const isOutput = block.type === "output"
+  const isTool = block.category === "tool"
+  const key = isTool
+    ? isOutput
+      ? ATTR_GEN_AI_TOOL_CALL_RESULT
+      : ATTR_GEN_AI_TOOL_CALL_ARGUMENTS
+    : isOutput
+      ? ATTR_GEN_AI_OUTPUT_MESSAGES
+      : ATTR_GEN_AI_INPUT_MESSAGES
+  const value = isTool ? block.value : wrapMessage(msg, block)
+  return [key, JSON.stringify(value)]
+}
+
 const computeIoAttrs = (
   blocks: readonly SourcedBlock[],
   isOrphanedLeaf: boolean,
@@ -712,18 +729,9 @@ const computeIoAttrs = (
 } => {
   const output = blocks.findLast(([, b]) => b.type === "output")
   const [outputMsg, lastOutputBlock] = output ?? []
-
   const outputAttr =
-    lastOutputBlock && outputMsg
-      ? lastOutputBlock.category === "tool"
-        ? ([
-            ATTR_GEN_AI_TOOL_CALL_RESULT,
-            JSON.stringify(lastOutputBlock.value),
-          ] as const)
-        : ([
-            ATTR_GEN_AI_OUTPUT_MESSAGES,
-            JSON.stringify(wrapMessage(outputMsg, lastOutputBlock)),
-          ] as const)
+    outputMsg && lastOutputBlock
+      ? ioAttr(outputMsg, lastOutputBlock)
       : undefined
 
   const lastCorrelationId =
@@ -743,21 +751,9 @@ const computeIoAttrs = (
       (block.category === "agent-text" && block !== lastOutputBlock)
     )
   })
-
-  const inputAttr = inputEntry
-    ? (() => {
-        const [inputMsg, firstInputBlock] = inputEntry
-        return firstInputBlock.category === "tool"
-          ? ([
-              ATTR_GEN_AI_TOOL_CALL_ARGUMENTS,
-              JSON.stringify(firstInputBlock.value),
-            ] as const)
-          : ([
-              ATTR_GEN_AI_INPUT_MESSAGES,
-              JSON.stringify(wrapMessage(inputMsg, firstInputBlock)),
-            ] as const)
-      })()
-    : undefined
+  const [inputMsg, firstInputBlock] = inputEntry ?? []
+  const inputAttr =
+    inputMsg && firstInputBlock ? ioAttr(inputMsg, firstInputBlock) : undefined
 
   return { inputAttr, outputAttr }
 }
@@ -769,38 +765,57 @@ const sharedAttrs = (ctx: Ctx): Attributes => ({
   [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
 })
 
-const aggregateAttrs = (
-  kind: GroupedKind,
-  blocks: readonly SourcedBlock[],
-): Attributes => {
+type AggregateFacts = {
+  model: string | undefined
+  responseId: string | undefined
+  stopReasons: string[]
+}
+
+const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
   const assistants = uniqueAssistants(blocks)
-  const model = assistants.at(-1)?.message.model
-  const responseId = assistants.at(-1)?.message.id
-  const finishReasons =
-    kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-      ? assistants.map((m) => m.message.stop_reason).filter((r) => r != null)
-      : []
   return {
-    ...(model
-      ? {
-          [ATTR_GEN_AI_REQUEST_MODEL]: model,
-          [ATTR_GEN_AI_RESPONSE_MODEL]: model,
-        }
-      : {}),
-    ...(responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: responseId } : {}),
-    ...(finishReasons.length
-      ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: finishReasons }
-      : {}),
+    model: assistants.at(-1)?.message.model,
+    responseId: assistants.at(-1)?.message.id,
+    stopReasons: assistants
+      .map((m) => m.message.stop_reason)
+      .filter((r) => r != null),
   }
 }
+
+const aggregateAttrs = (
+  kind: GroupedKind,
+  facts: AggregateFacts,
+): Attributes => ({
+  ...(facts.model
+    ? {
+        [ATTR_GEN_AI_REQUEST_MODEL]: facts.model,
+        [ATTR_GEN_AI_RESPONSE_MODEL]: facts.model,
+      }
+    : {}),
+  ...(facts.responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: facts.responseId } : {}),
+  ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.stopReasons.length
+    ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons }
+    : {}),
+})
+
+const commonAttrs = (
+  kind: GroupedKind,
+  ctx: Ctx,
+  isOperation: boolean,
+  facts: AggregateFacts,
+): Attributes => ({
+  ...sharedAttrs(ctx),
+  ...(isOperation ? { [ATTR_GEN_AI_OPERATION_NAME]: kind } : {}),
+  ...aggregateAttrs(kind, facts),
+})
 
 const leaf = (
   blocks: readonly [SourcedBlock, ...SourcedBlock[]],
   ctx: Ctx,
   orphaned?: "tool_use" | "tool_result",
 ): LeafGrouped => {
-  const kind = blocks[0][1].kind
-  const [startMsg, firstBlock] = blocks[0]
+  const [[startMsg, firstBlock]] = blocks
+  const kind = firstBlock.kind
   const isOperation = firstBlock.category === "tool"
 
   type ToolBlock = Extract<SourcedBlock[1], { category: "tool" }>
@@ -812,6 +827,7 @@ const leaf = (
     .find((e) => e)
 
   const times = blocks.map(([m]) => m[META].timestamp.getTime())
+  const facts = aggregateFacts(blocks)
   const { inputAttr, outputAttr } = computeIoAttrs(blocks, !!orphaned)
 
   return {
@@ -823,9 +839,7 @@ const leaf = (
     startTime: Math.min(...times),
     endTime: Math.max(...times),
     attributes: {
-      ...sharedAttrs(ctx),
-      ...(isOperation ? { [ATTR_GEN_AI_OPERATION_NAME]: kind } : {}),
-      ...aggregateAttrs(kind, blocks),
+      ...commonAttrs(kind, ctx, isOperation, facts),
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
       [metadata("block_types")]: blocks.map(([, b]) => b[META].block),
       ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
@@ -859,11 +873,11 @@ const branch = (
     return undefined
   }
 
-  const aggregates = aggregateAttrs(kind, blocks)
+  const facts = aggregateFacts(blocks)
   const agentName = partialAttrs[ATTR_GEN_AI_AGENT_NAME]
   const target =
     kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-      ? aggregates[ATTR_GEN_AI_RESPONSE_MODEL]
+      ? facts.model
       : kind === GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT &&
           typeof agentName === "string"
         ? agentName
@@ -878,9 +892,7 @@ const branch = (
     startTime: Math.min(...children.map((c) => c.startTime)),
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
-      ...sharedAttrs(ctx),
-      [ATTR_GEN_AI_OPERATION_NAME]: kind,
-      ...aggregates,
+      ...commonAttrs(kind, ctx, true, facts),
       ...partialAttrs,
     },
     ...(inputAttr ? { inputAttr } : {}),
@@ -927,28 +939,28 @@ const correlateToolCalls = function* (
   return
 }
 
-const groupBuffer = (kind: GroupedKind, attributes: Attributes, ctx: Ctx) => {
-  const acc = new Array<Grouped>()
-  return {
-    push: (...group: Grouped[]) => acc.push(...group),
-    pop: function* (): IteratorObject<Grouped> {
-      if (acc.length === 1) {
-        yield* acc
-      } else if (acc.length) {
-        const wrapped = branch(kind, attributes, [...acc], ctx)
-        if (wrapped) yield wrapped
-      }
-      acc.length = 0
-      return
-    },
+const wrapOrPass = function* (
+  kind: GroupedKind,
+  attrs: Attributes,
+  items: readonly Grouped[],
+  ctx: Ctx,
+): IteratorObject<Grouped> {
+  const [first, ...rest] = items
+  if (!first) {
+    return
   }
+  if (!rest.length) {
+    yield first
+    return
+  }
+  const wrapped = branch(kind, attrs, items, ctx)
+  if (wrapped) yield wrapped
+  return
 }
 
 const generationId = (grouped: Grouped): string | undefined => {
   for (const [msg] of grouped.blocks) {
-    if ("message" in msg && "id" in msg.message) {
-      return msg.message.id
-    }
+    if (msg.type === "assistant") return msg.message.id
   }
   return undefined
 }
@@ -967,23 +979,19 @@ const groupByGeneration = function* (
     ({ genId }) => genId,
   )
 
-  const seen = new Set<string>()
+  const emitted = new Set<string>()
   for (const { genId, entry } of tagged) {
     if (genId === undefined) {
       yield entry
       continue
     }
-    if (seen.has(genId) || !seen.add(genId)) {
+    if (emitted.has(genId)) {
       continue
     }
+    emitted.add(genId)
 
     const children = (buckets.get(genId) ?? []).map((c) => c.entry)
-    if (children.length === 1) {
-      yield* children
-      continue
-    }
-    const wrapped = branch(GEN_AI_OPERATION_NAME_VALUE_CHAT, {}, children, ctx)
-    if (wrapped) yield wrapped
+    yield* wrapOrPass(GEN_AI_OPERATION_NAME_VALUE_CHAT, {}, children, ctx)
   }
 
   return
@@ -1005,19 +1013,26 @@ const groupTurns = function* (
   entries: IteratorObject<Grouped>,
   ctx: Ctx,
 ): IteratorObject<Grouped> {
-  const acc = groupBuffer(
-    GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-    { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" },
-    ctx,
-  )
-
+  const turnAttrs = { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" }
+  let buffer: Grouped[] = []
   for (const entry of entries) {
     if (isTurnStart(entry)) {
-      yield* acc.pop()
+      yield* wrapOrPass(
+        GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+        turnAttrs,
+        buffer,
+        ctx,
+      )
+      buffer = []
     }
-    acc.push(entry)
+    buffer.push(entry)
   }
-  yield* acc.pop()
+  yield* wrapOrPass(
+    GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+    turnAttrs,
+    buffer,
+    ctx,
+  )
   return
 }
 
