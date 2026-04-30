@@ -800,11 +800,6 @@ const computeIoAttrs = (
 
 const isLeaf = (g: Grouped): g is LeafGrouped => g.depthFromLeaf === 0
 
-const sharedAttrs = (ctx: Ctx): Attributes => ({
-  [ATTR_USER_ID]: ctx.userId,
-  [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
-})
-
 type AggregateFacts = {
   model: string | undefined
   responseId: string | undefined
@@ -889,7 +884,8 @@ const commonAttrs = ({
   isOperation: boolean
   facts: AggregateFacts
 }): Attributes => ({
-  ...sharedAttrs(ctx),
+  [ATTR_USER_ID]: ctx.userId,
+  [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
   ...(isOperation
     ? {
         [ATTR_GEN_AI_OPERATION_NAME]: kind,
@@ -1074,17 +1070,8 @@ const generationId = (grouped: Grouped): string | undefined => {
   return undefined
 }
 
-const isOperationLeaf = (g: Grouped): boolean => {
-  if (!isLeaf(g)) {
-    return false
-  }
-  const [first] = g.blocks
-  if (!first) {
-    return false
-  }
-  const [, block] = first
-  return block.category === "tool"
-}
+const isOperationLeaf = (g: Grouped): boolean =>
+  isLeaf(g) && ATTR_GEN_AI_OPERATION_NAME in g.attributes
 
 const groupByGeneration = function* (
   entries: IteratorObject<Grouped>,
