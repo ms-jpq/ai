@@ -812,7 +812,8 @@ const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
     },
   )
   return {
-    model: assistants.at(-1)?.message.model,
+    model: assistants.findLast((a) => a.message.model !== "<synthetic>")
+      ?.message.model,
     responseId: assistants.at(-1)?.message.id,
     stopReasons: assistants
       .map((m) => m.message.stop_reason)
