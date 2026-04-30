@@ -1,11 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "dependencies": {
-    "@arizeai/openinference-semantic-conventions": "*",
     "@google/gemini-cli": "*",
     "@opentelemetry/exporter-trace-otlp-http": "*",
     "@opentelemetry/exporter-trace-otlp-proto": "*",
     "@opentelemetry/sdk-trace-base": "*",
+    "@opentelemetry/semantic-conventions": "*",
     "langfuse-cli": "*",
     "opencode-ai": "*",
     "prettier": "*"
