@@ -340,6 +340,25 @@ const extractToolUse = ({
   value,
 })
 
+const extractToolResult = ({
+  correlationId,
+  value,
+  kind = GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+  error,
+}: {
+  correlationId: string
+  value: unknown
+  kind?: BlockKind
+  error?: string
+}): ExtractedBlock => ({
+  category: "tool",
+  type: "output",
+  kind,
+  correlationId,
+  value,
+  ...(error !== undefined ? { error } : {}),
+})
+
 const documentValue = ({
   source,
   context,
@@ -475,14 +494,11 @@ const extractBlock = (
           }
         })
       })()
-      return {
-        category: "tool",
-        type: "output",
-        error: block.is_error ? "_OTHER" : undefined,
-        kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+      return extractToolResult({
         correlationId: block.tool_use_id,
         value,
-      }
+        error: block.is_error ? "_OTHER" : undefined,
+      })
     }
 
     case "code_execution_tool_result":
@@ -490,38 +506,29 @@ const extractBlock = (
       switch (block.content.type) {
         case "bash_code_execution_tool_result_error":
         case "code_execution_tool_result_error":
-          return {
-            category: "tool",
-            type: "output",
-            error: block.content.error_code,
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: block.content.error_code,
-          }
+            error: block.content.error_code,
+          })
         case "encrypted_code_execution_result":
-          return {
-            category: "tool",
-            type: "output",
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
             },
-          }
+          })
         case "bash_code_execution_result":
         case "code_execution_result":
-          return {
-            category: "tool",
-            type: "output",
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: {
               return_code: block.content.return_code,
               stderr: block.content.stderr,
               stdout: block.content.stdout,
             },
-          }
+          })
         default:
           fail(block.content satisfies never)
       }
@@ -529,22 +536,16 @@ const extractBlock = (
     case "text_editor_code_execution_tool_result":
       switch (block.content.type) {
         case "text_editor_code_execution_tool_result_error":
-          return {
-            category: "tool",
-            type: "output",
-            error: block.content.error_code,
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: {
               error_code: block.content.error_code,
               error_message: block.content.error_message,
             },
-          }
+            error: block.content.error_code,
+          })
         case "text_editor_code_execution_view_result":
-          return {
-            category: "tool",
-            type: "output",
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: {
               content: block.content.content,
@@ -553,20 +554,14 @@ const extractBlock = (
               start_line: block.content.start_line,
               total_lines: block.content.total_lines,
             },
-          }
+          })
         case "text_editor_code_execution_create_result":
-          return {
-            category: "tool",
-            type: "output",
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: { is_file_update: block.content.is_file_update },
-          }
+          })
         case "text_editor_code_execution_str_replace_result":
-          return {
-            category: "tool",
-            type: "output",
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: {
               lines: block.content.lines,
@@ -575,7 +570,7 @@ const extractBlock = (
               old_lines: block.content.old_lines,
               old_start: block.content.old_start,
             },
-          }
+          })
         default:
           fail(block.content satisfies never)
       }
@@ -584,23 +579,17 @@ const extractBlock = (
       switch (block.content.type) {
         case "tool_search_tool_result_error": {
           const { type: _, ...rest } = block.content
-          return {
-            category: "tool",
-            type: "output",
-            error: block.content.error_code,
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: rest,
-          }
+            error: block.content.error_code,
+          })
         }
         case "tool_search_tool_search_result":
-          return {
-            category: "tool",
-            type: "output",
-            kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
             value: block.content.tool_references,
-          }
+          })
         default:
           fail(block.content satisfies never)
       }
@@ -625,49 +614,41 @@ const extractBlock = (
       }
     case "web_search_tool_result":
       if (Array.isArray(block.content)) {
-        return {
-          category: "tool",
-          type: "output",
-          kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
+        return extractToolResult({
           correlationId: block.tool_use_id,
+          kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
           value: block.content.map((r) => ({
             page_age: r.page_age,
             title: r.title,
             url: r.url,
           })),
-        }
+        })
       }
-      return {
-        category: "tool",
-        type: "output",
-        error: block.content.error_code,
-        kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
+      return extractToolResult({
         correlationId: block.tool_use_id,
+        kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
         value: block.content.error_code,
-      }
+        error: block.content.error_code,
+      })
     case "web_fetch_tool_result":
       switch (block.content.type) {
         case "web_fetch_tool_result_error":
-          return {
-            category: "tool",
-            type: "output",
-            error: block.content.error_code,
-            kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
+            kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
             value: block.content.error_code,
-          }
+            error: block.content.error_code,
+          })
         case "web_fetch_result":
-          return {
-            category: "tool",
-            type: "output",
-            kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
+          return extractToolResult({
             correlationId: block.tool_use_id,
+            kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
             value: {
               retrieved_at: block.content.retrieved_at,
               url: block.content.url,
               content: documentValue(block.content.content),
             },
-          }
+          })
         default:
           fail(block.content satisfies never)
       }
@@ -975,13 +956,16 @@ const branch = ({
 
   const facts = aggregateFacts(blocks)
   const agentName = partialAttrs[ATTR_GEN_AI_AGENT_NAME]
-  const target =
-    kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-      ? facts.model
-      : kind === GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT &&
-          typeof agentName === "string"
-        ? agentName
-        : undefined
+  const target = (() => {
+    switch (kind) {
+      case GEN_AI_OPERATION_NAME_VALUE_CHAT:
+        return facts.model
+      case GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT:
+        return typeof agentName === "string" ? agentName : undefined
+      default:
+        return undefined
+    }
+  })()
 
   const { inputAttr, outputAttr } = computeIoAttrs(blocks, false)
 
@@ -1168,7 +1152,9 @@ const groupAgents = function* ({
       children: entries.toArray(),
       ctx,
     })
-    if (wrapped) yield wrapped
+    if (wrapped) {
+      yield wrapped
+    }
     return
   }
 
