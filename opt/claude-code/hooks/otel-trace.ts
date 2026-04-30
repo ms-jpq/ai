@@ -8,7 +8,7 @@ import type {
   BetaMessageParam,
   BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
-import type { Attributes, Context, Span, Tracer } from "@opentelemetry/api"
+import type { Attributes, Context, Tracer } from "@opentelemetry/api"
 import {
   ROOT_CONTEXT,
   SpanKind,
@@ -113,13 +113,20 @@ type SourcedBlock = readonly [
 
 type BaseGrouped = Readonly<{
   kind: GroupedKind
+  spanName: string
+  spanKind: SpanKind
+  startTime: number
+  endTime: number
   attributes: Attributes
+  status?: { code: SpanStatusCode }
+  inputAttr?: readonly [string, string]
+  outputAttr?: readonly [string, string]
+  blocks: readonly SourcedBlock[]
 }>
 
 type LeafGrouped = BaseGrouped &
   Readonly<{
     depthFromLeaf: 0
-    children: readonly SourcedBlock[]
   }>
 
 type BranchGrouped = BaseGrouped &
@@ -129,6 +136,8 @@ type BranchGrouped = BaseGrouped &
   }>
 
 type Grouped = LeafGrouped | BranchGrouped
+
+type Ctx = { userId: string; sessionId: string }
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
@@ -652,18 +661,239 @@ const extractContent = function* (
   return
 }
 
-const leaf = (
-  children: readonly [SourcedBlock, ...SourcedBlock[]],
-  orphaned?: "tool_use" | "tool_result",
-): Grouped => ({
-  kind: children[0][1].kind,
-  attributes: orphaned ? { [metadata("orphaned")]: orphaned } : {},
-  depthFromLeaf: 0,
-  children,
+const metadata = (label: string) => `langfuse.observation.metadata.${label}`
+
+const messagePart = (block: ExtractedBlock) => ({
+  type: block.category === "agent-thinking" ? "reasoning" : "text",
+  content:
+    typeof block.value === "string" ? block.value : JSON.stringify(block.value),
 })
+
+const wrapMessage = (msg: TranscriptMessage, block: ExtractedBlock) => [
+  {
+    role: msg.type,
+    parts: [messagePart(block)],
+    ...(block.type === "output"
+      ? {
+          finish_reason:
+            msg.type === "assistant"
+              ? (msg.message.stop_reason ?? "stop")
+              : "stop",
+        }
+      : {}),
+  },
+]
+
+const otelKind = (kind: GroupedKind): SpanKind =>
+  kind === GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
+    ? SpanKind.INTERNAL
+    : SpanKind.CLIENT
+
+type AssistantMessage = Extract<TranscriptMessage, { type: "assistant" }>
+
+const uniqueAssistants = (
+  blocks: readonly SourcedBlock[],
+): readonly AssistantMessage[] => {
+  const seen = new Set<string>()
+  return blocks
+    .map(([m]) => m)
+    .filter(
+      (m): m is AssistantMessage =>
+        m.type === "assistant" && !seen.has(m.uuid) && !!seen.add(m.uuid),
+    )
+}
+
+const computeIoAttrs = (
+  blocks: readonly SourcedBlock[],
+  isOrphanedLeaf: boolean,
+): {
+  inputAttr?: readonly [string, string]
+  outputAttr?: readonly [string, string]
+} => {
+  const output = blocks.findLast(([, b]) => b.type === "output")
+  const [outputMsg, lastOutputBlock] = output ?? []
+
+  const outputAttr =
+    lastOutputBlock && outputMsg
+      ? lastOutputBlock.category === "tool"
+        ? ([
+            ATTR_GEN_AI_TOOL_CALL_RESULT,
+            JSON.stringify(lastOutputBlock.value),
+          ] as const)
+        : ([
+            ATTR_GEN_AI_OUTPUT_MESSAGES,
+            JSON.stringify(wrapMessage(outputMsg, lastOutputBlock)),
+          ] as const)
+      : undefined
+
+  const lastCorrelationId =
+    lastOutputBlock?.category === "tool"
+      ? lastOutputBlock.correlationId
+      : undefined
+
+  const inputEntry = blocks.find(([, block]) => {
+    if (block.category === "tool") {
+      return (
+        block.correlationId === lastCorrelationId ||
+        (isOrphanedLeaf && block.type === "input")
+      )
+    }
+    return (
+      block.type === "input" ||
+      (block.category === "agent-text" && block !== lastOutputBlock)
+    )
+  })
+
+  const inputAttr = inputEntry
+    ? (() => {
+        const [inputMsg, firstInputBlock] = inputEntry
+        return firstInputBlock.category === "tool"
+          ? ([
+              ATTR_GEN_AI_TOOL_CALL_ARGUMENTS,
+              JSON.stringify(firstInputBlock.value),
+            ] as const)
+          : ([
+              ATTR_GEN_AI_INPUT_MESSAGES,
+              JSON.stringify(wrapMessage(inputMsg, firstInputBlock)),
+            ] as const)
+      })()
+    : undefined
+
+  return { inputAttr, outputAttr }
+}
+
+const isLeaf = (g: Grouped): g is LeafGrouped => g.depthFromLeaf === 0
+
+const sharedAttrs = (ctx: Ctx): Attributes => ({
+  [ATTR_USER_ID]: ctx.userId,
+  [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
+})
+
+const aggregateAttrs = (
+  kind: GroupedKind,
+  blocks: readonly SourcedBlock[],
+): Attributes => {
+  const assistants = uniqueAssistants(blocks)
+  const model = assistants.at(-1)?.message.model
+  const responseId = assistants.at(-1)?.message.id
+  const finishReasons =
+    kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+      ? assistants.map((m) => m.message.stop_reason).filter((r) => r != null)
+      : []
+  return {
+    ...(model
+      ? {
+          [ATTR_GEN_AI_REQUEST_MODEL]: model,
+          [ATTR_GEN_AI_RESPONSE_MODEL]: model,
+        }
+      : {}),
+    ...(responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: responseId } : {}),
+    ...(finishReasons.length
+      ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: finishReasons }
+      : {}),
+  }
+}
+
+const leaf = (
+  blocks: readonly [SourcedBlock, ...SourcedBlock[]],
+  ctx: Ctx,
+  orphaned?: "tool_use" | "tool_result",
+): LeafGrouped => {
+  const kind = blocks[0][1].kind
+  const [startMsg, firstBlock] = blocks[0]
+  const isOperation = firstBlock.category === "tool"
+
+  type ToolBlock = Extract<SourcedBlock[1], { category: "tool" }>
+  const toolBlock = blocks
+    .map(([, b]) => b)
+    .find((b): b is ToolBlock => b.category === "tool")
+  const toolError = blocks
+    .map(([, b]) => (b.category === "tool" && b.error ? b.error : undefined))
+    .find((e) => e)
+
+  const times = blocks.map(([m]) => m[META].timestamp.getTime())
+  const { inputAttr, outputAttr } = computeIoAttrs(blocks, !!orphaned)
+
+  return {
+    kind,
+    spanName: toolBlock?.toolName
+      ? `execute_tool ${toolBlock.toolName}`
+      : startMsg.type,
+    spanKind: isOperation ? otelKind(kind) : SpanKind.INTERNAL,
+    startTime: Math.min(...times),
+    endTime: Math.max(...times),
+    attributes: {
+      ...sharedAttrs(ctx),
+      ...(isOperation ? { [ATTR_GEN_AI_OPERATION_NAME]: kind } : {}),
+      ...aggregateAttrs(kind, blocks),
+      [metadata("transcript_jq")]: startMsg[META].debugExpr,
+      [metadata("block_types")]: blocks.map(([, b]) => b[META].block),
+      ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
+      ...(toolBlock?.toolName
+        ? { [ATTR_GEN_AI_TOOL_NAME]: toolBlock.toolName }
+        : {}),
+      ...(toolBlock?.correlationId
+        ? { [ATTR_GEN_AI_TOOL_CALL_ID]: toolBlock.correlationId }
+        : {}),
+      ...(toolError ? { [ATTR_ERROR_TYPE]: toolError } : {}),
+    },
+    ...(toolError ? { status: { code: SpanStatusCode.ERROR } } : {}),
+    ...(inputAttr ? { inputAttr } : {}),
+    ...(outputAttr ? { outputAttr } : {}),
+    blocks,
+    depthFromLeaf: 0,
+  }
+}
+
+const branch = (
+  kind: GroupedKind,
+  partialAttrs: Attributes,
+  children: readonly Grouped[],
+  ctx: Ctx,
+): BranchGrouped | undefined => {
+  if (!children.length) {
+    return undefined
+  }
+  const blocks = children.flatMap((c) => c.blocks)
+  if (!blocks.length) {
+    return undefined
+  }
+
+  const aggregates = aggregateAttrs(kind, blocks)
+  const agentName = partialAttrs[ATTR_GEN_AI_AGENT_NAME]
+  const target =
+    kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+      ? aggregates[ATTR_GEN_AI_RESPONSE_MODEL]
+      : kind === GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT &&
+          typeof agentName === "string"
+        ? agentName
+        : undefined
+
+  const { inputAttr, outputAttr } = computeIoAttrs(blocks, false)
+
+  return {
+    kind,
+    spanName: [kind, target].filter((n) => n).join(" "),
+    spanKind: otelKind(kind),
+    startTime: Math.min(...children.map((c) => c.startTime)),
+    endTime: Math.max(...children.map((c) => c.endTime)),
+    attributes: {
+      ...sharedAttrs(ctx),
+      [ATTR_GEN_AI_OPERATION_NAME]: kind,
+      ...aggregates,
+      ...partialAttrs,
+    },
+    ...(inputAttr ? { inputAttr } : {}),
+    ...(outputAttr ? { outputAttr } : {}),
+    blocks,
+    depthFromLeaf: 1 + Math.max(...children.map((c) => c.depthFromLeaf)),
+    children,
+  }
+}
 
 const correlateToolCalls = function* (
   extracted: IteratorObject<SourcedBlock>,
+  ctx: Ctx,
 ): IteratorObject<Grouped> {
   const acc = new Map<string, SourcedBlock>()
 
@@ -671,7 +901,7 @@ const correlateToolCalls = function* (
     const [, block] = entry
 
     if (block.category !== "tool" || block.correlationId === undefined) {
-      yield leaf([entry])
+      yield leaf([entry], ctx)
       continue
     }
 
@@ -683,34 +913,21 @@ const correlateToolCalls = function* (
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield leaf([entry], "tool_result")
+      yield leaf([entry], ctx, "tool_result")
       continue
     }
     acc.delete(id)
-    yield leaf([mate, entry])
+    yield leaf([mate, entry], ctx)
   }
 
   for (const entry of acc.values()) {
-    yield leaf([entry], "tool_use")
+    yield leaf([entry], ctx, "tool_use")
   }
 
   return
 }
 
-const isLeaf = (g: Grouped): g is LeafGrouped => g.depthFromLeaf === 0
-
-const iterGrouped = function* (grouped: Grouped): IteratorObject<SourcedBlock> {
-  if (isLeaf(grouped)) {
-    yield* grouped.children
-    return
-  }
-  for (const child of grouped.children) {
-    yield* iterGrouped(child)
-  }
-  return
-}
-
-const groupBuffer = (kind: GroupedKind, attributes: Attributes = {}) => {
+const groupBuffer = (kind: GroupedKind, attributes: Attributes, ctx: Ctx) => {
   const acc = new Array<Grouped>()
   return {
     push: (...group: Grouped[]) => acc.push(...group),
@@ -718,12 +935,8 @@ const groupBuffer = (kind: GroupedKind, attributes: Attributes = {}) => {
       if (acc.length === 1) {
         yield* acc
       } else if (acc.length) {
-        yield {
-          kind,
-          attributes,
-          depthFromLeaf: 1 + Math.max(...acc.map((a) => a.depthFromLeaf)),
-          children: [...acc],
-        }
+        const wrapped = branch(kind, attributes, [...acc], ctx)
+        if (wrapped) yield wrapped
       }
       acc.length = 0
       return
@@ -732,17 +945,17 @@ const groupBuffer = (kind: GroupedKind, attributes: Attributes = {}) => {
 }
 
 const generationId = (grouped: Grouped): string | undefined => {
-  for (const [msg] of iterGrouped(grouped)) {
+  for (const [msg] of grouped.blocks) {
     if ("message" in msg && "id" in msg.message) {
       return msg.message.id
     }
   }
-
   return undefined
 }
 
 const groupByGeneration = function* (
   entries: IteratorObject<Grouped>,
+  ctx: Ctx,
 ): IteratorObject<Grouped> {
   type Tagged = { genId: string | undefined; entry: Grouped }
   const tagged = entries
@@ -769,12 +982,8 @@ const groupByGeneration = function* (
       yield* children
       continue
     }
-    yield {
-      kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-      attributes: {},
-      depthFromLeaf: 1 + Math.max(...children.map((c) => c.depthFromLeaf)),
-      children,
-    }
+    const wrapped = branch(GEN_AI_OPERATION_NAME_VALUE_CHAT, {}, children, ctx)
+    if (wrapped) yield wrapped
   }
 
   return
@@ -784,7 +993,7 @@ const isTurnStart = (entry: Grouped): boolean => {
   if (!isLeaf(entry)) {
     return false
   }
-  const [first] = entry.children
+  const [first] = entry.blocks
   if (!first) {
     return false
   }
@@ -794,10 +1003,13 @@ const isTurnStart = (entry: Grouped): boolean => {
 
 const groupTurns = function* (
   entries: IteratorObject<Grouped>,
+  ctx: Ctx,
 ): IteratorObject<Grouped> {
-  const acc = groupBuffer(GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT, {
-    [ATTR_GEN_AI_AGENT_NAME]: "claude-code",
-  })
+  const acc = groupBuffer(
+    GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+    { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" },
+    ctx,
+  )
 
   for (const entry of entries) {
     if (isTurnStart(entry)) {
@@ -809,273 +1021,55 @@ const groupTurns = function* (
   return
 }
 
-const groupChains = function* (
+const groupAgents = function* (
   hook: HookInput,
   entries: IteratorObject<Grouped>,
+  ctx: Ctx,
 ): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
-    const children = entries.toArray()
-    yield {
-      kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-      attributes: {
+    const wrapped = branch(
+      GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+      {
         [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
         [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
       },
-      depthFromLeaf: 1 + Math.max(...children.map((c) => c.depthFromLeaf), 0),
-      children,
-    }
+      entries.toArray(),
+      ctx,
+    )
+    if (wrapped) yield wrapped
     return
   }
 
-  yield* groupTurns(entries)
+  yield* groupTurns(entries, ctx)
   return
 }
 
-const metadata = (label: string) => `langfuse.observation.metadata.${label}`
-
-const messagePart = (block: ExtractedBlock) => ({
-  type: block.category === "agent-thinking" ? "reasoning" : "text",
-  content:
-    typeof block.value === "string" ? block.value : JSON.stringify(block.value),
-})
-
-const wrapMessage = (msg: TranscriptMessage, block: ExtractedBlock) => [
-  {
-    role: msg.type,
-    parts: [messagePart(block)],
-    ...(block.type === "output"
-      ? {
-          finish_reason:
-            msg.type === "assistant"
-              ? (msg.message.stop_reason ?? "stop")
-              : "stop",
-        }
-      : {}),
-  },
-]
-
-const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
-  const sourceBlocks = iterGrouped(grouped).toArray()
-  const output = sourceBlocks.findLast(([, block]) => block.type === "output")
-  const [outputMsg, lastOutputBlock] = output ?? []
-
-  if (lastOutputBlock && outputMsg) {
-    const [key, value] =
-      lastOutputBlock.category === "tool"
-        ? [ATTR_GEN_AI_TOOL_CALL_RESULT, lastOutputBlock.value]
-        : [ATTR_GEN_AI_OUTPUT_MESSAGES, wrapMessage(outputMsg, lastOutputBlock)]
-    span.setAttribute(key, JSON.stringify(value))
-  }
-
-  const lastCorrelationId =
-    lastOutputBlock?.category === "tool"
-      ? lastOutputBlock.correlationId
-      : undefined
-
-  const isOrphanedLeaf =
-    isLeaf(grouped) && metadata("orphaned") in grouped.attributes
-
-  const inputEntry = sourceBlocks.find(([, block]) => {
-    if (block.category === "tool") {
-      return (
-        block.correlationId === lastCorrelationId ||
-        (isOrphanedLeaf && block.type === "input")
-      )
-    }
-    return (
-      block.type === "input" ||
-      (block.category === "agent-text" && block !== lastOutputBlock)
-    )
-  })
-
-  if (inputEntry) {
-    const [inputMsg, firstInputBlock] = inputEntry
-    const [key, value] =
-      firstInputBlock.category === "tool"
-        ? [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS, firstInputBlock.value]
-        : [ATTR_GEN_AI_INPUT_MESSAGES, wrapMessage(inputMsg, firstInputBlock)]
-    span.setAttribute(key, JSON.stringify(value))
-  }
-}
-
-type AssistantMessage = Extract<TranscriptMessage, { type: "assistant" }>
-
-const assistantMessages = (grouped: Grouped): AssistantMessage[] => {
-  const seen = new Set<string>()
-  return iterGrouped(grouped)
-    .map(([m]) => m)
-    .filter(
-      (m): m is AssistantMessage =>
-        m.type === "assistant" && !seen.has(m.uuid) && !!seen.add(m.uuid),
-    )
-    .toArray()
-}
-
-const findModel = (grouped: Grouped): string | undefined =>
-  assistantMessages(grouped)
-    .map((m) => m.message.model)
-    .at(-1)
-
-const findResponseId = (grouped: Grouped): string | undefined =>
-  assistantMessages(grouped)
-    .map((m) => m.message.id)
-    .at(-1)
-
-const findFinishReasons = (grouped: Grouped): string[] =>
-  assistantMessages(grouped)
-    .map((m) => m.message.stop_reason)
-    .filter((r) => r != null)
-
-const findToolError = (grouped: Grouped): string | undefined => {
-  for (const [, block] of iterGrouped(grouped)) {
-    if (block.category === "tool" && block.error) {
-      return block.error
-    }
-  }
-  return undefined
-}
-
-const otelKind = (kind: GroupedKind): SpanKind =>
-  kind === GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
-    ? SpanKind.INTERNAL
-    : SpanKind.CLIENT
-
-type SpanInfo = {
-  spanName: string
-  spanKind: SpanKind
-  operationName: string | undefined
-  toolError: string | undefined
-  leafAttrs: Attributes
-}
-
-const leafInfo = (grouped: LeafGrouped): SpanInfo | undefined => {
-  const first = grouped.children[0]
-  if (!first) {
-    return undefined
-  }
-  const [startMsg, firstBlock] = first
-  const isOperation = firstBlock.category === "tool"
-  type ToolBlock = Extract<SourcedBlock[1], { category: "tool" }>
-  const toolBlock = grouped.children
-    .map(([, b]) => b)
-    .find((b): b is ToolBlock => b.category === "tool")
-  const toolError = findToolError(grouped)
-
-  return {
-    spanName: toolBlock?.toolName
-      ? `execute_tool ${toolBlock.toolName}`
-      : startMsg.type,
-    spanKind: isOperation ? otelKind(grouped.kind) : SpanKind.INTERNAL,
-    operationName: isOperation ? grouped.kind : undefined,
-    toolError,
-    leafAttrs: {
-      [metadata("transcript_jq")]: startMsg[META].debugExpr,
-      [metadata("block_types")]: grouped.children.map(([, b]) => b[META].block),
-      ...(toolBlock?.toolName
-        ? { [ATTR_GEN_AI_TOOL_NAME]: toolBlock.toolName }
-        : {}),
-      ...(toolBlock?.correlationId
-        ? { [ATTR_GEN_AI_TOOL_CALL_ID]: toolBlock.correlationId }
-        : {}),
-      ...(toolError ? { [ATTR_ERROR_TYPE]: toolError } : {}),
-    },
-  }
-}
-
-const branchInfo = (
-  grouped: BranchGrouped,
-  model: string | undefined,
-): SpanInfo => {
-  const agentName = grouped.attributes[ATTR_GEN_AI_AGENT_NAME]
-  const target =
-    grouped.kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-      ? model
-      : grouped.kind === GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT &&
-          typeof agentName === "string"
-        ? agentName
-        : undefined
-  return {
-    spanName: [grouped.kind, target].filter((n) => n).join(" "),
-    spanKind: otelKind(grouped.kind),
-    operationName: grouped.kind,
-    toolError: undefined,
-    leafAttrs: {},
-  }
-}
-
-const emit = ({
-  tracer,
-  parentCtx,
-  userId,
-  sessionId,
-  grouped,
-}: {
-  tracer: Tracer
-  parentCtx: Context
-  userId: string
-  sessionId: string
-  grouped: Grouped
-}): void => {
-  const times = iterGrouped(grouped)
-    .map(([m]) => m[META].timestamp.getTime())
-    .toArray()
-  if (!times.length) {
-    return
-  }
-
-  const model = findModel(grouped)
-  const responseId = findResponseId(grouped)
-  const finishReasons =
-    grouped.kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-      ? findFinishReasons(grouped)
-      : []
-
-  const info = isLeaf(grouped) ? leafInfo(grouped) : branchInfo(grouped, model)
-  if (!info) {
-    return
-  }
-
+const emit = (tracer: Tracer, parentCtx: Context, grouped: Grouped): void => {
   const span = tracer.startSpan(
-    info.spanName,
+    grouped.spanName,
     {
-      startTime: Math.min(...times),
-      kind: info.spanKind,
-      attributes: {
-        [ATTR_USER_ID]: userId,
-        [ATTR_GEN_AI_CONVERSATION_ID]: sessionId,
-        ...(info.operationName
-          ? { [ATTR_GEN_AI_OPERATION_NAME]: info.operationName }
-          : {}),
-        ...(model
-          ? {
-              [ATTR_GEN_AI_REQUEST_MODEL]: model,
-              [ATTR_GEN_AI_RESPONSE_MODEL]: model,
-            }
-          : {}),
-        ...(responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: responseId } : {}),
-        ...(finishReasons.length
-          ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: finishReasons }
-          : {}),
-        ...grouped.attributes,
-        ...info.leafAttrs,
-      },
+      startTime: grouped.startTime,
+      kind: grouped.spanKind,
+      attributes: grouped.attributes,
     },
     parentCtx,
   )
-
-  if (info.toolError) {
-    span.setStatus({ code: SpanStatusCode.ERROR })
+  if (grouped.status) {
+    span.setStatus(grouped.status)
   }
-
+  if (grouped.outputAttr) {
+    span.setAttribute(...grouped.outputAttr)
+  }
+  if (grouped.inputAttr) {
+    span.setAttribute(...grouped.inputAttr)
+  }
   if (!isLeaf(grouped)) {
     const childCtx = trace.setSpan(parentCtx, span)
     for (const child of grouped.children) {
-      emit({ tracer, parentCtx: childCtx, userId, sessionId, grouped: child })
+      emit(tracer, childCtx, child)
     }
   }
-
-  attachIO({ span, grouped })
-  span.end(Math.max(...times))
+  span.end(grouped.endTime)
 }
 
 const main = async (): Promise<void> => {
@@ -1089,20 +1083,15 @@ const main = async (): Promise<void> => {
   }
 
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
+  const ctx = { userId, sessionId: hook.session_id } satisfies Ctx
   const extracted = extractContent(transcriptRows.values())
-  const correlated = correlateToolCalls(extracted)
-  const generations = groupByGeneration(correlated)
-  const grouped = groupChains(hook, generations)
+  const correlated = correlateToolCalls(extracted, ctx)
+  const generations = groupByGeneration(correlated, ctx)
+  const grouped = groupAgents(hook, generations, ctx)
 
   const tracer = otel.provider.getTracer("claude-code")
   for (const group of grouped) {
-    emit({
-      tracer,
-      parentCtx: ROOT_CONTEXT,
-      userId,
-      sessionId: hook.session_id,
-      grouped: group,
-    })
+    emit(tracer, ROOT_CONTEXT, group)
   }
 
   await otel.provider.forceFlush()
