@@ -114,10 +114,10 @@ type ExtractedBlock =
       error?: string
     })
 
-type SourcedBlock = readonly [
-  TranscriptMessage,
-  ExtractedBlock & { [META]: { block: BlockType } },
-]
+type SourcedBlock = Readonly<{
+  msg: TranscriptMessage
+  block: ExtractedBlock & { [META]: { block: BlockType } }
+}>
 
 type BaseGrouped = Readonly<{
   kind: GroupedKind
@@ -671,12 +671,15 @@ const extractBlock = (
 const extractContent = function* (
   messages: IteratorObject<TranscriptMessage>,
 ): IteratorObject<SourcedBlock> {
-  for (const message of messages) {
-    for (const block of contents(message)) {
-      const extracted = extractBlock(message.type, block)
+  for (const msg of messages) {
+    for (const raw of contents(msg)) {
+      const extracted = extractBlock(msg.type, raw)
       if (extracted) {
-        const blockType = typeof block === "string" ? "string" : block.type
-        yield [message, { ...extracted, [META]: { block: blockType } }]
+        const blockType = typeof raw === "string" ? "string" : raw.type
+        yield {
+          msg,
+          block: { ...extracted, [META]: { block: blockType } },
+        }
       }
     }
   }
@@ -712,16 +715,18 @@ const otelKind = (kind: GroupedKind): SpanKind =>
 
 type AssistantMessage = Extract<TranscriptMessage, { type: "assistant" }>
 
-const uniqueAssistants = (
+const uniqueAssistants = function* (
   blocks: readonly SourcedBlock[],
-): readonly AssistantMessage[] => {
+): IteratorObject<AssistantMessage> {
   const seen = new Set<string>()
-  return blocks
-    .map(([m]) => m)
-    .filter(
-      (m): m is AssistantMessage =>
-        m.type === "assistant" && !seen.has(m.uuid) && !!seen.add(m.uuid),
-    )
+  for (const { msg } of blocks) {
+    if (msg.type !== "assistant" || seen.has(msg.uuid)) {
+      continue
+    }
+    seen.add(msg.uuid)
+    yield msg
+  }
+  return
 }
 
 const ioAttr = (
@@ -741,42 +746,48 @@ const ioAttr = (
   return [key, JSON.stringify(value)]
 }
 
-const computeIoAttrs = (
-  blocks: readonly SourcedBlock[],
-  flags: { isOrphanedLeaf: boolean; excludeTool: boolean },
-): {
+type IoAttrs = {
   inputAttr?: readonly [string, string]
   outputAttr?: readonly [string, string]
-} => {
-  const { isOrphanedLeaf, excludeTool } = flags
+}
 
-  const output = blocks.findLast(
-    ([, b]) => b.type === "output" && (!excludeTool || b.category !== "tool"),
-  )
-  const [outputMsg, lastOutputBlock] = output ?? []
-  const outputAttr =
-    outputMsg && lastOutputBlock
-      ? ioAttr(outputMsg, lastOutputBlock)
-      : undefined
+const leafIo = ({
+  blocks,
+  isOrphaned,
+}: {
+  blocks: readonly SourcedBlock[]
+  isOrphaned: boolean
+}): IoAttrs => {
+  const output = blocks.findLast(({ block }) => block.type === "output")
+  const outputAttr = output ? ioAttr(output.msg, output.block) : undefined
 
   const lastCorrelationId =
-    lastOutputBlock?.category === "tool"
-      ? lastOutputBlock.correlationId
-      : undefined
+    output?.block.category === "tool" ? output.block.correlationId : undefined
 
-  const inputEntry = blocks.find(([, block]) => {
+  const input = blocks.find(({ block }) => {
     if (block.type !== "input") {
       return false
     }
     if (block.category === "tool") {
-      if (excludeTool) return false
-      return block.correlationId === lastCorrelationId || isOrphanedLeaf
+      return block.correlationId === lastCorrelationId || isOrphaned
     }
     return true
   })
-  const [inputMsg, firstInputBlock] = inputEntry ?? []
-  const inputAttr =
-    inputMsg && firstInputBlock ? ioAttr(inputMsg, firstInputBlock) : undefined
+  const inputAttr = input ? ioAttr(input.msg, input.block) : undefined
+
+  return { inputAttr, outputAttr }
+}
+
+const branchIo = (blocks: readonly SourcedBlock[]): IoAttrs => {
+  const output = blocks.findLast(
+    ({ block }) => block.type === "output" && block.category !== "tool",
+  )
+  const outputAttr = output ? ioAttr(output.msg, output.block) : undefined
+
+  const input = blocks.find(
+    ({ block }) => block.type === "input" && block.category !== "tool",
+  )
+  const inputAttr = input ? ioAttr(input.msg, input.block) : undefined
 
   return { inputAttr, outputAttr }
 }
@@ -794,7 +805,7 @@ type AggregateFacts = {
 }
 
 const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
-  const assistants = uniqueAssistants(blocks)
+  const assistants = uniqueAssistants(blocks).toArray()
   const usage = assistants.reduce(
     (acc, m) => ({
       inputTokens: acc.inputTokens + m.message.usage.input_tokens,
@@ -890,24 +901,23 @@ const leaf = ({
   ctx: Ctx
   orphaned?: "tool_use" | "tool_result"
 }): LeafGrouped => {
-  const [[startMsg, firstBlock]] = blocks
+  const [{ msg: startMsg, block: firstBlock }] = blocks
   const kind = firstBlock.kind
   const isOperation = firstBlock.category === "tool"
 
-  type ToolBlock = Extract<SourcedBlock[1], { category: "tool" }>
+  type ToolBlock = Extract<SourcedBlock["block"], { category: "tool" }>
   const toolBlock = blocks
-    .map(([, b]) => b)
+    .map(({ block }) => block)
     .find((b): b is ToolBlock => b.category === "tool")
   const toolError = blocks
-    .map(([, b]) => (b.category === "tool" && b.error ? b.error : undefined))
+    .map(({ block }) =>
+      block.category === "tool" && block.error ? block.error : undefined,
+    )
     .find((e) => e)
 
-  const times = blocks.map(([m]) => m[META].timestamp.getTime())
+  const times = blocks.map(({ msg }) => msg[META].timestamp.getTime())
   const facts = aggregateFacts(blocks)
-  const { inputAttr, outputAttr } = computeIoAttrs(blocks, {
-    isOrphanedLeaf: !!orphaned,
-    excludeTool: false,
-  })
+  const { inputAttr, outputAttr } = leafIo({ blocks, isOrphaned: !!orphaned })
 
   return {
     kind,
@@ -920,7 +930,7 @@ const leaf = ({
     attributes: {
       ...commonAttrs({ kind, ctx, isOperation, facts }),
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
-      [metadata("block_types")]: blocks.map(([, b]) => b[META].block),
+      [metadata("block_types")]: blocks.map(({ block }) => block[META].block),
       ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
       ...(toolBlock?.toolName
         ? { [ATTR_GEN_AI_TOOL_NAME]: toolBlock.toolName }
@@ -973,10 +983,7 @@ const branch = ({
     }
   })()
 
-  const { inputAttr, outputAttr } = computeIoAttrs(blocks, {
-    isOrphanedLeaf: false,
-    excludeTool: true,
-  })
+  const { inputAttr, outputAttr } = branchIo(blocks)
 
   return {
     kind,
@@ -1003,7 +1010,7 @@ const correlateToolCalls = function* (
   const acc = new Map<string, SourcedBlock>()
 
   for (const entry of extracted) {
-    const [, block] = entry
+    const { block } = entry
 
     if (block.category !== "tool" || block.correlationId === undefined) {
       yield leaf({ blocks: [entry], ctx })
@@ -1056,8 +1063,8 @@ const wrapOrPass = function* ({
   return
 }
 
-const generationId = (grouped: Grouped): string | undefined => {
-  for (const [msg] of grouped.blocks) {
+const generationKey = (grouped: Grouped): string | undefined => {
+  for (const { msg } of grouped.blocks) {
     if (msg.type === "assistant") return msg.message.id
   }
   return undefined
@@ -1070,28 +1077,28 @@ const groupByGeneration = function* (
   entries: IteratorObject<Grouped>,
   ctx: Ctx,
 ): IteratorObject<Grouped> {
-  type Tagged = { genId: string | undefined; entry: Grouped }
+  type Tagged = { genKey: string | undefined; entry: Grouped }
   const tagged = entries
-    .map((entry) => ({ genId: generationId(entry), entry }) satisfies Tagged)
+    .map((entry) => ({ genKey: generationKey(entry), entry }) satisfies Tagged)
     .toArray()
 
   const chatBuckets = Map.groupBy(
-    tagged.filter((t) => t.genId !== undefined && !isOperationLeaf(t.entry)),
-    ({ genId }) => genId,
+    tagged.filter((t) => t.genKey !== undefined && !isOperationLeaf(t.entry)),
+    ({ genKey }) => genKey,
   )
 
   const emitted = new Set<string>()
-  for (const { genId, entry } of tagged) {
-    if (genId === undefined || isOperationLeaf(entry)) {
+  for (const { genKey, entry } of tagged) {
+    if (genKey === undefined || isOperationLeaf(entry)) {
       yield entry
       continue
     }
-    if (emitted.has(genId)) {
+    if (emitted.has(genKey)) {
       continue
     }
-    emitted.add(genId)
+    emitted.add(genKey)
 
-    const children = chatBuckets.get(genId)?.map((c) => c.entry) ?? []
+    const children = chatBuckets.get(genKey)?.map((c) => c.entry) ?? []
     yield* wrapOrPass({
       kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
       attrs: {},
@@ -1111,8 +1118,25 @@ const isTurnStart = (entry: Grouped): boolean => {
   if (!first) {
     return false
   }
-  const [msg, block] = first
-  return msg.type === "user" && block.category !== "tool"
+  return first.msg.type === "user" && first.block.category !== "tool"
+}
+
+const chunkBy = function* <T>(
+  items: IteratorObject<T>,
+  isStart: (item: T) => boolean,
+): IteratorObject<readonly T[]> {
+  let chunk: T[] = []
+  for (const item of items) {
+    if (isStart(item) && chunk.length) {
+      yield chunk
+      chunk = []
+    }
+    chunk.push(item)
+  }
+  if (chunk.length) {
+    yield chunk
+  }
+  return
 }
 
 const groupTurns = function* (
@@ -1120,25 +1144,14 @@ const groupTurns = function* (
   ctx: Ctx,
 ): IteratorObject<Grouped> {
   const turnAttrs = { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" }
-  let buffer: Grouped[] = []
-  for (const entry of entries) {
-    if (isTurnStart(entry)) {
-      yield* wrapOrPass({
-        kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-        attrs: turnAttrs,
-        items: buffer,
-        ctx,
-      })
-      buffer = []
-    }
-    buffer.push(entry)
+  for (const items of chunkBy(entries, isTurnStart)) {
+    yield* wrapOrPass({
+      kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+      attrs: turnAttrs,
+      items,
+      ctx,
+    })
   }
-  yield* wrapOrPass({
-    kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-    attrs: turnAttrs,
-    items: buffer,
-    ctx,
-  })
   return
 }
 
