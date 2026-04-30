@@ -253,15 +253,13 @@ const parseMessages = async function* (
     ? hook.agent_transcript_path
     : hook.transcript_path
 
-  const types = new Set(["user", "assistant"] as const)
-
   let found = lastUuid === undefined
   for await (const message of readJsonL(transcriptPath)) {
     if (!found) {
       found ||= message.uuid === lastUuid
       continue
     }
-    if (!types.has(message.type)) {
+    if (message.type !== "user" && message.type !== "assistant") {
       continue
     }
 
@@ -289,6 +287,17 @@ const contents = function* (
 
   return
 }
+
+const extractChat = (
+  side: BaseExtractedBlock["type"],
+  category: Exclude<ExtractedBlock["category"], "tool">,
+  value: unknown,
+): ExtractedBlock => ({
+  category,
+  type: side,
+  kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
+  value,
+})
 
 const documentValue = ({
   source,
@@ -340,61 +349,32 @@ const extractBlock = (
   const textCategory = role === "assistant" ? "agent-text" : "user-text"
 
   if (typeof block === "string") {
-    return {
-      category: textCategory,
-      type: side,
-      kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-      value: block,
-    }
+    return extractChat(side, textCategory, block)
   }
 
   switch (block.type) {
     case "text":
-      return {
-        category: textCategory,
-        type: side,
-        kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-        value: block.citations?.length
+      return extractChat(
+        side,
+        textCategory,
+        block.citations?.length
           ? { text: block.text, citations: block.citations }
           : block.text,
-      }
+      )
     case "thinking":
-      if (!block.thinking) {
-        return undefined
-      }
-      return {
-        category: "agent-thinking",
-        type: side,
-        kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-        value: block.thinking,
-      }
+      return block.thinking
+        ? extractChat(side, "agent-thinking", block.thinking)
+        : undefined
     case "redacted_thinking":
-      if (!block.data) {
-        return undefined
-      }
-      return {
-        category: "agent-thinking",
-        type: side,
-        kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-        value: block.data,
-      }
+      return block.data
+        ? extractChat(side, "agent-thinking", block.data)
+        : undefined
     case "compaction":
-      if (!block.content) {
-        return undefined
-      }
-      return {
-        category: textCategory,
-        type: side,
-        kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-        value: block.content,
-      }
+      return block.content
+        ? extractChat(side, textCategory, block.content)
+        : undefined
     case "image":
-      return {
-        category: textCategory,
-        type: side,
-        kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-        value: imageValue(block),
-      }
+      return extractChat(side, textCategory, imageValue(block))
 
     case "mcp_tool_use":
       return {
@@ -734,17 +714,15 @@ const groupBuffer = (kind: GroupedKind, attributes: Attributes = {}) => {
   const acc = new Array<Grouped>()
   return {
     push: (...group: Grouped[]) => acc.push(...group),
-    pop: function* (flatten = false): IteratorObject<Grouped> {
-      if (acc.length) {
-        if (acc.length === 1 || flatten) {
-          yield* acc
-        } else {
-          yield {
-            kind,
-            attributes,
-            depthFromLeaf: 1 + Math.max(...acc.map((a) => a.depthFromLeaf)),
-            children: [...acc],
-          }
+    pop: function* (): IteratorObject<Grouped> {
+      if (acc.length === 1) {
+        yield* acc
+      } else if (acc.length) {
+        yield {
+          kind,
+          attributes,
+          depthFromLeaf: 1 + Math.max(...acc.map((a) => a.depthFromLeaf)),
+          children: [...acc],
         }
       }
       acc.length = 0
@@ -861,16 +839,18 @@ const messagePart = (block: ExtractedBlock) => ({
     typeof block.value === "string" ? block.value : JSON.stringify(block.value),
 })
 
-const wrapInput = (msg: TranscriptMessage, block: ExtractedBlock) => [
-  { role: msg.type, parts: [messagePart(block)] },
-]
-
-const wrapOutput = (msg: TranscriptMessage, block: ExtractedBlock) => [
+const wrapMessage = (msg: TranscriptMessage, block: ExtractedBlock) => [
   {
     role: msg.type,
     parts: [messagePart(block)],
-    finish_reason:
-      msg.type === "assistant" ? (msg.message.stop_reason ?? "stop") : "stop",
+    ...(block.type === "output"
+      ? {
+          finish_reason:
+            msg.type === "assistant"
+              ? (msg.message.stop_reason ?? "stop")
+              : "stop",
+        }
+      : {}),
   },
 ]
 
@@ -880,17 +860,11 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
   const [outputMsg, lastOutputBlock] = output ?? []
 
   if (lastOutputBlock && outputMsg) {
-    if (lastOutputBlock.category === "tool") {
-      span.setAttribute(
-        ATTR_GEN_AI_TOOL_CALL_RESULT,
-        JSON.stringify(lastOutputBlock.value),
-      )
-    } else {
-      span.setAttribute(
-        ATTR_GEN_AI_OUTPUT_MESSAGES,
-        JSON.stringify(wrapOutput(outputMsg, lastOutputBlock)),
-      )
-    }
+    const [key, value] =
+      lastOutputBlock.category === "tool"
+        ? [ATTR_GEN_AI_TOOL_CALL_RESULT, lastOutputBlock.value]
+        : [ATTR_GEN_AI_OUTPUT_MESSAGES, wrapMessage(outputMsg, lastOutputBlock)]
+    span.setAttribute(key, JSON.stringify(value))
   }
 
   const lastCorrelationId =
@@ -916,17 +890,11 @@ const attachIO = ({ span, grouped }: { span: Span; grouped: Grouped }) => {
 
   if (inputEntry) {
     const [inputMsg, firstInputBlock] = inputEntry
-    if (firstInputBlock.category === "tool") {
-      span.setAttribute(
-        ATTR_GEN_AI_TOOL_CALL_ARGUMENTS,
-        JSON.stringify(firstInputBlock.value),
-      )
-    } else {
-      span.setAttribute(
-        ATTR_GEN_AI_INPUT_MESSAGES,
-        JSON.stringify(wrapInput(inputMsg, firstInputBlock)),
-      )
-    }
+    const [key, value] =
+      firstInputBlock.category === "tool"
+        ? [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS, firstInputBlock.value]
+        : [ATTR_GEN_AI_INPUT_MESSAGES, wrapMessage(inputMsg, firstInputBlock)]
+    span.setAttribute(key, JSON.stringify(value))
   }
 }
 
@@ -1121,7 +1089,8 @@ const main = async (): Promise<void> => {
   }
 
   const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
-  const correlated = correlateToolCalls(extractContent(transcriptRows.values()))
+  const extracted = extractContent(transcriptRows.values())
+  const correlated = correlateToolCalls(extracted)
   const generations = groupByGeneration(correlated)
   const grouped = groupChains(hook, generations)
 
