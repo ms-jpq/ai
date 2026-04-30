@@ -761,16 +761,13 @@ const computeIoAttrs = (
       : undefined
 
   const inputEntry = blocks.find(([, block]) => {
-    if (block.category === "tool") {
-      return (
-        block.correlationId === lastCorrelationId ||
-        (isOrphanedLeaf && block.type === "input")
-      )
+    if (block.type !== "input") {
+      return false
     }
-    return (
-      block.type === "input" ||
-      (block.category === "agent-text" && block !== lastOutputBlock)
-    )
+    if (block.category === "tool") {
+      return block.correlationId === lastCorrelationId || isOrphanedLeaf
+    }
+    return true
   })
   const [inputMsg, firstInputBlock] = inputEntry ?? []
   const inputAttr =
