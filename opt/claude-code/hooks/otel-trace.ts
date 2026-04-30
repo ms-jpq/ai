@@ -1097,8 +1097,8 @@ const main = async (): Promise<void> => {
     return
   }
 
-  const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
   const ctx = { userId, sessionId: hook.session_id } satisfies Ctx
+  const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
   const extracted = extractContent(transcriptRows.values())
   const correlated = correlateToolCalls(extracted, ctx)
   const generations = groupByGeneration(correlated, ctx)
