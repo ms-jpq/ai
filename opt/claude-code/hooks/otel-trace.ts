@@ -826,11 +826,7 @@ const aggregateTokenCount = (lhs: TokenCount, rhs: TokenCount): TokenSum => ({
 const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
   const assistants = uniqueAssistants(blocks).toArray()
   const usage = assistants.reduce(
-    (acc, { message: { usage } }) =>
-      (usage.iterations ?? []).reduce(
-        aggregateTokenCount,
-        aggregateTokenCount(acc, usage),
-      ),
+    (acc, { message: { usage } }) => aggregateTokenCount(acc, usage),
     {
       input_tokens: 0,
       output_tokens: 0,
