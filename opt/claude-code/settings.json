@@ -15,8 +15,6 @@
     "CLAUDE_CODE_ENABLE_TELEMETRY": "0",
     "CLAUDE_CODE_ENHANCED_TELEMETRY_BETA": "0",
     "DISABLE_UPGRADE_COMMAND": "1",
-    "EDITOR": "true",
-    "NO_COLOR": "true",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORT_INTERVAL": "1000",
     "OTEL_LOG_TOOL_CONTENT": "1",
@@ -25,8 +23,7 @@
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_METRIC_EXPORT_INTERVAL": "1000",
     "OTEL_TRACES_EXPORTER": "otlp",
-    "OTEL_TRACES_EXPORT_INTERVAL": "1000",
-    "PAGER": "tee"
+    "OTEL_TRACES_EXPORT_INTERVAL": "1000"
   },
   "feedbackSurveyRate": 0,
   "hooks": {
