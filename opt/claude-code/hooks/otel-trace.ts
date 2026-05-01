@@ -823,17 +823,26 @@ const aggregateTokenCount = (lhs: TokenCount, rhs: TokenCount): TokenSum => ({
     (lhs.cache_read_input_tokens ?? 0) + (rhs.cache_read_input_tokens ?? 0),
 })
 
-const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
+const aggregateFacts = ({
+  blocks,
+  includeUsage,
+}: {
+  blocks: readonly SourcedBlock[]
+  includeUsage: boolean
+}): AggregateFacts => {
   const assistants = uniqueAssistants(blocks).toArray()
-  const usage = assistants.reduce(
-    (acc, { message: { usage } }) => aggregateTokenCount(acc, usage),
-    {
-      input_tokens: 0,
-      output_tokens: 0,
-      cache_read_input_tokens: 0,
-      cache_creation_input_tokens: 0,
-    } satisfies TokenSum,
-  )
+  const zeroUsage = {
+    input_tokens: 0,
+    output_tokens: 0,
+    cache_read_input_tokens: 0,
+    cache_creation_input_tokens: 0,
+  } satisfies TokenSum
+  const usage = includeUsage
+    ? assistants.reduce(
+        (acc, { message: { usage } }) => aggregateTokenCount(acc, usage),
+        zeroUsage,
+      )
+    : zeroUsage
   return {
     model: assistants.findLast((a) => a.message.model !== "<synthetic>")
       ?.message.model,
@@ -922,7 +931,7 @@ const leaf = ({
     .find((e) => e)
 
   const times = blocks.map(({ msg }) => msg[META].timestamp.getTime())
-  const facts = aggregateFacts(blocks)
+  const facts = aggregateFacts({ blocks, includeUsage: false })
   const { inputAttr, outputAttr } = leafIo({ blocks, isOrphaned: !!orphaned })
 
   return {
@@ -976,7 +985,10 @@ const branch = ({
     return undefined
   }
 
-  const facts = aggregateFacts(blocks)
+  const facts = aggregateFacts({
+    blocks,
+    includeUsage: kind === GEN_AI_OPERATION_NAME_VALUE_CHAT,
+  })
   const agentName = partialAttrs[ATTR_GEN_AI_AGENT_NAME]
   const target = (() => {
     switch (kind) {
@@ -1103,12 +1115,15 @@ const groupByGeneration = function* (
     }
     emitted.add(genKey)
 
-    yield* wrapOrPass({
+    const wrapped = branch({
       kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
-      attrs: {},
-      items: chatBuckets.get(genKey)?.map((c) => c.entry) ?? [],
+      partialAttrs: {},
+      children: chatBuckets.get(genKey)?.map((c) => c.entry) ?? [],
       ctx,
     })
+    if (wrapped) {
+      yield wrapped
+    }
   }
 
   return
