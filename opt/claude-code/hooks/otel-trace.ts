@@ -7,6 +7,7 @@ import type {
   BetaDocumentBlock,
   BetaMessageParam,
   BetaRequestDocumentBlock,
+  BetaUsage,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { Attributes, Context, Tracer } from "@opentelemetry/api"
 import {
@@ -794,35 +795,44 @@ const branchIo = (blocks: readonly SourcedBlock[]): IoAttrs => {
 
 const isLeaf = (g: Grouped): g is LeafGrouped => g.depthFromLeaf === 0
 
-type AggregateFacts = Readonly<{
-  model: string | undefined
-  responseId: string | undefined
-  stopReasons: string[]
-  inputTokens: number
-  outputTokens: number
-  cacheReadInputTokens: number
-  cacheCreationInputTokens: number
-}>
+type TokenCount = Pick<
+  BetaUsage,
+  | "input_tokens"
+  | "output_tokens"
+  | "cache_read_input_tokens"
+  | "cache_creation_input_tokens"
+>
+
+type TokenSum = { [K in keyof TokenCount]-?: number }
+
+type AggregateFacts = Readonly<
+  {
+    model: string | undefined
+    responseId: string | undefined
+    stopReasons: string[]
+  } & TokenSum
+>
+
+const aggregateTokenCount = (lhs: TokenCount, rhs: TokenCount): TokenSum => ({
+  input_tokens: lhs.input_tokens + rhs.input_tokens,
+  output_tokens: lhs.output_tokens + rhs.output_tokens,
+  cache_creation_input_tokens:
+    (lhs.cache_creation_input_tokens ?? 0) +
+    (rhs.cache_creation_input_tokens ?? 0),
+  cache_read_input_tokens:
+    (lhs.cache_read_input_tokens ?? 0) + (rhs.cache_read_input_tokens ?? 0),
+})
 
 const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
   const assistants = uniqueAssistants(blocks).toArray()
   const usage = assistants.reduce(
-    (acc, m) => ({
-      inputTokens: acc.inputTokens + m.message.usage.input_tokens,
-      outputTokens: acc.outputTokens + m.message.usage.output_tokens,
-      cacheReadInputTokens:
-        acc.cacheReadInputTokens +
-        (m.message.usage.cache_read_input_tokens ?? 0),
-      cacheCreationInputTokens:
-        acc.cacheCreationInputTokens +
-        (m.message.usage.cache_creation_input_tokens ?? 0),
-    }),
+    (acc, { message: { usage } }) => aggregateTokenCount(acc, usage),
     {
-      inputTokens: 0,
-      outputTokens: 0,
-      cacheReadInputTokens: 0,
-      cacheCreationInputTokens: 0,
-    },
+      input_tokens: 0,
+      output_tokens: 0,
+      cache_read_input_tokens: 0,
+      cache_creation_input_tokens: 0,
+    } satisfies TokenSum,
   )
   return {
     model: assistants.findLast((a) => a.message.model !== "<synthetic>")
@@ -866,21 +876,22 @@ const commonAttrs = ({
   ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.stopReasons.length
     ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons }
     : {}),
-  ...(facts.inputTokens
-    ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: facts.inputTokens }
+  ...(facts.input_tokens
+    ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: facts.input_tokens }
     : {}),
-  ...(facts.outputTokens
-    ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: facts.outputTokens }
+  ...(facts.output_tokens
+    ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: facts.output_tokens }
     : {}),
-  ...(facts.cacheReadInputTokens
+  ...(facts.cache_read_input_tokens
     ? {
-        [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: facts.cacheReadInputTokens,
+        [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]:
+          facts.cache_read_input_tokens,
       }
     : {}),
-  ...(facts.cacheCreationInputTokens
+  ...(facts.cache_creation_input_tokens
     ? {
         [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
-          facts.cacheCreationInputTokens,
+          facts.cache_creation_input_tokens,
       }
     : {}),
 })
