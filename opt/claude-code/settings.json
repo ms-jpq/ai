@@ -253,6 +253,7 @@
     "type": "command"
   },
   "teammateMode": "in-process",
+  "theme": "light",
   "worktree": {
     "symlinkDirectories": [
       ".cache/",

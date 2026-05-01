@@ -6,7 +6,6 @@ shopt -s dotglob nullglob extglob globstar
 
 BASE="$(realpath -- "$0")"
 BASE="${BASE%/*}"
-PATH="$BASE/bin:$PATH"
 ROOT="$(realpath -- "$BASE/../..")"
 
 set -a
