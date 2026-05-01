@@ -122,7 +122,11 @@ type SourcedBlock = Readonly<{
   block: ExtractedBlock & { [META]: { block: BlockType } }
 }>
 
-type Bundle = readonly [SourcedBlock, ...SourcedBlock[]]
+type NonEmpty<T> = readonly [T, ...T[]]
+
+const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0
+
+type Bundle = NonEmpty<SourcedBlock>
 
 type BaseGrouped = Readonly<{
   kind: GroupedKind
@@ -700,7 +704,7 @@ const messagePart = (block: ExtractedBlock) => ({
 
 const wrapMessage = (
   msg: TranscriptMessage,
-  blocks: readonly [ExtractedBlock, ...ExtractedBlock[]],
+  blocks: NonEmpty<ExtractedBlock>,
 ) => [
   {
     role: msg.type,
@@ -737,7 +741,7 @@ const uniqueAssistants = function* (
 
 const ioAttr = (
   msg: TranscriptMessage,
-  blocks: readonly [ExtractedBlock, ...ExtractedBlock[]],
+  blocks: NonEmpty<ExtractedBlock>,
 ): readonly [string, string] => {
   const [first] = blocks
   const isOutput = first.type === "output"
@@ -809,11 +813,8 @@ const branchIo = (blocks: readonly SourcedBlock[]): IoAttrs => {
     ? messageBlocks(blocks.values(), output.msg).toArray()
     : []
   const outputAttr =
-    output && outputBlocks.length
-      ? ioAttr(
-          output.msg,
-          outputBlocks as [ExtractedBlock, ...ExtractedBlock[]],
-        )
+    output && isNonEmpty(outputBlocks)
+      ? ioAttr(output.msg, outputBlocks)
       : undefined
 
   const input = blocks.find(
@@ -823,8 +824,8 @@ const branchIo = (blocks: readonly SourcedBlock[]): IoAttrs => {
     ? messageBlocks(blocks.values(), input.msg).toArray()
     : []
   const inputAttr =
-    input && inputBlocks.length
-      ? ioAttr(input.msg, inputBlocks as [ExtractedBlock, ...ExtractedBlock[]])
+    input && isNonEmpty(inputBlocks)
+      ? ioAttr(input.msg, inputBlocks)
       : undefined
 
   return { inputAttr, outputAttr }
