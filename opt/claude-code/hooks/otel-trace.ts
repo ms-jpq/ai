@@ -31,6 +31,7 @@ import {
 } from "@opentelemetry/sdk-trace-base"
 import {
   ATTR_ERROR_TYPE,
+  ATTR_SERVER_ADDRESS,
   ATTR_SERVICE_INSTANCE_ID,
   ATTR_SERVICE_NAME,
 } from "@opentelemetry/semantic-conventions"
@@ -41,6 +42,7 @@ import {
   ATTR_GEN_AI_INPUT_MESSAGES,
   ATTR_GEN_AI_OPERATION_NAME,
   ATTR_GEN_AI_OUTPUT_MESSAGES,
+  ATTR_GEN_AI_OUTPUT_TYPE,
   ATTR_GEN_AI_PROVIDER_NAME,
   ATTR_GEN_AI_REQUEST_MODEL,
   ATTR_GEN_AI_RESPONSE_FINISH_REASONS,
@@ -60,6 +62,7 @@ import {
   GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
   GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
   GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
+  GEN_AI_OUTPUT_TYPE_VALUE_TEXT,
   GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
 } from "@opentelemetry/semantic-conventions/incubating"
 import { fail } from "node:assert/strict"
@@ -657,7 +660,8 @@ const extractContent = function* (
   messages: IteratorObject<TranscriptMessage>,
 ): IteratorObject<Bundle> {
   for (const msg of messages) {
-    const chatBundle = new Array<SourcedBlock>()
+    const chatPart = new Array<SourcedBlock>()
+    const toolPart = new Array<SourcedBlock>()
     const toolBundles = new Array<Bundle>()
     for (const raw of contents(msg)) {
       const extracted = extractBlock(msg.type, raw)
@@ -668,13 +672,14 @@ const extractContent = function* (
         block: { ...extracted, [META]: { block: blockType } },
       } satisfies SourcedBlock
       if (extracted.category === "tool") {
+        toolPart.push(sourced)
         toolBundles.push([sourced])
       } else {
-        chatBundle.push(sourced)
+        chatPart.push(sourced)
       }
     }
-    if (isNonEmpty(chatBundle)) {
-      yield chatBundle
+    if (isNonEmpty(chatPart)) {
+      yield [chatPart[0], ...chatPart.slice(1), ...toolPart]
     }
     yield* toolBundles
   }
@@ -682,11 +687,47 @@ const extractContent = function* (
   return
 }
 
-const messagePart = (block: ExtractedBlock) => ({
-  type: block.category === "chat" && block.thinking ? "reasoning" : "text",
-  content:
-    typeof block.value === "string" ? block.value : JSON.stringify(block.value),
-})
+const messagePart = (block: ExtractedBlock) => {
+  if (block.category === "tool") {
+    const id = block.correlationId
+    if (block.type === "input") {
+      const args =
+        block.value && typeof block.value === "object" && "input" in block.value
+          ? (block.value as { input: unknown }).input
+          : block.value
+      return {
+        type: "tool_call",
+        ...(id !== undefined ? { id } : {}),
+        ...(block.toolName ? { name: block.toolName } : {}),
+        arguments: args,
+      }
+    }
+    return {
+      type: "tool_call_response",
+      ...(id !== undefined ? { id } : {}),
+      result: block.value,
+    }
+  }
+  return {
+    type: block.thinking ? "reasoning" : "text",
+    content:
+      typeof block.value === "string"
+        ? block.value
+        : JSON.stringify(block.value),
+  }
+}
+
+const FINISH_REASON_MAP: Readonly<Record<string, string>> = {
+  end_turn: "stop",
+  stop_sequence: "stop",
+  pause_turn: "stop",
+  max_tokens: "length",
+  tool_use: "tool_calls",
+  refusal: "content_filter",
+}
+
+const normalizeFinishReason = (raw: string | null | undefined): string =>
+  FINISH_REASON_MAP[raw ?? ""] ?? raw ?? "stop"
 
 const wrapMessage = (
   msg: TranscriptMessage,
@@ -699,7 +740,7 @@ const wrapMessage = (
       ? {
           finish_reason:
             msg.type === "assistant"
-              ? (msg.message.stop_reason ?? "stop")
+              ? normalizeFinishReason(msg.message.stop_reason)
               : "stop",
         }
       : {}),
@@ -821,7 +862,11 @@ const aggregateFacts = ({
   const usage = includeUsage
     ? assistants.reduce(
         (acc, { message: { usage: u } }) => ({
-          input_tokens: acc.input_tokens + u.input_tokens,
+          input_tokens:
+            acc.input_tokens +
+            u.input_tokens +
+            (u.cache_read_input_tokens ?? 0) +
+            (u.cache_creation_input_tokens ?? 0),
           output_tokens: acc.output_tokens + u.output_tokens,
           cache_read_input_tokens:
             acc.cache_read_input_tokens + (u.cache_read_input_tokens ?? 0),
@@ -864,6 +909,12 @@ const commonAttrs = ({
         [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
       }
     : {}),
+  ...(isOperation && kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
+    ? { [ATTR_SERVER_ADDRESS]: "api.anthropic.com" }
+    : {}),
+  ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+    ? { [ATTR_GEN_AI_OUTPUT_TYPE]: GEN_AI_OUTPUT_TYPE_VALUE_TEXT }
+    : {}),
   ...(facts.model
     ? {
         [ATTR_GEN_AI_REQUEST_MODEL]: facts.model,
@@ -872,7 +923,11 @@ const commonAttrs = ({
     : {}),
   ...(facts.responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: facts.responseId } : {}),
   ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.stopReasons.length
-    ? { [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons }
+    ? {
+        [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons.map(
+          normalizeFinishReason,
+        ),
+      }
     : {}),
   ...(facts.input_tokens
     ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: facts.input_tokens }
@@ -914,14 +969,18 @@ const leaf = ({
   const includeUsage = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
 
   type ToolBlock = Extract<SourcedBlock["block"], { category: "tool" }>
-  const toolBlock = blocks
-    .map(({ block }) => block)
-    .find((b): b is ToolBlock => b.category === "tool")
-  const toolError = blocks
-    .map(({ block }) =>
-      block.category === "tool" && block.error ? block.error : undefined,
-    )
-    .find((e) => e)
+  const toolBlock = isToolBundle
+    ? blocks
+        .map(({ block }) => block)
+        .find((b): b is ToolBlock => b.category === "tool")
+    : undefined
+  const toolError = isToolBundle
+    ? blocks
+        .map(({ block }) =>
+          block.category === "tool" && block.error ? block.error : undefined,
+        )
+        .find((e) => e)
+    : undefined
 
   const times = blocks.map(({ msg }) => msg[META].timestamp.getTime())
   const facts = aggregateFacts({ blocks, includeUsage })
