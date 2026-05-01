@@ -1072,9 +1072,8 @@ const groupByGeneration = function* (
   entries: IteratorObject<Grouped>,
   ctx: Ctx,
 ): IteratorObject<Grouped> {
-  type Tagged = { genKey: string | undefined; entry: Grouped }
   const tagged = entries
-    .map((entry) => ({ genKey: generationKey(entry), entry }) satisfies Tagged)
+    .map((entry) => ({ genKey: generationKey(entry), entry }) as const)
     .toArray()
 
   const chatBuckets = Map.groupBy(
@@ -1093,11 +1092,10 @@ const groupByGeneration = function* (
     }
     emitted.add(genKey)
 
-    const children = chatBuckets.get(genKey)?.map((c) => c.entry) ?? []
     yield* wrapOrPass({
       kind: GEN_AI_OPERATION_NAME_VALUE_CHAT,
       attrs: {},
-      items: children,
+      items: chatBuckets.get(genKey)?.map((c) => c.entry) ?? [],
       ctx,
     })
   }
@@ -1120,7 +1118,7 @@ const chunkBy = function* <T>(
   items: IteratorObject<T>,
   isStart: (item: T) => boolean,
 ): IteratorObject<readonly T[]> {
-  let chunk: T[] = []
+  let chunk = new Array<T>()
   for (const item of items) {
     if (isStart(item) && chunk.length) {
       yield chunk
