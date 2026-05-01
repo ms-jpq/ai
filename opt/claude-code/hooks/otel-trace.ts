@@ -89,6 +89,8 @@ type TranscriptMessage = Readonly<
   }
 >
 
+type AssistantMessage = Extract<TranscriptMessage, { type: "assistant" }>
+
 type BlockKind =
   | typeof GEN_AI_OPERATION_NAME_VALUE_CHAT
   | typeof GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
@@ -713,8 +715,6 @@ const otelKind = (kind: GroupedKind): SpanKind =>
     ? SpanKind.INTERNAL
     : SpanKind.CLIENT
 
-type AssistantMessage = Extract<TranscriptMessage, { type: "assistant" }>
-
 const uniqueAssistants = function* (
   blocks: readonly SourcedBlock[],
 ): IteratorObject<AssistantMessage> {
@@ -794,7 +794,7 @@ const branchIo = (blocks: readonly SourcedBlock[]): IoAttrs => {
 
 const isLeaf = (g: Grouped): g is LeafGrouped => g.depthFromLeaf === 0
 
-type AggregateFacts = {
+type AggregateFacts = Readonly<{
   model: string | undefined
   responseId: string | undefined
   stopReasons: string[]
@@ -802,7 +802,7 @@ type AggregateFacts = {
   outputTokens: number
   cacheReadInputTokens: number
   cacheCreationInputTokens: number
-}
+}>
 
 const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
   const assistants = uniqueAssistants(blocks).toArray()
@@ -829,16 +829,33 @@ const aggregateFacts = (blocks: readonly SourcedBlock[]): AggregateFacts => {
       ?.message.model,
     responseId: assistants.at(-1)?.message.id,
     stopReasons: assistants
+      .values()
       .map((m) => m.message.stop_reason)
-      .filter((r) => r != null),
+      .filter((r) => r != null)
+      .toArray(),
     ...usage,
   }
 }
 
-const aggregateAttrs = (
-  kind: GroupedKind,
-  facts: AggregateFacts,
-): Attributes => ({
+const commonAttrs = ({
+  kind,
+  ctx,
+  isOperation,
+  facts,
+}: {
+  kind: GroupedKind
+  ctx: Ctx
+  isOperation: boolean
+  facts: AggregateFacts
+}): Attributes => ({
+  [ATTR_USER_ID]: ctx.userId,
+  [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
+  ...(isOperation
+    ? {
+        [ATTR_GEN_AI_OPERATION_NAME]: kind,
+        [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
+      }
+    : {}),
   ...(facts.model
     ? {
         [ATTR_GEN_AI_REQUEST_MODEL]: facts.model,
@@ -866,28 +883,6 @@ const aggregateAttrs = (
           facts.cacheCreationInputTokens,
       }
     : {}),
-})
-
-const commonAttrs = ({
-  kind,
-  ctx,
-  isOperation,
-  facts,
-}: {
-  kind: GroupedKind
-  ctx: Ctx
-  isOperation: boolean
-  facts: AggregateFacts
-}): Attributes => ({
-  [ATTR_USER_ID]: ctx.userId,
-  [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
-  ...(isOperation
-    ? {
-        [ATTR_GEN_AI_OPERATION_NAME]: kind,
-        [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
-      }
-    : {}),
-  ...aggregateAttrs(kind, facts),
 })
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
