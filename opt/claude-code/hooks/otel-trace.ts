@@ -720,10 +720,10 @@ const uniqueAssistants = function* (
 ): IteratorObject<AssistantMessage> {
   const seen = new Set<string>()
   for (const { msg } of blocks) {
-    if (msg.type !== "assistant" || seen.has(msg.uuid)) {
+    if (msg.type !== "assistant" || seen.has(msg.message.id)) {
       continue
     }
-    seen.add(msg.uuid)
+    seen.add(msg.message.id)
     yield msg
   }
   return
