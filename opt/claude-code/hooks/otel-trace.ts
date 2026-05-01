@@ -717,17 +717,18 @@ const messagePart = (block: ExtractedBlock) => {
   }
 }
 
-const FINISH_REASON_MAP: Readonly<Record<string, string>> = {
-  end_turn: "stop",
-  stop_sequence: "stop",
-  pause_turn: "stop",
-  max_tokens: "length",
-  tool_use: "tool_calls",
-  refusal: "content_filter",
-}
+const normalizeFinishReason = (() => {
+  const map = new Map<string, string>([
+    ["end_turn", "stop"],
+    ["stop_sequence", "stop"],
+    ["pause_turn", "stop"],
+    ["max_tokens", "length"],
+    ["tool_use", "tool_calls"],
+    ["refusal", "content_filter"],
+  ])
 
-const normalizeFinishReason = (raw: string | null | undefined): string =>
-  FINISH_REASON_MAP[raw ?? ""] ?? raw ?? "stop"
+  return (raw: string | null | undefined) => map.get(raw ?? "") ?? raw ?? "stop"
+})()
 
 const wrapMessage = (
   msg: TranscriptMessage,
