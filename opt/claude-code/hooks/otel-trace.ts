@@ -101,33 +101,27 @@ type GroupedKind = BlockKind | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
 
 type ExtractedBlockType = typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
 
-// Anthropic extends OTel's text/tool_call/tool_call_response with reasoning, blob, uri, file, document, search_result.
-type ChatPart = Readonly<Record<string, unknown> & { type: string }>
-
-type ExtractedBlock =
-  | Readonly<{
-      category: "chat"
-      role: Role
-      type: ExtractedBlockType
-      part: ChatPart
-    }>
-  | Readonly<{
-      category: "tool"
-      type: ExtractedBlockType
-      kind: BlockKind
-      value: unknown
-      correlationId: string | undefined
-      toolName?: string
-      toolType?: "function" | "extension"
-      error?: string
-    }>
-
-type ToolBlock = Extract<ExtractedBlock, { category: "tool" }>
-
-type SourcedToolBlock = Readonly<{
-  msg: TranscriptMessage
-  block: ToolBlock
+type ChatBlock = Readonly<{
+  category: "chat"
+  role: Role
+  type: ExtractedBlockType
+  part: Record<string, unknown>
 }>
+
+type ToolBlock = Readonly<{
+  category: "tool"
+  type: ExtractedBlockType
+  kind: BlockKind
+  value: unknown
+  correlationId: string | undefined
+  toolName?: string
+  toolType?: "function" | "extension"
+  error?: string
+}>
+
+type ExtractedBlock = ChatBlock | ToolBlock
+
+type SourcedBlock<T extends ExtractedBlock> = Readonly<{ msg: TranscriptMessage; block: T }>
 
 type Facts = Readonly<{
   model?: string
@@ -314,7 +308,7 @@ const contents = function* (msg: TranscriptMessage): IteratorObject<MessageBlock
   return
 }
 
-const extractChat = ({ role, part }: { role: Role; part: ChatPart }) =>
+const extractChat = ({ role, part }: { role: Role; part: Record<string, unknown> }) =>
   ({
     category: "chat",
     role,
@@ -363,7 +357,7 @@ const extractToolResult = ({
     ...(error !== undefined ? { error } : {}),
   }) satisfies ExtractedBlock
 
-const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): ChatPart => {
+const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): Record<string, unknown> => {
   const meta = {
     ...(block.title ? { title: block.title } : {}),
     ...(block.context ? { context: block.context } : {}),
@@ -405,7 +399,7 @@ const documentValue = ({ source, title, ...block }: BetaDocumentBlock | BetaRequ
   }
 }
 
-const imagePart = ({ source }: BetaImageBlockParam): ChatPart => {
+const imagePart = ({ source }: BetaImageBlockParam): Record<string, unknown> => {
   switch (source.type) {
     case "base64":
       return {
@@ -701,33 +695,6 @@ const normalizeFinishReason = (() => {
   return (raw: string | null | undefined) => map.get(raw ?? "") ?? raw ?? "stop"
 })()
 
-const transcriptToMessage = ({ msg, asOutput }: { msg: TranscriptMessage; asOutput: boolean }) => ({
-  role: msg.type,
-  parts: contents(msg)
-    .map((raw) => extractBlock(msg.type, raw))
-    .filter((b) => b !== undefined)
-    .map((block): ChatPart => {
-      if (block.category === "chat") {
-        return block.part
-      }
-      if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
-        return {
-          type: "tool_call",
-          id: block.correlationId,
-          name: block.toolName,
-          arguments: block.value,
-        }
-      }
-      return {
-        type: "tool_call_response",
-        id: block.correlationId,
-        response: block.value,
-      }
-    })
-    .toArray(),
-  finish_reason: asOutput && msg.type === "assistant" ? normalizeFinishReason(msg.message.stop_reason) : undefined,
-})
-
 const factsFromAssistant = (msg: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
   if (msg.message.model === "<synthetic>") {
     return {
@@ -741,7 +708,6 @@ const factsFromAssistant = (msg: Extract<TranscriptMessage, { type: "assistant" 
     responseId: msg.message.id,
     stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
     usage: {
-      // Total prompt size including cache reads/creations; cache_* attrs break it down.
       input_tokens: u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
       output_tokens: u.output_tokens,
       cache_read_input_tokens: u.cache_read_input_tokens ?? 0,
@@ -779,19 +745,11 @@ const otelKind = (kind: GroupedKind): SpanKind =>
     ? SpanKind.CLIENT
     : SpanKind.INTERNAL
 
-const chatLeaf = ({
-  message,
-  history,
-  ctx,
-}: {
-  message: Extract<TranscriptMessage, { type: "assistant" }>
-  history: readonly TranscriptMessage[]
-  ctx: Ctx
-}): Grouped => {
+const chatLeaf = ({ output, ctx }: { output: SourcedBlock<ChatBlock>; ctx: Ctx }): Grouped => {
   const facts = factsFromAssistant(message)
   const time = message[META].timestamp.getTime()
-  const inputMessages = history.map((msg) => transcriptToMessage({ msg, asOutput: false }))
-  const outputMessages = [transcriptToMessage({ msg: message, asOutput: true })]
+  const inputMessages = []
+  const outputMessages = []
 
   return {
     spanName: facts.model ? `chat ${facts.model}` : "chat",
@@ -812,8 +770,8 @@ const toolLeaf = ({
   output,
   ctx,
 }: {
-  input?: SourcedToolBlock
-  output?: SourcedToolBlock
+  input?: SourcedBlock<ToolBlock>
+  output?: SourcedBlock<ToolBlock>
   ctx: Ctx
 }): Grouped => {
   const ref = input ?? output
@@ -863,7 +821,7 @@ const buildLeaves = function* ({
     return { ...g, turnStart: true }
   }
 
-  for (const [idx, msg] of transcript.entries()) {
+  for (const msg of transcript) {
     if (msg.type === "user") {
       turnStart = true
     }
@@ -887,7 +845,7 @@ const buildLeaves = function* ({
     }
 
     if (msg.type === "assistant") {
-      yield tag(chatLeaf({ message: msg, history: transcript.slice(0, idx), ctx }))
+      yield tag(chatLeaf({ output: block, ctx }))
     }
   }
 
