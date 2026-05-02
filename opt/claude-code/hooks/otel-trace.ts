@@ -745,7 +745,15 @@ const otelKind = (kind: GroupedKind): SpanKind =>
     ? SpanKind.CLIENT
     : SpanKind.INTERNAL
 
-const chatLeaf = ({ output, ctx }: { output: SourcedBlock<ChatBlock>; ctx: Ctx }): Grouped => {
+const chatLeaf = ({
+  input,
+  output,
+  ctx,
+}: {
+  input?: SourcedBlock<ChatBlock>
+  output?: SourcedBlock<ChatBlock>
+  ctx: Ctx
+}): Grouped => {
   const facts = factsFromAssistant(message)
   const time = message[META].timestamp.getTime()
   const inputMessages = []
