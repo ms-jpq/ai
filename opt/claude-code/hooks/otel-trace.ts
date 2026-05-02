@@ -950,7 +950,7 @@ const buildLeaves = function* ({
         continue
       }
       const id = extracted.correlationId
-      const sourced: SourcedToolBlock = { msg, block: extracted }
+      const sourced = { msg, block: extracted }
 
       if (extracted.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
         toolCalls.set(id, sourced)
@@ -975,7 +975,7 @@ const buildLeaves = function* ({
   return
 }
 
-const branch = ({
+const buildBranch = ({
   kind,
   attributes,
   children,
@@ -1014,7 +1014,7 @@ const groupAgents = function* ({
   if (hook.hook_event_name === "SubagentStop") {
     const children = entries.toArray()
     if (isNonEmpty(children)) {
-      yield branch({
+      yield buildBranch({
         kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
         attributes: {
           [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
@@ -1036,7 +1036,7 @@ const groupAgents = function* ({
       continue
     }
 
-    yield branch({
+    yield buildBranch({
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       attributes: {
         [ATTR_GEN_AI_AGENT_NAME]: "claude-code",
