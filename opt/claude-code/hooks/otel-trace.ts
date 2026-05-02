@@ -10,12 +10,7 @@ import type {
   BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { Attributes, Context, Tracer } from "@opentelemetry/api"
-import {
-  ROOT_CONTEXT,
-  SpanKind,
-  SpanStatusCode,
-  trace,
-} from "@opentelemetry/api"
+import { ROOT_CONTEXT, SpanKind, SpanStatusCode, trace } from "@opentelemetry/api"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"
 import {
   defaultResource,
@@ -25,10 +20,7 @@ import {
   processDetector,
   resourceFromAttributes,
 } from "@opentelemetry/resources"
-import {
-  BasicTracerProvider,
-  BatchSpanProcessor,
-} from "@opentelemetry/sdk-trace-base"
+import { BasicTracerProvider, BatchSpanProcessor } from "@opentelemetry/sdk-trace-base"
 import {
   ATTR_ERROR_TYPE,
   ATTR_SERVER_ADDRESS,
@@ -105,9 +97,7 @@ type BlockKind =
 
 type GroupedKind = BlockKind | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
 
-type ExtractedBlockType =
-  | typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT
-  | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
+type ExtractedBlockType = typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
 
 // Anthropic extends OTel's text/tool_call/tool_call_response with reasoning, blob, uri, file, document, search_result.
 type ChatPart = Readonly<Record<string, unknown> & { type: string }>
@@ -204,17 +194,11 @@ const measure = (label: string): Disposable => {
   }
 }
 
-const openState = async (
-  hook: HookInput,
-): Promise<AsyncDisposable & { uuid?: string }> => {
-  const key =
-    hook.hook_event_name === "SubagentStop"
-      ? `${hook.session_id}.${hook.agent_id}`
-      : hook.session_id
+const openState = async (hook: HookInput): Promise<AsyncDisposable & { uuid?: string }> => {
+  const key = hook.hook_event_name === "SubagentStop" ? `${hook.session_id}.${hook.agent_id}` : hook.session_id
   const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
 
-  const uuid =
-    (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
+  const uuid = (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
 
   const state = {
     uuid,
@@ -228,9 +212,7 @@ const openState = async (
   return state
 }
 
-const provider = (
-  hook: HookInput,
-): (AsyncDisposable & { provider: BasicTracerProvider }) | undefined => {
+const provider = (hook: HookInput): (AsyncDisposable & { provider: BasicTracerProvider }) | undefined => {
   const [auth, url] = [env["LANGFUSE_AUTH"], env["LANGFUSE_TRACE_URL"]]
   if (!auth || !url) {
     return undefined
@@ -271,9 +253,7 @@ const provider = (
   }
 }
 
-const readJsonL = async function* (
-  path: string,
-): AsyncIteratorObject<TranscriptMessage> {
+const readJsonL = async function* (path: string): AsyncIteratorObject<TranscriptMessage> {
   const rl = createInterface({
     input: createReadStream(path, { encoding: "utf-8" }),
     crlfDelay: Infinity,
@@ -291,9 +271,7 @@ const parseMessages = async function* (
   lastUuid: string | undefined,
 ): AsyncIteratorObject<TranscriptMessage> {
   const isSubAgent = hook.hook_event_name === "SubagentStop"
-  const transcriptPath = isSubAgent
-    ? hook.agent_transcript_path
-    : hook.transcript_path
+  const transcriptPath = isSubAgent ? hook.agent_transcript_path : hook.transcript_path
 
   let found = lastUuid === undefined
   for await (const message of readJsonL(transcriptPath)) {
@@ -317,9 +295,7 @@ const parseMessages = async function* (
   return
 }
 
-const contents = function* (
-  msg: TranscriptMessage,
-): IteratorObject<MessageBlock> {
+const contents = function* (msg: TranscriptMessage): IteratorObject<MessageBlock> {
   const content = msg.message.content
   if (typeof content === "string") {
     yield content
@@ -330,13 +306,7 @@ const contents = function* (
   return
 }
 
-const extractChat = ({
-  side,
-  part,
-}: {
-  side: ExtractedBlock["type"]
-  part: ChatPart
-}) =>
+const extractChat = ({ side, part }: { side: ExtractedBlock["type"]; part: ChatPart }) =>
   ({
     category: "chat",
     type: side,
@@ -384,10 +354,7 @@ const extractToolResult = ({
     ...(error !== undefined ? { error } : {}),
   }) satisfies ExtractedBlock
 
-const documentPart = ({
-  source,
-  ...block
-}: BetaRequestDocumentBlock): ChatPart => {
+const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): ChatPart => {
   const meta = {
     ...(block.title ? { title: block.title } : {}),
     ...(block.context ? { context: block.context } : {}),
@@ -412,11 +379,7 @@ const documentPart = ({
   }
 }
 
-const documentValue = ({
-  source,
-  title,
-  ...block
-}: BetaDocumentBlock | BetaRequestDocumentBlock) => {
+const documentValue = ({ source, title, ...block }: BetaDocumentBlock | BetaRequestDocumentBlock) => {
   const context = "context" in block ? block.context : undefined
   switch (source.type) {
     case "base64":
@@ -464,14 +427,8 @@ const imageValue = ({ source }: { source: BetaImageBlockParam["source"] }) => {
   }
 }
 
-const extractBlock = (
-  role: TranscriptMessage["type"],
-  block: MessageBlock,
-): ExtractedBlock | undefined => {
-  const side =
-    role === "assistant"
-      ? GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
-      : GEN_AI_TOKEN_TYPE_VALUE_INPUT
+const extractBlock = (role: TranscriptMessage["type"], block: MessageBlock): ExtractedBlock | undefined => {
+  const side = role === "assistant" ? GEN_AI_TOKEN_TYPE_VALUE_OUTPUT : GEN_AI_TOKEN_TYPE_VALUE_INPUT
 
   if (typeof block === "string") {
     return extractChat({ side, part: { type: "text", content: block } })
@@ -737,13 +694,7 @@ const normalizeFinishReason = (() => {
   return (raw: string | null | undefined) => map.get(raw ?? "") ?? raw ?? "stop"
 })()
 
-const transcriptToMessage = ({
-  msg,
-  asOutput,
-}: {
-  msg: TranscriptMessage
-  asOutput: boolean
-}) => ({
+const transcriptToMessage = ({ msg, asOutput }: { msg: TranscriptMessage; asOutput: boolean }) => ({
   role: msg.type,
   parts: contents(msg)
     .map((raw) => extractBlock(msg.type, raw))
@@ -767,15 +718,10 @@ const transcriptToMessage = ({
       }
     })
     .toArray(),
-  finish_reason:
-    asOutput && msg.type === "assistant"
-      ? normalizeFinishReason(msg.message.stop_reason)
-      : undefined,
+  finish_reason: asOutput && msg.type === "assistant" ? normalizeFinishReason(msg.message.stop_reason) : undefined,
 })
 
-const factsFromAssistant = (
-  msg: Extract<TranscriptMessage, { type: "assistant" }>,
-): Facts => {
+const factsFromAssistant = (msg: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
   if (msg.message.model === "<synthetic>") {
     return {
       stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
@@ -789,10 +735,7 @@ const factsFromAssistant = (
     stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
     usage: {
       // Total prompt size including cache reads/creations; cache_* attrs break it down.
-      input_tokens:
-        u.input_tokens +
-        (u.cache_read_input_tokens ?? 0) +
-        (u.cache_creation_input_tokens ?? 0),
+      input_tokens: u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
       output_tokens: u.output_tokens,
       cache_read_input_tokens: u.cache_read_input_tokens ?? 0,
       cache_creation_input_tokens: u.cache_creation_input_tokens ?? 0,
@@ -800,19 +743,9 @@ const factsFromAssistant = (
   }
 }
 
-const commonAttrs = ({
-  kind,
-  ctx,
-  facts,
-}: {
-  kind: GroupedKind
-  ctx: Ctx
-  facts?: Facts
-}): Attributes => {
+const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?: Facts }): Attributes => {
   const { model, responseId, stopReasons, usage } = facts ?? {}
-  const isApi =
-    kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
-    kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+  const isApi = kind === GEN_AI_OPERATION_NAME_VALUE_CHAT || kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
 
   return {
     [ATTR_USER_ID]: ctx.userId,
@@ -820,29 +753,22 @@ const commonAttrs = ({
     [ATTR_GEN_AI_OPERATION_NAME]: kind,
     [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
     [ATTR_SERVER_ADDRESS]: isApi ? "api.anthropic.com" : undefined,
-    [ATTR_GEN_AI_OUTPUT_TYPE]:
-      kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-        ? GEN_AI_OUTPUT_TYPE_VALUE_TEXT
-        : undefined,
+    [ATTR_GEN_AI_OUTPUT_TYPE]: kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ? GEN_AI_OUTPUT_TYPE_VALUE_TEXT : undefined,
     [ATTR_GEN_AI_REQUEST_MODEL]: model,
     [ATTR_GEN_AI_RESPONSE_MODEL]: model,
     [ATTR_GEN_AI_RESPONSE_ID]: responseId,
-    [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons?.length
-      ? stopReasons.map(normalizeFinishReason)
-      : undefined,
+    [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons?.length ? stopReasons.map(normalizeFinishReason) : undefined,
     [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: usage?.input_tokens,
     [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: usage?.output_tokens,
     [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: usage?.cache_read_input_tokens,
-    [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
-      usage?.cache_creation_input_tokens,
+    [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]: usage?.cache_creation_input_tokens,
   }
 }
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
 const otelKind = (kind: GroupedKind): SpanKind =>
-  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
-  kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT || kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
     ? SpanKind.CLIENT
     : SpanKind.INTERNAL
 
@@ -857,9 +783,7 @@ const chatLeaf = ({
 }): Grouped => {
   const facts = factsFromAssistant(message)
   const time = message[META].timestamp.getTime()
-  const inputMessages = history.map((msg) =>
-    transcriptToMessage({ msg, asOutput: false }),
-  )
+  const inputMessages = history.map((msg) => transcriptToMessage({ msg, asOutput: false }))
   const outputMessages = [transcriptToMessage({ msg: message, asOutput: true })]
 
   return {
@@ -902,12 +826,8 @@ const toolLeaf = ({
     endTime,
     attributes: {
       ...commonAttrs({ kind, ctx }),
-      [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: input
-        ? JSON.stringify(input.block.value)
-        : undefined,
-      [ATTR_GEN_AI_TOOL_CALL_RESULT]: output
-        ? JSON.stringify(output.block.value)
-        : undefined,
+      [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: input ? JSON.stringify(input.block.value) : undefined,
+      [ATTR_GEN_AI_TOOL_CALL_RESULT]: output ? JSON.stringify(output.block.value) : undefined,
       [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
       [ATTR_GEN_AI_TOOL_TYPE]: block.toolType,
       [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId,
@@ -960,9 +880,7 @@ const buildLeaves = function* ({
     }
 
     if (msg.type === "assistant") {
-      yield tag(
-        chatLeaf({ message: msg, history: transcript.slice(0, idx), ctx }),
-      )
+      yield tag(chatLeaf({ message: msg, history: transcript.slice(0, idx), ctx }))
     }
   }
 
@@ -1046,18 +964,8 @@ const groupAgents = function* ({
   return
 }
 
-const emit = ({
-  tracer,
-  parentCtx,
-  grouped,
-}: {
-  tracer: Tracer
-  parentCtx: Context
-  grouped: Grouped
-}): void => {
-  const attributes = Object.fromEntries(
-    Object.entries(grouped.attributes).filter(([, v]) => v !== undefined),
-  )
+const emit = ({ tracer, parentCtx, grouped }: { tracer: Tracer; parentCtx: Context; grouped: Grouped }): void => {
+  const attributes = Object.fromEntries(Object.entries(grouped.attributes).filter(([, v]) => v !== undefined))
   const span = tracer.startSpan(
     grouped.spanName,
     {
