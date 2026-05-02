@@ -143,7 +143,12 @@ type Grouped = Readonly<{
   spanKind: SpanKind
   startTime: number
   endTime: number
-  attributes: Attributes
+  attributes: Readonly<
+    Attributes & {
+      [ATTR_GEN_AI_INPUT_MESSAGES]?: string
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]?: string
+    }
+  >
   status?: { code: SpanStatusCode }
   children?: readonly Grouped[]
   turnStart?: boolean
