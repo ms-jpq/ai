@@ -384,12 +384,10 @@ const extractToolResult = ({
     ...(error !== undefined ? { error } : {}),
   }) satisfies ExtractedBlock
 
-const documentPart = (
-  block:
-    | (BetaDocumentBlock & { context?: undefined })
-    | BetaRequestDocumentBlock,
-): ChatPart => {
-  const { source } = block
+const documentPart = ({
+  source,
+  ...block
+}: BetaRequestDocumentBlock): ChatPart => {
   const meta = {
     ...(block.title ? { title: block.title } : {}),
     ...(block.context ? { context: block.context } : {}),
@@ -416,11 +414,10 @@ const documentPart = (
 
 const documentValue = ({
   source,
-  context,
   title,
-}:
-  | (BetaDocumentBlock & { context?: undefined })
-  | BetaRequestDocumentBlock) => {
+  ...block
+}: BetaDocumentBlock | BetaRequestDocumentBlock) => {
+  const context = "context" in block ? block.context : undefined
   switch (source.type) {
     case "base64":
     case "text":
@@ -436,14 +433,7 @@ const documentValue = ({
   }
 }
 
-const imagePart = ({
-  source,
-}: {
-  source:
-    | { type: "base64"; media_type: string }
-    | { type: "url"; url: string }
-    | { type: "file"; file_id: string }
-}): ChatPart => {
+const imagePart = ({ source }: BetaImageBlockParam): ChatPart => {
   switch (source.type) {
     case "base64":
       return {
