@@ -199,13 +199,12 @@ const measure = (label: string): Disposable => {
 const openState = async (hook: HookInput): Promise<AsyncDisposable & { uuid?: string }> => {
   const key = hook.hook_event_name === "SubagentStop" ? `${hook.session_id}.${hook.agent_id}` : hook.session_id
   const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
+  const tmp = `${path}.${randomUUID()}.tmp`
 
   const uuid = (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
-
   const state = {
     uuid,
     async [Symbol.asyncDispose]() {
-      const tmp = `${path}.${randomUUID()}.tmp`
       await mkdir(dirname(path), { recursive: true })
       await writeFile(tmp, state.uuid ?? "", "utf-8")
       await rename(tmp, path)
@@ -745,30 +744,46 @@ const otelKind = (kind: GroupedKind): SpanKind =>
     ? SpanKind.CLIENT
     : SpanKind.INTERNAL
 
+const toMessages = (sourced: NonEmpty<SourcedBlock<ChatBlock>>) =>
+  Map.groupBy(sourced, (s) => s.msg)
+    .entries()
+    .map(([msg, items]) => ({
+      role: msg.type,
+      parts: items.map((s) => s.block.part),
+    }))
+    .toArray()
+
 const chatLeaf = ({
   input,
   output,
   ctx,
 }: {
-  input?: SourcedBlock<ChatBlock>
-  output?: SourcedBlock<ChatBlock>
+  input?: NonEmpty<SourcedBlock<ChatBlock>>
+  output?: NonEmpty<SourcedBlock<ChatBlock>>
   ctx: Ctx
 }): Grouped => {
-  const facts = factsFromAssistant(message)
-  const time = message[META].timestamp.getTime()
-  const inputMessages = []
-  const outputMessages = []
+  const ref = output ?? input
+  ok(ref, "chatLeaf needs at least one of input/output")
+
+  const assistantMsg = output?.[0].msg
+  const facts = assistantMsg?.type === "assistant" ? factsFromAssistant(assistantMsg) : undefined
+
+  const inputMessages = input ? toMessages(input) : []
+  const outputMessages = output ? toMessages(output) : []
+
+  const first = (input ?? ref)[0]
+  const last = ref.at(-1)!
 
   return {
-    spanName: facts.model ? `chat ${facts.model}` : "chat",
+    spanName: facts?.model ? `chat ${facts.model}` : "chat",
     spanKind: SpanKind.CLIENT,
-    startTime: time,
-    endTime: time,
+    startTime: first.msg[META].timestamp.getTime(),
+    endTime: last.msg[META].timestamp.getTime(),
     attributes: {
       ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
       [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(inputMessages),
       [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputMessages),
-      [metadata("transcript_jq")]: message[META].debugExpr,
+      [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
   }
 }
@@ -819,7 +834,8 @@ const buildLeaves = function* ({
   transcript: readonly TranscriptMessage[]
   ctx: Ctx
 }): IteratorObject<Grouped> {
-  const toolCalls = new Map<string, SourcedToolBlock>()
+  const toolCalls = new Map<string, SourcedBlock<ToolBlock>>()
+  const chatInputs: SourcedBlock<ChatBlock>[] = []
   let turnStart = false
   const tag = (g: Grouped): Grouped => {
     if (!turnStart) {
@@ -834,26 +850,43 @@ const buildLeaves = function* ({
       turnStart = true
     }
 
+    const chatOutputs: SourcedBlock<ChatBlock>[] = []
+
     for (const raw of contents(msg)) {
       const block = extractBlock(msg.type, raw)
-      if (block?.category !== "tool" || block.correlationId === undefined) {
+      if (!block) {
         continue
       }
 
-      const id = block.correlationId
-      const output = { msg, block: block }
-      if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
-        toolCalls.set(id, output)
-        continue
+      if (block.category === "tool") {
+        if (block.correlationId === undefined) {
+          continue
+        }
+        const sourced = { msg, block }
+        if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+          toolCalls.set(block.correlationId, sourced)
+          continue
+        }
+        const input = toolCalls.get(block.correlationId)
+        toolCalls.delete(block.correlationId)
+        yield tag(toolLeaf({ input, output: sourced, ctx }))
+      } else {
+        const sourced = { msg, block }
+        if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+          chatInputs.push(sourced)
+        } else {
+          chatOutputs.push(sourced)
+        }
       }
-
-      const input = toolCalls.get(id)
-      toolCalls.delete(id)
-      yield tag(toolLeaf({ input, output, ctx }))
     }
 
     if (msg.type === "assistant") {
-      yield tag(chatLeaf({ output: block, ctx }))
+      const drained = chatInputs.splice(0)
+      const input = isNonEmpty(drained) ? drained : undefined
+      const output = isNonEmpty(chatOutputs) ? chatOutputs : undefined
+      if (input || output) {
+        yield tag(chatLeaf({ input, output, ctx }))
+      }
     }
   }
 
