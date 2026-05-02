@@ -783,12 +783,12 @@ const ioAttr = (
 const leafIo = (blocks: Bundle): Attributes => {
   const [first, ...rest] = blocks
   if (first.block.category !== "tool") {
-    const extracted = [first.block, ...rest.map(({ block }) => block)] as const
+    const extracted = [first.block, ...rest.map((s) => s.block)] as const
     return ioAttr(first.msg, extracted)
   }
 
-  const input = blocks.find(({ block }) => block.type === "input")
-  const output = blocks.find(({ block }) => block.type === "output")
+  const input = blocks.find((s) => s.block.type === "input")
+  const output = blocks.findLast((s) => s.block.type === "output")
   return {
     ...(input ? ioAttr(input.msg, [input.block]) : {}),
     ...(output ? ioAttr(output.msg, [output.block]) : {}),
@@ -796,20 +796,24 @@ const leafIo = (blocks: Bundle): Attributes => {
 }
 
 const branchIo = (blocks: readonly SourcedBlock[]): Attributes => {
-  const messageBlocks = (msg: TranscriptMessage): readonly ExtractedBlock[] =>
-    blocks
-      .filter((b) => b.msg === msg && b.block.category !== "tool")
-      .map(({ block }) => block)
+  const messageBlocks = (msg: TranscriptMessage | undefined) =>
+    msg
+      ? blocks
+          .values()
+          .filter((b) => b.msg === msg && b.block.category !== "tool")
+          .map(({ block }) => block)
+          .toArray()
+      : []
 
   const output = blocks.findLast(
     ({ block }) => block.type === "output" && block.category !== "tool",
   )
-  const outputBlocks = output ? messageBlocks(output.msg) : []
+  const outputBlocks = messageBlocks(output?.msg)
 
   const input = blocks.find(
     ({ block }) => block.type === "input" && block.category !== "tool",
   )
-  const inputBlocks = input ? messageBlocks(input.msg) : []
+  const inputBlocks = messageBlocks(input?.msg)
 
   return {
     ...(input && isNonEmpty(inputBlocks) ? ioAttr(input.msg, inputBlocks) : {}),
