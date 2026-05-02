@@ -726,24 +726,6 @@ const normalizeFinishReason = (() => {
   return (raw: string | null | undefined) => map.get(raw ?? "") ?? raw ?? "stop"
 })()
 
-const wrapMessage = (
-  msg: TranscriptMessage,
-  blocks: NonEmpty<ExtractedBlock>,
-) => [
-  {
-    role: msg.type,
-    parts: blocks.map(messagePart),
-    ...(blocks[0].type === "output"
-      ? {
-          finish_reason:
-            msg.type === "assistant"
-              ? normalizeFinishReason(msg.message.stop_reason)
-              : "stop",
-        }
-      : {}),
-  },
-]
-
 const ioAttr = (
   msg: TranscriptMessage,
   blocks: NonEmpty<ExtractedBlock>,
@@ -758,7 +740,19 @@ const ioAttr = (
     : isOutput
       ? ATTR_GEN_AI_OUTPUT_MESSAGES
       : ATTR_GEN_AI_INPUT_MESSAGES
-  const value = isTool ? first.value : wrapMessage(msg, blocks)
+  const value = isTool
+    ? first.value
+    : [
+        {
+          role: msg.type,
+          parts: blocks.map(messagePart),
+          ...(msg.type === "assistant"
+            ? {
+                finish_reason: normalizeFinishReason(msg.message.stop_reason),
+              }
+            : {}),
+        },
+      ]
   return { [key]: JSON.stringify(value) }
 }
 
