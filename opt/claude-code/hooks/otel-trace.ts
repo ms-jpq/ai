@@ -77,7 +77,6 @@ import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
 type NonEmpty<T> = readonly [T, ...T[]]
-type NonNull<T> = { [K in keyof T]-?: NonNullable<T[K]> }
 
 const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0
 const isNonNull = <T>(v: T): v is NonNullable<T> => v != null
@@ -960,18 +959,15 @@ const leaf = ({
       : undefined
 
   const isOperation = tool !== undefined || startMsg.type === "assistant"
-  const kind: BlockKind = tool?.kind ?? GEN_AI_OPERATION_NAME_VALUE_CHAT
-  const isChat = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-  const model = isChat
-    ? bundle
-        .values()
-        .map((s) => s.msg)
-        .filter((msg) => msg.type === "assistant")
-        .map((msg) => msg.message.model)
-        .filter((m) => m !== "<synthetic>")
-        .toArray()
-        .at(-1)
-    : undefined
+  const kind = tool?.kind ?? GEN_AI_OPERATION_NAME_VALUE_CHAT
+  const model = bundle
+    .values()
+    .map((s) => s.msg)
+    .filter((msg) => msg.type === "assistant")
+    .map((msg) => msg.message.model)
+    .filter((m) => m !== "<synthetic>")
+    .toArray()
+    .at(-1)
   const times = bundle.map(({ msg }) => msg[META].timestamp.getTime())
 
   const spanName = tool?.block.toolName
