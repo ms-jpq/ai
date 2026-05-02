@@ -130,7 +130,6 @@ type Bundle = NonEmpty<SourcedBlock>
 
 type Grouped = Readonly<{
   blocks: readonly SourcedBlock[]
-  kind: GroupedKind
   spanName: string
   spanKind: SpanKind
   startTime: number
@@ -687,31 +686,11 @@ const extractContent = function* (
   return
 }
 
-const messagePart = (block: ExtractedBlock) => {
-  if (block.category === "tool") {
-    const id = block.correlationId
-    if (block.type === "input") {
-      return {
-        type: "tool_call",
-        ...(id !== undefined ? { id } : {}),
-        ...(block.toolName ? { name: block.toolName } : {}),
-        arguments: block.value,
-      }
-    }
-    return {
-      type: "tool_call_response",
-      ...(id !== undefined ? { id } : {}),
-      result: block.value,
-    }
-  }
-  return {
-    type: block.thinking ? "reasoning" : "text",
-    content:
-      typeof block.value === "string"
-        ? block.value
-        : JSON.stringify(block.value),
-  }
-}
+const messagePart = (block: ExtractedBlock) => ({
+  type: block.category === "chat" && block.thinking ? "reasoning" : "text",
+  content:
+    typeof block.value === "string" ? block.value : JSON.stringify(block.value),
+})
 
 const normalizeFinishReason = (() => {
   const map = new Map<string, string>([
@@ -757,10 +736,9 @@ const ioAttr = (
 }
 
 const leafIo = (blocks: Bundle): Attributes => {
-  const [first, ...rest] = blocks
+  const [first] = blocks
   if (first.block.category !== "tool") {
-    const extracted = [first.block, ...rest.map((s) => s.block)] as const
-    return ioAttr(first.msg, extracted)
+    return ioAttr(first.msg, [first.block])
   }
 
   const input = blocks.find((s) => s.block.type === "input")
@@ -970,7 +948,6 @@ const leaf = ({
       : startMsg.type
 
   return {
-    kind,
     spanName,
     spanKind: isOperation ? otelKind(kind) : SpanKind.INTERNAL,
     startTime: Math.min(...times),
@@ -1041,7 +1018,6 @@ const branch = ({
   const target = typeof agentName === "string" ? agentName : undefined
 
   return {
-    kind,
     spanName: [kind, target].filter((n) => n).join(" "),
     spanKind: otelKind(kind),
     startTime: Math.min(...children.map((c) => c.startTime)),

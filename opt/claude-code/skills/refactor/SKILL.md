@@ -6,9 +6,8 @@ description: Iterative code refactor. Architecture and control flow over surface
 
 Each pass: audit, propose, apply, audit again. Stop when the user signs off, or when further iteration is churn.
 
-- Propose 3–5 items per audit, ranked by payoff.
-- Each item: one-paragraph description, file:line citation, sketch of the diff. Tag as **clear win**, **judgment call**, or **style**.
-- Don't auto-apply. Wait for an explicit subset.
+- Propose 3–5 items per audit, ranked by payoff. Each: one-paragraph description, file:line citation, sketch of the diff, tagged **clear win**, **judgment call**, or **style**.
+- Don't auto-apply. Wait for an explicit subset. The `auto` argument overrides this — apply the highest-payoff item each pass, stop when the next item is style-only.
 - For substantial structural changes, enter plan mode first, write a plan file, get explicit approval, then apply.
 - After applying, re-audit. New patterns become visible after the obvious ones are gone.
 
@@ -16,10 +15,9 @@ Each pass: audit, propose, apply, audit again. Stop when the user signs off, or 
 
 ## 1. Pipeline producers, thin consumers
 
-Each stage takes the previous stage's output, transforms it, and passes it on. Effects only at the final stage. The producer computes everything the consumer needs; the consumer reads.
+Each stage takes the previous stage's output, transforms it, and passes it on. Effects only at the final stage, which is a pure walk over fully-prepared data. The producer computes everything the consumer needs; the consumer reads.
 
 - A stage that aggregates + renders + traverses + emits is doing four things; pull three of them out.
-- The terminal stage should be a pure walk over fully-prepared data. If the consumer has to compute anything non-trivial, the producer didn't do its job.
 - Aggregates the consumer would otherwise compute by re-walking → compute once at construction, attach to the node.
 - Predicates read from contracts the producer already established. If the producer set a flag, read the flag — don't re-derive from raw inputs.
 
@@ -63,7 +61,3 @@ Don't propose:
 - Renames where the existing name is fine.
 - Pure style swaps (`match` over `switch`, `??` over `||`) unless invited.
 - Performance micro-optimization absent a measured problem.
-
-# Args
-
-- `auto` — skip the propose-and-wait step. Apply the highest-payoff item each pass. Stop when the next item is style-only.
