@@ -892,56 +892,60 @@ const commonAttrs = ({
   ctx: Ctx
   isOperation: boolean
   facts: AggregateFacts
-}): Attributes => ({
-  [ATTR_USER_ID]: ctx.userId,
-  [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
-  ...(isOperation
-    ? {
-        [ATTR_GEN_AI_OPERATION_NAME]: kind,
-        [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
-      }
-    : {}),
-  ...(isOperation &&
-  (kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
-    kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL)
-    ? { [ATTR_SERVER_ADDRESS]: "api.anthropic.com" }
-    : {}),
-  ...(isOperation && kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
-    ? { [ATTR_GEN_AI_OUTPUT_TYPE]: GEN_AI_OUTPUT_TYPE_VALUE_TEXT }
-    : {}),
-  ...(facts.model
-    ? {
-        [ATTR_GEN_AI_REQUEST_MODEL]: facts.model,
-        [ATTR_GEN_AI_RESPONSE_MODEL]: facts.model,
-      }
-    : {}),
-  ...(facts.responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: facts.responseId } : {}),
-  ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.stopReasons.length
-    ? {
-        [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons.map(
-          normalizeFinishReason,
-        ),
-      }
-    : {}),
-  ...(facts.input_tokens
-    ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: facts.input_tokens }
-    : {}),
-  ...(facts.output_tokens
-    ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: facts.output_tokens }
-    : {}),
-  ...(facts.cache_read_input_tokens
-    ? {
-        [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]:
-          facts.cache_read_input_tokens,
-      }
-    : {}),
-  ...(facts.cache_creation_input_tokens
-    ? {
-        [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
-          facts.cache_creation_input_tokens,
-      }
-    : {}),
-})
+}): Attributes => {
+  return {
+    [ATTR_USER_ID]: ctx.userId,
+    [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
+    ...(isOperation
+      ? {
+          [ATTR_GEN_AI_OPERATION_NAME]: kind,
+          [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
+        }
+      : {}),
+    ...(isOperation &&
+    (kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
+      kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL)
+      ? { [ATTR_SERVER_ADDRESS]: "api.anthropic.com" }
+      : {}),
+    ...(isOperation && kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
+      ? { [ATTR_GEN_AI_OUTPUT_TYPE]: GEN_AI_OUTPUT_TYPE_VALUE_TEXT }
+      : {}),
+    ...(facts.model
+      ? {
+          [ATTR_GEN_AI_REQUEST_MODEL]: facts.model,
+          [ATTR_GEN_AI_RESPONSE_MODEL]: facts.model,
+        }
+      : {}),
+    ...(facts.responseId
+      ? { [ATTR_GEN_AI_RESPONSE_ID]: facts.responseId }
+      : {}),
+    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.stopReasons.length
+      ? {
+          [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons.map(
+            normalizeFinishReason,
+          ),
+        }
+      : {}),
+    ...(facts.input_tokens
+      ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: facts.input_tokens }
+      : {}),
+    ...(facts.output_tokens
+      ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: facts.output_tokens }
+      : {}),
+    ...(facts.cache_read_input_tokens
+      ? {
+          [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]:
+            facts.cache_read_input_tokens,
+        }
+      : {}),
+    ...(facts.cache_creation_input_tokens
+      ? {
+          [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
+            facts.cache_creation_input_tokens,
+        }
+      : {}),
+  }
+}
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
