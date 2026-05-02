@@ -953,30 +953,32 @@ const commonAttrs = ({
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
 const leaf = ({
-  blocks,
+  bundle,
   ctx,
   orphaned,
 }: {
-  blocks: Bundle
+  bundle: Bundle
   ctx: Ctx
   orphaned?: "tool_use" | "tool_result"
 }): Grouped => {
-  const [{ msg: startMsg, block: firstBlock }] = blocks
+  const [{ msg: startMsg, block: firstBlock }] = bundle
   const isToolBundle = firstBlock.category === "tool"
-  const kind: BlockKind = isToolBundle
-    ? firstBlock.kind
-    : GEN_AI_OPERATION_NAME_VALUE_CHAT
+  const kind = (
+    isToolBundle ? firstBlock.kind : GEN_AI_OPERATION_NAME_VALUE_CHAT
+  ) satisfies BlockKind
+
   const isOperation = isToolBundle || startMsg.type === "assistant"
   const includeUsage = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
 
   const toolBlock = isToolBundle
-    ? blocks
+    ? bundle
         .values()
         .map(({ block }) => block)
         .find((b) => b.category === "tool")
     : undefined
+
   const toolError = isToolBundle
-    ? blocks
+    ? bundle
         .values()
         .map(({ block }) =>
           block.category === "tool" && block.error ? block.error : undefined,
@@ -984,8 +986,8 @@ const leaf = ({
         .find((e) => e)
     : undefined
 
-  const times = blocks.map(({ msg }) => msg[META].timestamp.getTime())
-  const facts = aggregateFacts({ blocks, includeUsage })
+  const times = bundle.map(({ msg }) => msg[META].timestamp.getTime())
+  const facts = aggregateFacts({ blocks: bundle, includeUsage })
 
   const spanName = toolBlock?.toolName
     ? `execute_tool ${toolBlock.toolName}`
@@ -1001,9 +1003,9 @@ const leaf = ({
     endTime: Math.max(...times),
     attributes: {
       ...commonAttrs({ kind, ctx, isOperation, facts }),
-      ...leafIo(blocks),
+      ...leafIo(bundle),
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
-      [metadata("block_types")]: blocks.map(({ block }) => block[META].block),
+      [metadata("block_types")]: bundle.map(({ block }) => block[META].block),
       ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
       ...(toolBlock?.toolName
         ? { [ATTR_GEN_AI_TOOL_NAME]: toolBlock.toolName }
@@ -1017,7 +1019,7 @@ const leaf = ({
       ...(toolError ? { [ATTR_ERROR_TYPE]: toolError } : {}),
     },
     ...(toolError ? { status: { code: SpanStatusCode.ERROR } } : {}),
-    blocks,
+    blocks: bundle,
   }
 }
 
@@ -1032,7 +1034,7 @@ const correlateToolCalls = function* (
       sourced.block.category !== "tool" ||
       sourced.block.correlationId === undefined
     ) {
-      yield leaf({ blocks: [sourced], ctx })
+      yield leaf({ bundle: [sourced], ctx })
       continue
     }
 
@@ -1044,15 +1046,15 @@ const correlateToolCalls = function* (
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield leaf({ blocks: [sourced], ctx, orphaned: "tool_result" })
+      yield leaf({ bundle: [sourced], ctx, orphaned: "tool_result" })
       continue
     }
     acc.delete(id)
-    yield leaf({ blocks: [mate, sourced], ctx })
+    yield leaf({ bundle: [mate, sourced], ctx })
   }
 
   for (const entry of acc.values()) {
-    yield leaf({ blocks: [entry], ctx, orphaned: "tool_use" })
+    yield leaf({ bundle: [entry], ctx, orphaned: "tool_use" })
   }
 
   return
