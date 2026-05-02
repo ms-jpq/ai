@@ -5,6 +5,7 @@ import type {
   BetaContentBlock,
   BetaContentBlockParam,
   BetaDocumentBlock,
+  BetaImageBlockParam,
   BetaMessageParam,
   BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
@@ -191,24 +192,14 @@ const chunkBy = function* <T>({
   return
 }
 
-const log = ({
-  level,
-  msg,
-}: {
-  level: "debug" | "info" | "error"
-  msg: string
-}): void => {
-  console.error(`[${level}] ${msg}`)
-}
-
 const measure = (label: string): Disposable => {
   const procT0 = performance.now()
-  log({ level: "debug", msg: `${label} started` })
+  console.error(`[debug] ${label} started`)
 
   return {
     [Symbol.dispose]() {
       const elapsed = ((performance.now() - procT0) / 1000).toFixed(2)
-      log({ level: "info", msg: `${label} completed in ${elapsed}s` })
+      console.error(`[info] ${label} completed in ${elapsed}s`)
     },
   }
 }
@@ -415,14 +406,7 @@ const documentValue = ({
   }
 }
 
-const imageValue = ({
-  source,
-}: {
-  source:
-    | { type: "base64"; media_type: string }
-    | { type: "url"; url: string }
-    | { type: "file"; file_id: string }
-}) => {
+const imageValue = ({ source }: { source: BetaImageBlockParam["source"] }) => {
   switch (source.type) {
     case "base64":
       return { media_type: source.media_type }
@@ -752,39 +736,6 @@ const extractBlock = (
   }
 }
 
-const blockToPart = (block: ExtractedBlock): ChatPart => {
-  if (block.category === "chat") {
-    return block.part
-  }
-
-  if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
-    return {
-      type: "tool_call",
-      id: block.correlationId,
-      name: block.toolName,
-      arguments: block.value,
-    }
-  }
-
-  return {
-    type: "tool_call_response",
-    id: block.correlationId,
-    response: block.value,
-  }
-}
-
-const messageParts = function* (
-  msg: TranscriptMessage,
-): IteratorObject<ChatPart> {
-  for (const raw of contents(msg)) {
-    const extracted = extractBlock(msg.type, raw)
-    if (extracted) {
-      yield blockToPart(extracted)
-    }
-  }
-  return
-}
-
 const normalizeFinishReason = (() => {
   const map = new Map<string, string>([
     ["end_turn", "stop"],
@@ -804,7 +755,28 @@ const transcriptToMessage = ({
   asOutput: boolean
 }) => ({
   role: msg.type,
-  parts: messageParts(msg).toArray(),
+  parts: contents(msg)
+    .map((raw) => extractBlock(msg.type, raw))
+    .filter((b) => b !== undefined)
+    .map((block): ChatPart => {
+      if (block.category === "chat") {
+        return block.part
+      }
+      if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+        return {
+          type: "tool_call",
+          id: block.correlationId,
+          name: block.toolName,
+          arguments: block.value,
+        }
+      }
+      return {
+        type: "tool_call_response",
+        id: block.correlationId,
+        response: block.value,
+      }
+    })
+    .toArray(),
   finish_reason:
     asOutput && msg.type === "assistant"
       ? normalizeFinishReason(msg.message.stop_reason)
