@@ -729,10 +729,10 @@ const extractBlock = (
 const normalizeFinishReason = (() => {
   const map = new Map<string, string>([
     ["end_turn", "stop"],
-    ["stop_sequence", "stop"],
     ["max_tokens", "length"],
-    ["tool_use", "tool_calls"],
     ["refusal", "content_filter"],
+    ["stop_sequence", "stop"],
+    ["tool_use", "tool_calls"],
   ])
   return (raw: string | null | undefined) => map.get(raw ?? "") ?? raw ?? "stop"
 })()
@@ -813,7 +813,6 @@ const commonAttrs = ({
   const isApi =
     kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
     kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
-  const hasOutputType = kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
 
   return {
     [ATTR_USER_ID]: ctx.userId,
@@ -821,9 +820,10 @@ const commonAttrs = ({
     [ATTR_GEN_AI_OPERATION_NAME]: kind,
     [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
     [ATTR_SERVER_ADDRESS]: isApi ? "api.anthropic.com" : undefined,
-    [ATTR_GEN_AI_OUTPUT_TYPE]: hasOutputType
-      ? GEN_AI_OUTPUT_TYPE_VALUE_TEXT
-      : undefined,
+    [ATTR_GEN_AI_OUTPUT_TYPE]:
+      kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+        ? GEN_AI_OUTPUT_TYPE_VALUE_TEXT
+        : undefined,
     [ATTR_GEN_AI_REQUEST_MODEL]: model,
     [ATTR_GEN_AI_RESPONSE_MODEL]: model,
     [ATTR_GEN_AI_RESPONSE_ID]: responseId,
