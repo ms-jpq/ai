@@ -780,22 +780,22 @@ const leafIo = (blocks: Bundle): Attributes => {
   }
 }
 
-const branchIo = (blocks: readonly SourcedBlock[]): Attributes => {
+const branchIo = (sourceBlocks: readonly SourcedBlock[]): Attributes => {
   const messageBlocks = (msg: TranscriptMessage | undefined) =>
     msg
-      ? blocks
+      ? sourceBlocks
           .values()
           .filter((b) => b.msg === msg && b.block.category !== "tool")
           .map(({ block }) => block)
           .toArray()
       : []
 
-  const output = blocks.findLast(
+  const output = sourceBlocks.findLast(
     ({ block }) => block.type === "output" && block.category !== "tool",
   )
   const outputBlocks = messageBlocks(output?.msg)
 
-  const input = blocks.find(
+  const input = sourceBlocks.find(
     ({ block }) => block.type === "input" && block.category !== "tool",
   )
   const inputBlocks = messageBlocks(input?.msg)
@@ -880,13 +880,17 @@ const commonAttrs = ({
   kind,
   ctx,
   isOperation,
-  facts,
+  blocks,
 }: {
   kind: GroupedKind
   ctx: Ctx
   isOperation: boolean
-  facts: AggregateFacts
+  blocks: readonly SourcedBlock[]
 }): Attributes => {
+  const facts = aggregateFacts({
+    blocks,
+    includeUsage: isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT,
+  })
   return {
     [ATTR_USER_ID]: ctx.userId,
     [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
@@ -990,16 +994,16 @@ const leaf = ({
 
   const isOperation = tool !== undefined || startMsg.type === "assistant"
   const kind: BlockKind = tool?.kind ?? GEN_AI_OPERATION_NAME_VALUE_CHAT
-  const facts = aggregateFacts({
-    blocks: bundle,
-    includeUsage: isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT,
-  })
+  const isChat = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+  const model = isChat
+    ? aggregateFacts({ blocks: bundle, includeUsage: false }).model
+    : undefined
   const times = bundle.map(({ msg }) => msg[META].timestamp.getTime())
 
   const spanName = tool?.block.toolName
     ? `execute_tool ${tool.block.toolName}`
-    : isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.model
-      ? `chat ${facts.model}`
+    : model
+      ? `chat ${model}`
       : startMsg.type
 
   return {
@@ -1009,7 +1013,7 @@ const leaf = ({
     startTime: Math.min(...times),
     endTime: Math.max(...times),
     attributes: {
-      ...commonAttrs({ kind, ctx, isOperation, facts }),
+      ...commonAttrs({ kind, ctx, isOperation, blocks: bundle }),
       ...leafIo(bundle),
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
       [metadata("block_types")]: bundle.map(({ block }) => block[META].block),
@@ -1070,7 +1074,6 @@ const branch = ({
   ctx: Ctx
 }): Grouped => {
   const blocks = children.flatMap((c) => c.blocks)
-  const facts = aggregateFacts({ blocks, includeUsage: false })
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
 
@@ -1081,7 +1084,7 @@ const branch = ({
     startTime: Math.min(...children.map((c) => c.startTime)),
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
-      ...commonAttrs({ kind, ctx, isOperation: true, facts }),
+      ...commonAttrs({ kind, ctx, isOperation: true, blocks }),
       ...branchIo(blocks),
       ...attributes,
     },
