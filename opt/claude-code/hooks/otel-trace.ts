@@ -463,25 +463,21 @@ const extractBlock = (
         toolName: `mcp__${block.server_name}__${block.name}`,
         toolType: "extension",
         correlationId: block.id,
-        value: {
-          name: block.name,
-          input: block.input,
-          server_name: block.server_name,
-        },
+        value: block.input,
       })
     case "server_tool_use":
       return extractToolUse({
         toolName: block.name,
         toolType: "extension",
         correlationId: block.id,
-        value: { name: block.name, input: block.input },
+        value: block.input,
       })
     case "tool_use":
       return extractToolUse({
         toolName: block.name,
         toolType: "function",
         correlationId: block.id,
-        value: { name: block.name, input: block.input },
+        value: block.input,
       })
 
     case "tool_result":
@@ -700,15 +696,11 @@ const messagePart = (block: ExtractedBlock) => {
   if (block.category === "tool") {
     const id = block.correlationId
     if (block.type === "input") {
-      const args =
-        block.value && typeof block.value === "object" && "input" in block.value
-          ? (block.value as { input: unknown }).input
-          : block.value
       return {
         type: "tool_call",
         ...(id !== undefined ? { id } : {}),
         ...(block.toolName ? { name: block.toolName } : {}),
-        arguments: args,
+        arguments: block.value,
       }
     }
     return {
@@ -758,9 +750,10 @@ const wrapMessage = (
 ]
 
 const otelKind = (kind: GroupedKind): SpanKind =>
-  kind === GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
-    ? SpanKind.INTERNAL
-    : SpanKind.CLIENT
+  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
+  kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+    ? SpanKind.CLIENT
+    : SpanKind.INTERNAL
 
 const ioAttr = (
   msg: TranscriptMessage,
@@ -910,10 +903,12 @@ const commonAttrs = ({
         [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
       }
     : {}),
-  ...(isOperation && kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
+  ...(isOperation &&
+  (kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
+    kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL)
     ? { [ATTR_SERVER_ADDRESS]: "api.anthropic.com" }
     : {}),
-  ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+  ...(isOperation && kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
     ? { [ATTR_GEN_AI_OUTPUT_TYPE]: GEN_AI_OUTPUT_TYPE_VALUE_TEXT }
     : {}),
   ...(facts.model
@@ -962,6 +957,7 @@ const leaf = ({
   orphaned?: "tool_use" | "tool_result"
 }): Grouped => {
   const [{ msg: startMsg, block: firstBlock }] = bundle
+  const blocks = bundle.map((s) => s.block)
   const isToolBundle = firstBlock.category === "tool"
   const kind = (
     isToolBundle ? firstBlock.kind : GEN_AI_OPERATION_NAME_VALUE_CHAT
@@ -971,18 +967,14 @@ const leaf = ({
   const includeUsage = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
 
   const toolBlock = isToolBundle
-    ? bundle
-        .values()
-        .map(({ block }) => block)
-        .find((b) => b.category === "tool")
+    ? blocks.find((b) => b.category === "tool")
     : undefined
 
   const toolError = isToolBundle
-    ? bundle
+    ? blocks
         .values()
-        .map(({ block }) =>
-          block.category === "tool" && block.error ? block.error : undefined,
-        )
+        .filter((block) => block.category === "tool")
+        .map((block) => block.error)
         .find((e) => e)
     : undefined
 
