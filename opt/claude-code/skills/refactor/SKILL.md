@@ -60,11 +60,10 @@ When the same _shape_ repeats with varying _values_, extract a helper. Don't ext
 
 - Object-param style at 3+ arguments. Positional at 1 or 2.
 - When `find` / `filter` results feed further accesses, write a typed predicate so the result narrows.
-- Re-derivation is the worst kind of unnamed access. If a value already lives somewhere, read it.
 
-## 8. Skip surface nits
+# Out of scope
 
-This skill does not propose:
+Don't propose:
 
 - Whitespace, semicolon, quote-style, import-order — formatter's job.
 - Renames where the existing name is fine.
