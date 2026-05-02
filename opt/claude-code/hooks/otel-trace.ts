@@ -840,50 +840,31 @@ const commonAttrs = ({
   facts?: Facts
 }): Attributes => {
   const { model, responseId, stopReasons, usage } = facts ?? {}
+  const isApi =
+    kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
+    kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+  const hasOutputType = kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
+
   return {
     [ATTR_USER_ID]: ctx.userId,
     [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
     [ATTR_GEN_AI_OPERATION_NAME]: kind,
     [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
-    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
-    kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
-      ? { [ATTR_SERVER_ADDRESS]: "api.anthropic.com" }
-      : {}),
-    ...(kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
-      ? { [ATTR_GEN_AI_OUTPUT_TYPE]: GEN_AI_OUTPUT_TYPE_VALUE_TEXT }
-      : {}),
-    ...(model
-      ? {
-          [ATTR_GEN_AI_REQUEST_MODEL]: model,
-          [ATTR_GEN_AI_RESPONSE_MODEL]: model,
-        }
-      : {}),
-    ...(responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: responseId } : {}),
-    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && stopReasons?.length
-      ? {
-          [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons.map(
-            normalizeFinishReason,
-          ),
-        }
-      : {}),
-    ...(usage?.input_tokens
-      ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: usage.input_tokens }
-      : {}),
-    ...(usage?.output_tokens
-      ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: usage.output_tokens }
-      : {}),
-    ...(usage?.cache_read_input_tokens
-      ? {
-          [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]:
-            usage.cache_read_input_tokens,
-        }
-      : {}),
-    ...(usage?.cache_creation_input_tokens
-      ? {
-          [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
-            usage.cache_creation_input_tokens,
-        }
-      : {}),
+    [ATTR_SERVER_ADDRESS]: isApi ? "api.anthropic.com" : undefined,
+    [ATTR_GEN_AI_OUTPUT_TYPE]: hasOutputType
+      ? GEN_AI_OUTPUT_TYPE_VALUE_TEXT
+      : undefined,
+    [ATTR_GEN_AI_REQUEST_MODEL]: model,
+    [ATTR_GEN_AI_RESPONSE_MODEL]: model,
+    [ATTR_GEN_AI_RESPONSE_ID]: responseId,
+    [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons?.length
+      ? stopReasons.map(normalizeFinishReason)
+      : undefined,
+    [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: usage?.input_tokens,
+    [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: usage?.output_tokens,
+    [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: usage?.cache_read_input_tokens,
+    [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
+      usage?.cache_creation_input_tokens,
   }
 }
 
@@ -896,12 +877,10 @@ const toolAttrs = ({
   block: ToolBlock
   error: string | undefined
 }): Attributes => ({
-  ...(block.toolName ? { [ATTR_GEN_AI_TOOL_NAME]: block.toolName } : {}),
-  ...(block.toolType ? { [ATTR_GEN_AI_TOOL_TYPE]: block.toolType } : {}),
-  ...(block.correlationId
-    ? { [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId }
-    : {}),
-  ...(error ? { [ATTR_ERROR_TYPE]: error } : {}),
+  [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
+  [ATTR_GEN_AI_TOOL_TYPE]: block.toolType,
+  [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId,
+  [ATTR_ERROR_TYPE]: error,
 })
 
 const otelKind = (kind: GroupedKind): SpanKind =>
@@ -914,12 +893,10 @@ const chatLeaf = ({
   message,
   history,
   ctx,
-  turnStart,
 }: {
   message: Extract<TranscriptMessage, { type: "assistant" }>
   history: readonly TranscriptMessage[]
   ctx: Ctx
-  turnStart: boolean
 }): Grouped => {
   const facts = factsFromAssistant(message)
   const time = message[META].timestamp.getTime()
@@ -939,7 +916,6 @@ const chatLeaf = ({
       [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputMessages),
       [metadata("transcript_jq")]: message[META].debugExpr,
     },
-    ...(turnStart ? { turnStart: true } : {}),
   }
 }
 
@@ -947,20 +923,17 @@ const toolLeaf = ({
   input,
   output,
   ctx,
-  orphaned,
-  turnStart,
 }: {
   input?: SourcedToolBlock
   output?: SourcedToolBlock
   ctx: Ctx
-  orphaned?: "tool_use" | "tool_result"
-  turnStart: boolean
 }): Grouped => {
   const ref = input ?? output
-  ok(ref)
+  ok(ref, "toolLeaf needs at least one of input/output")
 
   const block = ref.block
   const error = input?.block.error ?? output?.block.error
+  const orphaned = !input ? "tool_result" : !output ? "tool_use" : undefined
   const startTime = (input ?? output)!.msg[META].timestamp.getTime()
   const endTime = (output ?? input)!.msg[META].timestamp.getTime()
   const kind = block.kind
@@ -972,22 +945,17 @@ const toolLeaf = ({
     endTime,
     attributes: {
       ...commonAttrs({ kind, ctx }),
-      ...(input
-        ? {
-            [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: JSON.stringify(
-              input.block.value,
-            ),
-          }
-        : {}),
-      ...(output
-        ? { [ATTR_GEN_AI_TOOL_CALL_RESULT]: JSON.stringify(output.block.value) }
-        : {}),
+      [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: input
+        ? JSON.stringify(input.block.value)
+        : undefined,
+      [ATTR_GEN_AI_TOOL_CALL_RESULT]: output
+        ? JSON.stringify(output.block.value)
+        : undefined,
       ...toolAttrs({ block, error }),
       [metadata("transcript_jq")]: ref.msg[META].debugExpr,
-      ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
+      [metadata("orphaned")]: orphaned,
     },
-    ...(error ? { status: { code: SpanStatusCode.ERROR } } : {}),
-    ...(turnStart ? { turnStart: true } : {}),
+    status: error ? { code: SpanStatusCode.ERROR } : undefined,
   }
 }
 
@@ -999,70 +967,48 @@ const buildLeaves = function* ({
   ctx: Ctx
 }): IteratorObject<Grouped> {
   const toolCalls = new Map<string, SourcedToolBlock>()
-  let pendingTurnStart = false
-  const consumeTurnStart = () => {
-    const v = pendingTurnStart
-    pendingTurnStart = false
-    return v
+  let turnStart = false
+  const tag = (g: Grouped): Grouped => {
+    if (!turnStart) return g
+    turnStart = false
+    return { ...g, turnStart: true }
   }
 
   for (const [idx, msg] of transcript.entries()) {
     if (msg.type === "user") {
-      pendingTurnStart = true
+      turnStart = true
     }
 
     for (const raw of contents(msg)) {
       const extracted = extractBlock(msg.type, raw)
       if (
-        !extracted ||
-        extracted.category !== "tool" ||
+        extracted?.category !== "tool" ||
         extracted.correlationId === undefined
       ) {
         continue
       }
+      const id = extracted.correlationId
       const sourced: SourcedToolBlock = { msg, block: extracted }
 
       if (extracted.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
-        toolCalls.set(extracted.correlationId, sourced)
+        toolCalls.set(id, sourced)
         continue
       }
 
-      const mate = toolCalls.get(extracted.correlationId)
-      if (mate === undefined) {
-        yield toolLeaf({
-          output: sourced,
-          ctx,
-          orphaned: "tool_result",
-          turnStart: consumeTurnStart(),
-        })
-        continue
-      }
-      toolCalls.delete(extracted.correlationId)
-      yield toolLeaf({
-        input: mate,
-        output: sourced,
-        ctx,
-        turnStart: consumeTurnStart(),
-      })
+      const mate = toolCalls.get(id)
+      toolCalls.delete(id)
+      yield tag(toolLeaf({ input: mate, output: sourced, ctx }))
     }
 
     if (msg.type === "assistant") {
-      yield chatLeaf({
-        message: msg,
-        history: transcript.slice(0, idx),
-        ctx,
-        turnStart: consumeTurnStart(),
-      })
+      yield tag(
+        chatLeaf({ message: msg, history: transcript.slice(0, idx), ctx }),
+      )
     }
   }
 
   for (const orphan of toolCalls.values()) {
-    yield toolLeaf({
-      input: orphan,
-      ctx,
-      orphaned: "tool_use",
-      turnStart: false,
-    })
+    yield toolLeaf({ input: orphan, ctx })
   }
   return
 }
