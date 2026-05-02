@@ -845,13 +845,13 @@ const buildLeaves = function* ({
     return { ...g, turnStart: true }
   }
 
+  const chatInputs = new Array<SourcedBlock<ChatBlock>>()
+  const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
   for (const msg of transcript) {
     if (msg.type === "user") {
       turnStart = true
     }
 
-    const chatInputs = new Array<SourcedBlock<ChatBlock>>()
-    const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
     for (const raw of contents(msg)) {
       const block = extractBlock(msg.type, raw)
       if (!block) {
@@ -859,14 +859,18 @@ const buildLeaves = function* ({
       }
 
       if (block.category === "tool") {
+        const sourced = { msg, block }
+
         if (block.correlationId === undefined) {
+          yield toolLeaf({ input: sourced, ctx })
           continue
         }
-        const sourced = { msg, block }
+
         if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
           toolCalls.set(block.correlationId, sourced)
           continue
         }
+
         const input = toolCalls.get(block.correlationId)
         toolCalls.delete(block.correlationId)
         yield tag(toolLeaf({ input, output: sourced, ctx }))
@@ -876,9 +880,10 @@ const buildLeaves = function* ({
       const sourced = { msg, block }
       if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
         chatInputs.push(sourced)
-      } else {
-        chatOutputs.push(sourced)
+        continue
       }
+
+      chatOutputs.push(sourced)
     }
 
     if (msg.type === "assistant") {
