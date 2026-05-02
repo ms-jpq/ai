@@ -828,11 +828,11 @@ const toolLeaf = ({
 }
 
 const buildLeaves = function* ({
-  transcript,
   ctx,
+  transcript,
 }: {
-  transcript: readonly TranscriptMessage[]
   ctx: Ctx
+  transcript: IteratorObject<TranscriptMessage>
 }): IteratorObject<Grouped> {
   const toolCalls = new Map<string, SourcedBlock<ToolBlock>>()
   const chatInputs: SourcedBlock<ChatBlock>[] = []
@@ -850,8 +850,7 @@ const buildLeaves = function* ({
       turnStart = true
     }
 
-    const chatOutputs: SourcedBlock<ChatBlock>[] = []
-
+    const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
     for (const raw of contents(msg)) {
       const block = extractBlock(msg.type, raw)
       if (!block) {
@@ -927,13 +926,13 @@ const buildBranch = ({
 }
 
 const groupAgents = function* ({
+  ctx,
   hook,
   entries,
-  ctx,
 }: {
+  ctx: Ctx
   hook: HookInput
   entries: IteratorObject<Grouped>
-  ctx: Ctx
 }): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
     const children = entries.toArray()
@@ -1008,8 +1007,8 @@ const main = async (): Promise<void> => {
 
   const ctx = { userId, sessionId: hook.session_id } satisfies Ctx
   const transcript = await Array.fromAsync(parseMessages(hook, state.uuid))
-  const leaves = buildLeaves({ transcript, ctx })
-  const grouped = groupAgents({ hook, entries: leaves, ctx })
+  const leaves = buildLeaves({ ctx, transcript: transcript.values() })
+  const grouped = groupAgents({ ctx, hook, entries: leaves })
 
   const tracer = otel.provider.getTracer("claude-code")
   for (const group of grouped) {
