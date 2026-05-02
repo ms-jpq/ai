@@ -99,8 +99,6 @@ type TranscriptMessage = Readonly<
   }
 >
 
-type AssistantMessage = Extract<TranscriptMessage, { type: "assistant" }>
-
 type BlockKind =
   | typeof GEN_AI_OPERATION_NAME_VALUE_CHAT
   | typeof GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
@@ -1123,7 +1121,10 @@ const groupAgents = function* ({
 
     yield branch({
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-      attributes: { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" },
+      attributes: {
+        [ATTR_GEN_AI_AGENT_NAME]: "claude-code",
+        [ATTR_GEN_AI_AGENT_ID]: hook.session_id,
+      },
       children: chunk,
       ctx,
     })
