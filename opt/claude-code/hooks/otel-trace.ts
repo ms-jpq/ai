@@ -658,30 +658,20 @@ const extractBlock = (
 
 const extractContent = function* (
   messages: IteratorObject<TranscriptMessage>,
-): IteratorObject<Bundle> {
+): IteratorObject<SourcedBlock> {
   for (const msg of messages) {
-    const chatPart = new Array<SourcedBlock>()
-    const toolPart = new Array<SourcedBlock>()
-    const toolBundles = new Array<Bundle>()
     for (const raw of contents(msg)) {
       const extracted = extractBlock(msg.type, raw)
-      if (!extracted) continue
+      if (!extracted) {
+        continue
+      }
+
       const blockType = typeof raw === "string" ? "string" : raw.type
-      const sourced = {
+      yield {
         msg,
         block: { ...extracted, [META]: { block: blockType } },
       } satisfies SourcedBlock
-      if (extracted.category === "tool") {
-        toolPart.push(sourced)
-        toolBundles.push([sourced])
-      } else {
-        chatPart.push(sourced)
-      }
     }
-    if (isNonEmpty(chatPart)) {
-      yield [chatPart[0], ...chatPart.slice(1), ...toolPart]
-    }
-    yield* toolBundles
   }
 
   return
@@ -1065,33 +1055,33 @@ const branch = ({
 }
 
 const correlateToolCalls = function* (
-  bundles: IteratorObject<Bundle>,
+  sourcedBlocks: IteratorObject<SourcedBlock>,
   ctx: Ctx,
 ): IteratorObject<Grouped> {
   const acc = new Map<string, SourcedBlock>()
 
-  for (const bundle of bundles) {
-    const [first] = bundle
-    const { block } = first
-
-    if (block.category !== "tool" || block.correlationId === undefined) {
-      yield leaf({ blocks: bundle, ctx })
+  for (const sourced of sourcedBlocks) {
+    if (
+      sourced.block.category !== "tool" ||
+      sourced.block.correlationId === undefined
+    ) {
+      yield leaf({ blocks: [sourced], ctx })
       continue
     }
 
-    const id = block.correlationId
-    if (block.type === "input") {
-      acc.set(id, first)
+    const id = sourced.block.correlationId
+    if (sourced.block.type === "input") {
+      acc.set(id, sourced)
       continue
     }
 
     const mate = acc.get(id)
     if (mate === undefined) {
-      yield leaf({ blocks: bundle, ctx, orphaned: "tool_result" })
+      yield leaf({ blocks: [sourced], ctx, orphaned: "tool_result" })
       continue
     }
     acc.delete(id)
-    yield leaf({ blocks: [mate, first], ctx })
+    yield leaf({ blocks: [mate, sourced], ctx })
   }
 
   for (const entry of acc.values()) {
@@ -1120,6 +1110,7 @@ const groupAgents = function* ({
       children: entries.toArray(),
       ctx,
     })
+
     if (wrapped) {
       yield wrapped
     }
