@@ -159,6 +159,27 @@ const gitUserName = (): Promise<string> =>
     .then(({ stdout }) => stdout.trim())
     .catch(() => "")
 
+const chunkBy = function* <T>({
+  source,
+  isBoundary,
+}: {
+  source: IteratorObject<T>
+  isBoundary: (item: T) => boolean
+}): IteratorObject<NonEmpty<T>> {
+  let chunk = new Array<T>()
+  for (const item of source) {
+    if (isBoundary(item) && isNonEmpty(chunk)) {
+      yield chunk
+      chunk = []
+    }
+    chunk.push(item)
+  }
+  if (isNonEmpty(chunk)) {
+    yield chunk
+  }
+  return
+}
+
 const log = ({
   level,
   msg,
@@ -1108,34 +1129,28 @@ const groupAgents = function* ({
   }
 
   const turnAttrs = { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" }
-  const emitChunk = (chunk: readonly Grouped[]): Grouped | undefined => {
-    if (chunk.length === 0) return undefined
-    if (chunk.length === 1) return chunk[0]
-    return branch({
+  const isTurnStart = (entry: Grouped): boolean => {
+    const [first] = entry.blocks
+    return (
+      entry.children === undefined &&
+      first?.msg.type === "user" &&
+      first?.block.category !== "tool"
+    )
+  }
+
+  for (const chunk of chunkBy({ source: entries, isBoundary: isTurnStart })) {
+    if (chunk.length === 1) {
+      yield* chunk
+      continue
+    }
+
+    yield branch({
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       partialAttrs: turnAttrs,
       children: chunk,
       ctx,
     })
   }
-
-  let chunk = new Array<Grouped>()
-  for (const entry of entries) {
-    const [first] = entry.blocks
-    const isTurnStart =
-      entry.children === undefined &&
-      first?.msg.type === "user" &&
-      first?.block.category !== "tool"
-
-    if (isTurnStart && chunk.length) {
-      const out = emitChunk(chunk)
-      chunk = []
-      if (out) yield out
-    }
-    chunk.push(entry)
-  }
-  const tail = emitChunk(chunk)
-  if (tail) yield tail
   return
 }
 
