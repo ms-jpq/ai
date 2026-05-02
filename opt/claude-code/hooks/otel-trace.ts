@@ -942,24 +942,21 @@ const buildLeaves = function* ({
     }
 
     for (const raw of contents(msg)) {
-      const extracted = extractBlock(msg.type, raw)
-      if (
-        extracted?.category !== "tool" ||
-        extracted.correlationId === undefined
-      ) {
-        continue
-      }
-      const id = extracted.correlationId
-      const sourced = { msg, block: extracted }
-
-      if (extracted.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
-        toolCalls.set(id, sourced)
+      const block = extractBlock(msg.type, raw)
+      if (block?.category !== "tool" || block.correlationId === undefined) {
         continue
       }
 
-      const mate = toolCalls.get(id)
+      const id = block.correlationId
+      const output = { msg, block: block }
+      if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+        toolCalls.set(id, output)
+        continue
+      }
+
+      const input = toolCalls.get(id)
       toolCalls.delete(id)
-      yield tag(toolLeaf({ input: mate, output: sourced, ctx }))
+      yield tag(toolLeaf({ input, output, ctx }))
     }
 
     if (msg.type === "assistant") {
