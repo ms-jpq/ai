@@ -134,6 +134,7 @@ type SourcedBlock = Readonly<{
 type Bundle = NonEmpty<SourcedBlock>
 
 type Grouped = Readonly<{
+  blocks: readonly SourcedBlock[]
   kind: GroupedKind
   spanName: string
   spanKind: SpanKind
@@ -143,7 +144,6 @@ type Grouped = Readonly<{
   status?: { code: SpanStatusCode }
   inputAttr?: readonly [string, string]
   outputAttr?: readonly [string, string]
-  blocks: readonly SourcedBlock[]
   children?: readonly Grouped[]
 }>
 
@@ -1072,18 +1072,18 @@ const correlateToolCalls = function* (
 
 const branch = ({
   kind,
-  partialAttrs,
+  attributes,
   children,
   ctx,
 }: {
   kind: GroupedKind
-  partialAttrs: Attributes
+  attributes: Attributes
   children: readonly Grouped[]
   ctx: Ctx
 }): Grouped => {
   const blocks = children.flatMap((c) => c.blocks)
   const facts = aggregateFacts({ blocks, includeUsage: false })
-  const agentName = partialAttrs[ATTR_GEN_AI_AGENT_NAME]
+  const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
 
   const { inputAttr, outputAttr } = branchIo(blocks)
@@ -1096,13 +1096,22 @@ const branch = ({
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
       ...commonAttrs({ kind, ctx, isOperation: true, facts }),
-      ...partialAttrs,
+      ...attributes,
     },
     ...(inputAttr ? { inputAttr } : {}),
     ...(outputAttr ? { outputAttr } : {}),
     blocks,
     children,
   }
+}
+
+const isTurnStart = (entry: Grouped): boolean => {
+  const [first] = entry.blocks
+  return (
+    entry.children === undefined &&
+    first?.msg.type === "user" &&
+    first?.block.category !== "tool"
+  )
 }
 
 const groupAgents = function* ({
@@ -1117,25 +1126,14 @@ const groupAgents = function* ({
   if (hook.hook_event_name === "SubagentStop") {
     yield branch({
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-      partialAttrs: {
+      attributes: {
         [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
         [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
       },
       children: entries.toArray(),
       ctx,
     })
-
     return
-  }
-
-  const turnAttrs = { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" }
-  const isTurnStart = (entry: Grouped): boolean => {
-    const [first] = entry.blocks
-    return (
-      entry.children === undefined &&
-      first?.msg.type === "user" &&
-      first?.block.category !== "tool"
-    )
   }
 
   for (const chunk of chunkBy({ source: entries, isBoundary: isTurnStart })) {
@@ -1146,7 +1144,7 @@ const groupAgents = function* ({
 
     yield branch({
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-      partialAttrs: turnAttrs,
+      attributes: { [ATTR_GEN_AI_AGENT_NAME]: "claude-code" },
       children: chunk,
       ctx,
     })
