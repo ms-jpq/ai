@@ -142,8 +142,6 @@ type Grouped = Readonly<{
   endTime: number
   attributes: Attributes
   status?: { code: SpanStatusCode }
-  inputAttr?: readonly [string, string]
-  outputAttr?: readonly [string, string]
   children?: readonly Grouped[]
 }>
 
@@ -767,7 +765,7 @@ const otelKind = (kind: GroupedKind): SpanKind =>
 const ioAttr = (
   msg: TranscriptMessage,
   blocks: NonEmpty<ExtractedBlock>,
-): readonly [string, string] => {
+): Attributes => {
   const [first] = blocks
   const isOutput = first.type === "output"
   const isTool = first.category === "tool"
@@ -779,32 +777,25 @@ const ioAttr = (
       ? ATTR_GEN_AI_OUTPUT_MESSAGES
       : ATTR_GEN_AI_INPUT_MESSAGES
   const value = isTool ? first.value : wrapMessage(msg, blocks)
-  return [key, JSON.stringify(value)]
+  return { [key]: JSON.stringify(value) }
 }
 
-type IoAttrs = {
-  inputAttr?: readonly [string, string]
-  outputAttr?: readonly [string, string]
-}
-
-const leafIo = (blocks: Bundle): IoAttrs => {
+const leafIo = (blocks: Bundle): Attributes => {
   const [first, ...rest] = blocks
   if (first.block.category !== "tool") {
     const extracted = [first.block, ...rest.map(({ block }) => block)] as const
-    return first.block.type === "input"
-      ? { inputAttr: ioAttr(first.msg, extracted) }
-      : { outputAttr: ioAttr(first.msg, extracted) }
+    return ioAttr(first.msg, extracted)
   }
 
   const input = blocks.find(({ block }) => block.type === "input")
   const output = blocks.find(({ block }) => block.type === "output")
   return {
-    inputAttr: input ? ioAttr(input.msg, [input.block]) : undefined,
-    outputAttr: output ? ioAttr(output.msg, [output.block]) : undefined,
+    ...(input ? ioAttr(input.msg, [input.block]) : {}),
+    ...(output ? ioAttr(output.msg, [output.block]) : {}),
   }
 }
 
-const branchIo = (blocks: readonly SourcedBlock[]): IoAttrs => {
+const branchIo = (blocks: readonly SourcedBlock[]): Attributes => {
   const messageBlocks = (msg: TranscriptMessage): readonly ExtractedBlock[] =>
     blocks
       .filter((b) => b.msg === msg && b.block.category !== "tool")
@@ -814,21 +805,18 @@ const branchIo = (blocks: readonly SourcedBlock[]): IoAttrs => {
     ({ block }) => block.type === "output" && block.category !== "tool",
   )
   const outputBlocks = output ? messageBlocks(output.msg) : []
-  const outputAttr =
-    output && isNonEmpty(outputBlocks)
-      ? ioAttr(output.msg, outputBlocks)
-      : undefined
 
   const input = blocks.find(
     ({ block }) => block.type === "input" && block.category !== "tool",
   )
   const inputBlocks = input ? messageBlocks(input.msg) : []
-  const inputAttr =
-    input && isNonEmpty(inputBlocks)
-      ? ioAttr(input.msg, inputBlocks)
-      : undefined
 
-  return { inputAttr, outputAttr }
+  return {
+    ...(input && isNonEmpty(inputBlocks) ? ioAttr(input.msg, inputBlocks) : {}),
+    ...(output && isNonEmpty(outputBlocks)
+      ? ioAttr(output.msg, outputBlocks)
+      : {}),
+  }
 }
 
 type AggregateFacts = Readonly<
@@ -996,7 +984,6 @@ const leaf = ({
 
   const times = blocks.map(({ msg }) => msg[META].timestamp.getTime())
   const facts = aggregateFacts({ blocks, includeUsage })
-  const { inputAttr, outputAttr } = leafIo(blocks)
 
   const spanName = toolBlock?.toolName
     ? `execute_tool ${toolBlock.toolName}`
@@ -1012,6 +999,7 @@ const leaf = ({
     endTime: Math.max(...times),
     attributes: {
       ...commonAttrs({ kind, ctx, isOperation, facts }),
+      ...leafIo(blocks),
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
       [metadata("block_types")]: blocks.map(({ block }) => block[META].block),
       ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
@@ -1027,8 +1015,6 @@ const leaf = ({
       ...(toolError ? { [ATTR_ERROR_TYPE]: toolError } : {}),
     },
     ...(toolError ? { status: { code: SpanStatusCode.ERROR } } : {}),
-    ...(inputAttr ? { inputAttr } : {}),
-    ...(outputAttr ? { outputAttr } : {}),
     blocks,
   }
 }
@@ -1086,8 +1072,6 @@ const branch = ({
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
 
-  const { inputAttr, outputAttr } = branchIo(blocks)
-
   return {
     kind,
     spanName: [kind, target].filter((n) => n).join(" "),
@@ -1096,10 +1080,9 @@ const branch = ({
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
       ...commonAttrs({ kind, ctx, isOperation: true, facts }),
+      ...branchIo(blocks),
       ...attributes,
     },
-    ...(inputAttr ? { inputAttr } : {}),
-    ...(outputAttr ? { outputAttr } : {}),
     blocks,
     children,
   }
@@ -1172,12 +1155,6 @@ const emit = ({
   )
   if (grouped.status) {
     span.setStatus(grouped.status)
-  }
-  if (grouped.outputAttr) {
-    span.setAttribute(...grouped.outputAttr)
-  }
-  if (grouped.inputAttr) {
-    span.setAttribute(...grouped.inputAttr)
   }
   if (grouped.children) {
     const childCtx = trace.setSpan(parentCtx, span)
