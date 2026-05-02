@@ -60,11 +60,9 @@ When the same _shape_ repeats with varying _values_, extract a helper. Don't ext
 
 Don't propose:
 
-- Whitespace, semicolon, quote-style, import-order — formatter's job.
 - Renames where the existing name is fine.
 - Pure style swaps (`match` over `switch`, `??` over `||`) unless invited.
 - Performance micro-optimization absent a measured problem.
-- Backwards-compatibility hacks for code paths the codebase doesn't have.
 
 # Args
 

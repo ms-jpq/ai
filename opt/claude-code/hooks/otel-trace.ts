@@ -7,7 +7,6 @@ import type {
   BetaDocumentBlock,
   BetaMessageParam,
   BetaRequestDocumentBlock,
-  BetaUsage,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { Attributes, Context, Tracer } from "@opentelemetry/api"
 import {
