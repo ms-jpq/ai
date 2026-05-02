@@ -929,7 +929,9 @@ const buildLeaves = function* ({
   const toolCalls = new Map<string, SourcedToolBlock>()
   let turnStart = false
   const tag = (g: Grouped): Grouped => {
-    if (!turnStart) return g
+    if (!turnStart) {
+      return g
+    }
     turnStart = false
     return { ...g, turnStart: true }
   }
@@ -1056,12 +1058,15 @@ const emit = ({
   parentCtx: Context
   grouped: Grouped
 }): void => {
+  const attributes = Object.fromEntries(
+    Object.entries(grouped.attributes).filter(([, v]) => v !== undefined),
+  )
   const span = tracer.startSpan(
     grouped.spanName,
     {
       startTime: grouped.startTime,
       kind: grouped.spanKind,
-      attributes: grouped.attributes,
+      attributes,
     },
     parentCtx,
   )
