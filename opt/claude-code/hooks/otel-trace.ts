@@ -743,6 +743,7 @@ const extractBlock = (
         kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
         correlationId: undefined,
         toolName: block.type,
+        toolType: "extension",
         value: { file_id: block.file_id },
       } satisfies ExtractedBlock
 
@@ -751,25 +752,26 @@ const extractBlock = (
   }
 }
 
-const blockToPart = (block: ExtractedBlock): ChatPart =>
-  block.category === "chat"
-    ? block.part
-    : block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT
-      ? {
-          type: "tool_call",
-          ...(block.correlationId !== undefined
-            ? { id: block.correlationId }
-            : {}),
-          ...(block.toolName ? { name: block.toolName } : {}),
-          arguments: block.value,
-        }
-      : {
-          type: "tool_call_response",
-          ...(block.correlationId !== undefined
-            ? { id: block.correlationId }
-            : {}),
-          response: block.value,
-        }
+const blockToPart = (block: ExtractedBlock): ChatPart => {
+  if (block.category === "chat") {
+    return block.part
+  }
+
+  if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+    return {
+      type: "tool_call",
+      id: block.correlationId,
+      name: block.toolName,
+      arguments: block.value,
+    }
+  }
+
+  return {
+    type: "tool_call_response",
+    id: block.correlationId,
+    response: block.value,
+  }
+}
 
 const messageParts = function* (
   msg: TranscriptMessage,
@@ -812,9 +814,15 @@ const transcriptToMessage = ({
 const factsFromAssistant = (
   msg: Extract<TranscriptMessage, { type: "assistant" }>,
 ): Facts => {
+  if (msg.message.model === "<synthetic>") {
+    return {
+      stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
+    }
+  }
+
   const u = msg.message.usage
   return {
-    model: msg.message.model !== "<synthetic>" ? msg.message.model : undefined,
+    model: msg.message.model,
     responseId: msg.message.id,
     stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
     usage: {
