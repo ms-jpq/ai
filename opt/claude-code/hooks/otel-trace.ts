@@ -835,7 +835,7 @@ const buildLeaves = function* ({
   transcript: IteratorObject<TranscriptMessage>
 }): IteratorObject<Grouped> {
   const toolCalls = new Map<string, SourcedBlock<ToolBlock>>()
-  const chatInputs: SourcedBlock<ChatBlock>[] = []
+
   let turnStart = false
   const tag = (g: Grouped): Grouped => {
     if (!turnStart) {
@@ -850,6 +850,7 @@ const buildLeaves = function* ({
       turnStart = true
     }
 
+    const chatInputs = new Array<SourcedBlock<ChatBlock>>()
     const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
     for (const raw of contents(msg)) {
       const block = extractBlock(msg.type, raw)
@@ -869,13 +870,14 @@ const buildLeaves = function* ({
         const input = toolCalls.get(block.correlationId)
         toolCalls.delete(block.correlationId)
         yield tag(toolLeaf({ input, output: sourced, ctx }))
+        continue
+      }
+
+      const sourced = { msg, block }
+      if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+        chatInputs.push(sourced)
       } else {
-        const sourced = { msg, block }
-        if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
-          chatInputs.push(sourced)
-        } else {
-          chatOutputs.push(sourced)
-        }
+        chatOutputs.push(sourced)
       }
     }
 
