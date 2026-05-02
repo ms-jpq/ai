@@ -79,7 +79,6 @@ import { promisify } from "node:util"
 type NonEmpty<T> = readonly [T, ...T[]]
 
 const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0
-const isNonNull = <T>(v: T): v is NonNullable<T> => v != null
 
 type TranscriptMeta = Readonly<{
   timestamp: Date
@@ -831,7 +830,7 @@ const commonAttrs = ({
   const stopReasons = assistants
     .values()
     .map((m) => m.message.stop_reason)
-    .filter(isNonNull)
+    .filter((r) => r)
     .toArray()
 
   const usage =
