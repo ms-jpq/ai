@@ -83,16 +83,6 @@ Don't propose:
 - For substantial structural changes, enter plan mode first, write a plan file, get explicit approval, then apply.
 - After applying, re-audit. New patterns become visible after the obvious ones are gone.
 
-# Pace
-
-- Don't ask "are we happy?" after every edit. Ask after a meaningful pass — a structural change, a conformance audit, a consolidation round.
-- "Anything else to clean up?" is the natural checkpoint after a few passes have settled.
-
-# Tone
-
-- Rank, don't editorialize. The user knows what they value.
-- When the proposal is wrong, the user will say. Take the redirection as data, not as a defeat.
-
 # Args
 
 - `auto` — skip the propose-and-wait step. Apply the highest-payoff item each pass. Stop when the next item is style-only.
