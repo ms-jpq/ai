@@ -77,6 +77,12 @@ import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
+type NonEmpty<T> = readonly [T, ...T[]]
+type NonNull<T> = { [K in keyof T]-?: NonNullable<T[K]> }
+
+const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0
+const isNonNull = <T>(v: T): v is NonNullable<T> => v != null
+
 type TranscriptMeta = Readonly<{
   timestamp: Date
   debugExpr: string
@@ -124,12 +130,6 @@ type SourcedBlock = Readonly<{
   msg: TranscriptMessage
   block: ExtractedBlock & { [META]: { block: BlockType } }
 }>
-
-type NonEmpty<T> = readonly [T, ...T[]]
-type NonNull<T> = { [K in keyof T]-?: NonNullable<T[K]> }
-
-const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0
-const isNonNull = <T>(v: T): v is NonNullable<T> => v != null
 
 type Bundle = NonEmpty<SourcedBlock>
 
@@ -1012,48 +1012,6 @@ const leaf = ({
   }
 }
 
-const branch = ({
-  kind,
-  partialAttrs,
-  children,
-  ctx,
-}: {
-  kind: GroupedKind
-  partialAttrs: Attributes
-  children: readonly Grouped[]
-  ctx: Ctx
-}): Grouped | undefined => {
-  if (!children.length) {
-    return undefined
-  }
-  const blocks = children.flatMap((c) => c.blocks)
-  if (!blocks.length) {
-    return undefined
-  }
-
-  const facts = aggregateFacts({ blocks, includeUsage: false })
-  const agentName = partialAttrs[ATTR_GEN_AI_AGENT_NAME]
-  const target = typeof agentName === "string" ? agentName : undefined
-
-  const { inputAttr, outputAttr } = branchIo(blocks)
-
-  return {
-    kind,
-    spanName: [kind, target].filter((n) => n).join(" "),
-    spanKind: otelKind(kind),
-    startTime: Math.min(...children.map((c) => c.startTime)),
-    endTime: Math.max(...children.map((c) => c.endTime)),
-    attributes: {
-      ...commonAttrs({ kind, ctx, isOperation: true, facts }),
-      ...partialAttrs,
-    },
-    ...(inputAttr ? { inputAttr } : {}),
-    ...(outputAttr ? { outputAttr } : {}),
-    blocks,
-    children,
-  }
-}
-
 const correlateToolCalls = function* (
   sourcedBlocks: IteratorObject<SourcedBlock>,
   ctx: Ctx,
@@ -1091,6 +1049,41 @@ const correlateToolCalls = function* (
   return
 }
 
+const branch = ({
+  kind,
+  partialAttrs,
+  children,
+  ctx,
+}: {
+  kind: GroupedKind
+  partialAttrs: Attributes
+  children: readonly Grouped[]
+  ctx: Ctx
+}): Grouped => {
+  const blocks = children.flatMap((c) => c.blocks)
+  const facts = aggregateFacts({ blocks, includeUsage: false })
+  const agentName = partialAttrs[ATTR_GEN_AI_AGENT_NAME]
+  const target = typeof agentName === "string" ? agentName : undefined
+
+  const { inputAttr, outputAttr } = branchIo(blocks)
+
+  return {
+    kind,
+    spanName: [kind, target].filter((n) => n).join(" "),
+    spanKind: otelKind(kind),
+    startTime: Math.min(...children.map((c) => c.startTime)),
+    endTime: Math.max(...children.map((c) => c.endTime)),
+    attributes: {
+      ...commonAttrs({ kind, ctx, isOperation: true, facts }),
+      ...partialAttrs,
+    },
+    ...(inputAttr ? { inputAttr } : {}),
+    ...(outputAttr ? { outputAttr } : {}),
+    blocks,
+    children,
+  }
+}
+
 const groupAgents = function* ({
   hook,
   entries,
@@ -1101,7 +1094,7 @@ const groupAgents = function* ({
   ctx: Ctx
 }): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
-    const wrapped = branch({
+    yield branch({
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       partialAttrs: {
         [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
@@ -1111,9 +1104,6 @@ const groupAgents = function* ({
       ctx,
     })
 
-    if (wrapped) {
-      yield wrapped
-    }
     return
   }
 
@@ -1136,6 +1126,7 @@ const groupAgents = function* ({
       entry.children === undefined &&
       first?.msg.type === "user" &&
       first?.block.category !== "tool"
+
     if (isTurnStart && chunk.length) {
       const out = emitChunk(chunk)
       chunk = []
