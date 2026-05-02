@@ -846,17 +846,14 @@ const aggregateFacts = ({
   blocks: readonly SourcedBlock[]
   includeUsage: boolean
 }): AggregateFacts => {
-  const assistants = ((): readonly AssistantMessage[] => {
-    const seen = new Set<string>()
-    const out = new Array<AssistantMessage>()
-    for (const { msg } of blocks) {
-      if (msg.type === "assistant" && !seen.has(msg.message.id)) {
-        seen.add(msg.message.id)
-        out.push(msg)
-      }
-    }
-    return out
-  })()
+  const seen = new Set<string>()
+  const assistants = blocks
+    .values()
+    .map((b) => b.msg)
+    .filter((msg) => msg.type === "assistant")
+    .filter((msg) => !seen.has(msg.message.id) && !!seen.add(msg.message.id))
+    .toArray()
+
   const zeroUsage = {
     input_tokens: 0,
     output_tokens: 0,
@@ -972,14 +969,15 @@ const leaf = ({
   const isOperation = isToolBundle || startMsg.type === "assistant"
   const includeUsage = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
 
-  type ToolBlock = Extract<SourcedBlock["block"], { category: "tool" }>
   const toolBlock = isToolBundle
     ? blocks
+        .values()
         .map(({ block }) => block)
-        .find((b): b is ToolBlock => b.category === "tool")
+        .find((b) => b.category === "tool")
     : undefined
   const toolError = isToolBundle
     ? blocks
+        .values()
         .map(({ block }) =>
           block.category === "tool" && block.error ? block.error : undefined,
         )
