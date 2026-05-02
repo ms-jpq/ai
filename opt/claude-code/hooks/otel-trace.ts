@@ -384,6 +384,36 @@ const extractToolResult = ({
     ...(error !== undefined ? { error } : {}),
   }) satisfies ExtractedBlock
 
+const documentPart = (
+  block:
+    | (BetaDocumentBlock & { context?: undefined })
+    | BetaRequestDocumentBlock,
+): ChatPart => {
+  const { source } = block
+  const meta = {
+    ...(block.title ? { title: block.title } : {}),
+    ...(block.context ? { context: block.context } : {}),
+  }
+  switch (source.type) {
+    case "base64":
+    case "text":
+      return {
+        type: "blob",
+        content: "",
+        mime_type: source.media_type,
+        ...meta,
+      }
+    case "url":
+      return { type: "uri", uri: source.url, ...meta }
+    case "file":
+      return { type: "file", file_id: source.file_id, ...meta }
+    case "content":
+      return { type: "document", ...meta }
+    default:
+      fail(source satisfies never)
+  }
+}
+
 const documentValue = ({
   source,
   context,
@@ -401,19 +431,6 @@ const documentValue = ({
       return { context, title }
     case "file":
       return { context, file_id: source.file_id, title }
-    default:
-      fail(source satisfies never)
-  }
-}
-
-const imageValue = ({ source }: { source: BetaImageBlockParam["source"] }) => {
-  switch (source.type) {
-    case "base64":
-      return { media_type: source.media_type }
-    case "url":
-      return { url: source.url }
-    case "file":
-      return { file_id: source.file_id }
     default:
       fail(source satisfies never)
   }
@@ -444,31 +461,14 @@ const imagePart = ({
   }
 }
 
-const documentPart = (
-  block:
-    | (BetaDocumentBlock & { context?: undefined })
-    | BetaRequestDocumentBlock,
-): ChatPart => {
-  const { source } = block
-  const meta = {
-    ...(block.title ? { title: block.title } : {}),
-    ...(block.context ? { context: block.context } : {}),
-  }
+const imageValue = ({ source }: { source: BetaImageBlockParam["source"] }) => {
   switch (source.type) {
     case "base64":
-    case "text":
-      return {
-        type: "blob",
-        content: "",
-        mime_type: source.media_type,
-        ...meta,
-      }
+      return { media_type: source.media_type }
     case "url":
-      return { type: "uri", uri: source.url, ...meta }
+      return { url: source.url }
     case "file":
-      return { type: "file", file_id: source.file_id, ...meta }
-    case "content":
-      return { type: "document", ...meta }
+      return { file_id: source.file_id }
     default:
       fail(source satisfies never)
   }
