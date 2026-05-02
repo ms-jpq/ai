@@ -63,6 +63,8 @@ import {
   GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
   GEN_AI_OUTPUT_TYPE_VALUE_TEXT,
   GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
+  GEN_AI_TOKEN_TYPE_VALUE_INPUT,
+  GEN_AI_TOKEN_TYPE_VALUE_OUTPUT,
 } from "@opentelemetry/semantic-conventions/incubating"
 import { fail } from "node:assert/strict"
 import { execFile } from "node:child_process"
@@ -103,16 +105,21 @@ type BlockKind =
 
 type GroupedKind = BlockKind | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
 
+type ExtractedBlockType =
+  | typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT
+  | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
+
+type ChatPart = Readonly<Record<string, unknown> & { type: string }>
+
 type ExtractedBlock =
   | Readonly<{
       category: "chat"
-      type: "input" | "output"
-      value: unknown
-      thinking?: boolean
+      type: ExtractedBlockType
+      part: ChatPart
     }>
   | Readonly<{
       category: "tool"
-      type: "input" | "output"
+      type: ExtractedBlockType
       kind: BlockKind
       value: unknown
       correlationId: string | undefined
@@ -323,18 +330,15 @@ const contents = function* (
 
 const extractChat = ({
   side,
-  thinking,
-  value,
+  part,
 }: {
   side: ExtractedBlock["type"]
-  thinking?: boolean
-  value: unknown
+  part: ChatPart
 }) =>
   ({
     category: "chat",
     type: side,
-    value,
-    ...(thinking ? { thinking: true } : {}),
+    part,
   }) satisfies ExtractedBlock
 
 const extractToolUse = ({
@@ -350,7 +354,7 @@ const extractToolUse = ({
 }) =>
   ({
     category: "tool",
-    type: "input",
+    type: GEN_AI_TOKEN_TYPE_VALUE_INPUT,
     kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
     correlationId,
     toolName,
@@ -371,7 +375,7 @@ const extractToolResult = ({
 }) =>
   ({
     category: "tool",
-    type: "output",
+    type: GEN_AI_TOKEN_TYPE_VALUE_OUTPUT,
     kind,
     correlationId,
     value,
@@ -420,38 +424,107 @@ const imageValue = ({
   }
 }
 
+const imagePart = ({
+  source,
+}: {
+  source:
+    | { type: "base64"; media_type: string }
+    | { type: "url"; url: string }
+    | { type: "file"; file_id: string }
+}): ChatPart => {
+  switch (source.type) {
+    case "base64":
+      return {
+        type: "blob",
+        content: "",
+        mime_type: source.media_type,
+        modality: "image",
+      }
+    case "url":
+      return { type: "uri", uri: source.url, modality: "image" }
+    case "file":
+      return { type: "file", file_id: source.file_id, modality: "image" }
+    default:
+      fail(source satisfies never)
+  }
+}
+
+const documentPart = (
+  block:
+    | (BetaDocumentBlock & { context?: undefined })
+    | BetaRequestDocumentBlock,
+): ChatPart => {
+  const { source } = block
+  const meta = {
+    ...(block.title ? { title: block.title } : {}),
+    ...(block.context ? { context: block.context } : {}),
+  }
+  switch (source.type) {
+    case "base64":
+    case "text":
+      return {
+        type: "blob",
+        content: "",
+        mime_type: source.media_type,
+        ...meta,
+      }
+    case "url":
+      return { type: "uri", uri: source.url, ...meta }
+    case "file":
+      return { type: "file", file_id: source.file_id, ...meta }
+    case "content":
+      return { type: "document", ...meta }
+    default:
+      fail(source satisfies never)
+  }
+}
+
 const extractBlock = (
   role: TranscriptMessage["type"],
   block: MessageBlock,
 ): ExtractedBlock | undefined => {
-  const side = role === "assistant" ? "output" : "input"
+  const side =
+    role === "assistant"
+      ? GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
+      : GEN_AI_TOKEN_TYPE_VALUE_INPUT
 
   if (typeof block === "string") {
-    return extractChat({ side, value: block })
+    return extractChat({ side, part: { type: "text", content: block } })
   }
 
   switch (block.type) {
     case "text":
       return extractChat({
         side,
-        value: block.citations?.length
-          ? { text: block.text, citations: block.citations }
-          : block.text,
+        part: {
+          type: "text",
+          content: block.text,
+          ...(block.citations?.length ? { citations: block.citations } : {}),
+        },
       })
     case "thinking":
       return block.thinking
-        ? extractChat({ side, thinking: true, value: block.thinking })
+        ? extractChat({
+            side,
+            part: { type: "reasoning", content: block.thinking },
+          })
         : undefined
     case "redacted_thinking":
       return block.data
-        ? extractChat({ side, thinking: true, value: block.data })
+        ? extractChat({
+            side,
+            part: { type: "reasoning", content: block.data },
+          })
         : undefined
     case "compaction":
       return block.content
-        ? extractChat({ side, value: block.content })
+        ? extractChat({
+            side,
+            part: { type: "text", content: block.content },
+          })
         : undefined
     case "image":
-      return extractChat({ side, value: imageValue(block) })
+      return extractChat({ side, part: imagePart(block) })
 
     case "mcp_tool_use":
       return extractToolUse({
@@ -600,11 +673,12 @@ const extractBlock = (
       }
 
     case "document":
-      return extractChat({ side, value: documentValue(block) })
+      return extractChat({ side, part: documentPart(block) })
     case "search_result":
       return extractChat({
         side,
-        value: {
+        part: {
+          type: "search_result",
           content: block.content.map((item) => item.text),
           source: block.source,
           title: block.title,
@@ -687,11 +761,8 @@ const extractContent = function* (
   return
 }
 
-const messagePart = (block: ExtractedBlock) => ({
-  type: block.category === "chat" && block.thinking ? "reasoning" : "text",
-  content:
-    typeof block.value === "string" ? block.value : JSON.stringify(block.value),
-})
+const messagePart = (block: ExtractedBlock): ChatPart =>
+  block.category === "chat" ? block.part : { type: "text", content: "" }
 
 const normalizeFinishReason = (() => {
   const map = new Map<string, string>([
@@ -711,7 +782,7 @@ const ioAttr = (
   blocks: NonEmpty<ExtractedBlock>,
 ): Attributes => {
   const [first] = blocks
-  const isOutput = first.type === "output"
+  const isOutput = first.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
   const isTool = first.category === "tool"
   const key = isTool
     ? isOutput
@@ -742,8 +813,12 @@ const leafIo = (blocks: Bundle): Attributes => {
     return ioAttr(first.msg, [first.block])
   }
 
-  const input = blocks.find((s) => s.block.type === "input")
-  const output = blocks.findLast((s) => s.block.type === "output")
+  const input = blocks.find(
+    (s) => s.block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT,
+  )
+  const output = blocks.findLast(
+    (s) => s.block.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT,
+  )
   return {
     ...(input ? ioAttr(input.msg, [input.block]) : {}),
     ...(output ? ioAttr(output.msg, [output.block]) : {}),
@@ -761,12 +836,15 @@ const branchIo = (sourceBlocks: readonly SourcedBlock[]): Attributes => {
       : []
 
   const output = sourceBlocks.findLast(
-    ({ block }) => block.type === "output" && block.category !== "tool",
+    ({ block }) =>
+      block.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT &&
+      block.category !== "tool",
   )
   const outputBlocks = messageBlocks(output?.msg)
 
   const input = sourceBlocks.find(
-    ({ block }) => block.type === "input" && block.category !== "tool",
+    ({ block }) =>
+      block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT && block.category !== "tool",
   )
   const inputBlocks = messageBlocks(input?.msg)
 
@@ -978,7 +1056,7 @@ const correlateToolCalls = function* (
     }
 
     const id = sourced.block.correlationId
-    if (sourced.block.type === "input") {
+    if (sourced.block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
       acc.set(id, sourced)
       continue
     }
