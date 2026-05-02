@@ -108,6 +108,7 @@ type ExtractedBlockType =
   | typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT
   | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
 
+// Anthropic extends OTel's text/tool_call/tool_call_response with reasoning, blob, uri, file, document, search_result.
 type ChatPart = Readonly<Record<string, unknown> & { type: string }>
 
 type ExtractedBlock =
@@ -786,7 +787,6 @@ const normalizeFinishReason = (() => {
   const map = new Map<string, string>([
     ["end_turn", "stop"],
     ["stop_sequence", "stop"],
-    ["pause_turn", "stop"],
     ["max_tokens", "length"],
     ["tool_use", "tool_calls"],
     ["refusal", "content_filter"],
@@ -803,9 +803,10 @@ const transcriptToMessage = ({
 }) => ({
   role: msg.type,
   parts: messageParts(msg).toArray(),
-  ...(asOutput && msg.type === "assistant"
-    ? { finish_reason: normalizeFinishReason(msg.message.stop_reason) }
-    : {}),
+  finish_reason:
+    asOutput && msg.type === "assistant"
+      ? normalizeFinishReason(msg.message.stop_reason)
+      : undefined,
 })
 
 const factsFromAssistant = (
@@ -817,6 +818,7 @@ const factsFromAssistant = (
     responseId: msg.message.id,
     stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
     usage: {
+      // Total prompt size including cache reads/creations; cache_* attrs break it down.
       input_tokens:
         u.input_tokens +
         (u.cache_read_input_tokens ?? 0) +
