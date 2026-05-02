@@ -747,12 +747,6 @@ const wrapMessage = (
   },
 ]
 
-const otelKind = (kind: GroupedKind): SpanKind =>
-  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
-  kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
-    ? SpanKind.CLIENT
-    : SpanKind.INTERNAL
-
 const ioAttr = (
   msg: TranscriptMessage,
   blocks: NonEmpty<ExtractedBlock>,
@@ -949,6 +943,27 @@ const commonAttrs = ({
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
+const toolAttrs = ({
+  block,
+  error,
+}: {
+  block: Extract<ExtractedBlock, { category: "tool" }>
+  error: string | undefined
+}): Attributes => ({
+  ...(block.toolName ? { [ATTR_GEN_AI_TOOL_NAME]: block.toolName } : {}),
+  ...(block.toolType ? { [ATTR_GEN_AI_TOOL_TYPE]: block.toolType } : {}),
+  ...(block.correlationId
+    ? { [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId }
+    : {}),
+  ...(error ? { [ATTR_ERROR_TYPE]: error } : {}),
+})
+
+const otelKind = (kind: GroupedKind): SpanKind =>
+  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
+  kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+    ? SpanKind.CLIENT
+    : SpanKind.INTERNAL
+
 const leaf = ({
   bundle,
   ctx,
@@ -959,32 +974,30 @@ const leaf = ({
   orphaned?: "tool_use" | "tool_result"
 }): Grouped => {
   const [{ msg: startMsg, block: firstBlock }] = bundle
-  const blocks = bundle.map((s) => s.block)
-  const isToolBundle = firstBlock.category === "tool"
-  const kind = (
-    isToolBundle ? firstBlock.kind : GEN_AI_OPERATION_NAME_VALUE_CHAT
-  ) satisfies BlockKind
+  const tool =
+    firstBlock.category === "tool"
+      ? {
+          kind: firstBlock.kind,
+          block: firstBlock,
+          error: bundle
+            .values()
+            .map((s) => s.block)
+            .filter((b) => b.category === "tool")
+            .map((b) => b.error)
+            .find((e) => e),
+        }
+      : undefined
 
-  const isOperation = isToolBundle || startMsg.type === "assistant"
-  const includeUsage = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
-
-  const toolBlock = isToolBundle
-    ? blocks.find((b) => b.category === "tool")
-    : undefined
-
-  const toolError = isToolBundle
-    ? blocks
-        .values()
-        .filter((block) => block.category === "tool")
-        .map((block) => block.error)
-        .find((e) => e)
-    : undefined
-
+  const isOperation = tool !== undefined || startMsg.type === "assistant"
+  const kind: BlockKind = tool?.kind ?? GEN_AI_OPERATION_NAME_VALUE_CHAT
+  const facts = aggregateFacts({
+    blocks: bundle,
+    includeUsage: isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT,
+  })
   const times = bundle.map(({ msg }) => msg[META].timestamp.getTime())
-  const facts = aggregateFacts({ blocks: bundle, includeUsage })
 
-  const spanName = toolBlock?.toolName
-    ? `execute_tool ${toolBlock.toolName}`
+  const spanName = tool?.block.toolName
+    ? `execute_tool ${tool.block.toolName}`
     : isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.model
       ? `chat ${facts.model}`
       : startMsg.type
@@ -1001,18 +1014,9 @@ const leaf = ({
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
       [metadata("block_types")]: bundle.map(({ block }) => block[META].block),
       ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
-      ...(toolBlock?.toolName
-        ? { [ATTR_GEN_AI_TOOL_NAME]: toolBlock.toolName }
-        : {}),
-      ...(toolBlock?.toolType
-        ? { [ATTR_GEN_AI_TOOL_TYPE]: toolBlock.toolType }
-        : {}),
-      ...(toolBlock?.correlationId
-        ? { [ATTR_GEN_AI_TOOL_CALL_ID]: toolBlock.correlationId }
-        : {}),
-      ...(toolError ? { [ATTR_ERROR_TYPE]: toolError } : {}),
+      ...(tool ? toolAttrs(tool) : {}),
     },
-    ...(toolError ? { status: { code: SpanStatusCode.ERROR } } : {}),
+    ...(tool?.error ? { status: { code: SpanStatusCode.ERROR } } : {}),
     blocks: bundle,
   }
 }
