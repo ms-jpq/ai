@@ -90,6 +90,8 @@ type TranscriptMessage = Readonly<
   }
 >
 
+type Role = TranscriptMessage["type"]
+
 type BlockKind =
   | typeof GEN_AI_OPERATION_NAME_VALUE_CHAT
   | typeof GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
@@ -105,6 +107,7 @@ type ChatPart = Readonly<Record<string, unknown> & { type: string }>
 type ExtractedBlock =
   | Readonly<{
       category: "chat"
+      role: Role
       type: ExtractedBlockType
       part: ChatPart
     }>
@@ -311,10 +314,11 @@ const contents = function* (msg: TranscriptMessage): IteratorObject<MessageBlock
   return
 }
 
-const extractChat = ({ side, part }: { side: ExtractedBlock["type"]; part: ChatPart }) =>
+const extractChat = ({ role, part }: { role: Role; part: ChatPart }) =>
   ({
     category: "chat",
-    type: side,
+    role,
+    type: role === "assistant" ? GEN_AI_TOKEN_TYPE_VALUE_OUTPUT : GEN_AI_TOKEN_TYPE_VALUE_INPUT,
     part,
   }) satisfies ExtractedBlock
 
@@ -432,17 +436,15 @@ const imageValue = ({ source }: { source: BetaImageBlockParam["source"] }) => {
   }
 }
 
-const extractBlock = (role: TranscriptMessage["type"], block: MessageBlock): ExtractedBlock | undefined => {
-  const side = role === "assistant" ? GEN_AI_TOKEN_TYPE_VALUE_OUTPUT : GEN_AI_TOKEN_TYPE_VALUE_INPUT
-
+const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefined => {
   if (typeof block === "string") {
-    return extractChat({ side, part: { type: "text", content: block } })
+    return extractChat({ role, part: { type: "text", content: block } })
   }
 
   switch (block.type) {
     case "text":
       return extractChat({
-        side,
+        role,
         part: {
           type: "text",
           content: block.text,
@@ -452,26 +454,26 @@ const extractBlock = (role: TranscriptMessage["type"], block: MessageBlock): Ext
     case "thinking":
       return block.thinking
         ? extractChat({
-            side,
+            role,
             part: { type: "reasoning", content: block.thinking },
           })
         : undefined
     case "redacted_thinking":
       return block.data
         ? extractChat({
-            side,
+            role,
             part: { type: "reasoning", content: block.data },
           })
         : undefined
     case "compaction":
       return block.content
         ? extractChat({
-            side,
+            role,
             part: { type: "text", content: block.content },
           })
         : undefined
     case "image":
-      return extractChat({ side, part: imagePart(block) })
+      return extractChat({ role, part: imagePart(block) })
 
     case "mcp_tool_use":
       return extractToolUse({
@@ -620,10 +622,10 @@ const extractBlock = (role: TranscriptMessage["type"], block: MessageBlock): Ext
       }
 
     case "document":
-      return extractChat({ side, part: documentPart(block) })
+      return extractChat({ role, part: documentPart(block) })
     case "search_result":
       return extractChat({
-        side,
+        role,
         part: {
           type: "search_result",
           content: block.content.map((item) => item.text),
@@ -675,7 +677,7 @@ const extractBlock = (role: TranscriptMessage["type"], block: MessageBlock): Ext
     case "container_upload":
       return {
         category: "tool",
-        type: side,
+        type: role === "assistant" ? GEN_AI_TOKEN_TYPE_VALUE_OUTPUT : GEN_AI_TOKEN_TYPE_VALUE_INPUT,
         kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
         correlationId: undefined,
         toolName: block.type,
