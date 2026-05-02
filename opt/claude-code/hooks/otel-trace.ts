@@ -878,19 +878,6 @@ const commonAttrs = ({
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
-const toolAttrs = ({
-  block,
-  error,
-}: {
-  block: ToolBlock
-  error: string | undefined
-}): Attributes => ({
-  [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
-  [ATTR_GEN_AI_TOOL_TYPE]: block.toolType,
-  [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId,
-  [ATTR_ERROR_TYPE]: error,
-})
-
 const otelKind = (kind: GroupedKind): SpanKind =>
   kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
   kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
@@ -959,7 +946,10 @@ const toolLeaf = ({
       [ATTR_GEN_AI_TOOL_CALL_RESULT]: output
         ? JSON.stringify(output.block.value)
         : undefined,
-      ...toolAttrs({ block, error }),
+      [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
+      [ATTR_GEN_AI_TOOL_TYPE]: block.toolType,
+      [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId,
+      [ATTR_ERROR_TYPE]: error,
       [metadata("transcript_jq")]: ref.msg[META].debugExpr,
       [metadata("orphaned")]: orphaned,
     },
