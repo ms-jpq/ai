@@ -123,7 +123,8 @@ type ExtractedBlock =
 
 type SourcedBlock = Readonly<{
   msg: TranscriptMessage
-  block: ExtractedBlock & { [META]: { block: BlockType } }
+  type: BlockType
+  block: ExtractedBlock
 }>
 
 type Bundle = NonEmpty<SourcedBlock>
@@ -675,10 +676,10 @@ const extractContent = function* (
         continue
       }
 
-      const blockType = typeof raw === "string" ? "string" : raw.type
       yield {
+        type: typeof raw === "string" ? "string" : raw.type,
         msg,
-        block: { ...extracted, [META]: { block: blockType } },
+        block: extracted,
       } satisfies SourcedBlock
     }
   }
@@ -952,7 +953,7 @@ const leaf = ({
       ...commonAttrs({ kind, ctx, isOperation, blocks: bundle }),
       ...leafIo(bundle),
       [metadata("transcript_jq")]: startMsg[META].debugExpr,
-      [metadata("block_types")]: bundle.map(({ block }) => block[META].block),
+      [metadata("block_types")]: bundle.map((b) => b.type),
       ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
       ...(tool ? toolAttrs(tool) : {}),
     },
