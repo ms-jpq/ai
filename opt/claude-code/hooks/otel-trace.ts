@@ -66,7 +66,7 @@ import {
   GEN_AI_TOKEN_TYPE_VALUE_INPUT,
   GEN_AI_TOKEN_TYPE_VALUE_OUTPUT,
 } from "@opentelemetry/semantic-conventions/incubating"
-import { fail } from "node:assert/strict"
+import { fail, ok } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { randomUUID } from "node:crypto"
 import { createReadStream } from "node:fs"
@@ -88,7 +88,6 @@ type TranscriptMeta = Readonly<{
 }>
 
 type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
-type BlockType = "string" | (BetaContentBlock | BetaContentBlockParam)["type"]
 
 const META: unique symbol = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
@@ -128,16 +127,26 @@ type ExtractedBlock =
       error?: string
     }>
 
-type SourcedBlock = Readonly<{
+type ToolBlock = Extract<ExtractedBlock, { category: "tool" }>
+
+type SourcedToolBlock = Readonly<{
   msg: TranscriptMessage
-  type: BlockType
-  block: ExtractedBlock
+  block: ToolBlock
 }>
 
-type Bundle = NonEmpty<SourcedBlock>
+type Facts = Readonly<{
+  model?: string
+  responseId?: string
+  stopReasons?: readonly string[]
+  usage?: Readonly<{
+    input_tokens: number
+    output_tokens: number
+    cache_read_input_tokens: number
+    cache_creation_input_tokens: number
+  }>
+}>
 
 type Grouped = Readonly<{
-  blocks: readonly SourcedBlock[]
   spanName: string
   spanKind: SpanKind
   startTime: number
@@ -145,6 +154,7 @@ type Grouped = Readonly<{
   attributes: Attributes
   status?: { code: SpanStatusCode }
   children?: readonly Grouped[]
+  turnStart?: boolean
 }>
 
 type Ctx = { userId: string; sessionId: string }
@@ -740,29 +750,37 @@ const extractBlock = (
   }
 }
 
-const extractContent = function* (
-  messages: IteratorObject<TranscriptMessage>,
-): IteratorObject<SourcedBlock> {
-  for (const msg of messages) {
-    for (const raw of contents(msg)) {
-      const extracted = extractBlock(msg.type, raw)
-      if (!extracted) {
-        continue
-      }
+const blockToPart = (block: ExtractedBlock): ChatPart =>
+  block.category === "chat"
+    ? block.part
+    : block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT
+      ? {
+          type: "tool_call",
+          ...(block.correlationId !== undefined
+            ? { id: block.correlationId }
+            : {}),
+          ...(block.toolName ? { name: block.toolName } : {}),
+          arguments: block.value,
+        }
+      : {
+          type: "tool_call_response",
+          ...(block.correlationId !== undefined
+            ? { id: block.correlationId }
+            : {}),
+          response: block.value,
+        }
 
-      yield {
-        type: typeof raw === "string" ? "string" : raw.type,
-        msg,
-        block: extracted,
-      } satisfies SourcedBlock
+const messageParts = function* (
+  msg: TranscriptMessage,
+): IteratorObject<ChatPart> {
+  for (const raw of contents(msg)) {
+    const extracted = extractBlock(msg.type, raw)
+    if (extracted) {
+      yield blockToPart(extracted)
     }
   }
-
   return
 }
-
-const messagePart = (block: ExtractedBlock): ChatPart =>
-  block.category === "chat" ? block.part : { type: "text", content: "" }
 
 const normalizeFinishReason = (() => {
   const map = new Map<string, string>([
@@ -773,153 +791,63 @@ const normalizeFinishReason = (() => {
     ["tool_use", "tool_calls"],
     ["refusal", "content_filter"],
   ])
-
   return (raw: string | null | undefined) => map.get(raw ?? "") ?? raw ?? "stop"
 })()
 
-const ioAttr = (
-  msg: TranscriptMessage,
-  blocks: NonEmpty<ExtractedBlock>,
-): Attributes => {
-  const [first] = blocks
-  const isOutput = first.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
-  const isTool = first.category === "tool"
-  const key = isTool
-    ? isOutput
-      ? ATTR_GEN_AI_TOOL_CALL_RESULT
-      : ATTR_GEN_AI_TOOL_CALL_ARGUMENTS
-    : isOutput
-      ? ATTR_GEN_AI_OUTPUT_MESSAGES
-      : ATTR_GEN_AI_INPUT_MESSAGES
-  const value = isTool
-    ? first.value
-    : [
-        {
-          role: msg.type,
-          parts: blocks.map(messagePart),
-          ...(msg.type === "assistant"
-            ? {
-                finish_reason: normalizeFinishReason(msg.message.stop_reason),
-              }
-            : {}),
-        },
-      ]
-  return { [key]: JSON.stringify(value) }
-}
+const transcriptToMessage = ({
+  msg,
+  asOutput,
+}: {
+  msg: TranscriptMessage
+  asOutput: boolean
+}) => ({
+  role: msg.type,
+  parts: messageParts(msg).toArray(),
+  ...(asOutput && msg.type === "assistant"
+    ? { finish_reason: normalizeFinishReason(msg.message.stop_reason) }
+    : {}),
+})
 
-const leafIo = (blocks: Bundle): Attributes => {
-  const [first] = blocks
-  if (first.block.category !== "tool") {
-    return ioAttr(first.msg, [first.block])
-  }
-
-  const input = blocks.find(
-    (s) => s.block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT,
-  )
-  const output = blocks.findLast(
-    (s) => s.block.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT,
-  )
+const factsFromAssistant = (
+  msg: Extract<TranscriptMessage, { type: "assistant" }>,
+): Facts => {
+  const u = msg.message.usage
   return {
-    ...(input ? ioAttr(input.msg, [input.block]) : {}),
-    ...(output ? ioAttr(output.msg, [output.block]) : {}),
-  }
-}
-
-const branchIo = (sourceBlocks: readonly SourcedBlock[]): Attributes => {
-  const messageBlocks = (msg: TranscriptMessage | undefined) =>
-    msg
-      ? sourceBlocks
-          .values()
-          .filter((b) => b.msg === msg && b.block.category !== "tool")
-          .map(({ block }) => block)
-          .toArray()
-      : []
-
-  const output = sourceBlocks.findLast(
-    ({ block }) =>
-      block.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT &&
-      block.category !== "tool",
-  )
-  const outputBlocks = messageBlocks(output?.msg)
-
-  const input = sourceBlocks.find(
-    ({ block }) =>
-      block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT && block.category !== "tool",
-  )
-  const inputBlocks = messageBlocks(input?.msg)
-
-  return {
-    ...(input && isNonEmpty(inputBlocks) ? ioAttr(input.msg, inputBlocks) : {}),
-    ...(output && isNonEmpty(outputBlocks)
-      ? ioAttr(output.msg, outputBlocks)
-      : {}),
+    model: msg.message.model !== "<synthetic>" ? msg.message.model : undefined,
+    responseId: msg.message.id,
+    stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
+    usage: {
+      input_tokens:
+        u.input_tokens +
+        (u.cache_read_input_tokens ?? 0) +
+        (u.cache_creation_input_tokens ?? 0),
+      output_tokens: u.output_tokens,
+      cache_read_input_tokens: u.cache_read_input_tokens ?? 0,
+      cache_creation_input_tokens: u.cache_creation_input_tokens ?? 0,
+    },
   }
 }
 
 const commonAttrs = ({
   kind,
   ctx,
-  isOperation,
-  blocks,
+  facts,
 }: {
   kind: GroupedKind
   ctx: Ctx
-  isOperation: boolean
-  blocks: readonly SourcedBlock[]
+  facts?: Facts
 }): Attributes => {
-  const seen = new Set<string>()
-  const assistants = blocks
-    .values()
-    .map((b) => b.msg)
-    .filter((msg) => msg.type === "assistant")
-    .filter((msg) => !seen.has(msg.message.id) && !!seen.add(msg.message.id))
-    .toArray()
-
-  const model = assistants.findLast((a) => a.message.model !== "<synthetic>")
-    ?.message.model
-  const responseId = assistants.at(-1)?.message.id
-  const stopReasons = assistants
-    .values()
-    .map((m) => m.message.stop_reason)
-    .filter((r) => r)
-    .toArray()
-
-  const usage = assistants.reduce(
-    (acc, { message: { usage: u } }) => ({
-      input_tokens:
-        acc.input_tokens +
-        u.input_tokens +
-        (u.cache_read_input_tokens ?? 0) +
-        (u.cache_creation_input_tokens ?? 0),
-      output_tokens: acc.output_tokens + u.output_tokens,
-      cache_read_input_tokens:
-        acc.cache_read_input_tokens + (u.cache_read_input_tokens ?? 0),
-      cache_creation_input_tokens:
-        acc.cache_creation_input_tokens + (u.cache_creation_input_tokens ?? 0),
-    }),
-    {
-      input_tokens: 0,
-      output_tokens: 0,
-      cache_read_input_tokens: 0,
-      cache_creation_input_tokens: 0,
-    },
-  )
-
+  const { model, responseId, stopReasons, usage } = facts ?? {}
   return {
     [ATTR_USER_ID]: ctx.userId,
     [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
-    ...(isOperation
-      ? {
-          [ATTR_GEN_AI_OPERATION_NAME]: kind,
-          [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
-        }
-      : {}),
-    ...(isOperation &&
-    (kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
-      kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL)
+    [ATTR_GEN_AI_OPERATION_NAME]: kind,
+    [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
+    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ||
+    kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
       ? { [ATTR_SERVER_ADDRESS]: "api.anthropic.com" }
       : {}),
-    ...(isOperation && kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
+    ...(kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
       ? { [ATTR_GEN_AI_OUTPUT_TYPE]: GEN_AI_OUTPUT_TYPE_VALUE_TEXT }
       : {}),
     ...(model
@@ -929,7 +857,7 @@ const commonAttrs = ({
         }
       : {}),
     ...(responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: responseId } : {}),
-    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && stopReasons.length
+    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && stopReasons?.length
       ? {
           [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons.map(
             normalizeFinishReason,
@@ -963,7 +891,7 @@ const toolAttrs = ({
   block,
   error,
 }: {
-  block: Extract<ExtractedBlock, { category: "tool" }>
+  block: ToolBlock
   error: string | undefined
 }): Attributes => ({
   ...(block.toolName ? { [ATTR_GEN_AI_TOOL_NAME]: block.toolName } : {}),
@@ -980,100 +908,160 @@ const otelKind = (kind: GroupedKind): SpanKind =>
     ? SpanKind.CLIENT
     : SpanKind.INTERNAL
 
-const leaf = ({
-  bundle,
+const chatLeaf = ({
+  message,
+  history,
   ctx,
-  orphaned,
+  turnStart,
 }: {
-  bundle: Bundle
+  message: Extract<TranscriptMessage, { type: "assistant" }>
+  history: readonly TranscriptMessage[]
   ctx: Ctx
-  orphaned?: "tool_use" | "tool_result"
+  turnStart: boolean
 }): Grouped => {
-  const [{ msg: startMsg, block: firstBlock }] = bundle
-  const tool =
-    firstBlock.category === "tool"
-      ? {
-          kind: firstBlock.kind,
-          block: firstBlock,
-          error: bundle
-            .values()
-            .map((s) => s.block)
-            .filter((b) => b.category === "tool")
-            .map((b) => b.error)
-            .find((e) => e),
-        }
-      : undefined
-
-  const isOperation = tool !== undefined || startMsg.type === "assistant"
-  const kind = tool?.kind ?? GEN_AI_OPERATION_NAME_VALUE_CHAT
-  const model = bundle
-    .values()
-    .map((s) => s.msg)
-    .filter((msg) => msg.type === "assistant")
-    .map((msg) => msg.message.model)
-    .filter((m) => m !== "<synthetic>")
-    .toArray()
-    .at(-1)
-  const times = bundle.map(({ msg }) => msg[META].timestamp.getTime())
-
-  const spanName = tool?.block.toolName
-    ? `execute_tool ${tool.block.toolName}`
-    : model
-      ? `chat ${model}`
-      : startMsg.type
+  const facts = factsFromAssistant(message)
+  const time = message[META].timestamp.getTime()
+  const inputMessages = history.map((msg) =>
+    transcriptToMessage({ msg, asOutput: false }),
+  )
+  const outputMessages = [transcriptToMessage({ msg: message, asOutput: true })]
 
   return {
-    spanName,
-    spanKind: isOperation ? otelKind(kind) : SpanKind.INTERNAL,
-    startTime: Math.min(...times),
-    endTime: Math.max(...times),
+    spanName: facts.model ? `chat ${facts.model}` : "chat",
+    spanKind: SpanKind.CLIENT,
+    startTime: time,
+    endTime: time,
     attributes: {
-      ...commonAttrs({ kind, ctx, isOperation, blocks: bundle }),
-      ...leafIo(bundle),
-      [metadata("transcript_jq")]: startMsg[META].debugExpr,
-      [metadata("block_types")]: bundle.map((b) => b.type),
-      ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
-      ...(tool ? toolAttrs(tool) : {}),
+      ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
+      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(inputMessages),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputMessages),
+      [metadata("transcript_jq")]: message[META].debugExpr,
     },
-    ...(tool?.error ? { status: { code: SpanStatusCode.ERROR } } : {}),
-    blocks: bundle,
+    ...(turnStart ? { turnStart: true } : {}),
   }
 }
 
-const correlateToolCalls = function* (
-  sourcedBlocks: IteratorObject<SourcedBlock>,
-  ctx: Ctx,
-): IteratorObject<Grouped> {
-  const acc = new Map<string, SourcedBlock>()
+const toolLeaf = ({
+  input,
+  output,
+  ctx,
+  orphaned,
+  turnStart,
+}: {
+  input?: SourcedToolBlock
+  output?: SourcedToolBlock
+  ctx: Ctx
+  orphaned?: "tool_use" | "tool_result"
+  turnStart: boolean
+}): Grouped => {
+  const ref = input ?? output
+  ok(ref)
 
-  for (const sourced of sourcedBlocks) {
-    if (
-      sourced.block.category !== "tool" ||
-      sourced.block.correlationId === undefined
-    ) {
-      yield leaf({ bundle: [sourced], ctx })
-      continue
-    }
+  const block = ref.block
+  const error = input?.block.error ?? output?.block.error
+  const startTime = (input ?? output)!.msg[META].timestamp.getTime()
+  const endTime = (output ?? input)!.msg[META].timestamp.getTime()
+  const kind = block.kind
 
-    const id = sourced.block.correlationId
-    if (sourced.block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
-      acc.set(id, sourced)
-      continue
-    }
+  return {
+    spanName: block.toolName ? `${kind} ${block.toolName}` : kind,
+    spanKind: otelKind(kind),
+    startTime,
+    endTime,
+    attributes: {
+      ...commonAttrs({ kind, ctx }),
+      ...(input
+        ? {
+            [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: JSON.stringify(
+              input.block.value,
+            ),
+          }
+        : {}),
+      ...(output
+        ? { [ATTR_GEN_AI_TOOL_CALL_RESULT]: JSON.stringify(output.block.value) }
+        : {}),
+      ...toolAttrs({ block, error }),
+      [metadata("transcript_jq")]: ref.msg[META].debugExpr,
+      ...(orphaned ? { [metadata("orphaned")]: orphaned } : {}),
+    },
+    ...(error ? { status: { code: SpanStatusCode.ERROR } } : {}),
+    ...(turnStart ? { turnStart: true } : {}),
+  }
+}
 
-    const mate = acc.get(id)
-    if (mate === undefined) {
-      yield leaf({ bundle: [sourced], ctx, orphaned: "tool_result" })
-      continue
-    }
-    acc.delete(id)
-    yield leaf({ bundle: [mate, sourced], ctx })
+const buildLeaves = function* ({
+  transcript,
+  ctx,
+}: {
+  transcript: readonly TranscriptMessage[]
+  ctx: Ctx
+}): IteratorObject<Grouped> {
+  const toolCalls = new Map<string, SourcedToolBlock>()
+  let pendingTurnStart = false
+  const consumeTurnStart = () => {
+    const v = pendingTurnStart
+    pendingTurnStart = false
+    return v
   }
 
-  for (const entry of acc.values()) {
-    yield leaf({ bundle: [entry], ctx, orphaned: "tool_use" })
+  for (const [idx, msg] of transcript.entries()) {
+    if (msg.type === "user") {
+      pendingTurnStart = true
+    }
+
+    for (const raw of contents(msg)) {
+      const extracted = extractBlock(msg.type, raw)
+      if (
+        !extracted ||
+        extracted.category !== "tool" ||
+        extracted.correlationId === undefined
+      ) {
+        continue
+      }
+      const sourced: SourcedToolBlock = { msg, block: extracted }
+
+      if (extracted.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+        toolCalls.set(extracted.correlationId, sourced)
+        continue
+      }
+
+      const mate = toolCalls.get(extracted.correlationId)
+      if (mate === undefined) {
+        yield toolLeaf({
+          output: sourced,
+          ctx,
+          orphaned: "tool_result",
+          turnStart: consumeTurnStart(),
+        })
+        continue
+      }
+      toolCalls.delete(extracted.correlationId)
+      yield toolLeaf({
+        input: mate,
+        output: sourced,
+        ctx,
+        turnStart: consumeTurnStart(),
+      })
+    }
+
+    if (msg.type === "assistant") {
+      yield chatLeaf({
+        message: msg,
+        history: transcript.slice(0, idx),
+        ctx,
+        turnStart: consumeTurnStart(),
+      })
+    }
   }
 
+  for (const orphan of toolCalls.values()) {
+    yield toolLeaf({
+      input: orphan,
+      ctx,
+      orphaned: "tool_use",
+      turnStart: false,
+    })
+  }
   return
 }
 
@@ -1085,10 +1073,9 @@ const branch = ({
 }: {
   kind: GroupedKind
   attributes: Attributes
-  children: readonly Grouped[]
+  children: NonEmpty<Grouped>
   ctx: Ctx
 }): Grouped => {
-  const blocks = children.flatMap((c) => c.blocks)
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
 
@@ -1098,22 +1085,11 @@ const branch = ({
     startTime: Math.min(...children.map((c) => c.startTime)),
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
-      ...commonAttrs({ kind, ctx, isOperation: true, blocks }),
-      ...branchIo(blocks),
+      ...commonAttrs({ kind, ctx }),
       ...attributes,
     },
-    blocks,
     children,
   }
-}
-
-const isTurnStart = (entry: Grouped): boolean => {
-  const [first] = entry.blocks
-  return (
-    entry.children === undefined &&
-    first?.msg.type === "user" &&
-    first?.block.category !== "tool"
-  )
 }
 
 const groupAgents = function* ({
@@ -1126,19 +1102,25 @@ const groupAgents = function* ({
   ctx: Ctx
 }): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
-    yield branch({
-      kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-      attributes: {
-        [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
-        [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
-      },
-      children: entries.toArray(),
-      ctx,
-    })
+    const children = entries.toArray()
+    if (isNonEmpty(children)) {
+      yield branch({
+        kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+        attributes: {
+          [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
+          [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
+        },
+        children,
+        ctx,
+      })
+    }
     return
   }
 
-  for (const chunk of chunkBy({ source: entries, isBoundary: isTurnStart })) {
+  for (const chunk of chunkBy({
+    source: entries,
+    isBoundary: (e) => e.turnStart === true,
+  })) {
     if (chunk.length === 1) {
       yield* chunk
       continue
@@ -1198,10 +1180,9 @@ const main = async (): Promise<void> => {
   }
 
   const ctx = { userId, sessionId: hook.session_id } satisfies Ctx
-  const transcriptRows = await Array.fromAsync(parseMessages(hook, state.uuid))
-  const extracted = extractContent(transcriptRows.values())
-  const correlated = correlateToolCalls(extracted, ctx)
-  const grouped = groupAgents({ hook, entries: correlated, ctx })
+  const transcript = await Array.fromAsync(parseMessages(hook, state.uuid))
+  const leaves = buildLeaves({ transcript, ctx })
+  const grouped = groupAgents({ hook, entries: leaves, ctx })
 
   const tracer = otel.provider.getTracer("claude-code")
   for (const group of grouped) {
@@ -1210,7 +1191,7 @@ const main = async (): Promise<void> => {
 
   await otel.provider.forceFlush()
   if (hook.hook_event_name !== "SubagentStop") {
-    const tailUuid = transcriptRows.at(-1)?.uuid
+    const tailUuid = transcript.at(-1)?.uuid
     if (tailUuid !== undefined) {
       state.uuid = tailUuid
     }
