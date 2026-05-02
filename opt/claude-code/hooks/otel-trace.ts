@@ -808,74 +808,6 @@ const branchIo = (sourceBlocks: readonly SourcedBlock[]): Attributes => {
   }
 }
 
-type AggregateFacts = Readonly<
-  {
-    model: string | undefined
-    responseId: string | undefined
-    stopReasons: string[]
-  } & NonNull<
-    Pick<
-      BetaUsage,
-      | "input_tokens"
-      | "output_tokens"
-      | "cache_read_input_tokens"
-      | "cache_creation_input_tokens"
-    >
-  >
->
-
-const aggregateFacts = ({
-  blocks,
-  includeUsage,
-}: {
-  blocks: readonly SourcedBlock[]
-  includeUsage: boolean
-}): AggregateFacts => {
-  const seen = new Set<string>()
-  const assistants = blocks
-    .values()
-    .map((b) => b.msg)
-    .filter((msg) => msg.type === "assistant")
-    .filter((msg) => !seen.has(msg.message.id) && !!seen.add(msg.message.id))
-    .toArray()
-
-  const zeroUsage = {
-    input_tokens: 0,
-    output_tokens: 0,
-    cache_read_input_tokens: 0,
-    cache_creation_input_tokens: 0,
-  }
-  const usage = includeUsage
-    ? assistants.reduce(
-        (acc, { message: { usage: u } }) => ({
-          input_tokens:
-            acc.input_tokens +
-            u.input_tokens +
-            (u.cache_read_input_tokens ?? 0) +
-            (u.cache_creation_input_tokens ?? 0),
-          output_tokens: acc.output_tokens + u.output_tokens,
-          cache_read_input_tokens:
-            acc.cache_read_input_tokens + (u.cache_read_input_tokens ?? 0),
-          cache_creation_input_tokens:
-            acc.cache_creation_input_tokens +
-            (u.cache_creation_input_tokens ?? 0),
-        }),
-        zeroUsage,
-      )
-    : zeroUsage
-  return {
-    model: assistants.findLast((a) => a.message.model !== "<synthetic>")
-      ?.message.model,
-    responseId: assistants.at(-1)?.message.id,
-    stopReasons: assistants
-      .values()
-      .map((m) => m.message.stop_reason)
-      .filter(isNonNull)
-      .toArray(),
-    ...usage,
-  }
-}
-
 const commonAttrs = ({
   kind,
   ctx,
@@ -887,10 +819,48 @@ const commonAttrs = ({
   isOperation: boolean
   blocks: readonly SourcedBlock[]
 }): Attributes => {
-  const facts = aggregateFacts({
-    blocks,
-    includeUsage: isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT,
-  })
+  const seen = new Set<string>()
+  const assistants = blocks
+    .values()
+    .map((b) => b.msg)
+    .filter((msg) => msg.type === "assistant")
+    .filter((msg) => !seen.has(msg.message.id) && !!seen.add(msg.message.id))
+    .toArray()
+
+  const model = assistants.findLast((a) => a.message.model !== "<synthetic>")
+    ?.message.model
+  const responseId = assistants.at(-1)?.message.id
+  const stopReasons = assistants
+    .values()
+    .map((m) => m.message.stop_reason)
+    .filter(isNonNull)
+    .toArray()
+
+  const usage =
+    isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
+      ? assistants.reduce(
+          (acc, { message: { usage: u } }) => ({
+            input_tokens:
+              acc.input_tokens +
+              u.input_tokens +
+              (u.cache_read_input_tokens ?? 0) +
+              (u.cache_creation_input_tokens ?? 0),
+            output_tokens: acc.output_tokens + u.output_tokens,
+            cache_read_input_tokens:
+              acc.cache_read_input_tokens + (u.cache_read_input_tokens ?? 0),
+            cache_creation_input_tokens:
+              acc.cache_creation_input_tokens +
+              (u.cache_creation_input_tokens ?? 0),
+          }),
+          {
+            input_tokens: 0,
+            output_tokens: 0,
+            cache_read_input_tokens: 0,
+            cache_creation_input_tokens: 0,
+          },
+        )
+      : undefined
+
   return {
     [ATTR_USER_ID]: ctx.userId,
     [ATTR_GEN_AI_CONVERSATION_ID]: ctx.sessionId,
@@ -908,38 +878,36 @@ const commonAttrs = ({
     ...(isOperation && kind !== GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
       ? { [ATTR_GEN_AI_OUTPUT_TYPE]: GEN_AI_OUTPUT_TYPE_VALUE_TEXT }
       : {}),
-    ...(facts.model
+    ...(model
       ? {
-          [ATTR_GEN_AI_REQUEST_MODEL]: facts.model,
-          [ATTR_GEN_AI_RESPONSE_MODEL]: facts.model,
+          [ATTR_GEN_AI_REQUEST_MODEL]: model,
+          [ATTR_GEN_AI_RESPONSE_MODEL]: model,
         }
       : {}),
-    ...(facts.responseId
-      ? { [ATTR_GEN_AI_RESPONSE_ID]: facts.responseId }
-      : {}),
-    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && facts.stopReasons.length
+    ...(responseId ? { [ATTR_GEN_AI_RESPONSE_ID]: responseId } : {}),
+    ...(kind === GEN_AI_OPERATION_NAME_VALUE_CHAT && stopReasons.length
       ? {
-          [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: facts.stopReasons.map(
+          [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons.map(
             normalizeFinishReason,
           ),
         }
       : {}),
-    ...(facts.input_tokens
-      ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: facts.input_tokens }
+    ...(usage?.input_tokens
+      ? { [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: usage.input_tokens }
       : {}),
-    ...(facts.output_tokens
-      ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: facts.output_tokens }
+    ...(usage?.output_tokens
+      ? { [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: usage.output_tokens }
       : {}),
-    ...(facts.cache_read_input_tokens
+    ...(usage?.cache_read_input_tokens
       ? {
           [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]:
-            facts.cache_read_input_tokens,
+            usage.cache_read_input_tokens,
         }
       : {}),
-    ...(facts.cache_creation_input_tokens
+    ...(usage?.cache_creation_input_tokens
       ? {
           [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]:
-            facts.cache_creation_input_tokens,
+            usage.cache_creation_input_tokens,
         }
       : {}),
   }
@@ -996,7 +964,14 @@ const leaf = ({
   const kind: BlockKind = tool?.kind ?? GEN_AI_OPERATION_NAME_VALUE_CHAT
   const isChat = isOperation && kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
   const model = isChat
-    ? aggregateFacts({ blocks: bundle, includeUsage: false }).model
+    ? bundle
+        .values()
+        .map((s) => s.msg)
+        .filter((msg) => msg.type === "assistant")
+        .map((msg) => msg.message.model)
+        .filter((m) => m !== "<synthetic>")
+        .toArray()
+        .at(-1)
     : undefined
   const times = bundle.map(({ msg }) => msg[META].timestamp.getTime())
 

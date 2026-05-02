@@ -14,8 +14,6 @@ Each pass: audit, propose, apply, audit again. Stop when the user signs off, or 
 
 # Principles
 
-In rough priority order. The first three are architectural; the rest are tactical.
-
 ## 1. Pipeline producers, thin consumers
 
 Each stage takes the previous stage's output, transforms it, and passes it on. Effects only at the final stage. The producer computes everything the consumer needs; the consumer reads.
