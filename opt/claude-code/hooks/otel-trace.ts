@@ -977,8 +977,8 @@ const buildBranch = ({
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
 
-  const inputSequence = children.flatMap((c) => c[META]?.inputSequence ?? [])
-  const outputSequence = children.flatMap((c) => c[META]?.outputSequence ?? [])
+  const inputSequence = children.flatMap((c) => c[META].inputSequence ?? [])
+  const outputSequence = children.flatMap((c) => c[META].outputSequence ?? [])
 
   return {
     spanName: [kind, target].filter((n) => n).join(" "),
@@ -1025,7 +1025,7 @@ const groupAgents = function* ({
 
   for (const children of chunkBy({
     source: leaves,
-    isBoundary: (e) => e[META]?.turnStart === true,
+    isBoundary: (e) => e[META].turnStart === true,
   })) {
     yield buildBranch({
       ctx,
