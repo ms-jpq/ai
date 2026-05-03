@@ -24,6 +24,7 @@ import { BasicTracerProvider, BatchSpanProcessor } from "@opentelemetry/sdk-trac
 import {
   ATTR_ERROR_TYPE,
   ATTR_SERVER_ADDRESS,
+  ATTR_SERVER_PORT,
   ATTR_SERVICE_INSTANCE_ID,
   ATTR_SERVICE_NAME,
 } from "@opentelemetry/semantic-conventions"
@@ -133,6 +134,7 @@ type Facts = Readonly<{
   model?: string
   responseId?: string
   stopReasons?: readonly string[]
+  error?: string
   usage?: Readonly<{
     input_tokens: number
     output_tokens: number
@@ -715,10 +717,11 @@ const normalizeFinishReason = (() => {
   return (raw: string | null) => map.get(raw ?? "") ?? raw ?? "stop"
 })()
 
-const factsFromAssistant = ({ message }: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
+const factsFromAssistant = ({ message, error }: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
   if (message.model === "<synthetic>") {
     return {
       stopReasons: message.stop_reason ? [message.stop_reason] : [],
+      ...(error ? { error } : {}),
     }
   }
 
@@ -727,6 +730,7 @@ const factsFromAssistant = ({ message }: Extract<TranscriptMessage, { type: "ass
     model: message.model,
     responseId: message.id,
     stopReasons: message.stop_reason ? [message.stop_reason] : [],
+    ...(error ? { error } : {}),
     usage: {
       input_tokens: u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
       output_tokens: u.output_tokens,
@@ -737,7 +741,7 @@ const factsFromAssistant = ({ message }: Extract<TranscriptMessage, { type: "ass
 }
 
 const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?: Facts }): Attributes => {
-  const { model, responseId, stopReasons, usage } = facts ?? {}
+  const { model, responseId, stopReasons, error, usage } = facts ?? {}
   const isApi = kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
 
   return {
@@ -746,11 +750,13 @@ const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?
     [ATTR_GEN_AI_OPERATION_NAME]: kind,
     [ATTR_GEN_AI_PROVIDER_NAME]: GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
     [ATTR_SERVER_ADDRESS]: isApi ? "api.anthropic.com" : undefined,
+    [ATTR_SERVER_PORT]: isApi ? 443 : undefined,
     [ATTR_GEN_AI_OUTPUT_TYPE]: kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ? GEN_AI_OUTPUT_TYPE_VALUE_TEXT : undefined,
     [ATTR_GEN_AI_REQUEST_MODEL]: model,
     [ATTR_GEN_AI_RESPONSE_MODEL]: model,
     [ATTR_GEN_AI_RESPONSE_ID]: responseId,
     [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons?.length ? stopReasons.map(normalizeFinishReason) : undefined,
+    [ATTR_ERROR_TYPE]: isApi ? error : undefined,
     [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: usage?.input_tokens,
     [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: usage?.output_tokens,
     [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: usage?.cache_read_input_tokens,
@@ -813,6 +819,7 @@ const chatLeaf = ({
       [ATTR_GEN_AI_OUTPUT_MESSAGES]: output && JSON.stringify(outputSequence),
       [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
+    status: facts?.error ? { code: SpanStatusCode.ERROR } : undefined,
     [META]: { inputSequence, outputSequence },
   }
 }
