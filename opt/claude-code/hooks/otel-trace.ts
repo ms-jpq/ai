@@ -475,13 +475,28 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         correlationId: block.id,
         value: block.input,
       })
-    case "server_tool_use":
-      return extractToolUse({
-        toolName: block.name,
-        toolType: "extension",
-        correlationId: block.id,
-        value: block.input,
-      })
+    case "server_tool_use": {
+      switch (block.name) {
+        case "web_search":
+        case "web_fetch":
+          return extractChat({
+            role,
+            part: {
+              type: "server_tool_call",
+              id: block.id,
+              name: block.name,
+              server_tool_call: { arguments: block.input },
+            },
+          })
+        default:
+          return extractToolUse({
+            toolName: block.name,
+            toolType: "extension",
+            correlationId: block.id,
+            value: block.input,
+          })
+      }
+    }
     case "tool_use":
       return extractToolUse({
         toolName: block.name,
@@ -626,46 +641,47 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           title: block.title,
         },
       })
-    case "web_search_tool_result":
-      if (Array.isArray(block.content)) {
-        return extractToolResult({
-          correlationId: block.tool_use_id,
-          kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
-          value: block.content.map((r) => ({
-            page_age: r.page_age,
-            title: r.title,
-            url: r.url,
-          })),
-        })
-      }
-      return extractToolResult({
-        correlationId: block.tool_use_id,
-        kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
-        value: block.content.error_code,
-        error: block.content.error_code,
+    case "web_search_tool_result": {
+      return extractChat({
+        role,
+        part: {
+          type: "server_tool_call_response",
+          id: block.tool_use_id,
+          server_tool_call_response: Array.isArray(block.content)
+            ? {
+                results: block.content.map((r) => ({
+                  page_age: r.page_age,
+                  title: r.title,
+                  url: r.url,
+                })),
+              }
+            : { error_code: block.content.error_code },
+        },
       })
-    case "web_fetch_tool_result":
-      switch (block.content.type) {
-        case "web_fetch_tool_result_error":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
-            value: block.content.error_code,
-            error: block.content.error_code,
-          })
-        case "web_fetch_result":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            kind: GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
-            value: {
-              retrieved_at: block.content.retrieved_at,
-              url: block.content.url,
-              content: documentValue(block.content.content),
-            },
-          })
-        default:
-          fail(block.content satisfies never)
-      }
+    }
+    case "web_fetch_tool_result": {
+      return extractChat({
+        role,
+        part: {
+          type: "server_tool_call_response",
+          id: block.tool_use_id,
+          server_tool_call_response: (() => {
+            switch (block.content.type) {
+              case "web_fetch_tool_result_error":
+                return { error_code: block.content.error_code }
+              case "web_fetch_result":
+                return {
+                  retrieved_at: block.content.retrieved_at,
+                  url: block.content.url,
+                  content: documentValue(block.content.content),
+                }
+              default:
+                fail(block.content satisfies never)
+            }
+          })(),
+        },
+      })
+    }
 
     case "container_upload":
       return {
