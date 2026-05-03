@@ -948,17 +948,19 @@ const groupAgents = function* ({
 }): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
     const children = leaves.toArray()
-    if (isNonEmpty(children)) {
-      yield buildBranch({
-        kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-        attributes: {
-          [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
-          [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
-        },
-        children,
-        ctx,
-      })
+    if (!isNonEmpty(children)) {
+      return
     }
+
+    yield buildBranch({
+      kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+      attributes: {
+        [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
+        [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
+      },
+      children,
+      ctx,
+    })
     return
   }
 
@@ -966,11 +968,6 @@ const groupAgents = function* ({
     source: leaves,
     isBoundary: (e) => e[META]?.turnStart === true,
   })) {
-    if (children.length === 1) {
-      yield* children
-      continue
-    }
-
     yield buildBranch({
       ctx,
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
