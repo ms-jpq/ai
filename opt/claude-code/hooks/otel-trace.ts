@@ -771,7 +771,7 @@ const chatLeaf = ({
   output?: NonEmpty<SourcedBlock<ChatBlock>>
 }): Grouped => {
   const ref = output ?? input
-  ok(ref, "chatLeaf needs at least one of input/output")
+  ok(ref)
 
   const [{ msg: assistantMsg }] = output ?? [{ msg: undefined }]
   const facts = assistantMsg?.type === "assistant" ? factsFromAssistant(assistantMsg) : undefined
@@ -811,7 +811,7 @@ const toolLeaf = ({
   output?: SourcedBlock<ToolBlock>
 }): Grouped => {
   const ref = input ?? output
-  ok(ref, "toolLeaf needs at least one of input/output")
+  ok(ref)
 
   const block = ref.block
   const error = input?.block.error ?? output?.block.error
