@@ -53,7 +53,6 @@ import {
   GEN_AI_OPERATION_NAME_VALUE_CHAT,
   GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
   GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
-  GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL,
   GEN_AI_OUTPUT_TYPE_VALUE_TEXT,
   GEN_AI_PROVIDER_NAME_VALUE_ANTHROPIC,
   GEN_AI_TOKEN_TYPE_VALUE_INPUT,
@@ -92,10 +91,7 @@ type TranscriptMessage = Readonly<
 
 type Role = TranscriptMessage["type"]
 
-type BlockKind =
-  | typeof GEN_AI_OPERATION_NAME_VALUE_CHAT
-  | typeof GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
-  | typeof GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+type BlockKind = typeof GEN_AI_OPERATION_NAME_VALUE_CHAT | typeof GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
 
 type GroupedKind = BlockKind | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
 
@@ -339,18 +335,16 @@ const extractToolUse = ({
 const extractToolResult = ({
   correlationId,
   value,
-  kind = GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
   error,
 }: {
   correlationId: string
   value: unknown
-  kind?: BlockKind
   error?: string
 }) =>
   ({
     category: "tool",
     type: GEN_AI_TOKEN_TYPE_VALUE_OUTPUT,
-    kind,
+    kind: GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
     correlationId,
     value,
     ...(error !== undefined ? { error } : {}),
@@ -364,16 +358,11 @@ const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): Record<st
   switch (source.type) {
     case "base64":
     case "text":
-      return {
-        type: "blob",
-        content: "",
-        mime_type: source.media_type,
-        ...meta,
-      }
+      return { type: "document", mime_type: source.media_type, ...meta }
     case "url":
-      return { type: "uri", uri: source.url, ...meta }
+      return { type: "document", uri: source.url, ...meta }
     case "file":
-      return { type: "file", file_id: source.file_id, ...meta }
+      return { type: "document", file_id: source.file_id, ...meta }
     case "content":
       return { type: "document", ...meta }
     default:
@@ -475,28 +464,16 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         correlationId: block.id,
         value: block.input,
       })
-    case "server_tool_use": {
-      switch (block.name) {
-        case "web_search":
-        case "web_fetch":
-          return extractChat({
-            role,
-            part: {
-              type: "server_tool_call",
-              id: block.id,
-              name: block.name,
-              server_tool_call: { arguments: block.input },
-            },
-          })
-        default:
-          return extractToolUse({
-            toolName: block.name,
-            toolType: "extension",
-            correlationId: block.id,
-            value: block.input,
-          })
-      }
-    }
+    case "server_tool_use":
+      return extractChat({
+        role,
+        part: {
+          type: "server_tool_call",
+          id: block.id,
+          name: block.name,
+          server_tool_call: { arguments: block.input },
+        },
+      })
     case "tool_use":
       return extractToolUse({
         toolName: block.name,
@@ -538,96 +515,93 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
 
     case "code_execution_tool_result":
     case "bash_code_execution_tool_result":
-      switch (block.content.type) {
-        case "bash_code_execution_tool_result_error":
-        case "code_execution_tool_result_error":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: block.content.error_code,
-            error: block.content.error_code,
-          })
-        case "encrypted_code_execution_result":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: {
-              return_code: block.content.return_code,
-              stderr: block.content.stderr,
-            },
-          })
-        case "bash_code_execution_result":
-        case "code_execution_result":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: {
-              return_code: block.content.return_code,
-              stderr: block.content.stderr,
-              stdout: block.content.stdout,
-            },
-          })
-        default:
-          fail(block.content satisfies never)
-      }
+      return extractChat({
+        role,
+        part: {
+          type: "server_tool_call_response",
+          id: block.tool_use_id,
+          server_tool_call_response: (() => {
+            switch (block.content.type) {
+              case "bash_code_execution_tool_result_error":
+              case "code_execution_tool_result_error":
+                return { error_code: block.content.error_code }
+              case "encrypted_code_execution_result":
+                return {
+                  return_code: block.content.return_code,
+                  stderr: block.content.stderr,
+                }
+              case "bash_code_execution_result":
+              case "code_execution_result":
+                return {
+                  return_code: block.content.return_code,
+                  stderr: block.content.stderr,
+                  stdout: block.content.stdout,
+                }
+              default:
+                fail(block.content satisfies never)
+            }
+          })(),
+        },
+      })
 
     case "text_editor_code_execution_tool_result":
-      switch (block.content.type) {
-        case "text_editor_code_execution_tool_result_error":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: {
-              error_code: block.content.error_code,
-              error_message: block.content.error_message,
-            },
-            error: block.content.error_code,
-          })
-        case "text_editor_code_execution_view_result":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: {
-              content: block.content.content,
-              file_type: block.content.file_type,
-              num_lines: block.content.num_lines,
-              start_line: block.content.start_line,
-              total_lines: block.content.total_lines,
-            },
-          })
-        case "text_editor_code_execution_create_result":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: { is_file_update: block.content.is_file_update },
-          })
-        case "text_editor_code_execution_str_replace_result":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: {
-              lines: block.content.lines,
-              new_lines: block.content.new_lines,
-              new_start: block.content.new_start,
-              old_lines: block.content.old_lines,
-              old_start: block.content.old_start,
-            },
-          })
-        default:
-          fail(block.content satisfies never)
-      }
+      return extractChat({
+        role,
+        part: {
+          type: "server_tool_call_response",
+          id: block.tool_use_id,
+          server_tool_call_response: (() => {
+            switch (block.content.type) {
+              case "text_editor_code_execution_tool_result_error":
+                return {
+                  error_code: block.content.error_code,
+                  error_message: block.content.error_message,
+                }
+              case "text_editor_code_execution_view_result":
+                return {
+                  content: block.content.content,
+                  file_type: block.content.file_type,
+                  num_lines: block.content.num_lines,
+                  start_line: block.content.start_line,
+                  total_lines: block.content.total_lines,
+                }
+              case "text_editor_code_execution_create_result":
+                return { is_file_update: block.content.is_file_update }
+              case "text_editor_code_execution_str_replace_result":
+                return {
+                  lines: block.content.lines,
+                  new_lines: block.content.new_lines,
+                  new_start: block.content.new_start,
+                  old_lines: block.content.old_lines,
+                  old_start: block.content.old_start,
+                }
+              default:
+                fail(block.content satisfies never)
+            }
+          })(),
+        },
+      })
 
     case "tool_search_tool_result":
-      switch (block.content.type) {
-        case "tool_search_tool_result_error": {
-          const { type: _, ...rest } = block.content
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: rest,
-            error: block.content.error_code,
-          })
-        }
-        case "tool_search_tool_search_result":
-          return extractToolResult({
-            correlationId: block.tool_use_id,
-            value: block.content.tool_references,
-          })
-        default:
-          fail(block.content satisfies never)
-      }
+      return extractChat({
+        role,
+        part: {
+          type: "server_tool_call_response",
+          id: block.tool_use_id,
+          server_tool_call_response: (() => {
+            switch (block.content.type) {
+              case "tool_search_tool_result_error": {
+                const { type: _, ...rest } = block.content
+                return rest
+              }
+              case "tool_search_tool_search_result":
+                return { tool_references: block.content.tool_references }
+              default:
+                fail(block.content satisfies never)
+            }
+          })(),
+        },
+      })
 
     case "document":
       return extractChat({ role, part: documentPart(block) })
@@ -703,6 +677,7 @@ const normalizeFinishReason = (() => {
   const map = new Map<string, string>([
     ["end_turn", "stop"],
     ["max_tokens", "length"],
+    ["pause_turn", "stop"],
     ["refusal", "content_filter"],
     ["stop_sequence", "stop"],
     ["tool_use", "tool_calls"],
@@ -733,7 +708,7 @@ const factsFromAssistant = (msg: Extract<TranscriptMessage, { type: "assistant" 
 
 const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?: Facts }): Attributes => {
   const { model, responseId, stopReasons, usage } = facts ?? {}
-  const isApi = kind === GEN_AI_OPERATION_NAME_VALUE_CHAT || kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+  const isApi = kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
 
   return {
     [ATTR_USER_ID]: ctx.userId,
@@ -797,9 +772,7 @@ const chatLeaf = ({
 }
 
 const otelKind = (kind: GroupedKind): SpanKind =>
-  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT || kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
-    ? SpanKind.CLIENT
-    : SpanKind.INTERNAL
+  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ? SpanKind.CLIENT : SpanKind.INTERNAL
 
 const toolLeaf = ({
   input,
