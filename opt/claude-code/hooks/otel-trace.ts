@@ -786,6 +786,17 @@ const toMessages = ({
     }))
     .toArray()
 
+const textValue = (sequence: OtelMessageSequence): string | undefined => {
+  const texts = sequence
+    .values()
+    .flatMap((m) => m.parts.values())
+    .filter((p) => p.type === "text")
+    .map((p) => p.content)
+    .filter((c): c is string => typeof c === "string")
+    .toArray()
+  return isNonEmpty(texts) ? texts.join("\n\n") : undefined
+}
+
 const chatLeaf = ({
   ctx,
   input,
@@ -817,6 +828,8 @@ const chatLeaf = ({
       ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
       [ATTR_GEN_AI_INPUT_MESSAGES]: input && JSON.stringify(inputSequence),
       [ATTR_GEN_AI_OUTPUT_MESSAGES]: output && JSON.stringify(outputSequence),
+      "input.value": textValue(inputSequence),
+      "output.value": textValue(outputSequence),
       [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
     status: facts?.error ? { code: SpanStatusCode.ERROR } : undefined,
