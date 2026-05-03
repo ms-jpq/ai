@@ -878,8 +878,6 @@ const toolLeaf = ({
       ...commonAttrs({ kind, ctx }),
       [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: input && JSON.stringify(input.block.value),
       [ATTR_GEN_AI_TOOL_CALL_RESULT]: output && JSON.stringify(output.block.value),
-      [ATTR_GEN_AI_INPUT_MESSAGES]: input && JSON.stringify(inputSequence),
-      [ATTR_GEN_AI_OUTPUT_MESSAGES]: output && JSON.stringify(outputSequence),
       [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
       [ATTR_GEN_AI_TOOL_TYPE]: block.toolType,
       [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId,
