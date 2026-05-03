@@ -673,16 +673,19 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
   }
 }
 
-const normalizeFinishReason = (() => {
-  const map = new Map<string, string>([
-    ["end_turn", "stop"],
-    ["max_tokens", "length"],
-    ["pause_turn", "stop"],
-    ["refusal", "content_filter"],
-    ["stop_sequence", "stop"],
-    ["tool_use", "tool_calls"],
-  ])
-  return (raw: string | null | undefined) => map.get(raw ?? "") ?? raw ?? "stop"
+const [normalizeFinishReason, messageFinishReason] = (() => {
+  const make = (toolUse: string) => {
+    const map = new Map([
+      ["end_turn", "stop"],
+      ["max_tokens", "length"],
+      ["pause_turn", "stop"],
+      ["refusal", "content_filter"],
+      ["stop_sequence", "stop"],
+      ["tool_use", toolUse],
+    ])
+    return (raw: string | null) => map.get(raw ?? "") ?? raw ?? "stop"
+  }
+  return [make("tool_calls"), make("tool_call")] as const
 })()
 
 const factsFromAssistant = (msg: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
@@ -730,12 +733,22 @@ const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
-const toMessages = (sourced: Iterable<SourcedBlock<ChatBlock>>) =>
+const toInputMessages = (sourced: Iterable<SourcedBlock<ChatBlock>>) =>
   Map.groupBy(sourced, (s) => s.msg)
     .entries()
     .map(([msg, items]) => ({
       role: msg.type,
       parts: items.map((s) => s.block.part),
+    }))
+    .toArray()
+
+const toOutputMessages = (sourced: Iterable<SourcedBlock<ChatBlock>>) =>
+  Map.groupBy(sourced, (s) => s.msg)
+    .entries()
+    .map(([msg, items]) => ({
+      role: msg.type,
+      parts: items.map((s) => s.block.part),
+      finish_reason: msg.type === "assistant" ? messageFinishReason(msg.message.stop_reason) : "stop",
     }))
     .toArray()
 
@@ -764,8 +777,8 @@ const chatLeaf = ({
     endTime: last.msg[META].timestamp.getTime(),
     attributes: {
       ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
-      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(toMessages(input ?? [])),
-      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(toMessages(output ?? [])),
+      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(toInputMessages(input ?? [])),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(toOutputMessages(output ?? [])),
       [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
   }
