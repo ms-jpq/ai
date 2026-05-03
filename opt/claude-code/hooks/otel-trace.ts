@@ -994,8 +994,8 @@ const buildBranch = ({
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
       ...commonAttrs({ kind, ctx }),
-      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(inputSequence),
-      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputSequence),
+      [ATTR_GEN_AI_INPUT_MESSAGES]: inputSequence.length ? JSON.stringify(inputSequence) : undefined,
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: outputSequence.length ? JSON.stringify(outputSequence) : undefined,
       ...attributes,
     },
     children,
