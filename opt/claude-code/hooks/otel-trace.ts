@@ -767,7 +767,8 @@ const chatLeaf = ({
   const facts = assistantMsg?.type === "assistant" ? factsFromAssistant(assistantMsg) : undefined
 
   const [first] = input ?? ref
-  const last = ref.at(-1)!
+  const last = ref.at(-1)
+  ok(last)
 
   return {
     spanName: facts?.model ? `chat ${facts.model}` : "chat",
@@ -801,8 +802,8 @@ const toolLeaf = ({
   const block = ref.block
   const error = input?.block.error ?? output?.block.error
   const orphaned = !input ? "tool_result" : !output ? "tool_use" : undefined
-  const startTime = (input ?? output)!.msg[META].timestamp.getTime()
-  const endTime = (output ?? input)!.msg[META].timestamp.getTime()
+  const startTime = (input ?? ref).msg[META].timestamp.getTime()
+  const endTime = (output ?? ref).msg[META].timestamp.getTime()
   const kind = block.kind
 
   return {
@@ -837,7 +838,7 @@ const buildLeaves = function* ({
   const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
 
   let turnStart = false
-  const tag = (g: Grouped): Grouped => {
+  const markTurnStart = (g: Grouped): Grouped => {
     if (!turnStart) {
       return g
     }
@@ -851,7 +852,7 @@ const buildLeaves = function* ({
     const input = isNonEmpty(drainedIn) ? drainedIn : undefined
     const output = isNonEmpty(drainedOut) ? drainedOut : undefined
     if (input || output) {
-      yield tag(chatLeaf({ input, output, ctx }))
+      yield markTurnStart(chatLeaf({ input, output, ctx }))
     }
     return
   }
@@ -859,7 +860,7 @@ const buildLeaves = function* ({
   for (const msg of transcript) {
     const blocks = contents(msg)
       .map((raw) => extractBlock(msg.type, raw))
-      .filter((b) => !!b)
+      .filter((b) => b !== undefined)
 
     if (msg.type === "user") {
       turnStart = true
@@ -883,7 +884,7 @@ const buildLeaves = function* ({
 
         const input = toolCalls.get(block.correlationId)
         toolCalls.delete(block.correlationId)
-        yield tag(toolLeaf({ input, output: sourced, ctx }))
+        yield markTurnStart(toolLeaf({ input, output: sourced, ctx }))
         continue
       }
 
@@ -909,15 +910,15 @@ const buildLeaves = function* ({
 }
 
 const buildBranch = ({
+  ctx,
   kind,
   attributes,
   children,
-  ctx,
 }: {
+  ctx: Ctx
   kind: GroupedKind
   attributes: Attributes
   children: NonEmpty<Grouped>
-  ctx: Ctx
 }): Grouped => {
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
@@ -938,14 +939,14 @@ const buildBranch = ({
 const groupAgents = function* ({
   ctx,
   hook,
-  entries,
+  leaves,
 }: {
   ctx: Ctx
   hook: HookInput
-  entries: IteratorObject<Grouped>
+  leaves: IteratorObject<Grouped>
 }): IteratorObject<Grouped> {
   if (hook.hook_event_name === "SubagentStop") {
-    const children = entries.toArray()
+    const children = leaves.toArray()
     if (isNonEmpty(children)) {
       yield buildBranch({
         kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
@@ -960,29 +961,37 @@ const groupAgents = function* ({
     return
   }
 
-  for (const chunk of chunkBy({
-    source: entries,
+  for (const children of chunkBy({
+    source: leaves,
     isBoundary: (e) => e.turnStart === true,
   })) {
-    if (chunk.length === 1) {
-      yield* chunk
+    if (children.length === 1) {
+      yield* children
       continue
     }
 
     yield buildBranch({
+      ctx,
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       attributes: {
         [ATTR_GEN_AI_AGENT_NAME]: "general-purpose",
         [ATTR_GEN_AI_AGENT_ID]: hook.session_id,
       },
-      children: chunk,
-      ctx,
+      children,
     })
   }
   return
 }
 
-const emit = ({ tracer, parentCtx, grouped }: { tracer: Tracer; parentCtx: Context; grouped: Grouped }): void => {
+const emitSpanTree = ({
+  tracer,
+  parentCtx,
+  grouped,
+}: {
+  tracer: Tracer
+  parentCtx: Context
+  grouped: Grouped
+}): void => {
   const attributes = Object.fromEntries(Object.entries(grouped.attributes).filter(([, v]) => v !== undefined))
   const span = tracer.startSpan(
     grouped.spanName,
@@ -999,7 +1008,7 @@ const emit = ({ tracer, parentCtx, grouped }: { tracer: Tracer; parentCtx: Conte
   if (grouped.children) {
     const childCtx = trace.setSpan(parentCtx, span)
     for (const child of grouped.children) {
-      emit({ tracer, parentCtx: childCtx, grouped: child })
+      emitSpanTree({ tracer, parentCtx: childCtx, grouped: child })
     }
   }
   span.end(grouped.endTime)
@@ -1018,11 +1027,11 @@ const main = async (): Promise<void> => {
   const ctx = { userId, sessionId: hook.session_id } satisfies Ctx
   const transcript = await Array.fromAsync(parseMessages(hook, state.uuid))
   const leaves = buildLeaves({ ctx, transcript: transcript.values() })
-  const grouped = groupAgents({ ctx, hook, entries: leaves })
+  const grouped = groupAgents({ ctx, hook, leaves })
 
   const tracer = otel.provider.getTracer("claude-code")
   for (const group of grouped) {
-    emit({ tracer, parentCtx: ROOT_CONTEXT, grouped: group })
+    emitSpanTree({ tracer, parentCtx: ROOT_CONTEXT, grouped: group })
   }
 
   await otel.provider.forceFlush()
