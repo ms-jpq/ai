@@ -739,11 +739,6 @@ const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
-const otelKind = (kind: GroupedKind): SpanKind =>
-  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT || kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
-    ? SpanKind.CLIENT
-    : SpanKind.INTERNAL
-
 const toMessages = (sourced: Iterable<SourcedBlock<ChatBlock>>) =>
   Map.groupBy(sourced, (s) => s.msg)
     .entries()
@@ -784,6 +779,11 @@ const chatLeaf = ({
     },
   }
 }
+
+const otelKind = (kind: GroupedKind): SpanKind =>
+  kind === GEN_AI_OPERATION_NAME_VALUE_CHAT || kind === GEN_AI_OPERATION_NAME_VALUE_RETRIEVAL
+    ? SpanKind.CLIENT
+    : SpanKind.INTERNAL
 
 const toolLeaf = ({
   input,
