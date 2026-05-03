@@ -873,55 +873,49 @@ const toolLeaf = ({
   }
 }
 
-const buildLeaves = function* ({
+type LeafEvent =
+  | Readonly<{ kind: "userBoundary" }>
+  | Readonly<{ kind: "leaf"; leaf: Grouped; consumesTurnStart: boolean }>
+
+const aggerateLeaves = function* ({
   ctx,
   transcript,
 }: {
   ctx: Ctx
   transcript: IteratorObject<TranscriptMessage>
-}): IteratorObject<Grouped> {
+}): IteratorObject<LeafEvent> {
   const toolCalls = new Map<string, SourcedBlock<ToolBlock>>()
   const chatInputs = new Array<SourcedBlock<ChatBlock>>()
   const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
 
-  let turnStart = false
-  const markTurnStart = (grouped: Grouped): Grouped => {
-    if (!turnStart) {
-      return grouped
-    }
-    turnStart = false
-    const { [META]: meta, ...g } = grouped
-    return { ...g, [META]: { ...meta, turnStart: true } }
-  }
-
-  const emitChat = function* (): IteratorObject<Grouped> {
+  const flushChat = function* (): IteratorObject<LeafEvent> {
     const drainedIn = chatInputs.splice(0)
     const drainedOut = chatOutputs.splice(0)
     const input = isNonEmpty(drainedIn) ? drainedIn : undefined
     const output = isNonEmpty(drainedOut) ? drainedOut : undefined
     if (input || output) {
-      yield markTurnStart(chatLeaf({ ctx, input, output }))
+      yield { kind: "leaf", leaf: chatLeaf({ ctx, input, output }), consumesTurnStart: true }
     }
     return
   }
 
   for (const msg of transcript) {
+    if (msg.type === "user") {
+      yield { kind: "userBoundary" }
+    }
+
     const blocks = contents(msg)
       .map((raw) => extractBlock(msg.type, raw))
       .filter((b) => b !== undefined)
 
-    if (msg.type === "user") {
-      turnStart = true
-    }
-
     for (const block of blocks) {
       if (block.category === "tool") {
-        yield* emitChat()
+        yield* flushChat()
 
         const sourced = { msg, block }
 
         if (block.correlationId === undefined) {
-          yield toolLeaf({ input: sourced, ctx })
+          yield { kind: "leaf", leaf: toolLeaf({ input: sourced, ctx }), consumesTurnStart: false }
           continue
         }
 
@@ -932,14 +926,14 @@ const buildLeaves = function* ({
 
         const input = toolCalls.get(block.correlationId)
         toolCalls.delete(block.correlationId)
-        yield markTurnStart(toolLeaf({ input, output: sourced, ctx }))
+        yield { kind: "leaf", leaf: toolLeaf({ input, output: sourced, ctx }), consumesTurnStart: true }
         continue
       }
 
       const sourced = { msg, block }
       if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
         if (chatOutputs.length > 0) {
-          yield* emitChat()
+          yield* flushChat()
         }
         chatInputs.push(sourced)
         continue
@@ -949,10 +943,28 @@ const buildLeaves = function* ({
     }
   }
 
-  yield* emitChat()
+  yield* flushChat()
 
   for (const orphan of toolCalls.values()) {
-    yield toolLeaf({ input: orphan, ctx })
+    yield { kind: "leaf", leaf: toolLeaf({ input: orphan, ctx }), consumesTurnStart: false }
+  }
+  return
+}
+
+const tagTurns = function* (events: IteratorObject<LeafEvent>): IteratorObject<Grouped> {
+  let pending = false
+  for (const event of events) {
+    if (event.kind === "userBoundary") {
+      pending = true
+      continue
+    }
+    if (pending && event.consumesTurnStart) {
+      pending = false
+      const { [META]: meta, ...rest } = event.leaf
+      yield { ...rest, [META]: { ...meta, turnStart: true } }
+      continue
+    }
+    yield event.leaf
   }
   return
 }
@@ -1074,7 +1086,7 @@ const main = async (): Promise<void> => {
 
   const ctx = { userId, sessionId: hook.session_id } satisfies Ctx
   const transcript = await Array.fromAsync(parseMessages(hook, state.uuid))
-  const leaves = buildLeaves({ ctx, transcript: transcript.values() })
+  const leaves = tagTurns(aggerateLeaves({ ctx, transcript: transcript.values() }))
   const grouped = groupAgents({ ctx, hook, leaves })
 
   const tracer = otel.provider.getTracer("claude-code")
