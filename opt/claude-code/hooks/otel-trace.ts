@@ -75,6 +75,8 @@ type NonEmpty<T> = readonly [T, ...T[]]
 
 const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0
 
+const collapseSingleton = <T>(arr: readonly T[]): T | readonly T[] => (arr.length === 1 ? arr[0] : arr)
+
 type TranscriptMeta = Readonly<{
   timestamp: Date
   debugExpr: string
@@ -591,7 +593,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
                 return rest
               }
               case "tool_search_tool_search_result":
-                return { tool_references: block.content.tool_references }
+                return { tool_references: collapseSingleton(block.content.tool_references) }
               default:
                 fail(block.content satisfies never)
             }
@@ -606,11 +608,13 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           id: block.tool_use_id,
           server_tool_call_response: Array.isArray(block.content)
             ? {
-                results: block.content.map((r) => ({
-                  page_age: r.page_age,
-                  title: r.title,
-                  url: r.url,
-                })),
+                results: collapseSingleton(
+                  block.content.map((r) => ({
+                    page_age: r.page_age,
+                    title: r.title,
+                    url: r.url,
+                  })),
+                ),
               }
             : { error_code: block.content.error_code },
         },
@@ -659,23 +663,24 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         if (content === undefined || typeof content === "string") {
           return content
         }
-        const mapped = content.map((item) => {
-          switch (item.type) {
-            case "text":
-              return item.text
-            case "image":
-              return imageValue(item)
-            case "document":
-              return documentValue(item)
-            case "search_result":
-              return { source: item.source, title: item.title }
-            case "tool_reference":
-              return item.tool_name
-            default:
-              fail(item satisfies never)
-          }
-        })
-        return mapped.length === 1 ? mapped[0] : mapped
+        return collapseSingleton(
+          content.map((item) => {
+            switch (item.type) {
+              case "text":
+                return item.text
+              case "image":
+                return imageValue(item)
+              case "document":
+                return documentValue(item)
+              case "search_result":
+                return { source: item.source, title: item.title }
+              case "tool_reference":
+                return item.tool_name
+              default:
+                fail(item satisfies never)
+            }
+          }),
+        )
       })()
       return extractToolResult({
         correlationId: block.tool_use_id,
