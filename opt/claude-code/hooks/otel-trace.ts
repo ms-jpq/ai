@@ -1086,7 +1086,7 @@ const groupAgents = function* ({
       ctx,
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       attributes: {
-        [ATTR_GEN_AI_AGENT_NAME]: "main",
+        [ATTR_GEN_AI_AGENT_NAME]: "<main>",
         [ATTR_GEN_AI_AGENT_ID]: hook.session_id,
       },
       children,
