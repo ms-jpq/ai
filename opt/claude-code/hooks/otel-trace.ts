@@ -52,6 +52,7 @@ import {
   ATTR_GEN_AI_USAGE_OUTPUT_TOKENS,
   ATTR_USER_ID,
   GEN_AI_OPERATION_NAME_VALUE_CHAT,
+  GEN_AI_OPERATION_NAME_VALUE_CREATE_AGENT,
   GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL,
   GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
   GEN_AI_OUTPUT_TYPE_VALUE_TEXT,
@@ -97,7 +98,10 @@ type Role = TranscriptMessage["type"]
 
 type BlockKind = typeof GEN_AI_OPERATION_NAME_VALUE_CHAT | typeof GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
 
-type GroupedKind = BlockKind | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
+type GroupedKind =
+  | BlockKind
+  | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
+  | typeof GEN_AI_OPERATION_NAME_VALUE_CREATE_AGENT
 
 type ExtractedBlockType = typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
 
@@ -1067,7 +1071,7 @@ const groupAgents = function* ({
 
     yield buildBranch({
       ctx,
-      kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
+      kind: GEN_AI_OPERATION_NAME_VALUE_CREATE_AGENT,
       attributes: {
         [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
         [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
