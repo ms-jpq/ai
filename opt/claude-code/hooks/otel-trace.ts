@@ -900,7 +900,7 @@ const buildLeaves = function* ({
     const input = isNonEmpty(drainedIn) ? drainedIn : undefined
     const output = isNonEmpty(drainedOut) ? drainedOut : undefined
     if (input || output) {
-      yield markTurnStart(chatLeaf({ input, output, ctx }))
+      yield markTurnStart(chatLeaf({ ctx, input, output }))
     }
     return
   }
@@ -1006,13 +1006,13 @@ const groupAgents = function* ({
     }
 
     yield buildBranch({
+      ctx,
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       attributes: {
         [ATTR_GEN_AI_AGENT_NAME]: hook.agent_type,
         [ATTR_GEN_AI_AGENT_ID]: hook.agent_id,
       },
       children,
-      ctx,
     })
     return
   }
