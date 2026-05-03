@@ -873,9 +873,10 @@ const toolLeaf = ({
   }
 }
 
-type LeafEvent =
-  | Readonly<{ kind: "userBoundary" }>
-  | Readonly<{ kind: "leaf"; leaf: Grouped; consumesTurnStart: boolean }>
+const isRealUserTurn = (blocks: IteratorObject<ExtractedBlock>): boolean =>
+  blocks.some((b) => !(b.category === "tool" && b.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT))
+
+type LeafEvent = Readonly<{ kind: "userBoundary" } | { kind: "leaf"; leaf: Grouped; consumesTurnStart: boolean }>
 
 const aggerateLeaves = function* ({
   ctx,
@@ -900,13 +901,14 @@ const aggerateLeaves = function* ({
   }
 
   for (const msg of transcript) {
-    if (msg.type === "user") {
-      yield { kind: "userBoundary" }
-    }
-
     const blocks = contents(msg)
       .map((raw) => extractBlock(msg.type, raw))
       .filter((b) => b !== undefined)
+      .toArray()
+
+    if (msg.type === "user" && isRealUserTurn(blocks.values())) {
+      yield { kind: "userBoundary" }
+    }
 
     for (const block of blocks) {
       if (block.category === "tool") {
