@@ -75,7 +75,8 @@ type NonEmpty<T> = readonly [T, ...T[]]
 
 const isNonEmpty = <T>(arr: readonly T[]): arr is NonEmpty<T> => arr.length > 0
 
-const collapseSingleton = <T>(arr: readonly T[]): T | readonly T[] => (arr.length === 1 ? arr[0] : arr)
+const collapseSingleton = <T>(arr: readonly T[]): T | readonly T[] =>
+  arr.length === 1 && isNonEmpty(arr) ? arr[0] : arr
 
 type TranscriptMeta = Readonly<{
   timestamp: Date
