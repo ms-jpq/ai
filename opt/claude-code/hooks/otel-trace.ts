@@ -372,8 +372,29 @@ const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): MessagePa
       return { type: "uri", modality: "document", uri: source.url, ...meta }
     case "file":
       return { type: "file", modality: "document", file_id: source.file_id, ...meta }
-    case "content":
-      return { type: "text", content: "", ...meta }
+    case "content": {
+      const content =
+        typeof source.content === "string"
+          ? source.content
+          : source.content
+              .map((item) => {
+                if (item.type === "text") {
+                  return item.text
+                }
+                switch (item.source.type) {
+                  case "base64":
+                    return `[image: ${item.source.media_type}]`
+                  case "url":
+                    return `[image: ${item.source.url}]`
+                  case "file":
+                    return `[image: file_id=${item.source.file_id}]`
+                  default:
+                    fail(item.source satisfies never)
+                }
+              })
+              .join("\n\n")
+      return { type: "text", content, ...meta }
+    }
     default:
       fail(source satisfies never)
   }
