@@ -692,18 +692,18 @@ const [normalizeFinishReason, messageFinishReason] = (() => {
   return [make("tool_calls"), make("tool_call")] as const
 })()
 
-const factsFromAssistant = (msg: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
-  if (msg.message.model === "<synthetic>") {
+const factsFromAssistant = ({ message }: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
+  if (message.model === "<synthetic>") {
     return {
-      stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
+      stopReasons: message.stop_reason ? [message.stop_reason] : [],
     }
   }
 
-  const u = msg.message.usage
+  const u = message.usage
   return {
-    model: msg.message.model,
-    responseId: msg.message.id,
-    stopReasons: msg.message.stop_reason ? [msg.message.stop_reason] : [],
+    model: message.model,
+    responseId: message.id,
+    stopReasons: message.stop_reason ? [message.stop_reason] : [],
     usage: {
       input_tokens: u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
       output_tokens: u.output_tokens,
