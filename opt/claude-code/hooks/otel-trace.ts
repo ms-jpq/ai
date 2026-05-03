@@ -222,7 +222,7 @@ const openState = async (hook: HookInput): Promise<AsyncDisposable & { uuid?: st
   return state
 }
 
-const provider = (hook: HookInput): (AsyncDisposable & { provider: BasicTracerProvider }) | undefined => {
+const openProvider = (hook: HookInput): (AsyncDisposable & { provider: BasicTracerProvider }) | undefined => {
   const [auth, url] = [env["LANGFUSE_AUTH"], env["LANGFUSE_TRACE_URL"]]
   if (!auth || !url) {
     return undefined
@@ -1082,7 +1082,7 @@ const groupAgents = function* ({
       ctx,
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       attributes: {
-        [ATTR_GEN_AI_AGENT_NAME]: "general-purpose",
+        [ATTR_GEN_AI_AGENT_NAME]: "main",
         [ATTR_GEN_AI_AGENT_ID]: hook.session_id,
       },
       children,
@@ -1126,7 +1126,7 @@ const main = async (): Promise<void> => {
   using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
   await using state = await openState(hook)
-  await using otel = provider(hook)
+  await using otel = openProvider(hook)
   if (!otel) {
     return
   }
