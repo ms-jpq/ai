@@ -960,7 +960,7 @@ const groupAgents = function* ({
     yield buildBranch({
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
       attributes: {
-        [ATTR_GEN_AI_AGENT_NAME]: "claude-code",
+        [ATTR_GEN_AI_AGENT_NAME]: "general-purpose",
         [ATTR_GEN_AI_AGENT_ID]: hook.session_id,
       },
       children: chunk,
