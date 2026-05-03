@@ -145,6 +145,10 @@ type Grouped = Readonly<{
   status?: { code: SpanStatusCode }
   children?: readonly Grouped[]
   turnStart?: boolean
+  [META]?: {
+    inputSequence: unknown[]
+    outputSequence: unknown[]
+  }
 }>
 
 type Ctx = { userId: string; sessionId: string }
@@ -733,22 +737,17 @@ const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
-const toInputMessages = (sourced: Iterable<SourcedBlock<ChatBlock>>) =>
+const toMessages = ({ sourced, asInput }: { sourced: Iterable<SourcedBlock<ChatBlock>>; asInput: boolean }) =>
   Map.groupBy(sourced, (s) => s.msg)
     .entries()
     .map(([msg, items]) => ({
       role: msg.type,
       parts: items.map((s) => s.block.part),
-    }))
-    .toArray()
-
-const toOutputMessages = (sourced: Iterable<SourcedBlock<ChatBlock>>) =>
-  Map.groupBy(sourced, (s) => s.msg)
-    .entries()
-    .map(([msg, items]) => ({
-      role: msg.type,
-      parts: items.map((s) => s.block.part),
-      finish_reason: msg.type === "assistant" ? messageFinishReason(msg.message.stop_reason) : "stop",
+      ...(asInput
+        ? {}
+        : {
+            finish_reason: msg.type === "assistant" ? messageFinishReason(msg.message.stop_reason) : "stop",
+          }),
     }))
     .toArray()
 
@@ -777,8 +776,8 @@ const chatLeaf = ({
     endTime: last.msg[META].timestamp.getTime(),
     attributes: {
       ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
-      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(toInputMessages(input ?? [])),
-      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(toOutputMessages(output ?? [])),
+      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(toMessages({ sourced: input ?? [], asInput: true })),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(toMessages({ sourced: output ?? [], asInput: false })),
       [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
   }
