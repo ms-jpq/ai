@@ -659,7 +659,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         if (content === undefined || typeof content === "string") {
           return content
         }
-        return content.map((item) => {
+        const mapped = content.map((item) => {
           switch (item.type) {
             case "text":
               return item.text
@@ -675,6 +675,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
               fail(item satisfies never)
           }
         })
+        return mapped.length === 1 ? mapped[0] : mapped
       })()
       return extractToolResult({
         correlationId: block.tool_use_id,
