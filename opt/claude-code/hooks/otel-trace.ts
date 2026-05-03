@@ -488,14 +488,19 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         : undefined
     case "image":
       return extractChat({ role, part: imagePart(block) })
-
-    case "mcp_tool_use":
-      return extractToolUse({
-        toolName: `mcp__${block.server_name}__${block.name}`,
-        toolType: "extension",
-        correlationId: block.id,
-        value: block.input,
+    case "document":
+      return extractChat({ role, part: documentPart(block) })
+    case "search_result":
+      return extractChat({
+        role,
+        part: {
+          type: "text",
+          content: block.content.map((item) => item.text).join("\n\n"),
+          source: block.source,
+          title: block.title,
+        },
       })
+
     case "server_tool_use":
       return extractChat({
         role,
@@ -506,45 +511,6 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           server_tool_call: { arguments: block.input },
         },
       })
-    case "tool_use":
-      return extractToolUse({
-        toolName: block.name,
-        toolType: "function",
-        correlationId: block.id,
-        value: block.input,
-      })
-
-    case "tool_result":
-    case "mcp_tool_result": {
-      const value = (() => {
-        const { content } = block
-        if (content === undefined || typeof content === "string") {
-          return content
-        }
-        return content.map((item) => {
-          switch (item.type) {
-            case "text":
-              return item.text
-            case "image":
-              return imageValue(item)
-            case "document":
-              return documentValue(item)
-            case "search_result":
-              return { source: item.source, title: item.title }
-            case "tool_reference":
-              return item.tool_name
-            default:
-              fail(item satisfies never)
-          }
-        })
-      })()
-      return extractToolResult({
-        correlationId: block.tool_use_id,
-        value,
-        error: block.is_error ? "_OTHER" : undefined,
-      })
-    }
-
     case "code_execution_tool_result":
     case "bash_code_execution_tool_result":
       return extractChat({
@@ -575,7 +541,6 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           })(),
         },
       })
-
     case "text_editor_code_execution_tool_result":
       return extractChat({
         role,
@@ -613,7 +578,6 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           })(),
         },
       })
-
     case "tool_search_tool_result":
       return extractChat({
         role,
@@ -634,20 +598,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           })(),
         },
       })
-
-    case "document":
-      return extractChat({ role, part: documentPart(block) })
-    case "search_result":
-      return extractChat({
-        role,
-        part: {
-          type: "text",
-          content: block.content.map((item) => item.text).join("\n\n"),
-          source: block.source,
-          title: block.title,
-        },
-      })
-    case "web_search_tool_result": {
+    case "web_search_tool_result":
       return extractChat({
         role,
         part: {
@@ -664,8 +615,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
             : { error_code: block.content.error_code },
         },
       })
-    }
-    case "web_fetch_tool_result": {
+    case "web_fetch_tool_result":
       return extractChat({
         role,
         part: {
@@ -687,8 +637,51 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           })(),
         },
       })
-    }
 
+    case "tool_use":
+      return extractToolUse({
+        toolName: block.name,
+        toolType: "function",
+        correlationId: block.id,
+        value: block.input,
+      })
+    case "mcp_tool_use":
+      return extractToolUse({
+        toolName: `mcp__${block.server_name}__${block.name}`,
+        toolType: "extension",
+        correlationId: block.id,
+        value: block.input,
+      })
+    case "tool_result":
+    case "mcp_tool_result": {
+      const value = (() => {
+        const { content } = block
+        if (content === undefined || typeof content === "string") {
+          return content
+        }
+        return content.map((item) => {
+          switch (item.type) {
+            case "text":
+              return item.text
+            case "image":
+              return imageValue(item)
+            case "document":
+              return documentValue(item)
+            case "search_result":
+              return { source: item.source, title: item.title }
+            case "tool_reference":
+              return item.tool_name
+            default:
+              fail(item satisfies never)
+          }
+        })
+      })()
+      return extractToolResult({
+        correlationId: block.tool_use_id,
+        value,
+        error: block.is_error ? "_OTHER" : undefined,
+      })
+    }
     case "container_upload":
       return {
         category: "tool",
