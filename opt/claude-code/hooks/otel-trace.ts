@@ -154,7 +154,7 @@ type Grouped = Readonly<{
   >
   status?: { code: SpanStatusCode }
   children?: readonly Grouped[]
-  [META]?: {
+  [META]: {
     turnStart?: boolean
     inputSequence?: OtelMessageSequence
     outputSequence?: OtelMessageSequence
