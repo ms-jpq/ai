@@ -920,7 +920,6 @@ const buildBranch = ({
 }): Grouped => {
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
-  const last = children.at(-1)
 
   return {
     spanName: [kind, target].filter((n) => n).join(" "),
@@ -929,8 +928,6 @@ const buildBranch = ({
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
       ...commonAttrs({ kind, ctx }),
-      [ATTR_GEN_AI_INPUT_MESSAGES]: last?.attributes[ATTR_GEN_AI_INPUT_MESSAGES],
-      [ATTR_GEN_AI_OUTPUT_MESSAGES]: last?.attributes[ATTR_GEN_AI_OUTPUT_MESSAGES],
       ...attributes,
     },
     children,
