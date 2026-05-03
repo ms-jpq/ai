@@ -897,8 +897,16 @@ const toolLeaf = ({
   }
 }
 
-const isRealUserTurn = (blocks: IteratorObject<ExtractedBlock>): boolean =>
-  blocks.some((b) => !(b.category === "tool" && b.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT))
+const isRealUserTurn = (msg: TranscriptMessage, blocks: IteratorObject<ExtractedBlock>): boolean => {
+  if (msg.type !== "user") {
+    return false
+  }
+  if (msg.origin?.kind === "task-notification") {
+    return false
+  }
+
+  return blocks.some((b) => !(b.category === "tool" && b.type === GEN_AI_TOKEN_TYPE_VALUE_OUTPUT))
+}
 
 type LeafEvent = Readonly<{ kind: "userBoundary" } | { kind: "leaf"; leaf: Grouped; consumesTurnStart: boolean }>
 
@@ -930,7 +938,7 @@ const aggerateLeaves = function* ({
       .filter((b) => b !== undefined)
       .toArray()
 
-    if (msg.type === "user" && isRealUserTurn(blocks.values())) {
+    if (isRealUserTurn(msg, blocks.values())) {
       yield { kind: "userBoundary" }
     }
 
