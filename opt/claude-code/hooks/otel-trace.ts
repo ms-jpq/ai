@@ -835,6 +835,8 @@ const buildLeaves = function* ({
   transcript: IteratorObject<TranscriptMessage>
 }): IteratorObject<Grouped> {
   const toolCalls = new Map<string, SourcedBlock<ToolBlock>>()
+  const chatInputs = new Array<SourcedBlock<ChatBlock>>()
+  const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
 
   let turnStart = false
   const tag = (g: Grouped): Grouped => {
@@ -845,20 +847,30 @@ const buildLeaves = function* ({
     return { ...g, turnStart: true }
   }
 
-  const chatInputs = new Array<SourcedBlock<ChatBlock>>()
-  const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
+  const emitChat = function* (): IteratorObject<Grouped> {
+    const drainedIn = chatInputs.splice(0)
+    const drainedOut = chatOutputs.splice(0)
+    const input = isNonEmpty(drainedIn) ? drainedIn : undefined
+    const output = isNonEmpty(drainedOut) ? drainedOut : undefined
+    if (input || output) {
+      yield tag(chatLeaf({ input, output, ctx }))
+    }
+    return
+  }
+
   for (const msg of transcript) {
+    const blocks = contents(msg)
+      .map((raw) => extractBlock(msg.type, raw))
+      .filter((b) => !!b)
+
     if (msg.type === "user") {
       turnStart = true
     }
 
-    for (const raw of contents(msg)) {
-      const block = extractBlock(msg.type, raw)
-      if (!block) {
-        continue
-      }
-
+    for (const block of blocks) {
       if (block.category === "tool") {
+        yield* emitChat()
+
         const sourced = { msg, block }
 
         if (block.correlationId === undefined) {
@@ -879,22 +891,18 @@ const buildLeaves = function* ({
 
       const sourced = { msg, block }
       if (block.type === GEN_AI_TOKEN_TYPE_VALUE_INPUT) {
+        if (chatOutputs.length > 0) {
+          yield* emitChat()
+        }
         chatInputs.push(sourced)
         continue
       }
 
       chatOutputs.push(sourced)
     }
-
-    if (msg.type === "assistant") {
-      const drained = chatInputs.splice(0)
-      const input = isNonEmpty(drained) ? drained : undefined
-      const output = isNonEmpty(chatOutputs) ? chatOutputs : undefined
-      if (input || output) {
-        yield tag(chatLeaf({ input, output, ctx }))
-      }
-    }
   }
+
+  yield* emitChat()
 
   for (const orphan of toolCalls.values()) {
     yield toolLeaf({ input: orphan, ctx })
