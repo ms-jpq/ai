@@ -365,14 +365,15 @@ const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): MessagePa
   }
   switch (source.type) {
     case "base64":
+      return { type: "blob", modality: "document", content: "", mime_type: source.media_type, ...meta }
     case "text":
-      return { type: "document", mime_type: source.media_type, ...meta }
+      return { type: "text", content: source.data, ...meta }
     case "url":
-      return { type: "document", uri: source.url, ...meta }
+      return { type: "uri", modality: "document", uri: source.url, ...meta }
     case "file":
-      return { type: "document", file_id: source.file_id, ...meta }
+      return { type: "file", modality: "document", file_id: source.file_id, ...meta }
     case "content":
-      return { type: "document", ...meta }
+      return { type: "text", content: "", ...meta }
     default:
       fail(source satisfies never)
   }
@@ -617,8 +618,8 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
       return extractChat({
         role,
         part: {
-          type: "search_result",
-          content: block.content.map((item) => item.text),
+          type: "text",
+          content: block.content.map((item) => item.text).join("\n\n"),
           source: block.source,
           title: block.title,
         },
@@ -982,8 +983,9 @@ const buildBranch = ({
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
 
-  const inputSequence = children.flatMap((c) => c[META].inputSequence ?? [])
-  const outputSequence = children.flatMap((c) => c[META].outputSequence ?? [])
+  const isChat = (c: Grouped) => c.attributes[ATTR_GEN_AI_OPERATION_NAME] === GEN_AI_OPERATION_NAME_VALUE_CHAT
+  const inputSequence = children.find(isChat)?.[META].inputSequence ?? []
+  const outputSequence = children.findLast(isChat)?.[META].outputSequence ?? []
 
   return {
     spanName: [kind, target].filter((n) => n).join(" "),
