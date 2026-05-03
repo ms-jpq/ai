@@ -144,10 +144,10 @@ type Grouped = Readonly<{
   >
   status?: { code: SpanStatusCode }
   children?: readonly Grouped[]
-  turnStart?: boolean
   [META]?: {
-    inputSequence: unknown[]
-    outputSequence: unknown[]
+    turnStart?: boolean
+    inputSequence?: unknown[]
+    outputSequence?: unknown[]
   }
 }>
 
@@ -752,13 +752,13 @@ const toMessages = ({ sourced, asInput }: { sourced: Iterable<SourcedBlock<ChatB
     .toArray()
 
 const chatLeaf = ({
+  ctx,
   input,
   output,
-  ctx,
 }: {
+  ctx: Ctx
   input?: NonEmpty<SourcedBlock<ChatBlock>>
   output?: NonEmpty<SourcedBlock<ChatBlock>>
-  ctx: Ctx
 }): Grouped => {
   const ref = output ?? input
   ok(ref, "chatLeaf needs at least one of input/output")
@@ -788,13 +788,13 @@ const otelKind = (kind: GroupedKind): SpanKind =>
   kind === GEN_AI_OPERATION_NAME_VALUE_CHAT ? SpanKind.CLIENT : SpanKind.INTERNAL
 
 const toolLeaf = ({
+  ctx,
   input,
   output,
-  ctx,
 }: {
+  ctx: Ctx
   input?: SourcedBlock<ToolBlock>
   output?: SourcedBlock<ToolBlock>
-  ctx: Ctx
 }): Grouped => {
   const ref = input ?? output
   ok(ref, "toolLeaf needs at least one of input/output")
@@ -838,12 +838,13 @@ const buildLeaves = function* ({
   const chatOutputs = new Array<SourcedBlock<ChatBlock>>()
 
   let turnStart = false
-  const markTurnStart = (g: Grouped): Grouped => {
+  const markTurnStart = (grouped: Grouped): Grouped => {
     if (!turnStart) {
-      return g
+      return grouped
     }
     turnStart = false
-    return { ...g, turnStart: true }
+    const { [META]: meta, ...g } = grouped
+    return { ...g, [META]: { ...meta, turnStart: true } }
   }
 
   const emitChat = function* (): IteratorObject<Grouped> {
@@ -963,7 +964,7 @@ const groupAgents = function* ({
 
   for (const children of chunkBy({
     source: leaves,
-    isBoundary: (e) => e.turnStart === true,
+    isBoundary: (e) => e[META]?.turnStart === true,
   })) {
     if (children.length === 1) {
       yield* children
