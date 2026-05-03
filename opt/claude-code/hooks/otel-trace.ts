@@ -900,6 +900,7 @@ const toolLeaf = ({
     endTime,
     attributes: {
       ...commonAttrs({ kind, ctx }),
+      "langfuse.observation.type": "tool",
       [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: input && JSON.stringify(input.block.value),
       [ATTR_GEN_AI_TOOL_CALL_RESULT]: output && JSON.stringify(output.block.value),
       [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
@@ -1045,6 +1046,7 @@ const buildBranch = ({
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
       ...commonAttrs({ kind, ctx }),
+      "langfuse.observation.type": "agent",
       [ATTR_GEN_AI_INPUT_MESSAGES]: inputSequence.length ? JSON.stringify(inputSequence) : undefined,
       [ATTR_GEN_AI_OUTPUT_MESSAGES]: outputSequence.length ? JSON.stringify(outputSequence) : undefined,
       ...attributes,
