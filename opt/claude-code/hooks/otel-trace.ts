@@ -744,7 +744,7 @@ const otelKind = (kind: GroupedKind): SpanKind =>
     ? SpanKind.CLIENT
     : SpanKind.INTERNAL
 
-const toMessages = (sourced: NonEmpty<SourcedBlock<ChatBlock>>) =>
+const toMessages = (sourced: Iterable<SourcedBlock<ChatBlock>>) =>
   Map.groupBy(sourced, (s) => s.msg)
     .entries()
     .map(([msg, items]) => ({
@@ -765,13 +765,10 @@ const chatLeaf = ({
   const ref = output ?? input
   ok(ref, "chatLeaf needs at least one of input/output")
 
-  const assistantMsg = output?.[0].msg
+  const [{ msg: assistantMsg }] = output ?? [{ msg: undefined }]
   const facts = assistantMsg?.type === "assistant" ? factsFromAssistant(assistantMsg) : undefined
 
-  const inputMessages = input ? toMessages(input) : []
-  const outputMessages = output ? toMessages(output) : []
-
-  const first = (input ?? ref)[0]
+  const [first] = input ?? ref
   const last = ref.at(-1)!
 
   return {
@@ -781,8 +778,8 @@ const chatLeaf = ({
     endTime: last.msg[META].timestamp.getTime(),
     attributes: {
       ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
-      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(inputMessages),
-      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputMessages),
+      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(toMessages(input ?? [])),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(toMessages(output ?? [])),
       [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
   }
