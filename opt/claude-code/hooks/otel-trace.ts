@@ -173,13 +173,7 @@ const gitUserName = (): Promise<string> =>
     .then(({ stdout }) => stdout.trim())
     .catch(() => "")
 
-const chunkBy = function* <T>({
-  source,
-  isBoundary,
-}: {
-  source: IteratorObject<T>
-  isBoundary: (item: T) => boolean
-}): IteratorObject<NonEmpty<T>> {
+const chunkBy = function* <T>(source: IteratorObject<T>, isBoundary: (_: T) => boolean): IteratorObject<NonEmpty<T>> {
   let chunk = new Array<T>()
   for (const item of source) {
     if (isBoundary(item) && isNonEmpty(chunk)) {
@@ -1023,10 +1017,7 @@ const groupAgents = function* ({
     return
   }
 
-  for (const children of chunkBy({
-    source: leaves,
-    isBoundary: (e) => e[META].turnStart === true,
-  })) {
+  for (const children of chunkBy(leaves, (e) => Boolean(e[META].turnStart))) {
     yield buildBranch({
       ctx,
       kind: GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT,
