@@ -97,11 +97,21 @@ type GroupedKind = BlockKind | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
 
 type ExtractedBlockType = typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
 
+type MessagePart = Readonly<{ type: string } & Record<string, unknown>>
+
+type OtelMessage = Readonly<{
+  role: "system" | "user" | "assistant" | "tool"
+  parts: readonly MessagePart[]
+  finish_reason?: string
+}>
+
+type OtelMessageSequence = readonly OtelMessage[]
+
 type ChatBlock = Readonly<{
   category: "chat"
   role: Role
   type: ExtractedBlockType
-  part: Record<string, unknown>
+  part: MessagePart
 }>
 
 type ToolBlock = Readonly<{
@@ -146,8 +156,8 @@ type Grouped = Readonly<{
   children?: readonly Grouped[]
   [META]?: {
     turnStart?: boolean
-    inputSequence?: unknown[]
-    outputSequence?: unknown[]
+    inputSequence?: OtelMessageSequence
+    outputSequence?: OtelMessageSequence
   }
 }>
 
@@ -307,7 +317,7 @@ const contents = function* (msg: TranscriptMessage): IteratorObject<MessageBlock
   return
 }
 
-const extractChat = ({ role, part }: { role: Role; part: Record<string, unknown> }) =>
+const extractChat = ({ role, part }: { role: Role; part: MessagePart }) =>
   ({
     category: "chat",
     role,
@@ -354,7 +364,7 @@ const extractToolResult = ({
     ...(error !== undefined ? { error } : {}),
   }) satisfies ExtractedBlock
 
-const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): Record<string, unknown> => {
+const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): MessagePart => {
   const meta = {
     ...(block.title ? { title: block.title } : {}),
     ...(block.context ? { context: block.context } : {}),
@@ -391,7 +401,7 @@ const documentValue = ({ source, title, ...block }: BetaDocumentBlock | BetaRequ
   }
 }
 
-const imagePart = ({ source }: BetaImageBlockParam): Record<string, unknown> => {
+const imagePart = ({ source }: BetaImageBlockParam): MessagePart => {
   switch (source.type) {
     case "base64":
       return {
@@ -737,7 +747,13 @@ const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?
 
 const metadata = (label: string) => `langfuse.observation.metadata.${label}`
 
-const toMessages = ({ sourced, asInput }: { sourced: Iterable<SourcedBlock<ChatBlock>>; asInput: boolean }) =>
+const toMessages = ({
+  sourced,
+  asInput,
+}: {
+  sourced: Iterable<SourcedBlock<ChatBlock>>
+  asInput: boolean
+}): OtelMessageSequence =>
   Map.groupBy(sourced, (s) => s.msg)
     .entries()
     .map(([msg, items]) => ({
@@ -770,6 +786,9 @@ const chatLeaf = ({
   const last = ref.at(-1)
   ok(last)
 
+  const inputSequence = toMessages({ sourced: input ?? [], asInput: true })
+  const outputSequence = toMessages({ sourced: output ?? [], asInput: false })
+
   return {
     spanName: facts?.model ? `chat ${facts.model}` : "chat",
     spanKind: SpanKind.CLIENT,
@@ -777,10 +796,11 @@ const chatLeaf = ({
     endTime: last.msg[META].timestamp.getTime(),
     attributes: {
       ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
-      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(toMessages({ sourced: input ?? [], asInput: true })),
-      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(toMessages({ sourced: output ?? [], asInput: false })),
+      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(inputSequence),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputSequence),
       [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
+    [META]: { inputSequence, outputSequence },
   }
 }
 
@@ -806,6 +826,36 @@ const toolLeaf = ({
   const endTime = (output ?? ref).msg[META].timestamp.getTime()
   const kind = block.kind
 
+  const inputSequence = input
+    ? ([
+        {
+          role: "assistant",
+          parts: [
+            {
+              type: "tool_call",
+              ...(block.correlationId !== undefined ? { id: block.correlationId } : {}),
+              ...(block.toolName ? { name: block.toolName } : {}),
+              arguments: input.block.value,
+            },
+          ],
+        },
+      ] satisfies OtelMessageSequence)
+    : []
+  const outputSequence = output
+    ? ([
+        {
+          role: "tool",
+          parts: [
+            {
+              type: "tool_call_response",
+              ...(block.correlationId !== undefined ? { id: block.correlationId } : {}),
+              response: output.block.value,
+            },
+          ],
+        },
+      ] satisfies OtelMessageSequence)
+    : []
+
   return {
     spanName: block.toolName ? `${kind} ${block.toolName}` : kind,
     spanKind: otelKind(kind),
@@ -815,6 +865,8 @@ const toolLeaf = ({
       ...commonAttrs({ kind, ctx }),
       [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: input ? JSON.stringify(input.block.value) : undefined,
       [ATTR_GEN_AI_TOOL_CALL_RESULT]: output ? JSON.stringify(output.block.value) : undefined,
+      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(inputSequence),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputSequence),
       [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
       [ATTR_GEN_AI_TOOL_TYPE]: block.toolType,
       [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId,
@@ -823,6 +875,7 @@ const toolLeaf = ({
       [metadata("orphaned")]: orphaned,
     },
     status: error ? { code: SpanStatusCode.ERROR } : undefined,
+    [META]: { inputSequence, outputSequence },
   }
 }
 
@@ -924,6 +977,9 @@ const buildBranch = ({
   const agentName = attributes[ATTR_GEN_AI_AGENT_NAME]
   const target = typeof agentName === "string" ? agentName : undefined
 
+  const inputSequence = children.flatMap((c) => c[META]?.inputSequence ?? [])
+  const outputSequence = children.flatMap((c) => c[META]?.outputSequence ?? [])
+
   return {
     spanName: [kind, target].filter((n) => n).join(" "),
     spanKind: otelKind(kind),
@@ -931,9 +987,12 @@ const buildBranch = ({
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
       ...commonAttrs({ kind, ctx }),
+      [ATTR_GEN_AI_INPUT_MESSAGES]: JSON.stringify(inputSequence),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: JSON.stringify(outputSequence),
       ...attributes,
     },
     children,
+    [META]: { inputSequence, outputSequence },
   }
 }
 
