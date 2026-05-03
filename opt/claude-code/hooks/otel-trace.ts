@@ -681,19 +681,16 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
   }
 }
 
-const [normalizeFinishReason, messageFinishReason] = (() => {
-  const make = (toolUse: string) => {
-    const map = new Map([
-      ["end_turn", "stop"],
-      ["max_tokens", "length"],
-      ["pause_turn", "stop"],
-      ["refusal", "content_filter"],
-      ["stop_sequence", "stop"],
-      ["tool_use", toolUse],
-    ])
-    return (raw: string | null) => map.get(raw ?? "") ?? raw ?? "stop"
-  }
-  return [make("tool_calls"), make("tool_call")] as const
+const normalizeFinishReason = (() => {
+  const map = new Map([
+    ["end_turn", "stop"],
+    ["max_tokens", "length"],
+    ["pause_turn", "stop"],
+    ["refusal", "content_filter"],
+    ["stop_sequence", "stop"],
+    ["tool_use", "tool_call"],
+  ])
+  return (raw: string | null) => map.get(raw ?? "") ?? raw ?? "stop"
 })()
 
 const factsFromAssistant = ({ message }: Extract<TranscriptMessage, { type: "assistant" }>): Facts => {
@@ -756,7 +753,7 @@ const toMessages = ({
       ...(asInput
         ? {}
         : {
-            finish_reason: msg.type === "assistant" ? messageFinishReason(msg.message.stop_reason) : "stop",
+            finish_reason: msg.type === "assistant" ? normalizeFinishReason(msg.message.stop_reason) : "stop",
           }),
     }))
     .toArray()
