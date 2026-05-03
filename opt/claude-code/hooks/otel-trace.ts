@@ -923,7 +923,7 @@ const isRealUserTurn = (msg: TranscriptMessage, blocks: IteratorObject<Extracted
 
 type LeafEvent = Readonly<{ kind: "userBoundary" } | { kind: "leaf"; leaf: Grouped; consumesTurnStart: boolean }>
 
-const aggerateLeaves = function* ({
+const aggregateLeaves = function* ({
   ctx,
   transcript,
 }: {
@@ -1100,13 +1100,12 @@ const emitSpanTree = ({
   parentCtx: Context
   grouped: Grouped
 }): void => {
-  const attributes = Object.fromEntries(Object.entries(grouped.attributes).filter(([, v]) => v !== undefined))
   const span = tracer.startSpan(
     grouped.spanName,
     {
       startTime: grouped.startTime,
       kind: grouped.spanKind,
-      attributes,
+      attributes: grouped.attributes,
     },
     parentCtx,
   )
@@ -1134,7 +1133,7 @@ const main = async (): Promise<void> => {
 
   const ctx = { userId, sessionId: hook.session_id } satisfies Ctx
   const transcript = await Array.fromAsync(parseMessages(hook, state.uuid))
-  const leaves = tagTurns(aggerateLeaves({ ctx, transcript: transcript.values() }))
+  const leaves = tagTurns(aggregateLeaves({ ctx, transcript: transcript.values() }))
   const grouped = groupAgents({ ctx, hook, leaves })
 
   const tracer = otel.provider.getTracer("claude-code")
