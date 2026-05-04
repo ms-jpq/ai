@@ -202,6 +202,7 @@
       "Bash",
       "Glob",
       "Grep",
+      "mcp__plugin_omnibus_gateway__*",
       "Monitor",
       "Read",
       "Skill(tip)",
