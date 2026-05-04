@@ -1,14 +1,6 @@
 {
-  "crawl4ai": {
-    "type": "sse",
-    "url": "https://crawl4ai.${MCP_DOMAIN}/mcp/sse"
-  },
-  "playwright": {
+  "gateway": {
     "type": "http",
-    "url": "https://playwright.mcp.${MCP_DOMAIN}/mcp"
-  },
-  "searx": {
-    "type": "http",
-    "url": "https://searx.mcp.${MCP_DOMAIN}/mcp"
+    "url": "https://bifrost.${MCP_DOMAIN}/mcp"
   }
 }
