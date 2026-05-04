@@ -252,9 +252,6 @@ const openProvider = (hook: HookInput): (AsyncDisposable & { provider: BasicTrac
           headers: { Authorization: auth },
           timeoutMillis: 10_000,
         }),
-        {
-          maxQueueSize: 1_000_000,
-        },
       ),
     ],
   })
@@ -1102,7 +1099,7 @@ const groupAgents = function* ({
   return
 }
 
-const emitSpanTree = ({
+const emitSpanTree = async ({
   tracer,
   parentCtx,
   grouped,
@@ -1110,7 +1107,7 @@ const emitSpanTree = ({
   tracer: Tracer
   parentCtx: Context
   grouped: Grouped
-}): void => {
+}): Promise<void> => {
   const span = tracer.startSpan(
     grouped.spanName,
     {
@@ -1126,7 +1123,7 @@ const emitSpanTree = ({
   if (grouped.children) {
     const childCtx = trace.setSpan(parentCtx, span)
     for (const child of grouped.children) {
-      emitSpanTree({ tracer, parentCtx: childCtx, grouped: child })
+      await emitSpanTree({ tracer, parentCtx: childCtx, grouped: child })
     }
   }
   span.end(grouped.endTime)
@@ -1149,7 +1146,7 @@ const main = async (): Promise<void> => {
 
   const tracer = otel.provider.getTracer("claude-code")
   for (const group of grouped) {
-    emitSpanTree({ tracer, parentCtx: ROOT_CONTEXT, grouped: group })
+    await emitSpanTree({ tracer, parentCtx: ROOT_CONTEXT, grouped: group })
   }
 
   await otel.provider.forceFlush()
