@@ -5,15 +5,20 @@ set -o pipefail
 JSON="$(tee)"
 
 TOOL_NAME="$(jq -e --raw-output '.tool_name' <<< "$JSON")"
+NAME="$(sed -E -e 's#^mcp__plugin_omnibus_##' <<< "$TOOL_NAME")"
 
-case "$TOOL_NAME" in
-mcp__plugin_omnibus_crawl4ai__* | mcp__plugin_omnibus_playwright__* | mcp__plugin_omnibus_searx__searxng_web_search)
-  DECISION=allow
-  REASON='allowlisted by omnibus plugin'
-  ;;
-mcp__plugin_omnibus_searx__web_url_read)
+case "$NAME" in
+searx__web_url_read)
   DECISION=deny
-  REASON='denylisted by omnibus plugin'
+  REASON='use crawl4ai instead'
+  ;;
+searx__* | crawl4ai__*)
+  DECISION=allow
+  REASON='safe to use websearch'
+  ;;
+playwright__*)
+  DECISION=ask
+  REASON='haha'
   ;;
 *)
   exit 0
