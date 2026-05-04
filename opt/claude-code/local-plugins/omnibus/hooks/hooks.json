@@ -1,5 +1,16 @@
 {
-  "$docs": "https://code.claude.com/docs/en/settings",
+  "$docs": "https://code.claude.com/docs/en/plugins-reference#hooks",
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "hooks": {}
+  "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/mcp-tools.sh\"",
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
 }
