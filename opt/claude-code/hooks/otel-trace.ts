@@ -46,10 +46,6 @@ import {
   ATTR_GEN_AI_TOOL_CALL_RESULT,
   ATTR_GEN_AI_TOOL_NAME,
   ATTR_GEN_AI_TOOL_TYPE,
-  ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS,
-  ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS,
-  ATTR_GEN_AI_USAGE_INPUT_TOKENS,
-  ATTR_GEN_AI_USAGE_OUTPUT_TOKENS,
   ATTR_USER_ID,
   GEN_AI_OPERATION_NAME_VALUE_CHAT,
   GEN_AI_OPERATION_NAME_VALUE_CREATE_AGENT,
@@ -142,12 +138,6 @@ type Facts = Readonly<{
   responseId?: string
   stopReasons?: readonly string[]
   error?: string
-  usage?: Readonly<{
-    input_tokens: number
-    output_tokens: number
-    cache_read_input_tokens: number
-    cache_creation_input_tokens: number
-  }>
 }>
 
 type Grouped = Readonly<{
@@ -726,23 +716,16 @@ const factsFromAssistant = ({ message, error }: Extract<TranscriptMessage, { typ
     }
   }
 
-  const u = message.usage
   return {
     model: message.model,
     responseId: message.id,
     stopReasons: message.stop_reason ? [message.stop_reason] : [],
     ...(error ? { error } : {}),
-    usage: {
-      input_tokens: u.input_tokens + (u.cache_read_input_tokens ?? 0) + (u.cache_creation_input_tokens ?? 0),
-      output_tokens: u.output_tokens,
-      cache_read_input_tokens: u.cache_read_input_tokens ?? 0,
-      cache_creation_input_tokens: u.cache_creation_input_tokens ?? 0,
-    },
   }
 }
 
 const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?: Facts }): Attributes => {
-  const { model, responseId, stopReasons, error, usage } = facts ?? {}
+  const { model, responseId, stopReasons, error } = facts ?? {}
   const isApi = kind === GEN_AI_OPERATION_NAME_VALUE_CHAT
 
   return {
@@ -758,10 +741,6 @@ const commonAttrs = ({ kind, ctx, facts }: { kind: GroupedKind; ctx: Ctx; facts?
     [ATTR_GEN_AI_RESPONSE_ID]: responseId,
     [ATTR_GEN_AI_RESPONSE_FINISH_REASONS]: stopReasons?.length ? stopReasons.map(normalizeFinishReason) : undefined,
     [ATTR_ERROR_TYPE]: isApi ? error : undefined,
-    [ATTR_GEN_AI_USAGE_INPUT_TOKENS]: usage?.input_tokens,
-    [ATTR_GEN_AI_USAGE_OUTPUT_TOKENS]: usage?.output_tokens,
-    [ATTR_GEN_AI_USAGE_CACHE_READ_INPUT_TOKENS]: usage?.cache_read_input_tokens,
-    [ATTR_GEN_AI_USAGE_CACHE_CREATION_INPUT_TOKENS]: usage?.cache_creation_input_tokens,
   }
 }
 
