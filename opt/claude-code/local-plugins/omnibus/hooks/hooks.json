@@ -7,7 +7,7 @@
         "matcher": "^mcp__plugin_omnibus_",
         "hooks": [
           {
-            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/mcp-tools.sh\"",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/hooks/mcp-filter.sh\"",
             "type": "command"
           }
         ]
