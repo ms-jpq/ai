@@ -832,9 +832,9 @@ const chatLeaf = ({
       ...commonAttrs({ kind: GEN_AI_OPERATION_NAME_VALUE_CHAT, ctx, facts }),
       [ATTR_GEN_AI_INPUT_MESSAGES]: input && JSON.stringify(inputSequence),
       [ATTR_GEN_AI_OUTPUT_MESSAGES]: output && JSON.stringify(outputSequence),
+      [metadata("transcript_jq")]: last.msg[META].debugExpr,
       "input.value": textValue(inputSequence),
       "output.value": textValue(outputSequence),
-      [metadata("transcript_jq")]: last.msg[META].debugExpr,
     },
     status: facts?.error ? { code: SpanStatusCode.ERROR } : undefined,
     [META]: { inputSequence, outputSequence },
@@ -893,6 +893,9 @@ const toolLeaf = ({
       ] satisfies OtelMessageSequence)
     : []
 
+  const inputValue = input && JSON.stringify(input.block.value)
+  const outputValue = output && JSON.stringify(output.block.value)
+
   return {
     spanName: block.toolName ? `${kind} ${block.toolName}` : kind,
     spanKind: otelKind(kind),
@@ -900,15 +903,18 @@ const toolLeaf = ({
     endTime,
     attributes: {
       ...commonAttrs({ kind, ctx }),
-      "langfuse.observation.type": "tool",
-      [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: input && JSON.stringify(input.block.value),
-      [ATTR_GEN_AI_TOOL_CALL_RESULT]: output && JSON.stringify(output.block.value),
+      [ATTR_GEN_AI_TOOL_CALL_ARGUMENTS]: inputValue,
+      [ATTR_GEN_AI_TOOL_CALL_RESULT]: outputValue,
+      [ATTR_GEN_AI_INPUT_MESSAGES]: input && JSON.stringify(inputSequence),
+      [ATTR_GEN_AI_OUTPUT_MESSAGES]: output && JSON.stringify(outputSequence),
       [ATTR_GEN_AI_TOOL_NAME]: block.toolName,
       [ATTR_GEN_AI_TOOL_TYPE]: block.toolType,
       [ATTR_GEN_AI_TOOL_CALL_ID]: block.correlationId,
       [ATTR_ERROR_TYPE]: error,
-      [metadata("transcript_jq")]: ref.msg[META].debugExpr,
       [metadata("orphaned")]: orphaned,
+      [metadata("transcript_jq")]: ref.msg[META].debugExpr,
+      "input.value": inputValue,
+      "output.value": outputValue,
     },
     status: error ? { code: SpanStatusCode.ERROR } : undefined,
     [META]: { inputSequence, outputSequence },
@@ -1046,7 +1052,6 @@ const buildBranch = ({
     endTime: Math.max(...children.map((c) => c.endTime)),
     attributes: {
       ...commonAttrs({ kind, ctx }),
-      "langfuse.observation.type": "agent",
       [ATTR_GEN_AI_INPUT_MESSAGES]: inputSequence.length ? JSON.stringify(inputSequence) : undefined,
       [ATTR_GEN_AI_OUTPUT_MESSAGES]: outputSequence.length ? JSON.stringify(outputSequence) : undefined,
       ...attributes,
