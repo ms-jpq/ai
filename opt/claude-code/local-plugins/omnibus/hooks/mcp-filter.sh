@@ -16,10 +16,6 @@ searx__* | crawl4ai__*)
   DECISION=allow
   REASON='safe to use websearch'
   ;;
-playwright__*)
-  DECISION=ask
-  REASON='haha'
-  ;;
 *)
   exit 0
   ;;
