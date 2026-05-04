@@ -14,7 +14,7 @@ searx__web_url_read)
   ;;
 searx__* | crawl4ai__*)
   DECISION=allow
-  REASON='safe to use websearch'
+  REASON='readonly web use is allowed'
   ;;
 *)
   exit 0
