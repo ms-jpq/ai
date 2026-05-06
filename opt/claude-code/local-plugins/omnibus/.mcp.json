@@ -3,5 +3,9 @@
     "alwaysLoad": true,
     "type": "http",
     "url": "https://bifrost.${MCP_DOMAIN}/mcp"
+  },
+  "playwright": {
+    "type": "http",
+    "url": "https://playwright.mcp.${MCP_DOMAIN}/mcp"
   }
 }
