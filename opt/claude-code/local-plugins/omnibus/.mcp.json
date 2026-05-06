@@ -1,5 +1,6 @@
 {
   "gateway": {
+    "alwaysLoad": true,
     "type": "http",
     "url": "https://bifrost.${MCP_DOMAIN}/mcp"
   }
