@@ -27,7 +27,7 @@ YELLOW=$'\033[33m'
 case "$CC_MODE" in
 agent)
   read -r -d '' -- JQ <<- 'JQ' || true
-.tasks[] | {id, content: (">>> " + (.label | gsub("\\s+"; " ")) + " <<<")}
+  .tasks[] | {id, content: ((if .type == "local_agent" then "" else ("[" + .type + "] ") end) + (.label | gsub("\\s+"; " ")))}
 JQ
 
   exec -- jq --compact-output "$JQ"
