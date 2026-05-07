@@ -2,7 +2,7 @@
   "gateway": {
     "alwaysLoad": true,
     "type": "http",
-    "url": "https://bifrost.${MCP_DOMAIN}/mcp"
+    "url": "https://mcp.${MCP_DOMAIN}/mcp"
   },
   "playwright": {
     "type": "http",
