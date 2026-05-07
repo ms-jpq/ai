@@ -7,5 +7,9 @@
   "playwright": {
     "type": "http",
     "url": "https://playwright.mcp.${MCP_DOMAIN}/mcp"
+  },
+  "youtube": {
+    "type": "http",
+    "url": "https://youtube.mcp.${MCP_DOMAIN}/mcp"
   }
 }
