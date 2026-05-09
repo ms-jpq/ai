@@ -11,7 +11,7 @@ description: Web search and fetch. Returns findings with source URLs. Invoke in 
 
 - MCP over built-in search tools.
 
-- Use `searx` (search) and `crawl4ai` (fetch). Load via ToolSearch if required.
+- Use `searx` for search and `crawl4ai` for fetch.
 
 # Research
 
