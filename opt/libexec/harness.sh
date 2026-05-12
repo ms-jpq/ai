@@ -2,15 +2,14 @@
 
 set -o pipefail
 
-if [[ $PWD == "$HOME" ]]; then
-  TMP="$(mktemp -d)"
-  cd -- "$TMP"
-  exec -- "$@"
-fi
-
 BASE="${0%/*}"
 ROOT="$(realpath -- "$BASE/../..")"
 VAR="$ROOT/var"
+
+if [[ $PWD == "$HOME" ]]; then
+  cd -- "$ROOT"
+  exec -- "$@"
+fi
 
 OOM=()
 case "$OSTYPE" in
