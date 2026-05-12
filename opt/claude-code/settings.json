@@ -253,7 +253,5 @@
   },
   "teammateMode": "in-process",
   "theme": "light",
-  "worktree": {
-    "symlinkDirectories": [".cache/", ".markdown/", ".venv/", "node_modules/", "vendor/"]
-  }
+  "worktree": {}
 }
