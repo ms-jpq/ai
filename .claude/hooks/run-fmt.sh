@@ -15,6 +15,15 @@ case "$FILE_PATH" in
   FILE_PATH="$(realpath -- "$FILE_PATH")" || exit 2
   node_modules/.bin/prettier --write -- "$FILE_PATH" || exit 2
   ;;
+*/settings.json)
+  TMP="$(mktemp)"
+  if jq --sort-keys -- . "$FILE_PATH" > "$TMP"; then
+    exec -- mv -f -- "$TMP" "$FILE_PATH"
+  else
+    rm -f -- "$TMP"
+    exit 2
+  fi
+  ;;
 *)
   exit 0
   ;;

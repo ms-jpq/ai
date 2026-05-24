@@ -612,6 +612,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         },
       })
     case "web_fetch_tool_result":
+    case "advisor_tool_result":
       return extractChat({
         role,
         part: {
@@ -627,6 +628,12 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
                   url: block.content.url,
                   content: documentValue(block.content.content),
                 }
+              case "advisor_tool_result_error":
+                return { error_code: block.content.error_code }
+              case "advisor_result":
+                return { text: block.content.text }
+              case "advisor_redacted_result":
+                return { encrypted_content: block.content.encrypted_content }
               default:
                 fail(block.content satisfies never)
             }
