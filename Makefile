@@ -23,7 +23,7 @@ clean:
 
 clobber: clean
 	shopt -u failglob
-	rm -v -rf -- '$(VAR)' ./.venv/ ./node_modules/ $(CLOBBER)
+	rm -v -rf -- ./.venv/ ./node_modules/ $(CLOBBER)
 
 
 CURL := curl --fail --location --no-progress-meter

@@ -20,6 +20,7 @@ execl(
 )
 endef
 
+CLOBBER += $(VAR)/bin
 $(VAR)/bin: | $(VAR)
 	mkdir -v -p -- '$@'
 
