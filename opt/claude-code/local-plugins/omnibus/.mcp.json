@@ -4,6 +4,14 @@
     "type": "http",
     "url": "https://mcp.${MCP_DOMAIN}/mcp"
   },
+  "hister": {
+    "headers": {
+      "Authorization": "Basic ${HISTER_TOKEN}",
+      "Origin": "hister://"
+    },
+    "type": "http",
+    "url": "https://hister.${MCP_DOMAIN}/mcp"
+  },
   "playwright": {
     "type": "http",
     "url": "https://playwright.mcp.${MCP_DOMAIN}/mcp"
