@@ -27,9 +27,6 @@ esac
 
 ARGV=("$@")
 
-COLOURS=(blue green yellow purple orange pink cyan)
-RANDOM_COLOR="${COLOURS[RANDOM % ${#COLOURS[@]}]}"
-
 PLUGINS=(
   "$BASE/local-plugins"/*/
   "$ROOT/var/claude-plugins"/*/
@@ -49,7 +46,6 @@ printf -- '\033]0;%s\033\\' "[${PWD##*/}]" >&2
 export -- CLAUDE_CONFIG_DIR="$ROOT/var/claude"
 if [[ -t 0 ]]; then
   clear -x
-  printf -- '%s' "/color $RANDOM_COLOR" | "${EXEC[@]}"
-else
-  "${EXEC[@]}"
 fi
+
+"${EXEC[@]}"
