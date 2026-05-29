@@ -6,7 +6,6 @@ import type {
   BetaContentBlockParam,
   BetaDocumentBlock,
   BetaImageBlockParam,
-  BetaMessageParam,
   BetaRequestDocumentBlock,
 } from "@anthropic-ai/sdk/resources/beta/messages/messages.js"
 import type { Attributes, Context, Tracer } from "@opentelemetry/api"
@@ -84,7 +83,7 @@ type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
 
 const META: unique symbol = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
-  Extract<SDKMessage, { type: BetaMessageParam["role"] }> & {
+  Extract<SDKMessage, { type: "user" | "assistant" }> & {
     timestamp: string
     [META]: TranscriptMeta
   }
@@ -444,6 +443,79 @@ const imageValue = ({ source }: { source: BetaImageBlockParam["source"] }) => {
   }
 }
 
+type ServerToolResultContent = Extract<
+  Exclude<MessageBlock, string>,
+  {
+    type:
+      | "code_execution_tool_result"
+      | "bash_code_execution_tool_result"
+      | "text_editor_code_execution_tool_result"
+      | "tool_search_tool_result"
+      | "web_search_tool_result"
+      | "web_fetch_tool_result"
+      | "advisor_tool_result"
+  }
+>["content"]
+
+const serverToolResponse = (content: ServerToolResultContent) => {
+  if (Array.isArray(content)) {
+    return {
+      results: collapseSingleton(content.map((r) => ({ page_age: r.page_age, title: r.title, url: r.url }))),
+    }
+  }
+  switch (content.type) {
+    case "bash_code_execution_tool_result_error":
+    case "code_execution_tool_result_error":
+    case "web_search_tool_result_error":
+    case "web_fetch_tool_result_error":
+    case "advisor_tool_result_error":
+      return { error_code: content.error_code }
+    case "encrypted_code_execution_result":
+      return { return_code: content.return_code, stderr: content.stderr }
+    case "bash_code_execution_result":
+    case "code_execution_result":
+      return { return_code: content.return_code, stderr: content.stderr, stdout: content.stdout }
+    case "text_editor_code_execution_tool_result_error":
+      return { error_code: content.error_code, error_message: content.error_message }
+    case "text_editor_code_execution_view_result":
+      return {
+        content: content.content,
+        file_type: content.file_type,
+        num_lines: content.num_lines,
+        start_line: content.start_line,
+        total_lines: content.total_lines,
+      }
+    case "text_editor_code_execution_create_result":
+      return { is_file_update: content.is_file_update }
+    case "text_editor_code_execution_str_replace_result":
+      return {
+        lines: content.lines,
+        new_lines: content.new_lines,
+        new_start: content.new_start,
+        old_lines: content.old_lines,
+        old_start: content.old_start,
+      }
+    case "tool_search_tool_result_error": {
+      const { type: _, ...rest } = content
+      return rest
+    }
+    case "tool_search_tool_search_result":
+      return { tool_references: collapseSingleton(content.tool_references) }
+    case "web_fetch_result":
+      return {
+        retrieved_at: content.retrieved_at,
+        url: content.url,
+        content: documentValue(content.content),
+      }
+    case "advisor_result":
+      return { text: content.text }
+    case "advisor_redacted_result":
+      return { encrypted_content: content.encrypted_content }
+    default:
+      fail(content satisfies never)
+  }
+}
+
 const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefined => {
   if (typeof block === "string") {
     return extractChat({ role, part: { type: "text", content: block } })
@@ -507,110 +579,9 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
       })
     case "code_execution_tool_result":
     case "bash_code_execution_tool_result":
-      return extractChat({
-        role,
-        part: {
-          type: "server_tool_call_response",
-          id: block.tool_use_id,
-          server_tool_call_response: (() => {
-            switch (block.content.type) {
-              case "bash_code_execution_tool_result_error":
-              case "code_execution_tool_result_error":
-                return { error_code: block.content.error_code }
-              case "encrypted_code_execution_result":
-                return {
-                  return_code: block.content.return_code,
-                  stderr: block.content.stderr,
-                }
-              case "bash_code_execution_result":
-              case "code_execution_result":
-                return {
-                  return_code: block.content.return_code,
-                  stderr: block.content.stderr,
-                  stdout: block.content.stdout,
-                }
-              default:
-                fail(block.content satisfies never)
-            }
-          })(),
-        },
-      })
     case "text_editor_code_execution_tool_result":
-      return extractChat({
-        role,
-        part: {
-          type: "server_tool_call_response",
-          id: block.tool_use_id,
-          server_tool_call_response: (() => {
-            switch (block.content.type) {
-              case "text_editor_code_execution_tool_result_error":
-                return {
-                  error_code: block.content.error_code,
-                  error_message: block.content.error_message,
-                }
-              case "text_editor_code_execution_view_result":
-                return {
-                  content: block.content.content,
-                  file_type: block.content.file_type,
-                  num_lines: block.content.num_lines,
-                  start_line: block.content.start_line,
-                  total_lines: block.content.total_lines,
-                }
-              case "text_editor_code_execution_create_result":
-                return { is_file_update: block.content.is_file_update }
-              case "text_editor_code_execution_str_replace_result":
-                return {
-                  lines: block.content.lines,
-                  new_lines: block.content.new_lines,
-                  new_start: block.content.new_start,
-                  old_lines: block.content.old_lines,
-                  old_start: block.content.old_start,
-                }
-              default:
-                fail(block.content satisfies never)
-            }
-          })(),
-        },
-      })
     case "tool_search_tool_result":
-      return extractChat({
-        role,
-        part: {
-          type: "server_tool_call_response",
-          id: block.tool_use_id,
-          server_tool_call_response: (() => {
-            switch (block.content.type) {
-              case "tool_search_tool_result_error": {
-                const { type: _, ...rest } = block.content
-                return rest
-              }
-              case "tool_search_tool_search_result":
-                return { tool_references: collapseSingleton(block.content.tool_references) }
-              default:
-                fail(block.content satisfies never)
-            }
-          })(),
-        },
-      })
     case "web_search_tool_result":
-      return extractChat({
-        role,
-        part: {
-          type: "server_tool_call_response",
-          id: block.tool_use_id,
-          server_tool_call_response: Array.isArray(block.content)
-            ? {
-                results: collapseSingleton(
-                  block.content.map((r) => ({
-                    page_age: r.page_age,
-                    title: r.title,
-                    url: r.url,
-                  })),
-                ),
-              }
-            : { error_code: block.content.error_code },
-        },
-      })
     case "web_fetch_tool_result":
     case "advisor_tool_result":
       return extractChat({
@@ -618,26 +589,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         part: {
           type: "server_tool_call_response",
           id: block.tool_use_id,
-          server_tool_call_response: (() => {
-            switch (block.content.type) {
-              case "web_fetch_tool_result_error":
-                return { error_code: block.content.error_code }
-              case "web_fetch_result":
-                return {
-                  retrieved_at: block.content.retrieved_at,
-                  url: block.content.url,
-                  content: documentValue(block.content.content),
-                }
-              case "advisor_tool_result_error":
-                return { error_code: block.content.error_code }
-              case "advisor_result":
-                return { text: block.content.text }
-              case "advisor_redacted_result":
-                return { encrypted_content: block.content.encrypted_content }
-              default:
-                fail(block.content satisfies never)
-            }
-          })(),
+          server_tool_call_response: serverToolResponse(block.content),
         },
       })
 
@@ -697,6 +649,14 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         toolType: "extension",
         value: { file_id: block.file_id },
       } satisfies ExtractedBlock
+    case "mid_conv_system":
+      return extractChat({
+        role,
+        part: {
+          type: "text",
+          content: block.content.map((item) => item.text).join("\n\n"),
+        },
+      })
 
     default:
       fail(block satisfies never)
