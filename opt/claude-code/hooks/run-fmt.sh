@@ -20,9 +20,9 @@ case "$FILE_PATH" in
 *.awk)
   awk-fmt < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
   ;;
-*.lua)
-  stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH" || exit 2
-  ;;
+# *.lua)
+#   stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH" || exit 2
+#   ;;
 *.link | *.netdev | *.network | *.socket | *.service | *.target | *.mount | *.automount | *.dnssd)
   systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
   ;;
