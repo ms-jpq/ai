@@ -657,6 +657,14 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           content: block.content.map((item) => item.text).join("\n\n"),
         },
       })
+    case "fallback":
+      return extractChat({
+        role,
+        part: {
+          type: "text",
+          content: `[fallback: ${block.from.model} → ${block.to.model}]`,
+        },
+      })
 
     default:
       fail(block satisfies never)
