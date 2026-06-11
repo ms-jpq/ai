@@ -210,7 +210,8 @@
       "Skill(tip)",
       "WebFetch",
       "WebSearch"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "spinnerTipsEnabled": false,
   "spinnerVerbs": {
