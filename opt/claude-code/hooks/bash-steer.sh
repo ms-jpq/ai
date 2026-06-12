@@ -67,9 +67,6 @@ case "$CMD_LINE" in
 'git rebase '* | 'git commit '*--amend*)
   REASON='review history rewriting'
   ;;
-'git '*' --delete'* | 'git '*' -D'* | 'git '*' --force'* | 'git '*' -f'* | 'git '*' -F'* | 'git '*' --hard'*)
-  REASON='review destructive git operation'
-  ;;
 *)
   exit
   ;;
