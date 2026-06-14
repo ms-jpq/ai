@@ -23,7 +23,7 @@ SessionStart)
   ORPHANS=("$EXP" "$NOTES")
 
   for DIR in "${ORPHANS[@]}"; do
-    BRANCH="${DIR##*/.}"
+    BRANCH="\$${DIR##*/.}"
     PRESS_F=(git -C "$ROOT" worktree add --quiet --orphan -b "$BRANCH" -- "$DIR")
 
     if [[ -e "$DIR/.git" ]]; then
