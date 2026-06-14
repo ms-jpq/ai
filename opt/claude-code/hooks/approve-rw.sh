@@ -18,11 +18,15 @@ read -r -d '' -- JQ <<- 'JQ' || true
 JQ
 
 case "$FILE" in
-"$CWD"/.exp/*)
+"$CWD"/.exp/**/*)
   DECISION=allow
   REASON='✅ .exp/ auto-approved'
   ;;
-"$CWD"/.notes/*)
+"$CWD"/.notes/**/{root,worktrees,peers}/**/*)
+  DECISION=deny
+  REASON='🚫 .notes/ symlink — points to state owned by another'
+  ;;
+"$CWD"/.notes/**/*)
   DECISION=allow
   REASON='✅ .notes/ auto-approved'
   ;;

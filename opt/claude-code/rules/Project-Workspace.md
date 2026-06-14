@@ -12,7 +12,7 @@ Layout:
 |   |-- design/
 |   |-- plan/
 |   |-- research/
-|   |-- worktree/
+|   |-- worktrees/
 |   `-- <topic>/
 `-- ...
 ```
