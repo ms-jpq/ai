@@ -45,4 +45,4 @@ if [[ -t 0 ]]; then
   clear -x
 fi
 
-SHELL=bash "${EXEC[@]}"
+"${EXEC[@]}"

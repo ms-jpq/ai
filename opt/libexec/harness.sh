@@ -41,5 +41,5 @@ SANDBOX+=(
   --dir "$LIB/Application Support/opencode:rw"
 )
 
-export -- BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
+export -- SHELL=bash BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
 exec -- nice -n 19 -- "${OOM[@]}" "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
