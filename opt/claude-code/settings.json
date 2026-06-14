@@ -280,7 +280,6 @@
     "command": "CC_MODE=agent ~/.local/opt/ai/opt/claude-code/hooks/statusline.sh",
     "type": "command"
   },
-  "teammateMode": "in-process",
   "theme": "light",
   "worktree": {}
 }
