@@ -104,7 +104,7 @@ r | run)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name ${SESSION@Q} -- \"\$(< ${PROMPT@Q})\""
+    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --agent wtree-worker --name ${SESSION@Q} -- \"\$(< ${PROMPT@Q})\""
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
