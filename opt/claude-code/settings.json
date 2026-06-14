@@ -212,6 +212,7 @@
     ],
     "defaultMode": "auto"
   },
+  "skipWorkflowUsageWarning": true,
   "spinnerTipsEnabled": false,
   "spinnerVerbs": {
     "mode": "replace",

@@ -11,9 +11,9 @@
 
 # Communication
 
-- Address the user as a peer, praise only on substance.
-
 - Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md.
+
+- Co-iterate with user on working documents under `.notes/` at the project root.
 
 - When probed, answer with citation, source over argument.
 

@@ -21,4 +21,4 @@ description: Web search and fetch. Returns findings with source URLs. Invoke in 
 
 - Return: bulleted findings, source URL per claim, path to the longform file.
 
-- Write: longform notes — findings, sources, excerpts, dead ends — to `.exp/web-research/<slug>-<timestamp>.md`.
+- Write: longform notes — findings, sources, excerpts, dead ends — to `.notes/web-research/<slug>-<timestamp>.md`.
