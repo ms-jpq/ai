@@ -7,18 +7,28 @@ JSON="$(tee)"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 FILE="$(jq -e --raw-output '.tool_input.file_path' <<< "$JSON")"
 
-if [[ $FILE != "$CWD"/.exp/* ]]; then
-  exit
-fi
-
 read -r -d '' -- JQ <<- 'JQ' || true
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
-    "permissionDecision": "allow",
-    "permissionDecisionReason": "✅ .exp/ auto-approved"
+    "permissionDecision": $decision,
+    "permissionDecisionReason": $reason
   }
 }
 JQ
 
-exec -- jq -e --null-input "$JQ"
+case "$FILE" in
+"$CWD"/.exp/*)
+  DECISION=allow
+  REASON='✅ .exp/ auto-approved'
+  ;;
+"$CWD"/.notes/*)
+  DECISION=allow
+  REASON='✅ .notes/ auto-approved'
+  ;;
+*)
+  exit
+  ;;
+esac
+
+exec -- jq -e --null-input --arg decision "$DECISION" --arg reason "$REASON" "$JQ"

@@ -32,7 +32,7 @@ l | ls)
     --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
     --preview-window 'right,60%,wrap'
   )
-  if ! SESSION="$("$SELF/git.sh" list all | grep -z -e . | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
+  if ! SESSION="$("$SELF/git.sh" list all | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
     exit 0
   fi
 
