@@ -10,7 +10,8 @@ SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 BASE="${0%/*}"
 LIBEXEC="$(realpath -- "$BASE/../libexec")"
-SESSIONS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions"
+CLAUDE_CONFIG_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
+SESSIONS="$CLAUDE_CONFIG_DIR/.var/sessions"
 MD="$SESSIONS/$SESSION_ID.md"
 mkdir -p -- "$SESSIONS"
 
