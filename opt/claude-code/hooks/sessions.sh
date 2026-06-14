@@ -22,8 +22,8 @@ SessionStart)
   if [[ -v TMUX_PANE ]]; then
     tmux set-option -t "$TMUX_PANE" -p @claude_session "$SESSION_ID"
 
-    printf -v REVIEW -- '%q' "$ROOT/opt/claude-code/libexec/review-diffs.sh"
-    printf -v HIST -- '%q' "$ROOT/opt/claude-code/libexec/read-session.sh"
+    printf -v REVIEW -- '%q ' env -- CLAUDE_CONFIG_DIR="$CLAUDE_CONFIG_DIR" "$ROOT/opt/claude-code/libexec/review-diffs.sh"
+    printf -v HIST -- '%q ' env -- CLAUDE_CONFIG_DIR="$CLAUDE_CONFIG_DIR" "$ROOT/opt/claude-code/libexec/read-session.sh"
     tmux bind-key f run-shell -- "$HIST"
     tmux bind-key F run-shell -- "$REVIEW"
   fi
