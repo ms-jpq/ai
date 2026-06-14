@@ -13,4 +13,6 @@ Open what we're currently working on:
 
   - URLs and links referenced.
 
+- Make each path absolute.
+
 - Invoke `tmux-open` with multiple arguments: `tmux-open [FILE|DIR|LINK]...`
