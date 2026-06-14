@@ -2,8 +2,6 @@
 
 Layout:
 
-- both `.exp/` and `.notes/` are gitignored, and are themselves git repos.
-
 ```
 ./
 |-- .exp/
