@@ -18,18 +18,20 @@ case "$FILE_PATH" in
   systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
   ;;
 *.toml)
-  RUST_LOG=warn taplo format -- "$FILE_PATH" || exit 2
+  if command -v -- taplo > /dev/null; then
+    RUST_LOG=warn taplo format -- "$FILE_PATH" || exit 2
+  fi
   ;;
 *.sh)
-  shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
+  if command -v -- shfmt > /dev/null; then
+    shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
+  fi
   ;;
-*.py)
-  isort --profile=black --quiet -- "$FILE_PATH" || exit 2
-  black --quiet -- "$FILE_PATH" || exit 2
-  ;;
-*.md | *.yml | *.ts | *.js | *.mjs)
+*.md)
   FILE_PATH="$(realpath -- "$FILE_PATH")" || exit 2
-  prettier --log-level warn --write -- "$FILE_PATH" || exit 2
+  if command -v -- prettier > /dev/null; then
+    prettier --log-level warn --write -- "$FILE_PATH" || exit 2
+  fi
   ;;
 # *.lua)
 #   stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH" || exit 2
