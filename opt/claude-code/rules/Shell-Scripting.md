@@ -8,8 +8,6 @@
 set -o pipefail
 ```
 
-- Bash 3 compatible prelude for scripts under `~/work/` and `~/work.localized/`:
-
 ```bash
 #!/usr/bin/env -S -- bash
 

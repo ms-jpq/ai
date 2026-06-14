@@ -5,6 +5,9 @@ set -o pipefail
 SELF="$(realpath -- "$0")"
 SELF="${SELF%/*}"
 
+# shellcheck disable=SC2154
+PREVIEW="$XDG_CONFIG_HOME/zsh/libexec/preview.sh"
+
 ACTION="${1:-"list"}"
 if (($#)); then
   shift -- 1
@@ -21,6 +24,26 @@ PROMPT="$NOTES/PROMPT.md"
 case "$ACTION" in
 l | list)
   tmux list-sessions -f '#{m:worktree/*,#{session_name}}' -F '#{session_name}' | grep -e .
+  ;;
+n | nav)
+  if ! [[ -t 0 ]]; then
+    set -v
+    exit 2
+  fi
+
+  FZF=(
+    fzf --delimiter /
+    --preview "${PREVIEW@Q} ${ROOT@Q}/.notes/worktree/{-1}"
+    --preview-window 'right,60%,wrap'
+  )
+  if ! SESSION="$("$0" list | "${FZF[@]}")" || [[ -z $SESSION ]]; then
+    exit 0
+  fi
+
+  if [[ -v TMUX ]]; then
+    exec -- tmux switch-client -t "=$SESSION"
+  fi
+  exec -- tmux attach-session -t "=$SESSION"
   ;;
 k | kill)
   tmux kill-session -t "=$SESSION"
@@ -78,8 +101,8 @@ all)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {list,kill,prompt,run,all} ...
-	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'kill', 'prompt', 'run', 'all')
+	usage: $PROG [-h] {list,nav,kill,prompt,run,all} ...
+	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'nav', 'kill', 'prompt', 'run', 'all')
 EOF
   exit 2
   ;;
