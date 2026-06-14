@@ -47,9 +47,11 @@ a | attach)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name $QUOTED -- $READ "$'\n'
+    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name $QUOTED -- $READ"
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
+    printf -- '\n'
+    printf -- '%q ' tmux send-keys -- Enter
     printf -- '\n'
     printf -- '%q ' tmux select-pane -t '{marked}'
     printf -- '\n'

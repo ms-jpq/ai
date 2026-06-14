@@ -1,6 +1,5 @@
 ---
 description: Open the files, directories, and links relevant to the current task.
-disable-model-invocation: true
 ---
 
 Open what we're currently working on:
