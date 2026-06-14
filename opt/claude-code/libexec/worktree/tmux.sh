@@ -20,6 +20,10 @@ PROMPT="$NOTES/PROMPT.md"
 
 case "$ACTION" in
 l | ls)
+  if ! [[ -t 1 ]]; then
+    exec -- "$SELF/git.sh" list all
+  fi
+
   if ! [[ -t 0 ]]; then
     set -v
     exit 2

@@ -44,14 +44,16 @@ init)
 add)
   NAME="$1"
   WORKTREE="$WORKTREES/$NAME"
+  SELFNOTES="$WORKTREE/.notes"
 
   if ! [[ -e "$WORKTREE/.git" ]]; then
     git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
   fi
   mkdir -p -- "$NOTESTREE/$NAME"
   ln -sTnfr -- "$EXP" "$WORKTREE/.exp"
-  ln -sTnfr -- "$NOTESTREE/$NAME" "$WORKTREE/.notes"
-  ln -sTnfr -- "$NOTESTREE" "$WORKTREE/.notes/peers"
+  ln -sTnfr -- "$NOTESTREE/$NAME" "$SELFNOTES"
+  ln -sTnfr -- "$ROOT" "$SELFNOTES/->root"
+  ln -sTnfr -- "$NOTESTREE" "$SELFNOTES/->peers"
 
   printf -- '%s' "$WORKTREE"
   ;;
