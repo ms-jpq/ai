@@ -72,20 +72,21 @@ remove)
 list)
   FIND=(find "$WORKTREES" -mindepth 1 -maxdepth 1 -type d)
   SED=(sed -E -e 's#^.*/##')
+  TOMB=(-execdir test -e '../.notes/worktree/{}/DEAD.md' ';')
   case "${1:-"live"}" in
   live)
-    FIND+=('!')
+    FIND+=('!' "${TOMB[@]}")
     ;;
   dead)
+    FIND+=("${TOMB[@]}")
+    ;;
+  all)
     ;;
   *)
     set -v
     exit 2
     ;;
   esac
-  FIND+=(
-    -execdir test -e '../.notes/worktree/{}/DEAD.md' ';'
-  )
   if [[ -t 1 ]]; then
     FIND+=(-print)
   else

@@ -24,7 +24,12 @@ WorktreeRemove)
   exec -- "${WS[@]}" remove "${WORKTREE##*/}"
   ;;
 Stop)
-  exit 0
+  SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
+  HISTORY="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID.md"
+
+  if [[ -d "$CWD/.notes" ]]; then
+    ln -sTnf -- "$HISTORY" "$CWD/.notes/HISTORY.md"
+  fi
   ;;
 *)
   set -v

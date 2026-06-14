@@ -5,10 +5,7 @@ set -o pipefail
 SELF="$(realpath -- "$0")"
 SELF="${SELF%/*}"
 
-# shellcheck disable=SC2154
-PREVIEW="$XDG_CONFIG_HOME/zsh/libexec/preview.sh"
-
-ACTION="${1:-"list"}"
+ACTION="${1:-"ls"}"
 if (($#)); then
   shift -- 1
 fi
@@ -22,31 +19,41 @@ NOTES="$ROOT/.notes/worktree/$NAME"
 PROMPT="$NOTES/PROMPT.md"
 
 case "$ACTION" in
-l | list)
-  tmux list-sessions -f '#{m:worktree/*,#{session_name}}' -F '#{session_name}' | grep -e .
-  ;;
-n | nav)
+l | ls)
   if ! [[ -t 0 ]]; then
     set -v
     exit 2
   fi
 
   FZF=(
-    fzf --delimiter /
-    --preview "${PREVIEW@Q} ${ROOT@Q}/.notes/worktree/{-1}"
+    fzf
+    --read0
+    --delimiter /
+    --preview "${SELF@Q}/preview.sh {-1}"
     --preview-window 'right,60%,wrap'
   )
-  if ! SESSION="$("$0" list | "${FZF[@]}")" || [[ -z $SESSION ]]; then
+  if ! SESSION="$("$SELF/git.sh" list all | grep -z -e . | "${FZF[@]}")" || [[ -z $SESSION ]]; then
     exit 0
   fi
 
-  if [[ -v TMUX ]]; then
-    exec -- tmux switch-client -t "=$SESSION"
+  YAZI=("$HOME/.local/libexec/yazi.sh" -- "$ROOT/.notes/worktree/${SESSION##*/}")
+
+  if ! tmux has-session -t "=$SESSION" 2> /dev/null; then
+    exec -- tmux new-window -a -- "${YAZI[@]}"
   fi
-  exec -- tmux attach-session -t "=$SESSION"
+
+  tmux new-window -t "=$SESSION:" -- "${YAZI[@]}"
+  exec -- tmux switch-client -t "=$SESSION"
   ;;
 k | kill)
-  tmux kill-session -t "=$SESSION"
+  read -r -p "kill $SESSION? [y/N] " -- REPLY
+  if [[ $REPLY == [Yy]* ]]; then
+    tmux kill-session -t "=$SESSION"
+  fi
+  ;;
+rm | remove)
+  "$0" kill || true
+  "$SELF/git.sh" remove "$NAME"
   ;;
 p | prompt)
   "$SELF/git.sh" init
@@ -86,19 +93,23 @@ r | run)
   } > "$TMP"
   chmod +x -- "$TMP"
 
-  touch -- "$PROMPT"
+  if ! [[ -t 0 ]] && ! [[ /dev/stdin -ef /dev/null ]]; then
+    "$0" prompt "$NAME"
+  else
+    touch -- "$PROMPT"
+  fi
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
-all)
-  "$SELF/git.sh" list | xargs -0 -r -I % -- "$0" run %
+run-all)
+  tmux list-sessions -f '#{m:worktree/*,#{session_name}}' -F '#{session_name}' | grep -e . | tr -- '\n' '\0' | xargs -0 -r -I % -- "$0" run %
   tmux choose-tree -G -Z -s -NN
   ;;
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {list,nav,kill,prompt,run,all} ...
-	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'nav', 'kill', 'prompt', 'run', 'all')
+	usage: $PROG [-h] {ls,kill,remove,prompt,run,run-all} ...
+	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
   ;;
