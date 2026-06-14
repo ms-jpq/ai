@@ -2,12 +2,9 @@
 
 set -o pipefail
 
-NAME="$1"
+ROOT="$1"
+NAME="$2"
 
-HR=~/.local/libexec/hr.sh
-
-COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
-ROOT="${COMMON%/.git}"
 SESSION="worktree/${ROOT##*/}/$NAME"
 SESSION="${SESSION//[.:]/-}"
 NOTES="$ROOT/.notes/worktree/$NAME"
@@ -16,8 +13,8 @@ NOTES="$ROOT/.notes/worktree/$NAME"
 
 if tmux has-session -t "=$SESSION" 2> /dev/null; then
   printf -- '\n\n'
-  "$HR"
-  "$HR"
+  ~/.local/libexec/hr.sh
+  ~/.local/libexec/hr.sh
   printf -- '\n\n'
 
   exec -- tmux capture-pane -e -p -t "$SESSION"

@@ -49,8 +49,9 @@ add)
     git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
   fi
   mkdir -p -- "$NOTESTREE/$NAME"
-  ln -sTnf -- "$EXP" "$WORKTREE/.exp"
-  ln -sTnf -- "$NOTESTREE/$NAME" "$WORKTREE/.notes"
+  ln -sTnfr -- "$EXP" "$WORKTREE/.exp"
+  ln -sTnfr -- "$NOTESTREE/$NAME" "$WORKTREE/.notes"
+  ln -sTnfr -- "$NOTESTREE" "$WORKTREE/.notes/peers"
 
   printf -- '%s' "$WORKTREE"
   ;;

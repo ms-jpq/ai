@@ -26,9 +26,11 @@ WorktreeRemove)
 Stop)
   SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
   HISTORY="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID.md"
+  TRANSCRIPT="$(jq -e --raw-output '.transcript_path' <<< "$JSON")"
 
   if [[ -d "$CWD/.notes" ]]; then
     ln -sTnf -- "$HISTORY" "$CWD/.notes/HISTORY.md"
+    ln -sTnf -- "$TRANSCRIPT" "$CWD/.notes/transcript.json"
   fi
   ;;
 *)
