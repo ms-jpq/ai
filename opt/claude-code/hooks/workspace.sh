@@ -23,6 +23,9 @@ WorktreeRemove)
   WORKTREE="$(jq -e --raw-output '.worktree_path' <<< "$JSON")"
   exec -- "${WS[@]}" remove "${WORKTREE##*/}"
   ;;
+Stop)
+  exit 0
+  ;;
 *)
   set -v
   exit 2
