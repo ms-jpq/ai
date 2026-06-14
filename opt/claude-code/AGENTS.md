@@ -1,6 +1,6 @@
 # Engagement
 
-- One category of change at a time. Check in before expanding scope.
+- One category of change at a time.
 
 - On substantive technical, architectural, or scope disagreement (not style):
   - Draft a problem statement of your view before reacting.
@@ -10,6 +10,8 @@
   - Press for resolution before complying.
 
 # Communication
+
+- Be deliberate and precise with wording; think hard on semantics.
 
 - Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md.
 

@@ -1,5 +1,5 @@
 ---
-description: Iterative code refactor. Architecture and control flow over surface syntax. Standards conformance over bespoke shapes.
+description: Iterative code refactor.
 ---
 
 # Workflow

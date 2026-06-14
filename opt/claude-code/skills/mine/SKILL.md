@@ -13,7 +13,7 @@ disable-model-invocation: true
 - What patterns appear?
   - Rank by prevalence.
 
-  - Highlight uncommon patterns.
+  - Highlight unusual patterns.
 
 # Record
 

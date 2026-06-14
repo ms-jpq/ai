@@ -1,7 +1,7 @@
 ---
-description: Delegate a task to a background sub-agent.
+description: Delegate task(s) to background sub-agent(s).
 agent: general-purpose
 disable-model-invocation: true
 ---
 
-Delegate the task to a sub-agent with `run_in_background` - **Always**. Do not perform any part of it yourself. Continue with other work while it runs.
+Delegate the task to one or more sub-agents with `run_in_background`. Do not perform any part of it yourself. Continue with other work while it runs.
