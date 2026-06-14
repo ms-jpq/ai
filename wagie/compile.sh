@@ -2,10 +2,25 @@
 
 set -o pipefail
 
-CLAUDE_CONFIG_DIR="$1/.claude"
+OUT="$1"
+CLAUDE_CONFIG_DIR="$OUT/.claude"
 SELF="${0%/*}"
 
 cp -af -- "$SELF/../opt/claude-code"/{agents,bin,hooks,libexec,rules,skills,AGENTS.md,keybindings.json} "$CLAUDE_CONFIG_DIR/"
 mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
 
 rm -fr -- "$CLAUDE_CONFIG_DIR/skills/shitpost" "$CLAUDE_CONFIG_DIR/agents/web-research.md"
+
+LAYERS=(
+  agents.d
+  hooks.d
+  rules.d
+  skills.d
+)
+
+for LAYER in "${LAYERS[@]}"; do
+  SRC=$OUT/$LAYER
+  if [[ -d $SRC ]]; then
+    rsync --archive --keep-dirlinks -- "$SRC" "$CLAUDE_CONFIG_DIR/"
+  fi
+done
