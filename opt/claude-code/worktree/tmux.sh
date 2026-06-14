@@ -20,19 +20,19 @@ PROMPT="$NOTES/PROMPT.md"
 
 case "$ACTION" in
 l | list)
-  tmux list-sessions -f '#{m:worktree/*,#{session_name}}' -F '#{session_name}'
+  tmux list-sessions -f '#{m:worktree/*,#{session_name}}' -F '#{session_name}' | grep -e .
   ;;
 k | kill)
   tmux kill-session -t "=$SESSION"
   ;;
 p | prepare)
-  "$SELF/tree.sh" init
+  "$SELF/git.sh" init
   mkdir -p -- "$NOTES"
   cat -- "$PROMPT"
   ;;
 a | attach)
-  "$SELF/tree.sh" init
-  WORKTREE="$("$SELF/tree.sh" add "$NAME")"
+  "$SELF/git.sh" init
+  WORKTREE="$("$SELF/git.sh" add "$NAME")"
 
   printf -v QUOTED -- '%q' "$SESSION"
   # shellcheck disable=2016
@@ -69,11 +69,15 @@ a | attach)
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
 all)
-  "$SELF/tree.sh" list | xargs -0 -r -I % -- "$0" attach %
+  "$SELF/git.sh" list | xargs -0 -r -I % -- "$0" attach %
   tmux choose-tree -G -Z -s -NN
   ;;
 *)
-  set -v
+  PROG="${0##*/}"
+  tee -- >&2 <<- EOF
+	usage: $PROG [-h] {list,kill,prepare,attach,all} ...
+	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'kill', 'prepare', 'attach', 'all')
+EOF
   exit 2
   ;;
 esac

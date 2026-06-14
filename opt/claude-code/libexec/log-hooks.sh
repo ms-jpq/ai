@@ -2,9 +2,7 @@
 
 set -o pipefail
 
-SELF="$(realpath -- "$0")"
-ROOT="${SELF%/*}/../../.."
-SESSIONS="$ROOT/var/sessions"
+SESSIONS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions"
 
 JSON="$(tee)"
 if ! SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"; then
@@ -12,6 +10,7 @@ if ! SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"; then
 fi
 
 DEBUG="$SESSIONS/$SESSION_ID.events.jsonl"
+mkdir -p -- "$SESSIONS"
 touch -- "$DEBUG"
 
 # shellcheck disable=SC2094,SC2016

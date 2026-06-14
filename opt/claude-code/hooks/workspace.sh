@@ -9,7 +9,7 @@ EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 
 SELF="$(realpath -- "$0")"
-WS=(env -C "$CWD" -- "${SELF%/*}/../worktree/libexec/tree.sh")
+WS=(env -C "$CWD" -- "${SELF%/*}/../worktree/git.sh")
 
 case "$EVENT" in
 SessionStart)

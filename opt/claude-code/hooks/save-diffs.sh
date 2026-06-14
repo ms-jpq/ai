@@ -10,7 +10,7 @@ SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 TOOL_NAME="$(jq -e --raw-output '.tool_name' <<< "$JSON")"
 
 BASE="${0%/*}"
-ENTRY_DIR="$(realpath -- "$BASE/../../../var/sessions")/$SESSION_ID"
+ENTRY_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID"
 
 case "$EVENT" in
 PreToolUse)

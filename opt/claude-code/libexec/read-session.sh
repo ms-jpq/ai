@@ -9,7 +9,7 @@ if ! SESSION_ID="$("$BASE/which-session.sh")"; then
 fi
 
 ROOT="$(realpath -- "$BASE/../../..")"
-MARKDOWN="$ROOT/var/sessions/$SESSION_ID.md"
+MARKDOWN="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID.md"
 
 if ! [[ -f $MARKDOWN ]]; then
   exec -- tmux display-message -- '🐶'

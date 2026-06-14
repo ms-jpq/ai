@@ -8,5 +8,5 @@ fi
 
 INFO="$(tmux display-message -t "$TMUX_PANE" -p '#{session_name}:#{window_index}:#{pane_index}')"
 HASH="$(b3sum <<< "$1")"
-INDEX="${0%/*}/../../../var/sessions/${HASH%% *}.$INFO"
+INDEX="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/${HASH%% *}.$INFO"
 printf -- '%s' "$INDEX"

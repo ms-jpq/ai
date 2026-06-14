@@ -8,7 +8,7 @@ if ! SESSION_ID="$("$BASE/which-session.sh")"; then
   exit
 fi
 
-SESSION_DIR="$(realpath --no-symlinks -- "$BASE/../../../var/sessions")/$SESSION_ID"
+SESSION_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID"
 mkdir -p -- "$SESSION_DIR"
 
 DELTA="$SESSION_DIR/$SESSION_ID.delta.json"

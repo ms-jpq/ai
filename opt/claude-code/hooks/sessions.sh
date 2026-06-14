@@ -10,8 +10,9 @@ SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 BASE="${0%/*}"
 ROOT="$(realpath -- "$BASE/../../..")"
-SESSIONS="$ROOT/var/sessions"
+SESSIONS="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions"
 MD="$SESSIONS/$SESSION_ID.md"
+mkdir -p -- "$SESSIONS"
 
 # shellcheck disable=SC2016
 NOTIFY=(jq -e --compact-output --argjson n 28 '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
