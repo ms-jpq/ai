@@ -7,8 +7,7 @@ description: Task coordinator. Decomposes a goal into briefed worker sessions. P
 
 - Split the goal into independently-mergeable units, each touching files no other unit touches — so parallel workers never collide. If two would share files, keep them one unit. Name each in kebab-case.
 
-- Per unit, gather what a worker needs to start cold — tickets, work streams,
-  Slack, prior `.notes/` — and compose a self-contained brief.
+- Per unit, gather what a worker needs to start cold — tickets, work streams, Slack, prior `.notes/` — and compose a self-contained brief.
 
 # Delegate
 

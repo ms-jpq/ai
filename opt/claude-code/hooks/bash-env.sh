@@ -7,8 +7,5 @@ JSON="$(tee)"
 
 SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 if [[ -v CLAUDE_ENV_FILE ]]; then
-  {
-    printf -- '%q ' 'export' '--' "__CC_SESSION_ID=$SESSION_ID"
-    printf -- '\n'
-  } >> "$CLAUDE_ENV_FILE"
+  printf -- 'export -- __CC_SESSION_ID=%s\n' "${SESSION_ID@Q}" >> "$CLAUDE_ENV_FILE"
 fi

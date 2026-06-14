@@ -58,10 +58,6 @@ r | run)
   "$SELF/git.sh" init
   WORKTREE="$("$SELF/git.sh" add "$NAME")"
 
-  printf -v QUOTED -- '%q' "$SESSION"
-  # shellcheck disable=2016
-  printf -v READ -- '"$(< %q)"' "$PROMPT"
-
   TMP="$(mktemp).sh"
   {
     ENV=TMUX_NO_SAVE
@@ -71,7 +67,7 @@ r | run)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name $QUOTED -- $READ"
+    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name ${SESSION@Q} -- \"\$(< ${PROMPT@Q})\""
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
