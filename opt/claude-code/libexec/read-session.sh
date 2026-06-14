@@ -8,7 +8,6 @@ if ! SESSION_ID="$("$BASE/which-session.sh")"; then
   exit
 fi
 
-ROOT="$(realpath -- "$BASE/../../..")"
 MARKDOWN="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID.md"
 
 if ! [[ -f $MARKDOWN ]]; then
@@ -16,7 +15,9 @@ if ! [[ -f $MARKDOWN ]]; then
 fi
 
 if [[ -v RECUR ]]; then
-  "$ROOT/node_modules/.bin/prettier" --write --log-level=warn -- "$MARKDOWN"
+  if command -v -- prettier > /dev/null; then
+    prettier --write --log-level=warn -- "$MARKDOWN"
+  fi
   exec -- printf -- '\n' >> "$MARKDOWN"
 fi
 
