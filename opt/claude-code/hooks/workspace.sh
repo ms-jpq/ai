@@ -9,7 +9,7 @@ EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 
 SELF="$(realpath -- "$0")"
-WS=(env -C "$CWD" -- "${SELF%/*}/../worktree/libexec/workspace.sh")
+WS=(env -C "$CWD" -- "${SELF%/*}/../worktree/libexec/tree.sh")
 
 case "$EVENT" in
 SessionStart)
@@ -17,11 +17,11 @@ SessionStart)
   ;;
 WorktreeCreate)
   NAME="$(jq -e --raw-output '.name' <<< "$JSON")"
-  exec -- "${WS[@]}" up "$NAME"
+  exec -- "${WS[@]}" add "$NAME"
   ;;
 WorktreeRemove)
   WORKTREE="$(jq -e --raw-output '.worktree_path' <<< "$JSON")"
-  exec -- "${WS[@]}" down "${WORKTREE##*/}"
+  exec -- "${WS[@]}" remove "${WORKTREE##*/}"
   ;;
 *)
   set -v

@@ -41,22 +41,30 @@ init)
     "${PRESS_F[@]}"
   done
   ;;
-up)
+add)
   NAME="$1"
   WORKTREE="$WORKTREES/$NAME"
 
-  git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
+  if ! [[ -e "$WORKTREE/.git" ]]; then
+    git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
+  fi
   mkdir -p -- "$NOTESTREE/$NAME"
   ln -sTnf -- "$EXP" "$WORKTREE/.exp"
   ln -sTnf -- "$NOTESTREE/$NAME" "$WORKTREE/.notes"
+
   printf -- '%s' "$WORKTREE"
   ;;
-down)
+remove)
   NAME="$1"
   WORKTREE="$WORKTREES/$NAME"
   NOTES="$NOTESTREE/$NAME"
 
-  git -C "$ROOT" worktree remove -- "$WORKTREE"
+  if [[ -e "$WORKTREE/.git" ]]; then
+    git -C "$ROOT" worktree remove -- "$WORKTREE"
+  fi
+  if git -C "$ROOT" show-ref --verify --quiet -- "refs/heads/$NAME"; then
+    git -C "$ROOT" branch --delete -- "$NAME" || true
+  fi
   mkdir -p -- "$NOTES"
   chmod +t -- "$NOTES"
   touch -- "$NOTES/DEAD.md"

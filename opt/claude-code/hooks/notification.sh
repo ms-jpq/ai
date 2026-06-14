@@ -23,7 +23,8 @@ fi
 if [[ -v RECUR ]]; then
   jq . <<< "$JSON"
 else
-  ~/.config/tmux/libexec/taint-inactive.sh
+  # shellcheck disable=2154
+  "$XDG_CONFIG_HOME/tmux/libexec/taint-inactive.sh"
 
   if [[ -v TMUX_PANE ]]; then
     STATUS="$(tmux display-message -t "$TMUX_PANE" -p '#{session_active}#{window_active}')"
