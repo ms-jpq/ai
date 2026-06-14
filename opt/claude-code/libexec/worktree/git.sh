@@ -76,17 +76,21 @@ list)
   FIND=(find "$WORKTREES" -mindepth 1 -maxdepth 1 -type d)
   SED=(sed -E -e 's#^.*/##')
   TOMB=(-execdir test -e '../.notes/worktrees/{}/DEAD.md' ';')
-  case "${1:-"live"}" in
-  live)
+  case "${1:-"both"}" in
+  suspended)
     FIND+=('!' "${TOMB[@]}")
     ;;
   dead)
     FIND+=("${TOMB[@]}")
     ;;
-  all)
+  both)
     ;;
   *)
-    set -v
+    PROG="${0##*/}"
+    tee -- >&2 <<- EOF
+	usage: $PROG list [-h] {suspended,dead,both}
+	$PROG list: error: argument status: invalid choice: '$1'
+EOF
     exit 2
     ;;
   esac

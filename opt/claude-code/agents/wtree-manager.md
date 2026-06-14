@@ -25,7 +25,7 @@ description: Task coordinator. Decomposes a goal into briefed worker sessions. P
 
 # Check in (on request)
 
-- `wtree list` for live workers; read their `.notes/` for progress and blockers.
+- `wtree list {both,suspended,dead}` for workers; read their `.notes/` for progress and blockers.
 
 - Re-brief (rewrite `PROMPT.md`) or `wtree kill <name>` when asked. Surface that state and stop — do not loop or wait on completion. The human owns the loop: watching panes, deciding what's done.
 

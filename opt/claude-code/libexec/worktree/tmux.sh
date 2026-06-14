@@ -22,7 +22,7 @@ PROMPT="$NOTES/PROMPT.md"
 case "$ACTION" in
 l | ls)
   if ! [[ -t 1 ]]; then
-    exec -- "$SELF/git.sh" list all
+    exec -- "$SELF/git.sh" list "$@"
   fi
 
   if ! [[ -t 0 ]]; then
@@ -37,7 +37,7 @@ l | ls)
     --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
     --preview-window 'right,60%,wrap'
   )
-  if ! SESSION="$("$0" ls | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
+  if ! SESSION="$("$0" ls "$@" | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
     exit 0
   fi
 
@@ -70,12 +70,25 @@ rm | remove)
   ;;
 p | prompt)
   "$SELF/git.sh" init
-  mkdir -p -- "$NOTES"
+  "$SELF/git.sh" add "$NAME" > /dev/null
   cat > "$PROMPT"
-  printf -- '%s' ">>> $PROMPT" >&2
+  printf -- '%s\n' ">>> $PROMPT" >&2
+
+  if (($# > 1)); then
+    shift -- 1
+    for NAME in "$@"; do
+      DST="$ROOT/.notes/worktrees/$NAME/PROMPT.md"
+      "$SELF/git.sh" add "$NAME" > /dev/null
+      cp -f -- "$PROMPT" "$DST"
+      printf -- '%s\n' ">>> $DST" >&2
+    done
+  fi
   ;;
 r | run)
   if (($# > 1)); then
+    if ! [[ -t 0 ]] && ! [[ /dev/stdin -ef /dev/null ]]; then
+      "$0" prompt "$@"
+    fi
     exec -- "${FANOUT[@]}" run < <(printf -- '%s\0' "$@")
   fi
 
@@ -118,6 +131,15 @@ r | run)
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
+m | merge)
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" merge < <(printf -- '%s\0' "$@")
+  fi
+
+  # TODO:
+  printf -- '%s\n' "merge $NAME — not yet implemented" >&2
+  exit 69
+  ;;
 run-all)
   "$0" ls | "${FANOUT[@]}" run
   tmux choose-tree -G -Z -s -NN
@@ -125,7 +147,7 @@ run-all)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,kill,remove,prompt,run,run-all} ...
+	usage: $PROG [-h] {ls,kill,remove,prompt,run,merge,run-all} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
