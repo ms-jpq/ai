@@ -20,6 +20,7 @@ a | attach)
   "$SELF/tree.sh" init
   WORKTREE="$("$SELF/tree.sh" add "$NAME")"
   printf -v QUOTED -- '%q' "$SESSION"
+  printf -v INSTRUCTION -- '%q' ""
 
   TMP="$(mktemp).sh"
   {
@@ -30,7 +31,7 @@ a | attach)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue || claude --name $QUOTED "$'\n'
+    printf -- '%q ' tmux set-buffer -- "claude --continue || claude --name $QUOTED -- $INSTRUCTION"$'\n'
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
@@ -41,12 +42,14 @@ a | attach)
 
     # tmux select-window -t :-1
     printf -- '%q ' tmux set-environment -g -h -u -- "$ENV"
+    printf -- '\n'
+
+    printf -- '%q ' rm -fr -- "$TMP"
   } > "$TMP"
   chmod +x -- "$TMP"
 
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
-  rm -fr -- "$TMP"
   ;;
 all)
   "$SELF/tree.sh" list | xargs -0 -r -I % -- "$0" attach %
