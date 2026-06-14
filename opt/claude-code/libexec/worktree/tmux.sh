@@ -9,6 +9,7 @@ ACTION="${1:-"ls"}"
 if (($#)); then
   shift -- 1
 fi
+FANOUT=(xargs -0 -r --max-args 1 -- "$0")
 
 NAME="${1:-}"
 COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
@@ -36,7 +37,7 @@ l | ls)
     --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
     --preview-window 'right,60%,wrap'
   )
-  if ! SESSION="$("$SELF/git.sh" list all | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
+  if ! SESSION="$("$0" ls | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
     exit 0
   fi
 
@@ -50,13 +51,21 @@ l | ls)
   exec -- tmux switch-client -t "=$SESSION"
   ;;
 k | kill)
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" kill < <(printf -- '%s\0' "$@")
+  fi
+
   read -r -p "kill $SESSION? [y/N] " -- REPLY
   if [[ $REPLY == [Yy]* ]]; then
     tmux kill-session -t "=$SESSION"
   fi
   ;;
 rm | remove)
-  "$0" kill || true
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
+  fi
+
+  "$0" kill "$NAME" || true
   "$SELF/git.sh" remove "$NAME"
   ;;
 p | prompt)
@@ -66,6 +75,10 @@ p | prompt)
   printf -- '%s' ">>> $PROMPT" >&2
   ;;
 r | run)
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" run < <(printf -- '%s\0' "$@")
+  fi
+
   "$SELF/git.sh" init
   WORKTREE="$("$SELF/git.sh" add "$NAME")"
 
@@ -106,7 +119,7 @@ r | run)
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
 run-all)
-  tmux list-sessions -f '#{m:worktree/*,#{session_name}}' -F '#{session_name}' | grep -e . | tr -- '\n' '\0' | xargs -0 -r -I % -- "$0" run %
+  "$0" ls | "${FANOUT[@]}" run
   tmux choose-tree -G -Z -s -NN
   ;;
 *)
