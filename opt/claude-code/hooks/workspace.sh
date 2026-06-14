@@ -21,11 +21,25 @@ WORKTREES="$ROOT/.worktrees"
 case "$EVENT" in
 SessionStart)
   ORPHANS=("$EXP" "$NOTES")
+
   for DIR in "${ORPHANS[@]}"; do
     BRANCH="${DIR##*/.}"
-    if ! [[ -e "$DIR/.git" ]]; then
-      git -C "$ROOT" worktree add --quiet --orphan -b "$BRANCH" -- "$DIR"
+    PRESS_F=(git -C "$ROOT" worktree add --quiet --orphan -b "$BRANCH" -- "$DIR")
+
+    if [[ -e "$DIR/.git" ]]; then
+      continue
     fi
+    if [[ -d $DIR ]] && find "$DIR" -mindepth 1 -print -quit | grep --quiet -e .; then
+      STASH="$(mktemp --dry-run --tmpdir="$ROOT")"
+      mv -- "$DIR" "$STASH"
+      "${PRESS_F[@]}"
+
+      mv -- "$STASH"/* "$DIR/"
+      rmdir -- "$STASH"
+      continue
+    fi
+
+    "${PRESS_F[@]}"
   done
 
   exit 0
@@ -37,16 +51,15 @@ esac
 case "$EVENT" in
 WorktreeCreate)
   NAME="$(jq -e --raw-output '.name' <<< "$JSON")"
-  NOTES="$NOTESTREE/$NAME"
   WORKTREE="$WORKTREES/$NAME"
 
-  mkdir -p -- "$NOTES"
+  git worktree add --quiet -- "$WORKTREE"
+  mkdir -p -- "$NOTESTREE/$NAME"
   printf -- '%s' "$WORKTREE"
   ;;
 WorktreeRemove)
   WORKTREE="$(jq -e --raw-output '.worktree_path' <<< "$JSON")"
-  NAME="${WORKTREE##*/}"
-  NOTES="$NOTESTREE/$NAME"
+  NOTES="$NOTESTREE/${WORKTREE##*/}"
 
   if git -C "$CWD" worktree remove -- "$WORKTREE"; then
     mkdir -p -- "$NOTES"
