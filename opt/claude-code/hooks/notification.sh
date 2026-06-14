@@ -4,11 +4,10 @@ set -Eeu
 set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 
-SELF="$(realpath -- "$0")"
-ROOT="${SELF%/*}/../../.."
-SOCK="$(realpath -- "$ROOT/var/claude.notify.sock")"
+SOCK="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/claude.notify.sock"
 
 if [[ -t 0 ]]; then
+  mkdir -p -- "${SOCK%/*}"
   RECUR=1 socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
   exit
 fi
