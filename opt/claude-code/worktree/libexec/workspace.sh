@@ -2,11 +2,12 @@
 
 set -o pipefail
 
-EVENT="$1"
-CWD="$2"
-shift -- 2
+ACTION="${1:-"list"}"
+if (($#)); then
+  shift -- 1
+fi
 
-if ! GITDIR="$(git -C "$CWD" rev-parse --path-format=absolute --git-common-dir)" 2> /dev/null; then
+if ! GITDIR="$(git rev-parse --path-format=absolute --git-common-dir)" 2> /dev/null; then
   exit
 fi
 
@@ -16,7 +17,7 @@ NOTES="$ROOT/.notes"
 NOTESTREE="$NOTES/worktree"
 WORKTREES="$ROOT/.worktrees"
 
-case "$EVENT" in
+case "$ACTION" in
 init)
   ORPHANS=("$EXP" "$NOTES")
 
@@ -55,11 +56,35 @@ down)
   WORKTREE="$WORKTREES/$NAME"
   NOTES="$NOTESTREE/$NAME"
 
-  if git -C "$CWD" worktree remove -- "$WORKTREE"; then
-    mkdir -p -- "$NOTES"
-    chmod +t -- "$NOTES"
-    touch -- "$NOTES/DEAD.md"
+  git -C "$ROOT" worktree remove -- "$WORKTREE"
+  mkdir -p -- "$NOTES"
+  chmod +t -- "$NOTES"
+  touch -- "$NOTES/DEAD.md"
+  ;;
+list)
+  FIND=(find "$WORKTREES" -mindepth 1 -maxdepth 1 -type d)
+  SED=(sed -E -e 's#^.*/##')
+  case "${1:-"live"}" in
+  live)
+    FIND+=('!')
+    ;;
+  dead)
+    ;;
+  *)
+    set -v
+    exit 2
+    ;;
+  esac
+  FIND+=(
+    -execdir test -e '../.notes/worktree/{}/DEAD.md' ';'
+  )
+  if [[ -t 1 ]]; then
+    FIND+=(-print)
+  else
+    FIND+=(-print0)
+    SED+=(-z)
   fi
+  "${FIND[@]}" | "${SED[@]}"
   ;;
 *)
   set -v
