@@ -31,7 +31,7 @@ p | prompt)
   cat > "$PROMPT"
   printf -- '%s' ">>> $PROMPT" >&2
   ;;
-a | attach)
+r | run)
   "$SELF/git.sh" init
   WORKTREE="$("$SELF/git.sh" add "$NAME")"
 
@@ -72,14 +72,14 @@ a | attach)
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
 all)
-  "$SELF/git.sh" list | xargs -0 -r -I % -- "$0" attach %
+  "$SELF/git.sh" list | xargs -0 -r -I % -- "$0" run %
   tmux choose-tree -G -Z -s -NN
   ;;
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {list,kill,prompt,attach,all} ...
-	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'kill', 'prompt', 'attach', 'all')
+	usage: $PROG [-h] {list,kill,prompt,run,all} ...
+	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'kill', 'prompt', 'run', 'all')
 EOF
   exit 2
   ;;
