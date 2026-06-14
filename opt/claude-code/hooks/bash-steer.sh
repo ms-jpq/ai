@@ -38,7 +38,7 @@ case "$CMD_LINE" in
   DECISION=deny
   REASON='use locally installed tools, install as required'
   ;;
-'nohup '* | 'crontab '* | 'tmux '* | 'screen '* | 'zellij '*)
+'nohup '* | 'crontab '* | 'screen '* | 'zellij '*)
   DECISION=deny
   REASON='use run_in_background for long-running work instead'
   ;;

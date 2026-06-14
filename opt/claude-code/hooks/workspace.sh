@@ -8,64 +8,20 @@ JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 
-if ! GITDIR="$(git -C "$CWD" rev-parse --path-format=absolute --git-common-dir)" 2> /dev/null; then
-  exit
-fi
-
-ROOT="${GITDIR%/.git}"
-EXP="$ROOT/.exp"
-NOTES="$ROOT/.notes"
-NOTESTREE="$NOTES/worktree"
-WORKTREES="$ROOT/.worktrees"
+SELF="$(realpath -- "$0")"
+WORKSPACE="${SELF%/*}/../worktree/libexec/workspace.sh"
 
 case "$EVENT" in
 SessionStart)
-  ORPHANS=("$EXP" "$NOTES")
-
-  for DIR in "${ORPHANS[@]}"; do
-    BRANCH="\$${DIR##*/.}"
-    PRESS_F=(git -C "$ROOT" worktree add --quiet --orphan -b "$BRANCH" -- "$DIR")
-
-    if [[ -e "$DIR/.git" ]]; then
-      continue
-    fi
-    if [[ -d $DIR ]] && find "$DIR" -mindepth 1 -print -quit | grep --quiet -e .; then
-      STASH="$(mktemp --dry-run --tmpdir="$ROOT")"
-      mv -- "$DIR" "$STASH"
-      "${PRESS_F[@]}"
-
-      mv -- "$STASH"/* "$DIR/"
-      rmdir -- "$STASH"
-      continue
-    fi
-
-    "${PRESS_F[@]}"
-  done
-
-  exit 0
+  exec -- "$WORKSPACE" init "$CWD"
   ;;
-*)
-  ;;
-esac
-
-case "$EVENT" in
 WorktreeCreate)
   NAME="$(jq -e --raw-output '.name' <<< "$JSON")"
-  WORKTREE="$WORKTREES/$NAME"
-
-  git worktree add --quiet -- "$WORKTREE"
-  mkdir -p -- "$NOTESTREE/$NAME"
-  printf -- '%s' "$WORKTREE"
+  exec -- "$WORKSPACE" up "$CWD" "$NAME"
   ;;
 WorktreeRemove)
   WORKTREE="$(jq -e --raw-output '.worktree_path' <<< "$JSON")"
-  NOTES="$NOTESTREE/${WORKTREE##*/}"
-
-  if git -C "$CWD" worktree remove -- "$WORKTREE"; then
-    mkdir -p -- "$NOTES"
-    chmod +t -- "$NOTES"
-    touch -- "$NOTES/DEAD.md"
-  fi
+  exec -- "$WORKSPACE" down "$CWD" "${WORKTREE##*/}"
   ;;
 *)
   set -v
