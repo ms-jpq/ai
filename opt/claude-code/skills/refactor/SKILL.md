@@ -4,60 +4,71 @@ description: Iterative code refactor.
 
 # Workflow
 
-Each pass: audit, propose, apply, audit again. Stop when the user signs off, or when further iteration is churn.
+- Discover the invariants first. No invariants, can't refactor.
+  - Behavior that must survive: contract, outputs, public surface.
 
-- Propose 3–5 items per audit, ranked by payoff. Each: one-paragraph description, file:line citation, sketch of the diff, tagged **clear win**, **judgment call**, or **style**.
-- Don't auto-apply. Wait for an explicit subset. The `auto` argument overrides this — apply the highest-payoff item each pass, stop when the next item is style-only.
-- For substantial structural changes, enter plan mode first, write a plan file, get explicit approval, then apply.
-- After applying, re-audit. New patterns become visible after the obvious ones are gone.
+  - Pin with tests. If none, write one capturing current behavior before touching anything.
+
+- Each pass: audit → propose → apply → verify against invariants → re-audit. Stop on sign-off or churn.
+
+- Propose 3–5 items/audit, ranked by payoff. Each: description, file:line, diff sketch, tag — **clear win** / **judgment call** / **style**.
+
+- Don't auto-apply; wait for an explicit subset. `auto`: apply highest-payoff each pass, stop when next is style-only.
+
+- Substantial structural change → create ./.notes/plan/*.md file, approval, apply.
 
 # Principles
 
 ## 1. Pipeline producers, thin consumers
 
-Each stage takes the previous stage's output, transforms it, and passes it on. Effects only at the final stage, which is a pure walk over fully-prepared data. The producer computes everything the consumer needs; the consumer reads.
+- Producer computes everything; consumer reads. Effects only at the final stage — a pure walk over prepared data.
 
-- A stage that aggregates + renders + traverses + emits is doing four things; pull three of them out.
-- Aggregates the consumer would otherwise compute by re-walking → compute once at construction, attach to the node.
-- Predicates read from contracts the producer already established. If the producer set a flag, read the flag — don't re-derive from raw inputs.
+- Stage doing aggregate + render + traverse + emit → pull three out.
+
+- Aggregate the consumer would re-walk → compute once at construction, attach to the node.
+
+- Read the flag the producer set; don't re-derive from raw inputs.
 
 ## 2. Simple control flow
 
-Cleverness in control flow is the most expensive kind. Flatten where possible.
+- One predicate per branch. `if (seen.has(x)) continue; seen.add(x)` over `seen.has(x) || !seen.add(x)`.
 
-- One predicate per branch. No `seen.has(x) || !seen.add(x)`-style side-effects smuggled past short-circuits when `if (seen.has(x)) continue; seen.add(x)` reads cleaner.
-- Early `continue` / `return` over nested `if`. The exception is a stable cascade with a clear shape (filter input, filter output, fallthrough).
-- Don't compute values derived from other computed values. Pull the source of truth up.
+- Early `continue` / `return` over nested `if`. Exception: a stable cascade — filter input, filter output, fallthrough.
 
 ## 3. Domain-driven types
 
-Types model the domain. The shape of the data is the shape of the program.
+- One stage, one named type. Inline structural shapes = types not yet named.
 
-- One stage, one named type. Inline structural shapes are placeholders for types that haven't been named yet.
-- Named subtypes over inline structural unions. If subtypes share fields, lift them into a base.
-- Discriminate by a property the runtime can actually check. If structural narrowing fails (e.g., `0 | number` collapses to `number`), write a type predicate.
-- When `find` / `filter` results feed further accesses, write a typed predicate so the result narrows.
-- If a field is internal scaffolding used only during construction, it usually wants to be a separate intermediate type or a parallel tree.
+- Named subtypes over inline unions; lift shared fields into a base.
+
+- Discriminate on a runtime-checkable property. Structural narrowing fails (`0 | number` → `number`) → write a predicate.
+
+- `find` / `filter` feeding further access → typed predicate so it narrows.
+
+- Construction-only scaffolding → separate intermediate type or parallel tree.
 
 ## 4. Standards conformance
 
-When the output targets a published spec, audit attribute-by-attribute. Don't invent shapes.
+- Output targets a published spec → audit attribute-by-attribute; don't invent shapes.
 
-- Read the actual schema files. Don't trust documentation summaries.
-- Hierarchy matters. If the spec says X is a sibling of Y, don't nest it under Y because the data happens to flow that way.
-- Cite the spec by name when proposing changes. The argument is "the spec says X," not "I think X."
+- Read the schema files, not doc summaries.
+
+- Preserve hierarchy: sibling in spec → sibling in code, regardless of data flow.
+
+- Cite the spec by name — "the spec says X," not "I think X."
 
 ## 5. Real-duplication helpers
 
-When the same _shape_ repeats with varying _values_, extract a helper. Don't extract for visual similarity alone.
+- Same shape, varying values → extract. Not for visual similarity alone.
 
-- Helper signature exposes what varies, hides what doesn't. Object-param style at 3+ arguments; positional at 1 or 2.
-- A helper used once is just a name. Use it if the name clarifies; otherwise inline.
+- Signature exposes what varies, hides what doesn't. Object-param at 3+ args, positional at 1–2.
+
+- Used once → just a name; inline unless the name clarifies.
 
 # Out of scope
 
-Don't propose:
-
 - Renames where the existing name is fine.
-- Pure style swaps (`match` over `switch`, `??` over `||`) unless invited.
+
+- Style swaps (`match` over `switch`, `??` over `||`) unless invited.
+
 - Performance micro-optimization absent a measured problem.

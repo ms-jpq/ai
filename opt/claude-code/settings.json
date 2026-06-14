@@ -127,8 +127,7 @@
       {
         "hooks": [
           {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/bash-env.sh",
             "type": "command"
           }
         ]
@@ -136,7 +135,16 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/bash-env.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           }
         ]
@@ -191,6 +199,26 @@
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
+    "WorktreeRemove": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
           }
         ]

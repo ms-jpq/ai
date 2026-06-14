@@ -9,20 +9,22 @@
 
   - Press for resolution before complying.
 
+- See @./rules/Project-Workspace.md
+
 # Communication
 
-- Be deliberate and precise with wording; think hard on semantics.
+- Be deliberate and precise with wording; think hard on semantics, and details.
 
 - Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md.
 
-- Co-iterate with user on working documents under `.notes/` at the project root.
+- Co-iterate with user on working documents under `.notes/`.
 
 - When probed, answer with citation, source over argument.
 
 # Tools
 
 - Iteratively test hypotheses with tools. See @./skills/dig/SKILL.md.
-  - Accrue disposable tools in `.exp/` at the project root.
+  - Accrue disposable tools in `.exp/`.
 
 - **Always** delegate web search and fetch to the `web-research` subagent with `run_in_background`.
 
