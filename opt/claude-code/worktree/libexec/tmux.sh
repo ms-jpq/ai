@@ -15,6 +15,8 @@ COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
 ROOT="${COMMON%/.git}"
 SESSION="worktree/${ROOT##*/}/$NAME"
 SESSION="${SESSION//[.:]/-}"
+NOTES="$ROOT/.notes/worktree/$NAME"
+PROMPT="$NOTES/PROMPT.md"
 
 case "$ACTION" in
 l | list)
@@ -23,14 +25,18 @@ l | list)
 k | kill)
   tmux kill-session -t "=$SESSION"
   ;;
+p | prepare)
+  "$SELF/tree.sh" init
+  mkdir -p -- "$NOTES"
+  cat -- "$PROMPT"
+  ;;
 a | attach)
   "$SELF/tree.sh" init
   WORKTREE="$("$SELF/tree.sh" add "$NAME")"
-  INSTRUCTIONS="$ROOT/.notes/worktree/$NAME/PROMPT.md"
 
   printf -v QUOTED -- '%q' "$SESSION"
   # shellcheck disable=2016
-  printf -v PROMPT -- '"$(< %q)"' "$INSTRUCTIONS"
+  printf -v READ -- '"$(< %q)"' "$PROMPT"
 
   TMP="$(mktemp).sh"
   {
@@ -41,7 +47,7 @@ a | attach)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name $QUOTED -- $PROMPT"$'\n'
+    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name $QUOTED -- $READ"$'\n'
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
@@ -58,7 +64,7 @@ a | attach)
   } > "$TMP"
   chmod +x -- "$TMP"
 
-  touch -- "$INSTRUCTIONS"
+  touch -- "$PROMPT"
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
