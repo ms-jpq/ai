@@ -15,12 +15,10 @@ NOTES="$ROOT/.notes/worktree/$NAME"
 ~/.local/libexec/preview.sh "$NOTES"
 
 if tmux has-session -t "=$SESSION" 2> /dev/null; then
-  printf -- '\n'
-  printf -- '\n'
+  printf -- '\n\n'
   "$HR"
   "$HR"
-  printf -- '\n'
-  printf -- '\n'
+  printf -- '\n\n'
 
   exec -- tmux capture-pane -e -p -t "$SESSION"
 fi
