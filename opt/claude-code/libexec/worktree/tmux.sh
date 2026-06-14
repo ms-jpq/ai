@@ -25,10 +25,11 @@ l | list)
 k | kill)
   tmux kill-session -t "=$SESSION"
   ;;
-p | prepare)
+p | prompt)
   "$SELF/git.sh" init
   mkdir -p -- "$NOTES"
-  cat -- "$PROMPT"
+  cat > "$PROMPT"
+  printf -- '%s' ">>> $PROMPT" >&2
   ;;
 a | attach)
   "$SELF/git.sh" init
@@ -77,8 +78,8 @@ all)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {list,kill,prepare,attach,all} ...
-	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'kill', 'prepare', 'attach', 'all')
+	usage: $PROG [-h] {list,kill,prompt,attach,all} ...
+	$PROG: error: argument command: invalid choice: '$ACTION' (choose from 'list', 'kill', 'prompt', 'attach', 'all')
 EOF
   exit 2
   ;;
