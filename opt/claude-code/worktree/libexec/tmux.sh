@@ -39,13 +39,14 @@ a | attach)
     printf -- '%q ' tmux select-pane -M
     printf -- '\n'
 
-    # tmux select-window -t :-2
+    # tmux select-window -t :-1
     printf -- '%q ' tmux set-environment -g -h -u -- "$ENV"
   } > "$TMP"
   chmod +x -- "$TMP"
 
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
+  rm -fr -- "$TMP"
   ;;
 all)
   "$SELF/tree.sh" list | xargs -0 -r -I % -- "$0" attach %
