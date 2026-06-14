@@ -2,6 +2,16 @@
 
 set -o pipefail
 
+declare -A -- MAP=(
+  [PostToolUse]=running
+  [PostToolUseFailure]=running
+  [PreToolUse]=running
+  [UserPromptSubmit]=running
+  [Notification]=parked
+  [Stop]=parked
+  [StopFailure]=parked
+)
+
 JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
@@ -10,6 +20,10 @@ CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 
 SELF="$(realpath -- "$0")"
 WS=(env -C "$CWD" -- "${SELF%/*}/../libexec/worktree/git.sh")
+
+if [[ -v MAP[$EVENT] ]] && [[ -L "$CWD/.notes" ]]; then
+  "${WS[@]}" set-status "${CWD##*/}" "${MAP[$EVENT]}"
+fi
 
 case "$EVENT" in
 SessionStart)
@@ -32,6 +46,8 @@ Stop)
     ln -sTnf -- "$HISTORY" "$CWD/.notes/HISTORY.md"
     ln -sTnf -- "$TRANSCRIPT" "$CWD/.notes/transcript.json"
   fi
+  ;;
+PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification | StopFailure)
   ;;
 *)
   set -v

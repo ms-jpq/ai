@@ -25,7 +25,9 @@ description: Task coordinator. Decomposes a goal into briefed worker sessions. P
 
 # Check in (on request)
 
-- `wtree list {both,suspended,dead}` for workers; read their `.notes/` for progress and blockers.
+- Each worker carries one state — a `STATUS-{RUNNING,PARKED,REAPED}` marker in `.notes/worktrees/<name>/` (`git.sh set-status` swaps it): `running` is alive (working or idle), `parked` is stopped and wants a look, `reaped` is torn down (its notes survive teardown).
+
+- `wtree ls parked` lists the stopped workers; read each one's `.notes/` — HISTORY.md and any question it wrote — to tell **done** (branch ready, a `wtree merge` candidate) from **stuck** (needs a re-brief or an answer).
 
 - Re-brief (rewrite `PROMPT.md`) or `wtree kill <name>` when asked. Surface that state and stop — do not loop or wait on completion. The human owns the loop: watching panes, deciding what's done.
 

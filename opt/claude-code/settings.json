@@ -37,6 +37,15 @@
             "type": "command"
           }
         ]
+      },
+      {
+        "matcher": "idle_prompt|permission_prompt",
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
       }
     ],
     "PostCompact": [
@@ -74,6 +83,14 @@
           }
         ],
         "matcher": "Edit|Write"
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
       }
     ],
     "PostToolUseFailure": [
@@ -86,6 +103,14 @@
           }
         ],
         "matcher": "Edit|Write"
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
       }
     ],
     "PreToolUse": [
@@ -111,6 +136,14 @@
           }
         ],
         "matcher": "Edit|Write"
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
       }
     ],
     "SessionEnd": [
@@ -185,6 +218,14 @@
             "type": "command"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
       }
     ],
     "SubagentStop": [
@@ -199,6 +240,15 @@
       }
     ],
     "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
+      },
       {
         "hooks": [
           {

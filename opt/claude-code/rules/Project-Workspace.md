@@ -1,14 +1,12 @@
 # Project Workspace
 
-Layout:
+Root Layout:
 
 ```
 ./
 |-- .exp/
-|   |-- .git/
 |   `-- ...
 |-- .notes/
-|   |-- .git/
 |   |-- design/
 |   |-- plan/
 |   |-- research/
@@ -17,10 +15,29 @@ Layout:
 `-- ...
 ```
 
+---
+
+Worktree Layout:
+
+```
+./
+|-- .exp/
+|   `-- ...
+|-- .notes/
+|   |-- ->peers/
+|   |-- ->root/
+|   `-- <topic>/
+`-- ...
+```
+
+---
+
 ## Worktree Symlinks
 
-- `.exp/` → `<main>/.exp/` — one shared tool pool across all worktrees.
+- `.exp/` → `<root>/.exp/` — one shared tool pool across all worktrees.
 
-- `.notes/` → `<main>/.notes/worktrees/<name>/` — per-worktree, survives teardown.
+- `.notes/` → `<root>/.notes/worktrees/<name>/` — per-worktree, survives teardown.
 
-- Dead worktrees are marked with a tomb stone of `<main>/.notes/worktrees/<name>/DEAD.md`
+- `.notes/->root/` → `<root>/` — the root worktree.
+
+- `.notes/->peers/` → `<root>/.notes/worktrees/` — the sibling notes pool.
