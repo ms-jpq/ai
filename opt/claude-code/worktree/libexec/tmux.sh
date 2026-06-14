@@ -53,6 +53,7 @@ a | attach)
   ;;
 all)
   "$SELF/tree.sh" list | xargs -0 -r -I % -- "$0" attach %
+  tmux choose-tree -G -Z -s -NN
   ;;
 *)
   set -v
