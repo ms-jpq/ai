@@ -42,7 +42,7 @@ PostToolUse)
   ExitPlanMode)
     touch -- "$MD"
     # shellcheck disable=SC2094
-    exec -- flock "$MD" jq -e --raw-output '["# >>> plan <<<", "", .tool_response.plan, "", "---", ""][]' <<< "$JSON" >> "$MD"
+    exec -- ~/.local/libexec/flock.sh "$MD" jq -e --raw-output '["# >>> plan <<<", "", .tool_response.plan, "", "---", ""][]' <<< "$JSON" >> "$MD"
     ;;
   *)
     exit
@@ -76,4 +76,4 @@ JQ=(
 touch -- "$MD"
 
 # shellcheck disable=SC2094
-exec -- flock "$MD" "${JQ[@]}" <<< "$JSON" >> "$MD"
+exec -- ~/.local/libexec/flock.sh "$MD" "${JQ[@]}" <<< "$JSON" >> "$MD"

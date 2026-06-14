@@ -20,7 +20,7 @@ if [[ -v RECUR ]]; then
   exec -- printf -- '\n' >> "$MARKDOWN"
 fi
 
-RECUR=1 flock "$MARKDOWN" "$0"
+RECUR=1 ~/.local/libexec/flock.sh "$MARKDOWN" "$0"
 
 # shellcheck disable=SC2154
 exec -- tmux new-window -a -c "$PWD" -- nvim -M -c "norm! G" -c "?\V# >>>" -c "norm! zz" -- "$MARKDOWN"

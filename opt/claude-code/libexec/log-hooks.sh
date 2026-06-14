@@ -14,4 +14,4 @@ mkdir -p -- "$SESSIONS"
 touch -- "$DEBUG"
 
 # shellcheck disable=SC2094,SC2016
-exec -- flock "$DEBUG" jq -e --compact-output --arg src "$1" '.ts = (now | strftime("%H:%M:%S")) | .src = $src' <<< "$JSON" >> "$DEBUG"
+exec -- ~/.local/libexec/flock.sh "$DEBUG" jq -e --compact-output --arg src "$1" '.ts = (now | strftime("%H:%M:%S")) | .src = $src' <<< "$JSON" >> "$DEBUG"
