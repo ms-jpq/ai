@@ -47,6 +47,9 @@ a | attach)
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
+all)
+  "$SELF/tree.sh" list | xargs -0 -r -I % -- "$0" attach %
+  ;;
 *)
   set -v
   exit 2
