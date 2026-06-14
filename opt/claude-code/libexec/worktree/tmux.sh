@@ -47,7 +47,7 @@ a | attach)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name $QUOTED -- $READ"$'\n'
+    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --name $QUOTED -- $READ "$'\n'
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
