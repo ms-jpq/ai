@@ -141,7 +141,7 @@ resume)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,kill,remove,provision,run,resume,run-all} ...
+	usage: $PROG [-h] {ls,kill,remove,provision,run,resume} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2

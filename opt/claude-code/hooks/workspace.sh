@@ -19,7 +19,7 @@ EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 
 SELF="$(realpath -- "$0")"
-WS=(env -C "$CWD" -- "${SELF%/*}/../libexec/worktree/git.sh")
+WS=(env -C "$CWD" -- "${SELF%/*}/../libexec/worktree/pool.sh")
 
 if [[ -v MAP[$EVENT] ]] && [[ -L "$CWD/.notes" ]]; then
   "${WS[@]}" set-status "${CWD##*/}" "${MAP[$EVENT]}"
