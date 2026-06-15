@@ -39,24 +39,6 @@ l | ls)
   )
   "$0" ls "$@" | sort -z | "${FZF[@]}"
   ;;
-k | kill)
-  if (($# > 1)); then
-    exec -- "${FANOUT[@]}" kill < <(printf -- '%s\0' "$@")
-  fi
-
-  read -r -p "kill $SESSION? [y/N] " -- REPLY < /dev/tty
-  if [[ $REPLY == [Yy]* ]]; then
-    tmux kill-session -t "=$SESSION"
-  fi
-  ;;
-rm | remove)
-  if (($# > 1)); then
-    exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
-  fi
-
-  "$0" kill "$NAME" || true
-  "$SELF/pool.sh" remove "$NAME"
-  ;;
 n | new)
   "$SELF/pool.sh" init
   for SRC in "$@"; do
@@ -101,10 +83,37 @@ JQ
 
   exec -- "$SELF/tmux.sh" launch "$SESSION" "$WORKTREE" "$RESUME"
   ;;
+k | kill)
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" kill < <(printf -- '%s\0' "$@")
+  fi
+
+  read -r -p "kill $SESSION? [y/N] " -- REPLY < /dev/tty
+  if [[ $REPLY == [Yy]* ]]; then
+    tmux kill-session -t "=$SESSION"
+  fi
+  ;;
+reap)
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" reap < <(printf -- '%s\0' "$@")
+  fi
+
+  # TODO:
+  printf -- '%s\n' "reap $NAME — not yet implemented" >&2
+  exit 69
+  ;;
+rm | remove)
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
+  fi
+
+  "$0" kill "$NAME" || true
+  "$SELF/pool.sh" remove "$NAME"
+  ;;
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,kill,remove,new,resume} ...
+	usage: $PROG [-h] {ls,new,resume,kill,reap,remove} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
