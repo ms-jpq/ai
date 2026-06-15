@@ -19,5 +19,6 @@ if [[ -e $HISTORY ]]; then
   ~/.local/libexec/hr.sh
   printf -- '\n\n'
 
-  tail -n 99 -- "$HISTORY" | CLICOLOR_FORCE=1 glow --style light
+  # shellcheck disable=SC2154
+  tail -n 99 -- "$HISTORY" | CLICOLOR_FORCE=1 glow --style light --width "$FZF_PREVIEW_COLUMNS"
 fi
