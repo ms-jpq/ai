@@ -89,6 +89,7 @@ JQ
   ;;
 w | watch)
   if (($#)); then
+    ~/.local/libexec/hr.sh
     printf -- '%s:\n' "$NAME"
     cat -- "$NOTES/LAST_MESSAGE.md" 2> /dev/null || true
     exit
