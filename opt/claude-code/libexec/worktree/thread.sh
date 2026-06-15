@@ -91,11 +91,15 @@ w | watch)
   if (($#)); then
     MSG="$NOTES/LAST_MESSAGE.md"
     if [[ -f $MSG ]]; then
+      HR=(~/.local/libexec/hr.sh '#')
+      if [[ -v COLUMNS ]]; then
+        HR+=($((COLUMNS - 8)))
+      fi
       {
-        ~/.local/libexec/hr.sh
+        "${HR[@]}"
         printf -- '%s\n' "# >>> $NAME <<<"
         cat -- "$MSG"
-      } | glow
+      } | CLICOLOR_FORCE=1 glow -s light
     fi
     exit
   fi
