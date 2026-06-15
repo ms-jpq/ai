@@ -94,18 +94,18 @@ r | resume)
   WORKTREE="$("$SELF/pool.sh" add "$NAME")"
 
   README=''
-  if drifted; then
-    README=''
+  if "$SELF/prompt.sh" drifted "$PROMPT"; then
+    "$SELF/prompt.sh" seal "$PROMPT"
+    README='Your brief changed since you last read it — re-read it.'
   fi
-
   read -r -d '' -- MESSAGE <<- JQ || true
 $README
 
 $(realpath --relative-to "$WORKTREE" -- "$PROMPT")
 JQ
-  RESUME=''
+  RESUME="claude --agent wthread-worker --name ${SESSION@Q} -- ${MESSAGE@Q}"
   if [[ -e "$NOTES/HISTORY.md" ]]; then
-    RESUME="claude --continue -- ${MESSAGE@Q} || "
+    RESUME="claude --continue -- ${MESSAGE@Q} || $RESUME"
   fi
 
   TMP="$(mktemp).sh"
@@ -117,7 +117,7 @@ JQ
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "${RESUME}claude --agent wthread-worker --name ${SESSION@Q} -- ${MESSAGE@Q}"
+    printf -- '%q ' tmux set-buffer -- "$RESUME"
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
