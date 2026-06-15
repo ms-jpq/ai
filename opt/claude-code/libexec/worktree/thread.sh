@@ -98,7 +98,7 @@ w | watch)
       {
         "${HR[@]}"
         printf -- '%s\n' "# >>> $NAME <<<"
-        cat -- "$MSG"
+        tail -n 16 -- "$MSG"
       } | CLICOLOR_FORCE=1 glow --style light
     fi
     exit

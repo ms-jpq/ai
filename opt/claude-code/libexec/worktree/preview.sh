@@ -19,5 +19,5 @@ if [[ -e $HISTORY ]]; then
   ~/.local/libexec/hr.sh
   printf -- '\n\n'
 
-  tail -n 99 -- "$HISTORY"
+  tail -n 99 -- "$HISTORY" | CLICOLOR_FORCE=1 glow --style light
 fi
