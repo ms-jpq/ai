@@ -20,6 +20,10 @@ PROMPT="$NOTES/PROMPT.md"
 
 case "$ACTION" in
 l | ls)
+  if [[ ${1:-} == running ]]; then
+    exec -- tmux choose-tree -G -Z -s -NN -f "#{m:${SESSION%/*}/*,#{session_name}}"
+  fi
+
   if ! [[ -t 1 ]]; then
     exec -- "$SELF/pool.sh" list "$@"
   fi
