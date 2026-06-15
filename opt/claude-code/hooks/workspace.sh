@@ -19,7 +19,9 @@ EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 
 SELF="$(realpath -- "$0")"
-WS=(env -C "$CWD" -- "${SELF%/*}/../libexec/worktree/pool.sh")
+LIBEXEC="${SELF%/*}/../libexec/worktree"
+WS=(env -C "$CWD" -- "$LIBEXEC/pool.sh")
+PROMPT_SH="$LIBEXEC/prompt.sh"
 
 if [[ -v MAP[$EVENT] ]] && [[ -L "$CWD/.notes" ]]; then
   "${WS[@]}" set-status "${CWD##*/}" "${MAP[$EVENT]}"
@@ -45,6 +47,19 @@ Stop)
   if [[ -d "$CWD/.notes" ]]; then
     ln -sTnf -- "$HISTORY" "$CWD/.notes/HISTORY.md"
     ln -sTnf -- "$TRANSCRIPT" "$CWD/.notes/transcript.json"
+  fi
+
+  if [[ -L "$CWD/.notes" ]] && "$PROMPT_SH" drifted "$CWD/.notes/PROMPT.md"; then
+    PROMPT=.notes/PROMPT.md
+    "$PROMPT_SH" seal "$CWD/$PROMPT"
+
+    read -r -d '' -- JQ <<- 'JQ' || true
+{
+  decision: "block",
+  reason: ("📝 " + $reason)
+}
+JQ
+    exec -- jq -e --null-input --arg reason "Your brief ($PROMPT) changed — re-read it and continue." "$JQ"
   fi
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification | StopFailure)

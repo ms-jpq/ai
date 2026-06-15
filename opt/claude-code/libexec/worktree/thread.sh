@@ -22,7 +22,7 @@ PROMPT="$NOTES/PROMPT.md"
 case "$ACTION" in
 l | ls)
   if ! [[ -t 1 ]]; then
-    exec -- "$SELF/git.sh" list "$@"
+    exec -- "$SELF/pool.sh" list "$@"
   fi
 
   if ! [[ -t 0 ]]; then
@@ -66,24 +66,24 @@ rm | remove)
   fi
 
   "$0" kill "$NAME" || true
-  "$SELF/git.sh" remove "$NAME"
+  "$SELF/pool.sh" remove "$NAME"
   ;;
-p | provision)
-  "$SELF/git.sh" init
+n | new)
+  "$SELF/pool.sh" init
   for SRC in "$@"; do
     BASE="${SRC%.md}"
-    b2sum -- "$SRC" > "$BASE.sum"
+    "$SELF/prompt.sh" seal "$SRC"
 
     NAME="${BASE##*/}"
-    WORKTREE="$("$SELF/git.sh" add "$NAME")"
+    WORKTREE="$("$SELF/pool.sh" add "$NAME")"
     for EXT in md sum; do
       ln -v -sTnfr -- "$BASE.$EXT" "$WORKTREE/.notes/PROMPT.$EXT"
     done
   done
   ;;
-r | run)
+r | resume)
   if (($# > 1)); then
-    exec -- "${FANOUT[@]}" run < <(printf -- '%s\0' "$@")
+    exec -- "${FANOUT[@]}" resume < <(printf -- '%s\0' "$@")
   fi
 
   if ! [[ -f $PROMPT ]]; then
@@ -91,7 +91,7 @@ r | run)
     set -x
     exit 2
   fi
-  WORKTREE="$("$SELF/git.sh" add "$NAME")"
+  WORKTREE="$("$SELF/pool.sh" add "$NAME")"
   P="$(realpath --relative-to "$WORKTREE" -- "$PROMPT")"
   RESUME=''
   if [[ -e "$NOTES/HISTORY.md" ]]; then
@@ -107,7 +107,7 @@ r | run)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "${RESUME}claude --agent wtree-worker --name ${SESSION@Q} -- ${P@Q}"
+    printf -- '%q ' tmux set-buffer -- "${RESUME}claude --agent wthread-worker --name ${SESSION@Q} -- ${P@Q}"
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
@@ -129,19 +129,10 @@ r | run)
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP" < /dev/null
   ;;
-resume)
-  if (($# > 1)); then
-    exec -- "${FANOUT[@]}" resume < <(printf -- '%s\0' "$@")
-  fi
-
-  # TODO:
-  printf -- '%s\n' "resume $NAME — not yet implemented" >&2
-  exit 69
-  ;;
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,kill,remove,provision,run,resume} ...
+	usage: $PROG [-h] {ls,kill,remove,new,resume} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2

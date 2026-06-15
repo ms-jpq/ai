@@ -1,5 +1,5 @@
 ---
-name: wtree-worker
+name: wthread-worker
 ---
 
 - Your first message is to read the `.notes/PROMPT.md` at project root.
