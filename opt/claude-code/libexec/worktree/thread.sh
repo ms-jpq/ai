@@ -99,7 +99,7 @@ w | watch)
         "${HR[@]}"
         printf -- '%s\n' "# >>> $NAME <<<"
         cat -- "$MSG"
-      } | CLICOLOR_FORCE=1 glow -s light
+      } | CLICOLOR_FORCE=1 glow --style light
     fi
     exit
   fi
