@@ -71,16 +71,14 @@ rm | remove)
 p | provision)
   "$SELF/git.sh" init
   for SRC in "$@"; do
-    if ! [[ -f $SRC ]]; then
-      printf -- '%q\n' "$SRC"
-      set -x
-      exit 2
-    fi
+    BASE="${SRC%.md}"
+    b2sum -- "$SRC" > "$BASE.sum"
 
-    NAME="${SRC##*/}"
-    NAME="${NAME%.md}"
+    NAME="${BASE##*/}"
     WORKTREE="$("$SELF/git.sh" add "$NAME")"
-    ln -v -sTnfr -- "$SRC" "$WORKTREE/.notes/PROMPT.md"
+    for EXT in md sum; do
+      ln -v -sTnfr -- "$BASE.$EXT" "$WORKTREE/.notes/PROMPT.$EXT"
+    done
   done
   ;;
 r | run)
@@ -95,6 +93,10 @@ r | run)
   fi
   WORKTREE="$("$SELF/git.sh" add "$NAME")"
   P="$(realpath --relative-to "$WORKTREE" -- "$PROMPT")"
+  RESUME=''
+  if [[ -e "$NOTES/HISTORY.md" ]]; then
+    RESUME='claude --continue -- continue || '
+  fi
 
   TMP="$(mktemp).sh"
   {
@@ -105,7 +107,7 @@ r | run)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --agent wtree-worker --name ${SESSION@Q} -- ${P@Q}"
+    printf -- '%q ' tmux set-buffer -- "${RESUME}claude --agent wtree-worker --name ${SESSION@Q} -- ${P@Q}"
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'

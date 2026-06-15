@@ -39,13 +39,14 @@
         ]
       },
       {
-        "matcher": "idle_prompt|permission_prompt",
         "hooks": [
           {
+            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
           }
-        ]
+        ],
+        "matcher": "idle_prompt|permission_prompt"
       }
     ],
     "PostCompact": [
@@ -60,6 +61,15 @@
       }
     ],
     "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
+      },
       {
         "hooks": [
           {
@@ -83,17 +93,18 @@
           }
         ],
         "matcher": "Edit|Write"
-      },
+      }
+    ],
+    "PostToolUseFailure": [
       {
         "hooks": [
           {
+            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
           }
         ]
-      }
-    ],
-    "PostToolUseFailure": [
+      },
       {
         "hooks": [
           {
@@ -103,17 +114,18 @@
           }
         ],
         "matcher": "Edit|Write"
-      },
+      }
+    ],
+    "PreToolUse": [
       {
         "hooks": [
           {
+            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
           }
         ]
-      }
-    ],
-    "PreToolUse": [
+      },
       {
         "hooks": [
           {
@@ -136,14 +148,6 @@
           }
         ],
         "matcher": "Edit|Write"
-      },
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
-            "type": "command"
-          }
-        ]
       }
     ],
     "SessionEnd": [
@@ -157,10 +161,11 @@
       }
     ],
     "SessionStart": [
-      {
+{
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/bash-env.sh",
+            "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
           }
         ]
@@ -168,7 +173,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/bash-env.sh",
             "type": "command"
           }
         ]
@@ -209,20 +214,17 @@
         "hooks": [
           {
             "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          },
+          {
+            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           },
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/telemetry.sh",
-            "type": "command"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
           }
         ]
