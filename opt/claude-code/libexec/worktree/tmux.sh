@@ -35,7 +35,7 @@ l | ls)
     --read0
     --delimiter /
     --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
-    --preview-window 'right,60%,wrap'
+    --preview-window 'right,80%,wrap'
   )
   if ! SESSION="$("$0" ls "$@" | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
     exit 0
@@ -71,6 +71,12 @@ rm | remove)
 p | provision)
   "$SELF/git.sh" init
   for SRC in "$@"; do
+    if ! [[ -f $SRC ]]; then
+      printf -- '%q\n' "$SRC"
+      set -x
+      exit 2
+    fi
+
     NAME="${SRC##*/}"
     NAME="${NAME%.md}"
     WORKTREE="$("$SELF/git.sh" add "$NAME")"
@@ -83,8 +89,9 @@ r | run)
   fi
 
   if ! [[ -f $PROMPT ]]; then
+    printf -- '%q\n' "$PROMPT"
     set -x
-    exit 3
+    exit 2
   fi
   WORKTREE="$("$SELF/git.sh" add "$NAME")"
   P="$(realpath --relative-to "$WORKTREE" -- "$PROMPT")"
@@ -118,7 +125,7 @@ r | run)
   chmod +x -- "$TMP"
 
   # shellcheck disable=2154
-  "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
+  "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP" < /dev/null
   ;;
 resume)
   if (($# > 1)); then
@@ -128,10 +135,6 @@ resume)
   # TODO:
   printf -- '%s\n' "resume $NAME — not yet implemented" >&2
   exit 69
-  ;;
-run-all)
-  "$0" ls | "${FANOUT[@]}" run
-  tmux choose-tree -G -Z -s -NN
   ;;
 *)
   PROG="${0##*/}"
