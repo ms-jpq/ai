@@ -71,7 +71,8 @@ rm | remove)
 p | provision)
   "$SELF/git.sh" init
   for SRC in "$@"; do
-    NAME="${SRC%.md}"
+    NAME="${SRC##*/}"
+    NAME="${NAME%.md}"
     WORKTREE="$("$SELF/git.sh" add "$NAME")"
     ln -v -sTnfr -- "$SRC" "$WORKTREE/.notes/PROMPT.md"
   done
@@ -86,6 +87,7 @@ r | run)
     exit 3
   fi
   WORKTREE="$("$SELF/git.sh" add "$NAME")"
+  P="$(realpath --relative-to "$WORKTREE" -- "$PROMPT")"
 
   TMP="$(mktemp).sh"
   {
@@ -96,7 +98,7 @@ r | run)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --agent wtree-worker --name ${SESSION@Q} -- ${PROMPT@Q}"
+    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --agent wtree-worker --name ${SESSION@Q} -- ${P@Q}"
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
