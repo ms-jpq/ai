@@ -16,7 +16,7 @@ COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
 ROOT="${COMMON%/.git}"
 SESSION="worktree/${ROOT##*/}/$NAME"
 SESSION="${SESSION//[.:]/-}"
-NOTES="$ROOT/.notes/worktrees/$NAME"
+NOTES="$ROOT/.notes/worktree/$NAME"
 PROMPT="$NOTES/PROMPT.md"
 
 case "$ACTION" in
@@ -41,7 +41,7 @@ l | ls)
     exit 0
   fi
 
-  YAZI=("$HOME/.local/libexec/yazi.sh" -- "$ROOT/.notes/worktrees/${SESSION##*/}")
+  YAZI=("$HOME/.local/libexec/yazi.sh" -- "$ROOT/.notes/worktree/${SESSION##*/}")
 
   if ! tmux has-session -t "=$SESSION" 2> /dev/null; then
     exec -- tmux new-window -a -- "${YAZI[@]}"

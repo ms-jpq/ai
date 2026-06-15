@@ -14,7 +14,7 @@ fi
 ROOT="${GITDIR%/.git}"
 EXP="$ROOT/.exp"
 NOTES="$ROOT/.notes"
-NOTESTREE="$NOTES/worktrees"
+NOTESTREE="$NOTES/worktree"
 WORKTREES="$ROOT/.worktrees"
 
 case "$ACTION" in

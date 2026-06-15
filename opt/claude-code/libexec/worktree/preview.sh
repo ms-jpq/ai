@@ -7,7 +7,7 @@ NAME="$2"
 
 SESSION="worktree/${ROOT##*/}/$NAME"
 SESSION="${SESSION//[.:]/-}"
-NOTES="$ROOT/.notes/worktrees/$NAME"
+NOTES="$ROOT/.notes/worktree/$NAME"
 
 ~/.local/libexec/preview.sh "$NOTES"
 
