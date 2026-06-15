@@ -104,7 +104,11 @@ w | watch)
     exit
   fi
 
-  "$SELF/pool.sh" list parked | "${FANOUT[@]}" watch
+  if ! command -v -- watch > /dev/null || [[ -v WATCHING ]]; then
+    "$SELF/pool.sh" list parked | "${FANOUT[@]}" watch
+  else
+    WATCHING=1 exec -- watch --color -- "$0" watch
+  fi
   ;;
 k | kill)
   if (($# > 1)); then
