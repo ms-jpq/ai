@@ -26,7 +26,7 @@ l | ls)
   fi
 
   if ! [[ -t 0 ]]; then
-    set -v
+    set -x
     exit 2
   fi
 
@@ -68,31 +68,23 @@ rm | remove)
   "$0" kill "$NAME" || true
   "$SELF/git.sh" remove "$NAME"
   ;;
-p | prompt)
+p | provision)
   "$SELF/git.sh" init
-  "$SELF/git.sh" add "$NAME" > /dev/null
-  cat > "$PROMPT"
-  printf -- '%s\n' ">>> $PROMPT" >&2
-
-  if (($# > 1)); then
-    shift -- 1
-    for NAME in "$@"; do
-      DST="$ROOT/.notes/worktrees/$NAME/PROMPT.md"
-      "$SELF/git.sh" add "$NAME" > /dev/null
-      cp -f -- "$PROMPT" "$DST"
-      printf -- '%s\n' ">>> $DST" >&2
-    done
-  fi
+  for SRC in "$@"; do
+    NAME="${SRC%.md}"
+    WORKTREE="$("$SELF/git.sh" add "$NAME")"
+    ln -v -sTnfr -- "$SRC" "$WORKTREE/.notes/PROMPT.md"
+  done
   ;;
 r | run)
   if (($# > 1)); then
-    if ! [[ -t 0 ]] && ! [[ /dev/stdin -ef /dev/null ]]; then
-      "$0" prompt "$@"
-    fi
     exec -- "${FANOUT[@]}" run < <(printf -- '%s\0' "$@")
   fi
 
-  "$SELF/git.sh" init
+  if ! [[ -f $PROMPT ]]; then
+    set -x
+    exit 3
+  fi
   WORKTREE="$("$SELF/git.sh" add "$NAME")"
 
   TMP="$(mktemp).sh"
@@ -104,7 +96,7 @@ r | run)
 
     printf -- '%q ' tmux new-window -c "$WORKTREE"
     printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --agent wtree-worker --name ${SESSION@Q} -- \"\$(< ${PROMPT@Q})\""
+    printf -- '%q ' tmux set-buffer -- "claude --continue -- continue || claude --agent wtree-worker --name ${SESSION@Q} -- ${PROMPT@Q}"
     printf -- '\n'
     printf -- '%q ' tmux paste-buffer -d -p
     printf -- '\n'
@@ -123,21 +115,16 @@ r | run)
   } > "$TMP"
   chmod +x -- "$TMP"
 
-  if ! [[ -t 0 ]] && ! [[ /dev/stdin -ef /dev/null ]]; then
-    "$0" prompt "$NAME"
-  else
-    touch -- "$PROMPT"
-  fi
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP"
   ;;
-m | merge)
+resume)
   if (($# > 1)); then
-    exec -- "${FANOUT[@]}" merge < <(printf -- '%s\0' "$@")
+    exec -- "${FANOUT[@]}" resume < <(printf -- '%s\0' "$@")
   fi
 
   # TODO:
-  printf -- '%s\n' "merge $NAME — not yet implemented" >&2
+  printf -- '%s\n' "resume $NAME — not yet implemented" >&2
   exit 69
   ;;
 run-all)
@@ -147,7 +134,7 @@ run-all)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,kill,remove,prompt,run,merge,run-all} ...
+	usage: $PROG [-h] {ls,kill,remove,provision,run,resume,run-all} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
