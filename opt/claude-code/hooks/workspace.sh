@@ -56,7 +56,7 @@ Stop)
     read -r -d '' -- JQ <<- 'JQ' || true
 {
   decision: "block",
-  reason: ("📝 " + $reason)
+  reason: $reason
 }
 JQ
     exec -- jq -e --null-input --arg reason "Your brief ($PROMPT) changed — re-read it and continue." "$JQ"
