@@ -3,6 +3,9 @@
 set -o pipefail
 
 ACTION="${1:-"list"}"
+if [[ ${1:-} == set-status ]] && ! [[ -v LOCKED ]]; then
+  LOCKED=1 exec -- ~/.local/libexec/flock.sh "$0" "$0" "$@"
+fi
 if (($#)); then
   shift -- 1
 fi
@@ -18,6 +21,10 @@ NOTESTREE="$NOTES/worktree"
 WORKTREES="$ROOT/.worktrees"
 
 case "$ACTION" in
+session)
+  SESSION="worktree/${ROOT##*/}/$1"
+  printf -- '%s' "${SESSION//[.:]/-}"
+  ;;
 init)
   ORPHANS=("$EXP" "$NOTES")
 

@@ -2,11 +2,13 @@
 
 set -o pipefail
 
+SELF="$(realpath -- "$0")"
+SELF="${SELF%/*}"
+
 ROOT="$1"
 NAME="$2"
 
-SESSION="worktree/${ROOT##*/}/$NAME"
-SESSION="${SESSION//[.:]/-}"
+SESSION="$("$SELF/pool.sh" session "$NAME")"
 NOTES="$ROOT/.notes/worktree/$NAME"
 
 ~/.local/libexec/preview.sh "$NOTES"

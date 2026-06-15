@@ -14,8 +14,7 @@ FANOUT=(xargs -0 -r --max-args 1 -- "$0")
 NAME="${1:-}"
 COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
 ROOT="${COMMON%/.git}"
-SESSION="worktree/${ROOT##*/}/$NAME"
-SESSION="${SESSION//[.:]/-}"
+SESSION="$("$SELF/pool.sh" session "$NAME")"
 NOTES="$ROOT/.notes/worktree/$NAME"
 PROMPT="$NOTES/PROMPT.md"
 
@@ -36,19 +35,9 @@ l | ls)
     --delimiter /
     --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
     --preview-window 'right,80%,wrap'
+    --bind "enter:become(${SELF@Q}/tmux.sh nav {-1} ${ROOT@Q}/.notes/worktree/{-1})"
   )
-  if ! SESSION="$("$0" ls "$@" | sort -z | "${FZF[@]}")" || [[ -z $SESSION ]]; then
-    exit 0
-  fi
-
-  YAZI=("$HOME/.local/libexec/yazi.sh" -- "$ROOT/.notes/worktree/${SESSION##*/}")
-
-  if ! tmux has-session -t "=$SESSION" 2> /dev/null; then
-    exec -- tmux new-window -a -- "${YAZI[@]}"
-  fi
-
-  tmux new-window -t "=$SESSION:" -- "${YAZI[@]}"
-  exec -- tmux switch-client -t "=$SESSION"
+  "$0" ls "$@" | sort -z | "${FZF[@]}"
   ;;
 k | kill)
   if (($# > 1)); then
@@ -96,7 +85,9 @@ r | resume)
   README=''
   if "$SELF/prompt.sh" drifted "$PROMPT"; then
     "$SELF/prompt.sh" seal "$PROMPT"
-    README='Your brief changed since you last read it — re-read it.'
+    if [[ -e "$NOTES/HISTORY.md" ]]; then
+      README='Your brief changed since you last read it — re-read it.'
+    fi
   fi
   read -r -d '' -- MESSAGE <<- JQ || true
 $README
@@ -108,36 +99,7 @@ JQ
     RESUME="claude --continue -- ${MESSAGE@Q} || $RESUME"
   fi
 
-  TMP="$(mktemp).sh"
-  {
-    ENV=TMUX_NO_SAVE
-
-    printf -- '%q ' tmux set-environment -g -h -- "$ENV" 1
-    printf -- '\n'
-
-    printf -- '%q ' tmux new-window -c "$WORKTREE"
-    printf -- '\n'
-    printf -- '%q ' tmux set-buffer -- "$RESUME"
-    printf -- '\n'
-    printf -- '%q ' tmux paste-buffer -d -p
-    printf -- '\n'
-    printf -- '%q ' tmux send-keys -- Enter
-    printf -- '\n'
-    printf -- '%q ' tmux select-pane -t '{marked}'
-    printf -- '\n'
-    printf -- '%q ' tmux select-pane -M
-    printf -- '\n'
-
-    # tmux select-window -t :-1
-    printf -- '%q ' tmux set-environment -g -h -u -- "$ENV"
-    printf -- '\n'
-
-    printf -- '%q ' rm -fr -- "$TMP"
-  } > "$TMP"
-  chmod +x -- "$TMP"
-
-  # shellcheck disable=2154
-  "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP" < /dev/null
+  exec -- "$SELF/tmux.sh" launch "$SESSION" "$WORKTREE" "$RESUME"
   ;;
 *)
   PROG="${0##*/}"
