@@ -120,7 +120,7 @@ main)
   printf -- '%s' "${TRACE_INFO}${COST_INFO} ${BOLD}⟢${RESET} ${TIME_INFO} ${BOLD}∷${RESET} ${TOT_COUNT} ${SEP} ${USAGE_INFO} ${SEP}${LINES_DELTA}${DIR_INFO}"
   ;;
 *)
-  set -v
+  set -x
   exit 1
   ;;
 esac

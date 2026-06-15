@@ -29,7 +29,7 @@ PreToolUse)
     exec -- jq -e --raw-output --join-output '.tool_input.content' <<< "$JSON" > "$NEW"
     ;;
   *)
-    set -v
+    set -x
     exit 2
     ;;
   esac
@@ -38,7 +38,7 @@ PostToolUse | PostToolUseFailure)
   find "$ENTRY_DIR" -mindepth 1 -delete
   ;;
 *)
-  set -v
+  set -x
   exit 2
   ;;
 esac

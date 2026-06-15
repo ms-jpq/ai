@@ -32,7 +32,7 @@ case "$PROGRAM" in
       exec -- "$SH" "$@"
     fi
   done
-  set -v
+  set -x
   exit 127
   ;;
 esac

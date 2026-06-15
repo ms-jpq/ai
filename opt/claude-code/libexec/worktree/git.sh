@@ -76,7 +76,7 @@ set-status)
   case "$STATE" in
   running | parked | reaped) ;;
   *)
-    set -v
+    set -x
     exit 2
     ;;
   esac
@@ -128,7 +128,7 @@ EOF
   "${FIND[@]}" | "${SED[@]}"
   ;;
 *)
-  set -v
+  set -x
   exit 2
   ;;
 esac

@@ -50,7 +50,7 @@ Stop)
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification | StopFailure)
   ;;
 *)
-  set -v
+  set -x
   exit 2
   ;;
 esac

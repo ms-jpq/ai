@@ -37,7 +37,7 @@ CURL+=(-- "$URL")
 "${CURL[@]}"
 ```
 
-- `case` catch-all (`*`) exits with `set -v; exit 2` for unexpected inputs.
+- `case` catch-all (`*`) exits with `set -x; exit 2` for unexpected inputs.
 
 ```bash
 case "$VARIABLE" in
@@ -45,7 +45,7 @@ case "$VARIABLE" in
   # ...
   ;;
 *)
-  set -v
+  set -x
   exit 2
   ;;
 esac
