@@ -83,11 +83,6 @@
       {
         "hooks": [
           {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/save-diffs.sh",
-            "type": "command"
-          },
-          {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/run-fmt.sh",
             "type": "command"
           }
@@ -104,16 +99,6 @@
             "type": "command"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/save-diffs.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "Edit|Write"
       }
     ],
     "PreToolUse": [
@@ -140,11 +125,6 @@
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/approve-rw.sh",
             "type": "command"
-          },
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/save-diffs.sh",
-            "type": "command"
           }
         ],
         "matcher": "Edit|Write"
@@ -161,7 +141,7 @@
       }
     ],
     "SessionStart": [
-{
+      {
         "hooks": [
           {
             "async": true,

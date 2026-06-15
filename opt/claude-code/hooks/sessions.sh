@@ -24,7 +24,6 @@ SessionStart)
     tmux set-option -t "$TMUX_PANE" -p @claude_session "$SESSION_ID"
 
     tmux bind-key f run-shell -- "env -- CLAUDE_CONFIG_DIR=${CLAUDE_CONFIG_DIR@Q} ${LIBEXEC@Q}/read-session.sh"
-    tmux bind-key F run-shell -- "env -- CLAUDE_CONFIG_DIR=${CLAUDE_CONFIG_DIR@Q} ${LIBEXEC@Q}/review-diffs.sh"
   fi
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
