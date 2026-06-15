@@ -87,6 +87,15 @@ JQ
 
   exec -- "$SELF/tmux.sh" launch "$SESSION" "$WORKTREE" "$RESUME"
   ;;
+w | watch)
+  if (($#)); then
+    printf -- '%s:\n' "$NAME"
+    cat -- "$NOTES/LAST_MESSAGE.md" 2> /dev/null || true
+    exit
+  fi
+
+  "$SELF/pool.sh" list parked | "${FANOUT[@]}" watch
+  ;;
 k | kill)
   if (($# > 1)); then
     exec -- "${FANOUT[@]}" kill < <(printf -- '%s\0' "$@")
@@ -117,7 +126,7 @@ rm | remove)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,new,resume,kill,reap,remove} ...
+	usage: $PROG [-h] {ls,new,resume,watch,kill,reap,remove} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2

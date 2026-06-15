@@ -2,30 +2,19 @@
 
 set -o pipefail
 
-declare -A -- MAP=(
-  [PostToolUse]=running
-  [PostToolUseFailure]=running
-  [PreToolUse]=running
-  [UserPromptSubmit]=running
-  [Notification]=parked
-  [Stop]=parked
-  [StopFailure]=parked
-)
-
 JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
+SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
+TRANSCRIPT="$(jq -e --raw-output '.transcript_path' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
+HISTORY="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID.md"
 
 SELF="$(realpath -- "$0")"
 LIBEXEC="${SELF%/*}/../libexec/worktree"
 WS=(env -C "$CWD" -- "$LIBEXEC/pool.sh")
 PROMPT_SH="$LIBEXEC/prompt.sh"
-
-if [[ -v MAP[$EVENT] ]] && [[ -L "$CWD/.notes" ]]; then
-  "${WS[@]}" set-status "${CWD##*/}" "${MAP[$EVENT]}"
-fi
 
 case "$EVENT" in
 SessionStart)
@@ -39,17 +28,47 @@ WorktreeRemove)
   WORKTREE="$(jq -e --raw-output '.worktree_path' <<< "$JSON")"
   exec -- "${WS[@]}" remove "${WORKTREE##*/}"
   ;;
+*)
+  ;;
+esac
+
+NOTES="$CWD/.notes"
+if ! [[ -L $NOTES && -d $NOTES ]]; then
+  exit
+fi
+
+declare -A -- MAP=(
+  [PostToolUse]=running
+  [PostToolUseFailure]=running
+  [PreToolUse]=running
+  [UserPromptSubmit]=running
+  [Notification]=parked
+  [Stop]=parked
+  [StopFailure]=parked
+)
+
+if [[ -v MAP[$EVENT] ]]; then
+  "${WS[@]}" set-status "${CWD##*/}" "${MAP[$EVENT]}"
+fi
+
+case "$EVENT" in
+StopFailure)
+  jq --raw-output '.last_assistant_message' <<< "$JSON" > "$NOTES/LAST_MESSAGE.md"
+  ;;
 Stop)
-  SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
-  HISTORY="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID.md"
-  TRANSCRIPT="$(jq -e --raw-output '.transcript_path' <<< "$JSON")"
+  jq --raw-output '.last_assistant_message' <<< "$JSON" > "$NOTES/LAST_MESSAGE.md"
 
-  if [[ -d "$CWD/.notes" ]]; then
-    ln -sTnf -- "$HISTORY" "$CWD/.notes/HISTORY.md"
-    ln -sTnf -- "$TRANSCRIPT" "$CWD/.notes/transcript.json"
-  fi
+  declare -A -- LINKS=(
+    ["HISTORY.md"]="$HISTORY"
+    ["transcript.json"]="$TRANSCRIPT"
+  )
+  for DEST in "${!LINKS[@]}"; do
+    if ! [[ -L "$NOTES/$DEST" ]]; then
+      ln -sTnf -- "${LINKS[$DEST]}" "$NOTES/$DEST"
+    fi
+  done
 
-  if [[ -L "$CWD/.notes" ]] && "$PROMPT_SH" drifted "$CWD/.notes/PROMPT.md"; then
+  if "$PROMPT_SH" drifted "$NOTES/PROMPT.md"; then
     PROMPT=.notes/PROMPT.md
     "$PROMPT_SH" seal "$CWD/$PROMPT"
 
@@ -62,7 +81,7 @@ JQ
     exec -- jq -e --null-input --arg reason "Your brief ($PROMPT) changed — re-read it and continue." "$JQ"
   fi
   ;;
-PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification | StopFailure)
+PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
   ;;
 *)
   set -x
