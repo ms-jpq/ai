@@ -8,7 +8,6 @@ import process, { exit, stderr, stdin, stdout } from "node:process"
 import { createInterface } from "node:readline"
 
 const NAME = "wthread"
-const SOCK = join(await realpath(".notes"), "channel.sock")
 
 const TOOLS = [
   {
@@ -115,10 +114,15 @@ const serve = async (sock: string) => {
   ])
 }
 
-try {
-  await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(SOCK)])
-} finally {
-  await unlink(SOCK).catch(() => {})
+const main = async () => {
+  const SOCK = join(await realpath(".notes"), "channel.sock")
+
+  try {
+    await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(SOCK)])
+  } finally {
+    await unlink(SOCK).catch(() => {})
+  }
 }
 
+await main()
 exit(0)
