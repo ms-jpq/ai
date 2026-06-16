@@ -87,7 +87,7 @@ r | resume)
   ;;
 w | watch)
   if (($#)); then
-    MSG="$NOTES/LAST_MESSAGE.md"
+    MSG="$NOTES/.LAST_MESSAGE.md"
     if [[ -f $MSG ]]; then
       HR=(~/.local/libexec/hr.sh '#')
       if [[ -v COLUMNS ]]; then

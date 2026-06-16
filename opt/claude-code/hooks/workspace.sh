@@ -52,7 +52,7 @@ fi
 
 case "$EVENT" in
 Stop | StopFailure)
-  jq --raw-output '.last_assistant_message' <<< "$JSON" > "$NOTES/LAST_MESSAGE.md"
+  jq --raw-output '.last_assistant_message' <<< "$JSON" > "$NOTES/.LAST_MESSAGE.md"
 
   if [[ $EVENT == Stop ]]; then
     declare -A -- LINKS=(
@@ -66,7 +66,7 @@ Stop | StopFailure)
     done
   fi
 
-  SUBJECT="$(head -n 1 -- "$NOTES/LAST_MESSAGE.md")"
+  SUBJECT="$(head -n 1 -- "$NOTES/.LAST_MESSAGE.md")"
   "$LIBEXEC/commit-on-change.sh" "$NOTES" "${SUBJECT:-stop}"
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
