@@ -1,5 +1,5 @@
 ---
-name: wthread-worker
+name: wt-worker
 ---
 
 - Your first message is to read the `.notes/TASK.md` at project root.

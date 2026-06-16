@@ -55,7 +55,7 @@ n | new)
       mv -- "$BRIEF" "$DST"
     fi
     touch -- "$DST"
-    ln -v -sTnfr -- "$DST" "$BRIEF"
+    env -C "$ROOT" -- ln -v -sTnfr -- "$DST" "$BRIEF"
   done
   ;;
 e | edit)
@@ -77,7 +77,7 @@ r | resume)
   WORKTREE="$("$SELF/pool.sh" add "$NAME")"
 
   MESSAGE="$(realpath --relative-to "$WORKTREE" -- "$TASK")"
-  RESUME="claude --agent wthread-worker --name ${SESSION@Q} -- ${MESSAGE@Q}"
+  RESUME="claude --agent wt-worker --name ${SESSION@Q} -- ${MESSAGE@Q}"
   if [[ -e "$NOTES/.HISTORY.md" ]]; then
     RESUME="claude --continue -- ${MESSAGE@Q} || $RESUME"
   fi
