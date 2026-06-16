@@ -49,7 +49,10 @@ n | new)
     BASE="${SRC%.md}"
     NAME="${BASE##*/}"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
-    ln -v -sTnfr -- "$BASE.md" "$WORKTREE/.notes/TASK.md"
+    SRC="$BASE.md"
+    DST="$WORKTREE/.notes/TASK.md"
+    mv -f -- "$SRC" "$DST"
+    ln -v -sTnfr -- "$DST" "$SRC"
   done
   ;;
 r | resume)
