@@ -63,6 +63,10 @@ n | new)
   fi
   ;;
 o | open)
+  if [[ -z $NAME ]]; then
+    exec -- ~/.local/bin/tmux-open "$ROOT_NOTES"
+  fi
+
   WORKTREE="$("$SELF/pool.sh" add "$NAME")"
   exec -- ~/.local/bin/tmux-open "$WORKTREE"
   ;;
