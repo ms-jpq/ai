@@ -1,5 +1,16 @@
 #!/usr/bin/env -S -- node
 
+import type {
+  CallToolResult,
+  InitializeResult,
+  JSONRPCErrorResponse,
+  JSONRPCNotification,
+  JSONRPCResultResponse,
+  ListToolsResult,
+  RequestId,
+  Result,
+  Tool,
+} from "@modelcontextprotocol/sdk/types.js"
 import { once } from "node:events"
 import { realpath, unlink } from "node:fs/promises"
 import { createServer, type Socket } from "node:net"
@@ -20,9 +31,16 @@ const TOOLS = [
       required: ["text"],
     },
   },
-]
+] satisfies Tool[]
 
-const send = (msg: object) => stdout.write(JSON.stringify({ jsonrpc: "2.0", ...msg }) + "\n")
+const clients = new Set<Socket>()
+
+const send = (
+  msg:
+    | Omit<JSONRPCResultResponse, "jsonrpc">
+    | Omit<JSONRPCErrorResponse, "jsonrpc">
+    | Omit<JSONRPCNotification, "jsonrpc">,
+) => stdout.write(JSON.stringify({ jsonrpc: "2.0", ...msg }) + "\n")
 
 const notify = (() => {
   let seq = 0
@@ -32,11 +50,9 @@ const notify = (() => {
   }
 })()
 
-const clients = new Set<Socket>()
+const error = (id: RequestId, message: string) => send({ id, error: { code: -32601, message } })
 
-const error = (id: unknown, message: string) => send({ id, error: { code: -32601, message } })
-
-const result = (id: unknown, result: object) => send({ id, result })
+const result = (id: RequestId, result: Result) => send({ id, result })
 
 const broadcast = (text: string) => {
   const line = text.endsWith("\n") ? text : `${text}\n`
@@ -44,8 +60,9 @@ const broadcast = (text: string) => {
     sock.write(line)
   }
 }
+
 const dispatch = (line: string) => {
-  const msg = JSON.parse(line)
+  const msg = JSON.parse(line) as { method: string; id: RequestId; params?: any }
 
   switch (msg.method) {
     case "ping":
@@ -56,15 +73,15 @@ const dispatch = (line: string) => {
         protocolVersion: msg.params?.protocolVersion ?? "2025-06-18",
         serverInfo: { name: NAME, version: "0.0.1" },
         capabilities: { tools: {}, experimental: { "claude/channel": {} } },
-      })
+      } satisfies InitializeResult)
       break
     case "tools/list":
-      result(msg.id, { tools: TOOLS })
+      result(msg.id, { tools: TOOLS } satisfies ListToolsResult)
       break
     case "tools/call":
       if (msg.params?.name === "reply") {
         broadcast(String(msg.params.arguments?.text ?? ""))
-        result(msg.id, { content: [{ type: "text", text: "sent" }] })
+        result(msg.id, { content: [{ type: "text", text: "sent" }] } satisfies CallToolResult)
       } else {
         error(msg.id, `unknown tool: ${msg.params?.name}`)
       }
@@ -117,12 +134,12 @@ const serve = async (sock: string) => {
 }
 
 const main = async () => {
-  const SOCK = join(await realpath(".notes"), "channel.sock")
+  const sock = join(await realpath(".notes"), "channel.sock")
 
   try {
-    await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(SOCK)])
+    await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(sock)])
   } finally {
-    await unlink(SOCK).catch(() => {})
+    await unlink(sock).catch(() => {})
   }
 }
 

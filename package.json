@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/claude-agent-sdk": "*",
+    "@modelcontextprotocol/sdk": "*",
     "@types/node": "*",
     "typescript": "*"
   },
