@@ -50,6 +50,12 @@ e | edit)
 
   for SRC in "$@"; do
     NAME="$("$SELF/task-name.sh" "$SRC")"
+    if [[ -z $NAME ]]; then
+      tee -- >&2 <<- EOF
+	$PROG: $ACTION needs a worker name, got ${SRC@Q}
+EOF
+      exit 2
+    fi
     BRIEF="$ROOT_NOTES/tasks/$NAME.md"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
     DST="$WORKTREE/.notes/TASK.md"
@@ -111,13 +117,6 @@ w | watch)
 rm | remove)
   if (($# > 1)); then
     exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
-  fi
-
-  if [[ $NAME == "${ROOT##*/}" ]]; then
-    tee -- >&2 <<- EOF
-	$PROG: refusing to remove '$NAME' (repo root) — name a worker
-EOF
-    exit 2
   fi
 
   read -r -p "remove $NAME? [y/N] " -- REPLY < /dev/tty

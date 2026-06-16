@@ -10,7 +10,11 @@ if [[ $SRC != @(.|..|*/*) && -n $ROOT && -d "$ROOT/.notes/worktrees/$SRC" ]]; th
   NAME="$SRC"
 elif [[ -d $SRC ]]; then
   TOP="$(git -C "$SRC" rev-parse --show-toplevel)"
-  NAME="${TOP##*/}"
+  if [[ $TOP == "$ROOT" ]]; then
+    NAME=""
+  else
+    NAME="${TOP##*/}"
+  fi
 else
   BASE="${SRC%.md}"
   NAME="${BASE##*/}"
