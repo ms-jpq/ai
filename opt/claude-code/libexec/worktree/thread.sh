@@ -2,6 +2,7 @@
 
 set -o pipefail
 
+PROG="${0##*/}"
 SELF="$(realpath -- "$0")"
 SELF="${SELF%/*}"
 
@@ -12,6 +13,10 @@ fi
 FANOUT=(xargs -0 -r --max-args 1 -- "$0")
 
 NAME="${1:-}"
+if [[ -n $NAME ]]; then
+  NAME="$("$SELF/task-name.sh" "$NAME")"
+fi
+
 COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
 ROOT="${COMMON%/.git}"
 ROOT_NOTES="$ROOT/.notes"
@@ -19,12 +24,15 @@ SESSION="$("$SELF/pool.sh" session "$NAME")"
 NOTES="$ROOT_NOTES/worktrees/$NAME"
 TASK="$NOTES/TASK.md"
 
+if [[ $ACTION == @(r|resume|rm|remove|reap) && -z $NAME ]]; then
+  tee -- >&2 <<- EOF
+	$PROG: $ACTION needs a worker name
+EOF
+  exit 2
+fi
+
 case "$ACTION" in
 o | open)
-  if [[ -n $NAME ]]; then
-    NAME="$("$SELF/task-name.sh" "$NAME")"
-  fi
-
   if [[ -z $NAME ]]; then
     "$SELF/pool.sh" init
     exec -- ~/.local/bin/tmux-open "$ROOT_NOTES"
@@ -118,7 +126,6 @@ reap)
   exit 69
   ;;
 *)
-  PROG="${0##*/}"
   tee -- >&2 <<- EOF
 	usage: $PROG [-h] {open,edit,resume,watch,remove,reap} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
