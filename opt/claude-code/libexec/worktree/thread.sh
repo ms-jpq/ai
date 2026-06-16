@@ -15,13 +15,13 @@ NAME="${1:-}"
 COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
 ROOT="${COMMON%/.git}"
 SESSION="$("$SELF/pool.sh" session "$NAME")"
-NOTES="$ROOT/.notes/worktree/$NAME"
-PROMPT="$NOTES/PROMPT.md"
+NOTES="$ROOT/.notes/worktrees/$NAME"
+TASK="$NOTES/TASK.md"
 
 case "$ACTION" in
 l | ls)
   if [[ ${1:-} == running ]]; then
-    exec -- tmux choose-tree -G -Z -s -NN -f "#{m:${SESSION%/*}/*,#{session_name}}"
+    exec -- tmux choose-tree -G -Z -s -O name -NN -f "#{m:${SESSION%/*}/*,#{session_name}}"
   fi
 
   if ! [[ -t 1 ]]; then
@@ -39,7 +39,7 @@ l | ls)
     --delimiter /
     --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
     --preview-window 'right,80%,wrap'
-    --bind "enter:become(${SELF@Q}/tmux.sh nav {-1} ${ROOT@Q}/.notes/worktree/{-1})"
+    --bind "enter:become(${SELF@Q}/tmux.sh nav {-1} ${ROOT@Q}/.notes/worktrees/{-1})"
   )
   "$0" ls "$@" | sort -z | "${FZF[@]}"
   ;;
@@ -47,13 +47,9 @@ n | new)
   "$SELF/pool.sh" init
   for SRC in "$@"; do
     BASE="${SRC%.md}"
-    "$SELF/prompt.sh" seal "$SRC"
-
     NAME="${BASE##*/}"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
-    for EXT in md sum; do
-      ln -v -sTnfr -- "$BASE.$EXT" "$WORKTREE/.notes/PROMPT.$EXT"
-    done
+    ln -v -sTnfr -- "$BASE.md" "$WORKTREE/.notes/TASK.md"
   done
   ;;
 r | resume)
@@ -61,25 +57,14 @@ r | resume)
     exec -- "${FANOUT[@]}" resume < <(printf -- '%s\0' "$@")
   fi
 
-  if ! [[ -f $PROMPT ]]; then
-    printf -- '%q\n' "$PROMPT"
+  if ! [[ -f $TASK ]]; then
+    printf -- '%q\n' "$TASK"
     set -x
     exit 2
   fi
   WORKTREE="$("$SELF/pool.sh" add "$NAME")"
 
-  README=''
-  if "$SELF/prompt.sh" drifted "$PROMPT"; then
-    "$SELF/prompt.sh" seal "$PROMPT"
-    if [[ -e "$NOTES/HISTORY.md" ]]; then
-      README='Your brief changed since you last read it — re-read it.'
-    fi
-  fi
-  read -r -d '' -- MESSAGE <<- JQ || true
-$README
-
-$(realpath --relative-to "$WORKTREE" -- "$PROMPT")
-JQ
+  MESSAGE="$(realpath --relative-to "$WORKTREE" -- "$TASK")"
   RESUME="claude --agent wthread-worker --name ${SESSION@Q} -- ${MESSAGE@Q}"
   if [[ -e "$NOTES/HISTORY.md" ]]; then
     RESUME="claude --continue -- ${MESSAGE@Q} || $RESUME"

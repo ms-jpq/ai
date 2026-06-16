@@ -17,7 +17,7 @@ fi
 ROOT="${GITDIR%/.git}"
 EXP="$ROOT/.exp"
 NOTES="$ROOT/.notes"
-NOTESTREE="$NOTES/worktree"
+NOTESTREE="$NOTES/worktrees"
 WORKTREES="$ROOT/.worktrees"
 
 case "$ACTION" in
@@ -26,6 +26,8 @@ session)
   printf -- '%s' "${SESSION//[.:]/-}"
   ;;
 init)
+  mkdir -p -- "$EXP" "$NOTES"/{design,plans,research,tasks,worktrees}
+
   ORPHANS=("$EXP" "$NOTES")
 
   for DIR in "${ORPHANS[@]}"; do

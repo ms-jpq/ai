@@ -8,7 +8,7 @@ SELF="${SELF%/*}"
 ROOT="$1"
 NAME="$2"
 
-NOTES="$ROOT/.notes/worktree/$NAME"
+NOTES="$ROOT/.notes/worktrees/$NAME"
 
 ~/.local/libexec/preview.sh "$NOTES"
 

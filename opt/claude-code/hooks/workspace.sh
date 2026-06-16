@@ -14,7 +14,6 @@ HISTORY="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/sessions/$SESSION_ID.md"
 SELF="$(realpath -- "$0")"
 LIBEXEC="${SELF%/*}/../libexec/worktree"
 WS=(env -C "$CWD" -- "$LIBEXEC/pool.sh")
-PROMPT_SH="$LIBEXEC/prompt.sh"
 
 case "$EVENT" in
 SessionStart)
@@ -67,19 +66,6 @@ Stop)
       ln -sTnf -- "${LINKS[$DEST]}" "$NOTES/$DEST"
     fi
   done
-
-  if "$PROMPT_SH" drifted "$NOTES/PROMPT.md"; then
-    PROMPT=.notes/PROMPT.md
-    "$PROMPT_SH" seal "$CWD/$PROMPT"
-
-    read -r -d '' -- JQ <<- 'JQ' || true
-{
-  decision: "block",
-  reason: $reason
-}
-JQ
-    exec -- jq -e --null-input --arg reason "Your brief ($PROMPT) changed — re-read it and continue." "$JQ"
-  fi
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
   ;;
