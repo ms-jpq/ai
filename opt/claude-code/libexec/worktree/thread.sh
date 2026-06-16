@@ -113,6 +113,13 @@ rm | remove)
     exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
   fi
 
+  if [[ $NAME == "${ROOT##*/}" ]]; then
+    tee -- >&2 <<- EOF
+	$PROG: refusing to remove '$NAME' (repo root) — name a worker
+EOF
+    exit 2
+  fi
+
   tmux kill-session -t "=$SESSION" || true
   "$SELF/pool.sh" remove "$NAME"
   ;;
