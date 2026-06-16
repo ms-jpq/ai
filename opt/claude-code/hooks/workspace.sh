@@ -32,7 +32,7 @@ WorktreeRemove)
 esac
 
 NOTES="$CWD/.notes"
-if ! [[ -L $NOTES && -d $NOTES ]]; then
+if ! [[ -d $NOTES && -e "$NOTES/.git" ]]; then
   exit
 fi
 
@@ -46,7 +46,7 @@ declare -A -- MAP=(
   [StopFailure]=parked
 )
 
-if [[ -v MAP[$EVENT] ]]; then
+if [[ -L $NOTES && -v MAP[$EVENT] ]]; then
   "${WS[@]}" set-status "${CWD##*/}" "${MAP[$EVENT]}"
 fi
 
@@ -66,11 +66,9 @@ Stop | StopFailure)
     done
   fi
 
-  if PREFIX="$(git -C "$NOTES" rev-parse --show-prefix 2> /dev/null)" && [[ -z $PREFIX ]]; then
-    SUBJECT="$(head -n 1 -- "$NOTES/LAST_MESSAGE.md")"
-    git -C "$NOTES" add -A
-    git -C "$NOTES" commit -q --allow-empty -m "${SUBJECT:-stop}"
-  fi
+  SUBJECT="$(head -n 1 -- "$NOTES/LAST_MESSAGE.md")"
+  git -C "$NOTES" add -A
+  git -C "$NOTES" commit -q --allow-empty -m "${SUBJECT:-stop}"
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
   ;;
