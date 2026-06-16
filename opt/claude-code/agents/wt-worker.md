@@ -15,3 +15,5 @@ description: Executes a task brief inside an isolated git worktree.
   - `->peers/` — read-only view into your sibling workers' notes.
 
 - `.exp/` is a shared scratch pool for throwaway tools.
+
+- You are encouraged to spawn agent teams.
