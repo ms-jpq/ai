@@ -13,6 +13,8 @@ Root Layout:
 |   |-- tasks/
 |   |-- worktrees/
 |   `-- <topic>/
+|-- .worktrees/
+|   `-- <name>/
 `-- ...
 ```
 
@@ -38,8 +40,8 @@ Worktree Layout:
 
 - `.exp/` → `<root>/.exp/` — one shared tool pool across all worktrees.
 
-- `.notes/` → `<root>/.notes/worktree/<name>/` — per-worktree, survives teardown.
+- `.notes/` → `<root>/.notes/worktrees/<name>/` — per-worktree, survives teardown.
 
 - `.notes/->root/` → `<root>/` — the root worktree.
 
-- `.notes/->peers/` → `<root>/.notes/worktree/` — the sibling notes pool.
+- `.notes/->peers/` → `<root>/.notes/worktrees/` — the sibling notes pool.
