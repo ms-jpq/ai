@@ -46,6 +46,7 @@ const broadcast = (text: string) => {
 }
 const dispatch = (line: string) => {
   const msg = JSON.parse(line)
+
   switch (msg.method) {
     case "ping":
       result(msg.id, {})
@@ -77,9 +78,10 @@ const dispatch = (line: string) => {
 
 const listen = async () => {
   for await (const line of createInterface({ input: stdin })) {
-    if (line.trim().length === 0) {
+    if (line.length === 0) {
       continue
     }
+
     try {
       dispatch(line)
     } catch (e) {
@@ -96,7 +98,7 @@ const serve = async (sock: string) => {
 
     try {
       for await (const line of createInterface({ input: s })) {
-        if (line.length > 0) {
+        if (line.length) {
           notify(line)
         }
       }
