@@ -2,27 +2,18 @@
 
 set -o pipefail
 
-MODE="$1"
-SRC="$2"
+SRC="$1"
 if [[ -d $SRC ]]; then
   TOP="$(git -C "$SRC" rev-parse --show-toplevel 2> /dev/null)" || TOP="$(realpath -- "$SRC")"
-  NAME="${TOP##*/}"
+  COMMON="$(git -C "$SRC" rev-parse --path-format=absolute --git-common-dir 2> /dev/null)" || COMMON=""
+  if [[ $TOP == "${COMMON%/.git}" ]]; then
+    NAME=""
+  else
+    NAME="${TOP##*/}"
+  fi
 else
   BASE="${SRC%.md}"
   NAME="${BASE##*/}"
 fi
 
-case "$MODE" in
-name)
-  printf -- '%s' "$NAME"
-  ;;
-path)
-  COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
-  ROOT="${COMMON%/.git}"
-  printf -- '%s' "$ROOT/.notes/tasks/$NAME.md"
-  ;;
-*)
-  set -x
-  exit 2
-  ;;
-esac
+printf -- '%s' "$NAME"

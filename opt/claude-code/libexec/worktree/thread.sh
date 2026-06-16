@@ -21,6 +21,10 @@ TASK="$NOTES/TASK.md"
 
 case "$ACTION" in
 o | open)
+  if [[ -n $NAME ]]; then
+    NAME="$("$SELF/task-name.sh" "$NAME")"
+  fi
+
   if [[ -z $NAME ]]; then
     "$SELF/pool.sh" init
     exec -- ~/.local/bin/tmux-open "$ROOT_NOTES"
@@ -37,7 +41,7 @@ e | edit)
   fi
 
   for SRC in "$@"; do
-    NAME="$("$SELF/task-name.sh" name "$SRC")"
+    NAME="$("$SELF/task-name.sh" "$SRC")"
     BRIEF="$ROOT_NOTES/tasks/$NAME.md"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
     DST="$WORKTREE/.notes/TASK.md"
@@ -96,22 +100,12 @@ w | watch)
     WATCHING=1 exec -- watch --color -- "$0" watch
   fi
   ;;
-k | kill)
-  if (($# > 1)); then
-    exec -- "${FANOUT[@]}" kill < <(printf -- '%s\0' "$@")
-  fi
-
-  read -r -p "kill $NAME? [y/N] " -- REPLY < /dev/tty
-  if [[ $REPLY == [Yy]* ]]; then
-    tmux kill-session -t "=$SESSION"
-  fi
-  ;;
 rm | remove)
   if (($# > 1)); then
     exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
   fi
 
-  "$0" kill "$NAME" || true
+  tmux kill-session -t "=$SESSION" || true
   "$SELF/pool.sh" remove "$NAME"
   ;;
 reap)
@@ -126,7 +120,7 @@ reap)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {open,edit,resume,watch,kill,remove,reap} ...
+	usage: $PROG [-h] {open,edit,resume,watch,remove,reap} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
