@@ -31,7 +31,7 @@ def render(template, *, context, strict=False): ...
   - `with nullcontext(): ...` to group related statements.
   - Single `with a, b:` over nested `with a: with b:`.
 
-- Prefix non-exported module-level names with `_` — constants, functions, classes.
+- Only for Python: Prefix non-exported module-level names with `_` — constants, functions, classes.
 
 - `@dataclass(frozen=True)` for data types.
 

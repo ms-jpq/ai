@@ -51,21 +51,26 @@ if [[ -v MAP[$EVENT] ]]; then
 fi
 
 case "$EVENT" in
-StopFailure)
-  jq --raw-output '.last_assistant_message' <<< "$JSON" > "$NOTES/LAST_MESSAGE.md"
-  ;;
-Stop)
+Stop | StopFailure)
   jq --raw-output '.last_assistant_message' <<< "$JSON" > "$NOTES/LAST_MESSAGE.md"
 
-  declare -A -- LINKS=(
-    ["HISTORY.md"]="$HISTORY"
-    ["transcript.json"]="$TRANSCRIPT"
-  )
-  for DEST in "${!LINKS[@]}"; do
-    if ! [[ -L "$NOTES/$DEST" ]]; then
-      ln -sTnf -- "${LINKS[$DEST]}" "$NOTES/$DEST"
-    fi
-  done
+  if [[ $EVENT == Stop ]]; then
+    declare -A -- LINKS=(
+      ["HISTORY.md"]="$HISTORY"
+      ["transcript.json"]="$TRANSCRIPT"
+    )
+    for DEST in "${!LINKS[@]}"; do
+      if ! [[ -L "$NOTES/$DEST" ]]; then
+        ln -sTnf -- "${LINKS[$DEST]}" "$NOTES/$DEST"
+      fi
+    done
+  fi
+
+  if PREFIX="$(git -C "$NOTES" rev-parse --show-prefix 2> /dev/null)" && [[ -z $PREFIX ]]; then
+    SUBJECT="$(head -n 1 -- "$NOTES/LAST_MESSAGE.md")"
+    git -C "$NOTES" add -A
+    git -C "$NOTES" commit -q --allow-empty -m "${SUBJECT:-stop}"
+  fi
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
   ;;

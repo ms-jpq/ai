@@ -2,6 +2,9 @@
 
 set -o pipefail
 
+SELF="$(realpath -- "$0")"
+SELF="${SELF%/*}"
+
 ACTION="${1:-"list"}"
 if [[ ${1:-} == set-status ]] && ! [[ -v LOCKED ]]; then
   LOCKED=1 exec -- ~/.local/libexec/flock.sh "$0" "$0" "$@"
@@ -28,27 +31,11 @@ session)
 init)
   mkdir -p -- "$EXP" "$NOTES"/{design,plans,research,tasks,worktrees}
 
-  ORPHANS=("$EXP" "$NOTES")
-
-  for DIR in "${ORPHANS[@]}"; do
-    BRANCH="\$${DIR##*/.}"
-    PRESS_F=(git -C "$ROOT" worktree add --quiet --orphan -b "$BRANCH" -- "$DIR")
-
-    if [[ -e "$DIR/.git" ]]; then
-      continue
-    fi
-    if [[ -d $DIR ]] && find "$DIR" -mindepth 1 -print -quit | grep --quiet -e .; then
-      STASH="$(mktemp --dry-run --tmpdir="$ROOT")"
-      mv -- "$DIR" "$STASH"
-      "${PRESS_F[@]}"
-
-      mv -- "$STASH"/* "$DIR/"
-      rmdir -- "$STASH"
-      continue
-    fi
-
-    "${PRESS_F[@]}"
+  for DIR in "$EXP" "$NOTES"; do
+    "$SELF/orphan.sh" "$DIR" "\$${DIR##*/.}"
   done
+
+  printf -- '%s\n' 'worktrees/' > "$NOTES/.gitignore"
   ;;
 add)
   NAME="$1"
@@ -58,7 +45,11 @@ add)
   if ! [[ -e "$WORKTREE/.git" ]]; then
     git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
   fi
-  mkdir -p -- "$NOTESTREE/$NAME"
+
+  DIR="$NOTESTREE/$NAME"
+  "$SELF/orphan.sh" "$DIR" "notes/$NAME"
+  printf -- '%s\n' '.STATUS-*' > "$DIR/.gitignore"
+
   ln -sTnfr -- "$EXP" "$WORKTREE/.exp"
   ln -sTnfr -- "$NOTESTREE/$NAME" "$SELFNOTES"
   ln -sTnfr -- "$ROOT" "$SELFNOTES/->root"
@@ -92,8 +83,8 @@ set-status)
 
   DIR="$NOTESTREE/$NAME"
   mkdir -p -- "$DIR"
-  touch -- "$DIR/STATUS-${STATE^^}"
-  find "$DIR" -mindepth 1 -maxdepth 1 -type f -name 'STATUS-*' ! -name "STATUS-${STATE^^}" -delete
+  touch -- "$DIR/.STATUS-${STATE^^}"
+  find "$DIR" -mindepth 1 -maxdepth 1 -type f -name '.STATUS-*' ! -name ".STATUS-${STATE^^}" -delete
   ;;
 list)
   if ! [[ -d $NOTESTREE ]]; then
@@ -109,10 +100,10 @@ list)
   for STATE in "${STATES[@]}"; do
     case "$STATE" in
     running | parked | reaped)
-      ARGS+=(-o -name "STATUS-${STATE^^}")
+      ARGS+=(-o -name ".STATUS-${STATE^^}")
       ;;
     all)
-      ARGS+=(-o -name 'STATUS-*')
+      ARGS+=(-o -name '.STATUS-*')
       ;;
     *)
       PROG="${0##*/}"
@@ -127,7 +118,7 @@ EOF
   ARGS=("${ARGS[@]:1}")
 
   FIND=(find "$NOTESTREE" -mindepth 2 -maxdepth 2 -type f '(' "${ARGS[@]}" ')')
-  SED=(sed -E -e 's#/STATUS-[^/]*$##' -e 's#^.*/##')
+  SED=(sed -E -e 's#/\.STATUS-[^/]*$##' -e 's#^.*/##')
   if [[ -t 1 ]]; then
     FIND+=(-print)
   else
