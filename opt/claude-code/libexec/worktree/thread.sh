@@ -5,7 +5,7 @@ set -o pipefail
 SELF="$(realpath -- "$0")"
 SELF="${SELF%/*}"
 
-ACTION="${1:-"ls"}"
+ACTION="${1:-"open"}"
 if (($#)); then
   shift -- 1
 fi
@@ -44,7 +44,16 @@ l | ls)
   )
   "$0" ls "$@" | sort -z | "${FZF[@]}"
   ;;
-n | new)
+o | open)
+  if [[ -z $NAME ]]; then
+    "$SELF/pool.sh" init
+    exec -- ~/.local/bin/tmux-open "$ROOT_NOTES"
+  fi
+
+  WORKTREE="$("$SELF/pool.sh" add "$NAME")"
+  exec -- ~/.local/bin/tmux-open "$WORKTREE"
+  ;;
+n | new | e | edit)
   for SRC in "$@"; do
     NAME="$("$SELF/task-name.sh" name "$SRC")"
     BRIEF="$("$SELF/task-name.sh" path "$NAME")"
@@ -59,23 +68,10 @@ n | new)
   done
 
   if (($# == 1)); then
-    exec -- "$0" edit "$NAME"
+    # shellcheck disable=SC2154,SC2086
+    env -C "$ROOT_NOTES" -- $EDITOR -- "$BRIEF"
+    "$SELF/commit-on-change.sh" "$BRIEF" edit
   fi
-  ;;
-o | open)
-  if [[ -z $NAME ]]; then
-    exec -- ~/.local/bin/tmux-open "$ROOT_NOTES"
-  fi
-
-  WORKTREE="$("$SELF/pool.sh" add "$NAME")"
-  exec -- ~/.local/bin/tmux-open "$WORKTREE"
-  ;;
-e | edit)
-  SRC="$("$SELF/task-name.sh" path "$NAME")"
-  mkdir -p -- "${SRC%/*}"
-  # shellcheck disable=SC2154,SC2086
-  env -C "$ROOT_NOTES" -- $EDITOR -- "$SRC"
-  "$SELF/commit-on-change.sh" "$SRC" edit
   ;;
 r | resume)
   if (($# > 1)); then
