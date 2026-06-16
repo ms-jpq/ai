@@ -29,13 +29,11 @@ session)
   printf -- '%s' "${SESSION//[.:]/-}"
   ;;
 init)
-  mkdir -p -- "$EXP" "$NOTES"/{design,plans,research,tasks,worktrees}
-
   for DIR in "$EXP" "$NOTES"; do
     "$SELF/orphan.sh" "$DIR" "\$${DIR##*/.}"
   done
 
-  printf -- '%s\n' 'worktrees/' > "$NOTES/.gitignore"
+  rsync --archive -- "$SELF/template/root/" "$NOTES/"
   ;;
 add)
   NAME="$1"
@@ -48,12 +46,10 @@ add)
 
   DIR="$NOTESTREE/$NAME"
   "$SELF/orphan.sh" "$DIR" "notes/$NAME"
-  printf -- '%s\n' '.STATUS-*' > "$DIR/.gitignore"
+  rsync --archive -- "$SELF/template/worker/" "$DIR/"
 
   ln -sTnfr -- "$EXP" "$WORKTREE/.exp"
   ln -sTnfr -- "$NOTESTREE/$NAME" "$SELFNOTES"
-  ln -sTnfr -- "$ROOT" "$SELFNOTES/->root"
-  ln -sTnfr -- "$NOTESTREE" "$SELFNOTES/->peers"
   "$0" set-status "$NAME" running
 
   printf -- '%s' "$WORKTREE"
