@@ -63,6 +63,10 @@ n | new)
     exec -- "$0" edit "$NAME"
   fi
   ;;
+o | open)
+  WORKTREE="$("$SELF/pool.sh" add "$NAME")"
+  exec -- ~/.local/bin/tmux-open "$WORKTREE"
+  ;;
 e | edit)
   SRC="$("$SELF/task-name.sh" path "$NAME")"
   mkdir -p -- "${SRC%/*}"
@@ -142,7 +146,7 @@ rm | remove)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,new,edit,resume,watch,kill,reap,remove} ...
+	usage: $PROG [-h] {ls,new,open,edit,resume,watch,kill,reap,remove} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2

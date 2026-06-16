@@ -34,6 +34,13 @@ init)
   done
 
   rsync --archive --keep-dirlinks -- "$SELF/template/root/" "$ROOT/"
+
+  for DIR in "$EXP" "$NOTES"; do
+    if ! git -C "$DIR" rev-parse --verify --quiet HEAD > /dev/null; then
+      git -C "$DIR" add -A
+      git -C "$DIR" commit -q -m init
+    fi
+  done
   ;;
 add)
   NAME="$1"
@@ -51,6 +58,11 @@ add)
 
   "$0" set-status "$NAME" running
 
+  if ! git -C "$NOTESTREE/$NAME" rev-parse --verify --quiet HEAD > /dev/null; then
+    git -C "$NOTESTREE/$NAME" add -A
+    git -C "$NOTESTREE/$NAME" commit -q -m running
+  fi
+
   printf -- '%s' "$WORKTREE"
   ;;
 remove)
@@ -63,7 +75,11 @@ remove)
   if git -C "$ROOT" show-ref --verify --quiet -- "refs/heads/$NAME"; then
     git -C "$ROOT" branch --delete -- "$NAME" || true
   fi
+
   "$0" set-status "$NAME" reaped
+
+  git -C "$NOTESTREE/$NAME" add -A
+  git -C "$NOTESTREE/$NAME" commit -q --allow-empty -m reaped
   ;;
 set-status)
   NAME="$1"
