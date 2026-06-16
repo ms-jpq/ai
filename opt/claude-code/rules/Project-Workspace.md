@@ -8,9 +8,10 @@ Root Layout:
 |   `-- ...
 |-- .notes/
 |   |-- design/
-|   |-- plan/
+|   |-- plans/
 |   |-- research/
-|   |-- worktree/
+|   |-- tasks/
+|   |-- worktrees/
 |   `-- <topic>/
 `-- ...
 ```
@@ -24,6 +25,7 @@ Worktree Layout:
 |-- .exp/
 |   `-- ...
 |-- .notes/
+|   |-- TASK.md
 |   |-- ->peers/
 |   |-- ->root/
 |   `-- <topic>/

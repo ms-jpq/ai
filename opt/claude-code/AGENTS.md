@@ -21,6 +21,8 @@
 
 - When probed, answer with citation, source over argument.
 
+- Link PR/issue/URL references in responses, never a bare ID: `[#1234](…/pull/1234)`, `[ENG-1234](…/issue/ENG-1234)`.
+
 # Tools
 
 - Iteratively test hypotheses with tools. See @./skills/dig/SKILL.md.
