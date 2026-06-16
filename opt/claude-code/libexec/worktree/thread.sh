@@ -45,7 +45,6 @@ l | ls)
   "$0" ls "$@" | sort -z | "${FZF[@]}"
   ;;
 n | new)
-  "$SELF/pool.sh" init
   for SRC in "$@"; do
     NAME="$("$SELF/task-name.sh" name "$SRC")"
     BRIEF="$("$SELF/task-name.sh" path "$NAME")"
@@ -71,17 +70,16 @@ e | edit)
   SRC="$("$SELF/task-name.sh" path "$NAME")"
   mkdir -p -- "${SRC%/*}"
   # shellcheck disable=SC2154,SC2086
-  exec -- env -C "$ROOT_NOTES" -- $EDITOR -- "$SRC"
+  env -C "$ROOT_NOTES" -- $EDITOR -- "$SRC"
+  "$SELF/commit-on-change.sh" "$SRC" edit
   ;;
 r | resume)
   if (($# > 1)); then
     exec -- "${FANOUT[@]}" resume < <(printf -- '%s\0' "$@")
   fi
 
-  if ! [[ -f $TASK ]]; then
-    printf -- '%q\n' "$TASK"
-    set -x
-    exit 2
+  if ! [[ -s $TASK ]]; then
+    "$0" edit "$NAME"
   fi
   WORKTREE="$("$SELF/pool.sh" add "$NAME")"
 

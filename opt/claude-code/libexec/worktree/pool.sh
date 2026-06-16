@@ -47,6 +47,8 @@ add)
   WORKTREE="$WORKTREES/$NAME"
   SELFNOTES="$WORKTREE/.notes"
 
+  "$0" init
+
   "$SELF/orphan.sh" "$NOTESTREE/$NAME" "notes/$NAME"
 
   if ! [[ -e "$WORKTREE/.git" ]]; then
