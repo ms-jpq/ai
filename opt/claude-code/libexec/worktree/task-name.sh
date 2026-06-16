@@ -4,8 +4,13 @@ set -o pipefail
 
 MODE="$1"
 SRC="$2"
-BASE="${SRC%.md}"
-NAME="${BASE##*/}"
+if [[ -d $SRC ]]; then
+  TOP="$(git -C "$SRC" rev-parse --show-toplevel 2> /dev/null)" || TOP="$(realpath -- "$SRC")"
+  NAME="${TOP##*/}"
+else
+  BASE="${SRC%.md}"
+  NAME="${BASE##*/}"
+fi
 
 case "$MODE" in
 name)

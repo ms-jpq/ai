@@ -38,7 +38,7 @@ e | edit)
 
   for SRC in "$@"; do
     NAME="$("$SELF/task-name.sh" name "$SRC")"
-    BRIEF="$("$SELF/task-name.sh" path "$NAME")"
+    BRIEF="$ROOT_NOTES/tasks/$NAME.md"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
     DST="$WORKTREE/.notes/TASK.md"
     if [[ -f $BRIEF && ! -L $BRIEF ]]; then
@@ -106,6 +106,14 @@ k | kill)
     tmux kill-session -t "=$SESSION"
   fi
   ;;
+rm | remove)
+  if (($# > 1)); then
+    exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
+  fi
+
+  "$0" kill "$NAME" || true
+  "$SELF/pool.sh" remove "$NAME"
+  ;;
 reap)
   if (($# > 1)); then
     exec -- "${FANOUT[@]}" reap < <(printf -- '%s\0' "$@")
@@ -115,18 +123,10 @@ reap)
   printf -- '%s\n' "reap $NAME — not yet implemented" >&2
   exit 69
   ;;
-rm | remove)
-  if (($# > 1)); then
-    exec -- "${FANOUT[@]}" remove < <(printf -- '%s\0' "$@")
-  fi
-
-  "$0" kill "$NAME" || true
-  "$SELF/pool.sh" remove "$NAME"
-  ;;
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {open,edit,resume,watch,kill,reap,remove} ...
+	usage: $PROG [-h] {open,edit,resume,watch,kill,remove,reap} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
