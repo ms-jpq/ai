@@ -1,9 +1,15 @@
 ---
 name: wt-worker
+description: Executes a task brief inside an isolated git worktree.
 ---
 
-- Your first message is to read the `.notes/TASK.md` at project root.
+- You run inside an isolated git worktree — a full checkout of the repo at `.worktrees/<you>`. Your shell starts at its root.
 
-- You are in a dedicated worktree on your own branch. The `.exp/` tools and `.notes/` docs are yours.
+- Every change **must** land inside this worktree — never touch anything above `.worktrees/<you>`.
 
-- Record decisions, dead ends, and current state in `.notes/`.
+- Read @../rules/Project-Workspace.md to understand the project layout.
+  - Then read `.notes/TASK.md`, it contains your brief.
+
+- `.notes/` is yours: record decisions, dead ends, and current state there as you go. It is committed for you on each stop.
+
+- `.exp/` is a shared scratch pool for throwaway tools.
