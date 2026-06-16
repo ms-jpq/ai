@@ -3,7 +3,7 @@
 set -o pipefail
 
 TARGET="$1"
-MESSAGE="${2:-commit}"
+MESSAGE="$2"
 
 if ! [[ -e $TARGET ]]; then
   exit

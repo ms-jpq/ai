@@ -36,10 +36,7 @@ init)
   rsync --archive --keep-dirlinks -- "$SELF/template/root/" "$ROOT/"
 
   for DIR in "$EXP" "$NOTES"; do
-    if ! git -C "$DIR" rev-parse --verify --quiet HEAD > /dev/null; then
-      git -C "$DIR" add -A
-      git -C "$DIR" commit -q -m init
-    fi
+    "$SELF/commit-on-change.sh" "$DIR" init
   done
   ;;
 add)
@@ -49,7 +46,7 @@ add)
 
   "$0" init
 
-  "$SELF/orphan.sh" "$NOTESTREE/$NAME" "notes/$NAME"
+  "$SELF/orphan.sh" "$NOTESTREE/$NAME" "\$notes\$$NAME"
 
   if ! [[ -e "$WORKTREE/.git" ]]; then
     git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
@@ -60,10 +57,7 @@ add)
 
   "$0" set-status "$NAME" running
 
-  if ! git -C "$NOTESTREE/$NAME" rev-parse --verify --quiet HEAD > /dev/null; then
-    git -C "$NOTESTREE/$NAME" add -A
-    git -C "$NOTESTREE/$NAME" commit -q -m running
-  fi
+  "$SELF/commit-on-change.sh" "$NOTESTREE/$NAME" running
 
   printf -- '%s' "$WORKTREE"
   ;;

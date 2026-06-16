@@ -67,8 +67,7 @@ Stop | StopFailure)
   fi
 
   SUBJECT="$(head -n 1 -- "$NOTES/LAST_MESSAGE.md")"
-  git -C "$NOTES" add -A
-  git -C "$NOTES" commit -q --allow-empty -m "${SUBJECT:-stop}"
+  "$LIBEXEC/commit-on-change.sh" "$NOTES" "${SUBJECT:-stop}"
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
   ;;
