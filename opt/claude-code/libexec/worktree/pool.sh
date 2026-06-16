@@ -66,10 +66,10 @@ remove)
   WORKTREE="$WORKTREES/$NAME"
 
   if [[ -e "$WORKTREE/.git" ]]; then
-    git -C "$ROOT" worktree remove -- "$WORKTREE"
+    git -C "$ROOT" worktree remove --force -- "$WORKTREE"
   fi
   if git -C "$ROOT" show-ref --verify --quiet -- "refs/heads/$NAME"; then
-    git -C "$ROOT" branch --delete -- "$NAME" || true
+    git -C "$ROOT" branch --delete --force -- "$NAME"
   fi
 
   "$0" set-status "$NAME" reaped

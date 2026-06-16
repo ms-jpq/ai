@@ -120,6 +120,11 @@ EOF
     exit 2
   fi
 
+  read -r -p "remove $NAME? [y/N] " -- REPLY < /dev/tty
+  if [[ $REPLY != [Yy]* ]]; then
+    exit 1
+  fi
+
   tmux kill-session -t "=$SESSION" || true
   "$SELF/pool.sh" remove "$NAME"
   ;;
