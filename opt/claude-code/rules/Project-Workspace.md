@@ -42,6 +42,6 @@ Worktree Layout:
 
 - `.notes/` → `<root>/.notes/worktrees/<name>/` — per-worktree, survives teardown.
 
-- `.notes/->root/` → `<root>/` — the root worktree.
+- `.notes/->root/` → `<root>/.notes/` — the root notes.
 
 - `.notes/->peers/` → `<root>/.notes/worktrees/` — the sibling notes pool.
