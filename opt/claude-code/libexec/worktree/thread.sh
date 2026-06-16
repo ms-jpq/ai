@@ -20,30 +20,6 @@ NOTES="$ROOT_NOTES/worktrees/$NAME"
 TASK="$NOTES/TASK.md"
 
 case "$ACTION" in
-l | ls)
-  if [[ ${1:-} == running ]]; then
-    exec -- tmux choose-tree -G -Z -s -O name -NN -f "#{m:${SESSION%/*}/*,#{session_name}}"
-  fi
-
-  if ! [[ -t 1 ]]; then
-    exec -- "$SELF/pool.sh" list "$@"
-  fi
-
-  if ! [[ -t 0 ]]; then
-    set -x
-    exit 2
-  fi
-
-  FZF=(
-    fzf
-    --read0
-    --delimiter /
-    --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
-    --preview-window 'right,80%,wrap'
-    --bind "enter:become(${SELF@Q}/tmux.sh nav {-1} ${ROOT_NOTES@Q}/worktrees/{-1})"
-  )
-  "$0" ls "$@" | sort -z | "${FZF[@]}"
-  ;;
 o | open)
   if [[ -z $NAME ]]; then
     "$SELF/pool.sh" init
@@ -53,7 +29,13 @@ o | open)
   WORKTREE="$("$SELF/pool.sh" add "$NAME")"
   exec -- ~/.local/bin/tmux-open "$WORKTREE"
   ;;
-n | new | e | edit)
+e | edit)
+  if (($# == 0)); then
+    "$SELF/pool.sh" init
+    # shellcheck disable=SC2154,SC2086
+    exec -- env -C "$ROOT_NOTES" -- $EDITOR -- .
+  fi
+
   for SRC in "$@"; do
     NAME="$("$SELF/task-name.sh" name "$SRC")"
     BRIEF="$("$SELF/task-name.sh" path "$NAME")"
@@ -144,7 +126,7 @@ rm | remove)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,new,open,edit,resume,watch,kill,reap,remove} ...
+	usage: $PROG [-h] {open,edit,resume,watch,kill,reap,remove} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2

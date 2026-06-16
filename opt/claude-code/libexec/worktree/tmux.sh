@@ -45,19 +45,6 @@ launch)
   # shellcheck disable=2154
   exec -- "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP" < /dev/null
   ;;
-nav)
-  SESSION="$("$SELF/pool.sh" session "$1")"
-  DIR="$2"
-
-  YAZI=("$HOME/.local/libexec/yazi.sh" -- "$DIR")
-
-  if ! tmux has-session -t "=$SESSION" 2> /dev/null; then
-    exec -- tmux new-window -a -- "${YAZI[@]}"
-  fi
-
-  tmux new-window -t "=$SESSION:" -- "${YAZI[@]}"
-  exec -- tmux switch-client -t "=$SESSION"
-  ;;
 *)
   set -x
   exit 2
