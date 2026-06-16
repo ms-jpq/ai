@@ -54,9 +54,14 @@ n | new)
     if [[ -f $BRIEF && ! -L $BRIEF ]]; then
       mv -- "$BRIEF" "$DST"
     fi
+
     touch -- "$DST"
-    env -C "$ROOT" -- ln -v -sTnfr -- "$DST" "$BRIEF"
+    ln -v -sTnfr -- "$DST" "$BRIEF"
   done
+
+  if (($# == 1)); then
+    exec -- "$0" edit "$NAME"
+  fi
   ;;
 e | edit)
   SRC="$("$SELF/task-name.sh" path "$NAME")"

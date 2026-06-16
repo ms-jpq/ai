@@ -18,7 +18,7 @@ import { join } from "node:path"
 import process, { exit, stderr, stdin, stdout } from "node:process"
 import { createInterface } from "node:readline"
 
-const NAME = "wthread"
+const NAME = "wt"
 
 const TOOLS = [
   {
