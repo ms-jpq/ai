@@ -56,12 +56,12 @@ Stop | StopFailure)
 
   if [[ $EVENT == Stop ]]; then
     declare -A -- LINKS=(
-      ["HISTORY.md"]="$HISTORY"
-      ["transcript.json"]="$TRANSCRIPT"
+      [".HISTORY.md"]="$HISTORY"
+      [".TRANSCRIPT.json"]="$TRANSCRIPT"
     )
     for DEST in "${!LINKS[@]}"; do
       if ! [[ -L "$NOTES/$DEST" ]]; then
-        ln -sTnf -- "${LINKS[$DEST]}" "$NOTES/$DEST"
+        ln -sTnfr -- "${LINKS[$DEST]}" "$NOTES/$DEST"
       fi
     done
   fi

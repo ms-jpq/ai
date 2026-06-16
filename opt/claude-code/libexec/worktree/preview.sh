@@ -12,7 +12,7 @@ NOTES="$ROOT/.notes/worktrees/$NAME"
 
 ~/.local/libexec/preview.sh "$NOTES"
 
-HISTORY="$NOTES/HISTORY.md"
+HISTORY="$NOTES/.HISTORY.md"
 if [[ -e $HISTORY ]]; then
   printf -- '\n\n'
   ~/.local/libexec/hr.sh

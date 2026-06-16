@@ -78,7 +78,7 @@ r | resume)
 
   MESSAGE="$(realpath --relative-to "$WORKTREE" -- "$TASK")"
   RESUME="claude --agent wthread-worker --name ${SESSION@Q} -- ${MESSAGE@Q}"
-  if [[ -e "$NOTES/HISTORY.md" ]]; then
+  if [[ -e "$NOTES/.HISTORY.md" ]]; then
     RESUME="claude --continue -- ${MESSAGE@Q} || $RESUME"
   fi
 
