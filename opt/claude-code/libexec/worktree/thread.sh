@@ -119,7 +119,7 @@ k | kill)
     exec -- "${FANOUT[@]}" kill < <(printf -- '%s\0' "$@")
   fi
 
-  read -r -p "kill $SESSION? [y/N] " -- REPLY < /dev/tty
+  read -r -p "kill $NAME? [y/N] " -- REPLY < /dev/tty
   if [[ $REPLY == [Yy]* ]]; then
     tmux kill-session -t "=$SESSION"
   fi
