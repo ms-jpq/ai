@@ -18,7 +18,6 @@
 - Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md.
 
 - Co-iterate with user on working documents under `.notes/`.
-  - Draft plans under `.notes/plan/*` instead of using plan mode.
 
 - When probed, answer with citation, source over argument.
 
