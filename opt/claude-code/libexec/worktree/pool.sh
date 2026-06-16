@@ -33,23 +33,22 @@ init)
     "$SELF/orphan.sh" "$DIR" "\$${DIR##*/.}"
   done
 
-  rsync --archive -- "$SELF/template/root/" "$NOTES/"
+  rsync --archive --keep-dirlinks -- "$SELF/template/root/" "$ROOT/"
   ;;
 add)
   NAME="$1"
   WORKTREE="$WORKTREES/$NAME"
   SELFNOTES="$WORKTREE/.notes"
 
+  "$SELF/orphan.sh" "$NOTESTREE/$NAME" "notes/$NAME"
+
   if ! [[ -e "$WORKTREE/.git" ]]; then
     git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
   fi
 
-  DIR="$NOTESTREE/$NAME"
-  "$SELF/orphan.sh" "$DIR" "notes/$NAME"
-  rsync --archive -- "$SELF/template/worker/" "$DIR/"
-
-  rsync --archive -- "$SELF/template/code/" "$WORKTREE/"
   ln -sTnfr -- "$NOTESTREE/$NAME" "$SELFNOTES"
+  rsync --archive --keep-dirlinks -- "$SELF/template/worktree/" "$WORKTREE/"
+
   "$0" set-status "$NAME" running
 
   printf -- '%s' "$WORKTREE"

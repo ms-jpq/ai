@@ -42,6 +42,10 @@ const send = (
     | Omit<JSONRPCNotification, "jsonrpc">,
 ) => stdout.write(JSON.stringify({ jsonrpc: "2.0", ...msg }) + "\n")
 
+const error = (id: RequestId, message: string) => send({ id, error: { code: -32601, message } })
+
+const respond = (id: RequestId, result: Result) => send({ id, result })
+
 const notify = (() => {
   let seq = 0
   return (content: string) => {
@@ -49,10 +53,6 @@ const notify = (() => {
     send({ method: "notifications/claude/channel", params: { content, meta } })
   }
 })()
-
-const error = (id: RequestId, message: string) => send({ id, error: { code: -32601, message } })
-
-const result = (id: RequestId, result: Result) => send({ id, result })
 
 const broadcast = (text: string) => {
   const line = text.endsWith("\n") ? text : `${text}\n`
@@ -66,22 +66,22 @@ const dispatch = (line: string) => {
 
   switch (msg.method) {
     case "ping":
-      result(msg.id, {})
+      respond(msg.id, {})
       break
     case "initialize":
-      result(msg.id, {
+      respond(msg.id, {
         protocolVersion: msg.params?.protocolVersion ?? "2025-06-18",
         serverInfo: { name: NAME, version: "0.0.1" },
         capabilities: { tools: {}, experimental: { "claude/channel": {} } },
       } satisfies InitializeResult)
       break
     case "tools/list":
-      result(msg.id, { tools: TOOLS } satisfies ListToolsResult)
+      respond(msg.id, { tools: TOOLS } satisfies ListToolsResult)
       break
     case "tools/call":
       if (msg.params?.name === "reply") {
         broadcast(String(msg.params.arguments?.text ?? ""))
-        result(msg.id, { content: [{ type: "text", text: "sent" }] } satisfies CallToolResult)
+        respond(msg.id, { content: [{ type: "text", text: "sent" }] } satisfies CallToolResult)
       } else {
         error(msg.id, `unknown tool: ${msg.params?.name}`)
       }

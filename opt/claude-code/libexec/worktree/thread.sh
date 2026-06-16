@@ -47,15 +47,15 @@ l | ls)
 n | new)
   "$SELF/pool.sh" init
   for SRC in "$@"; do
-    BASE="${SRC%.md}"
-    NAME="${BASE##*/}"
+    NAME="$("$SELF/task-name.sh" name "$SRC")"
+    BRIEF="$("$SELF/task-name.sh" path "$NAME")"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
-    SRC="$BASE.md"
     DST="$WORKTREE/.notes/TASK.md"
-    if [[ -f $SRC && ! -L $SRC ]]; then
-      mv -- "$SRC" "$DST"
+    if [[ -f $BRIEF && ! -L $BRIEF ]]; then
+      mv -- "$BRIEF" "$DST"
     fi
-    ln -v -sTnfr -- "$DST" "$SRC"
+    touch -- "$DST"
+    ln -v -sTnfr -- "$DST" "$BRIEF"
   done
   ;;
 e | edit)
