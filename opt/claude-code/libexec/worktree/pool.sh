@@ -48,7 +48,7 @@ add)
   "$SELF/orphan.sh" "$DIR" "notes/$NAME"
   rsync --archive -- "$SELF/template/worker/" "$DIR/"
 
-  ln -sTnfr -- "$EXP" "$WORKTREE/.exp"
+  rsync --archive -- "$SELF/template/code/" "$WORKTREE/"
   ln -sTnfr -- "$NOTESTREE/$NAME" "$SELFNOTES"
   "$0" set-status "$NAME" running
 

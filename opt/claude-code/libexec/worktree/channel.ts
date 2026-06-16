@@ -35,37 +35,10 @@ const notify = (() => {
 
 const clients = new Set<Socket>()
 
-const serve = async (sock: string) => {
-  await unlink(sock).catch(() => {})
-
-  const server = createServer(async (s) => {
-    clients.add(s)
-
-    try {
-      for await (const line of createInterface({ input: s })) {
-        if (line.length > 0) {
-          notify(line)
-        }
-      }
-    } finally {
-      clients.delete(s)
-    }
-  })
-
-  server.on("error", (e) => {
-    stderr.write(`${NAME}: ${e}\n`)
-    exit(1)
-  })
-
-  server.listen(sock, () => stderr.write(`${NAME}: ${sock}\n`))
-}
-
-;(async () => {
-  serve(SOCK)
-})()
-
 const error = (id: unknown, message: string) => send({ id, error: { code: -32601, message } })
+
 const result = (id: unknown, result: object) => send({ id, result })
+
 const broadcast = (text: string) => {
   const line = text.endsWith("\n") ? text : `${text}\n`
   for (const sock of clients) {
@@ -103,21 +76,49 @@ const dispatch = (line: string) => {
   }
 }
 
-{
-  void (async () => {
-    for await (const line of createInterface({ input: stdin })) {
-      if (line.trim().length === 0) {
-        continue
-      }
-      try {
-        dispatch(line)
-      } catch (e) {
-        stderr.write(`${NAME}: ${e}\n`)
-      }
+const listen = async () => {
+  for await (const line of createInterface({ input: stdin })) {
+    if (line.trim().length === 0) {
+      continue
     }
-  })()
+    try {
+      dispatch(line)
+    } catch (e) {
+      stderr.write(`${NAME}: ${e}\n`)
+    }
+  }
 }
 
-await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), once(stdin, "end")])
-await unlink(SOCK).catch(() => {})
+const serve = async (sock: string) => {
+  await unlink(sock).catch(() => {})
+
+  const server = createServer(async (s) => {
+    clients.add(s)
+
+    try {
+      for await (const line of createInterface({ input: s })) {
+        if (line.length > 0) {
+          notify(line)
+        }
+      }
+    } catch (_) {
+    } finally {
+      clients.delete(s)
+    }
+  })
+
+  await Promise.all([
+    new Promise<void>((r) => server.listen(sock, r)),
+    once(server, "error").then(([e]) => {
+      throw e
+    }),
+  ])
+}
+
+try {
+  await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(SOCK)])
+} finally {
+  await unlink(SOCK).catch(() => {})
+}
+
 exit(0)
