@@ -14,8 +14,9 @@ FANOUT=(xargs -0 -r --max-args 1 -- "$0")
 NAME="${1:-}"
 COMMON="$(git rev-parse --path-format=absolute --git-common-dir)"
 ROOT="${COMMON%/.git}"
+ROOT_NOTES="$ROOT/.notes"
 SESSION="$("$SELF/pool.sh" session "$NAME")"
-NOTES="$ROOT/.notes/worktrees/$NAME"
+NOTES="$ROOT_NOTES/worktrees/$NAME"
 TASK="$NOTES/TASK.md"
 
 case "$ACTION" in
@@ -39,7 +40,7 @@ l | ls)
     --delimiter /
     --preview "${SELF@Q}/preview.sh ${ROOT@Q} {-1}"
     --preview-window 'right,80%,wrap'
-    --bind "enter:become(${SELF@Q}/tmux.sh nav {-1} ${ROOT@Q}/.notes/worktrees/{-1})"
+    --bind "enter:become(${SELF@Q}/tmux.sh nav {-1} ${ROOT_NOTES@Q}/worktrees/{-1})"
   )
   "$0" ls "$@" | sort -z | "${FZF[@]}"
   ;;
@@ -51,9 +52,17 @@ n | new)
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
     SRC="$BASE.md"
     DST="$WORKTREE/.notes/TASK.md"
-    mv -f -- "$SRC" "$DST"
+    if [[ -f $SRC && ! -L $SRC ]]; then
+      mv -- "$SRC" "$DST"
+    fi
     ln -v -sTnfr -- "$DST" "$SRC"
   done
+  ;;
+e | edit)
+  SRC="$("$SELF/task-name.sh" path "$NAME")"
+  mkdir -p -- "${SRC%/*}"
+  # shellcheck disable=SC2154,SC2086
+  exec -- env -C "$ROOT_NOTES" -- $EDITOR -- "$SRC"
   ;;
 r | resume)
   if (($# > 1)); then
@@ -128,7 +137,7 @@ rm | remove)
 *)
   PROG="${0##*/}"
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {ls,new,resume,watch,kill,reap,remove} ...
+	usage: $PROG [-h] {ls,new,edit,resume,watch,kill,reap,remove} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
