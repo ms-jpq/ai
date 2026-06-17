@@ -73,7 +73,7 @@ Stop | StopFailure)
   fi
 
   SUBJECT="$(head -n 1 -- "$NOTES/.LAST_MESSAGE.md")"
-  "$LIBEXEC/commit-on-change.sh" "$NOTES" "stop${SUBJECT:+ | $SUBJECT}"
+  "$LIBEXEC/commit-on-change.sh" "$NOTES" "stop${SUBJECT:+ ~> $SUBJECT}"
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
   ;;
