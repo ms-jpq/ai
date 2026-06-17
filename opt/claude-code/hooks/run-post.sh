@@ -30,15 +30,29 @@ case "$FILE_PATH" in
     shellcheck --shell=bash -- "$FILE_PATH" || exit 2
   fi
   ;;
+*Dockerfile | *Dockerfile.* | *.dockerfile | *Containerfile)
+  if command -v -- hadolint > /dev/null; then
+    hadolint -- "$FILE_PATH" || exit 2
+  fi
+  ;;
+*.pl | *.pm | *.t)
+  if command -v -- perltidy > /dev/null; then
+    RC=0
+    perltidy --standard-error-output --backup-and-modify-in-place --backup-file-extension=/ --indent-columns=2 --output-line-ending=unix -- "$FILE_PATH" || RC=$?
+    rm -fr -- "$FILE_PATH.bak"
+
+    case "$RC" in
+    0 | 2) ;;
+    *)
+      exit 2
+      ;;
+    esac
+  fi
+  ;;
 *.md | *.json)
   FILE_PATH="$(realpath -- "$FILE_PATH")" || exit 2
   if command -v -- prettier > /dev/null; then
     prettier --log-level warn --write -- "$FILE_PATH" || exit 2
-  fi
-  ;;
-*Dockerfile | *Dockerfile.* | *.dockerfile | *Containerfile)
-  if command -v -- hadolint > /dev/null; then
-    hadolint -- "$FILE_PATH" || exit 2
   fi
   ;;
 # *.lua)
