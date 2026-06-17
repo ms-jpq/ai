@@ -22,15 +22,23 @@ case "$FILE_PATH" in
     RUST_LOG=warn taplo format -- "$FILE_PATH" || exit 2
   fi
   ;;
-*.sh)
+*.sh | *.bash)
   if command -v -- shfmt > /dev/null; then
     shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
   fi
+  if command -v -- shellcheck > /dev/null; then
+    shellcheck --shell=bash -- "$FILE_PATH" || exit 2
+  fi
   ;;
-*.md)
+*.md | *.json)
   FILE_PATH="$(realpath -- "$FILE_PATH")" || exit 2
   if command -v -- prettier > /dev/null; then
     prettier --log-level warn --write -- "$FILE_PATH" || exit 2
+  fi
+  ;;
+*Dockerfile | *Dockerfile.* | *.dockerfile | *Containerfile)
+  if command -v -- hadolint > /dev/null; then
+    hadolint -- "$FILE_PATH" || exit 2
   fi
   ;;
 # *.lua)

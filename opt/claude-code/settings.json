@@ -84,7 +84,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-fmt.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
             "type": "command"
           }
         ],

@@ -6,7 +6,7 @@
       {
         "hooks": [
           {
-            "command": ".claude/hooks/run-fmt.sh",
+            "command": ".claude/hooks/run-post.sh",
             "type": "command"
           }
         ],
