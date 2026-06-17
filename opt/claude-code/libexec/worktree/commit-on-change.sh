@@ -20,5 +20,5 @@ TOP="$(git -C "$DIR" rev-parse --show-toplevel)"
 
 git -C "$TOP" add -A
 if STATUS="$(git -C "$TOP" status --porcelain)" && [[ -n $STATUS ]]; then
-  git -C "$TOP" commit -q -m "$MESSAGE"
+  git -C "$TOP" commit -q -m ":$MESSAGE"
 fi

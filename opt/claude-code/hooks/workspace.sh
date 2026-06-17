@@ -36,6 +36,12 @@ if ! [[ -d $NOTES && -e "$NOTES/.git" ]]; then
   exit
 fi
 
+MAIN_AGENT='wt-worker'
+AGENT_TYPE="$(jq --raw-output '.agent_type // ""' <<< "$JSON")"
+if [[ -L $NOTES && $AGENT_TYPE != "$MAIN_AGENT" ]]; then
+  exit
+fi
+
 declare -A -- MAP=(
   [PostToolUse]=running
   [PostToolUseFailure]=running
@@ -67,7 +73,7 @@ Stop | StopFailure)
   fi
 
   SUBJECT="$(head -n 1 -- "$NOTES/.LAST_MESSAGE.md")"
-  "$LIBEXEC/commit-on-change.sh" "$NOTES" "${SUBJECT:-stop}"
+  "$LIBEXEC/commit-on-change.sh" "$NOTES" "stop${SUBJECT:+ | $SUBJECT}"
   ;;
 PostToolUse | PostToolUseFailure | PreToolUse | UserPromptSubmit | Notification)
   ;;

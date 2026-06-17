@@ -57,7 +57,7 @@ add)
 
   "$0" set-status "$NAME" running
 
-  "$SELF/commit-on-change.sh" "$NOTESTREE/$NAME" running
+  "$SELF/commit-on-change.sh" "$NOTESTREE/$NAME" add
 
   printf -- '%s' "$WORKTREE"
   ;;
