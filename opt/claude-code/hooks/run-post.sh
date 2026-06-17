@@ -39,7 +39,6 @@ case "$FILE_PATH" in
   if command -v -- perltidy > /dev/null; then
     RC=0
     perltidy --standard-error-output --backup-and-modify-in-place --backup-file-extension=/ --indent-columns=2 --output-line-ending=unix -- "$FILE_PATH" || RC=$?
-    rm -fr -- "$FILE_PATH.bak"
 
     case "$RC" in
     0 | 2) ;;
