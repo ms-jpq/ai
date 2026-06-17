@@ -22,7 +22,7 @@ case "$FILE" in
   DECISION=allow
   REASON='✅ .exp/ auto-approved'
   ;;
-"$CWD"/.notes/'->root'/**/* | "$CWD"/.notes/'->peers'/**/*)
+"$CWD"/.notes/'@root'/**/* | "$CWD"/.notes/'@peers'/**/*)
   DECISION=deny
   REASON='🚫 .notes/ symlink — points to state owned by another'
   ;;

@@ -28,8 +28,8 @@ Worktree Layout:
 |   `-- ...
 |-- .notes/
 |   |-- TASK.md
-|   |-- ->peers/
-|   |-- ->root/
+|   |-- @peers/
+|   |-- @root/
 |   `-- <topic>/
 `-- ...
 ```
@@ -42,6 +42,6 @@ Worktree Layout:
 
 - `.notes/` → `<root>/.notes/worktrees/<name>/` — per-worktree, survives teardown.
 
-- `.notes/->root/` → `<root>/.notes/` — the root notes.
+- `.notes/@root/` → `<root>/.notes/` — the root notes.
 
-- `.notes/->peers/` → `<root>/.notes/worktrees/` — the sibling notes pool.
+- `.notes/@peers/` → `<root>/.notes/worktrees/` — the sibling notes pool.
