@@ -6,6 +6,7 @@ OUT="$1"
 CLAUDE_CONFIG_DIR="$OUT/.claude"
 SELF="${0%/*}"
 
+mkdir -p -- "$OUT"
 cp -af -- "$SELF/../opt/claude-code"/{agents,bin,hooks,libexec,rules,skills,AGENTS.md,keybindings.json} "$CLAUDE_CONFIG_DIR/"
 mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
 
