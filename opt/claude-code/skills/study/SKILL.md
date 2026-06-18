@@ -7,6 +7,7 @@ description: Help the user explore a domain by branching from their question int
 - Sketch the domain first. List the major nodes, contested edges, common misconceptions. Internal map — not user-facing.
 
 - The user's question is the seed. Generate follow-up questions the user would also want to ask:
+
   - Mechanism: how does X actually work, step by step?
 
   - Boundary: where does X stop applying? What replaces it?

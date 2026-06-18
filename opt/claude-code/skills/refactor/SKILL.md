@@ -5,6 +5,7 @@ description: Iterative code refactor.
 # Workflow
 
 - Discover the invariants first. No invariants, can't refactor.
+
   - Behavior that must survive: contract, outputs, public surface.
 
   - Pin with tests. If none, write one capturing current behavior before touching anything.
@@ -15,7 +16,7 @@ description: Iterative code refactor.
 
 - Don't auto-apply; wait for an explicit subset. `auto`: apply highest-payoff each pass, stop when next is style-only.
 
-- Substantial structural change → create ./.notes/plan/\*.md file, approval, apply.
+- Substantial structural change → create ./.notes/plans/\*.md file, approval, apply.
 
 # Principles
 

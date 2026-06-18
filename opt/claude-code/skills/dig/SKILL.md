@@ -5,6 +5,7 @@ description: Hypothesis test by experimenting. Write disposable tools — don't 
 # Clarify
 
 - Derive 2-4 candidate hypotheses.
+
   - State each hypothesis in one sentence.
 
   - What output would confirm it? What would refute it?

@@ -14,7 +14,7 @@ description: Draft a problem statement, then sharpen it with the user. Iterate u
 
 - Approach: the high-level direction you're leaning.
 
-- Draw a diagram if it clarifies. Mermaid preferred.
+- Draw a diagram if it clarifies.
 
 # Sharpen
 

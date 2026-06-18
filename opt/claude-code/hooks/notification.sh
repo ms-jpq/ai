@@ -16,7 +16,7 @@ JSON="$(tee)"
 # "${SELF%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
 if [[ -v RECUR ]]; then
-  jq . <<< "$JSON"
+  jq . <<< "$JSON" >&2
 else
   # shellcheck disable=2154
   "$XDG_CONFIG_HOME/tmux/libexec/taint-inactive.sh"
@@ -40,4 +40,4 @@ fi
 FALLBACK="Chatty ~ $(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
 TITLE="$(jq -e --raw-output --arg fallback "$FALLBACK" '.title // $fallback' <<< "$JSON")"
 MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
-exec -- ~/.local/libexec/notify.kitty.sh /tmp/kitty.*.sock "$TITLE" "$MESSAGE"
+exec -- ~/.local/libexec/notify.kitty.sh "$TITLE" "$MESSAGE"

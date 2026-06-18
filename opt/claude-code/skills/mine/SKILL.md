@@ -6,11 +6,13 @@ disable-model-invocation: true
 # Discover
 
 - Find all source files relevant to the topic:
+
   - Read every file — don't sample.
 
   - Include invocations.
 
 - What patterns appear?
+
   - Rank by prevalence.
 
   - Highlight unusual patterns.

@@ -1,6 +1,6 @@
 # Planning
 
-- Draft plans under `.notes/plan/*` instead of using plan mode.
+- Draft plans under `.notes/plans/*` instead of using plan mode.
   - Name should follow `YY-MM-DD-<slug>.md`
 
 - Use the `/open` skill once document has been drafted.
