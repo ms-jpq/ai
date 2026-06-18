@@ -14,4 +14,6 @@ Open what we're currently working on:
 
 - Make each path absolute.
 
-- Invoke `tmux-open` with multiple arguments: `tmux-open [FILE|DIR|LINK]...`
+- For files and directories invoke `tmux-edit` with multiple arguments: `tmux-edit FILE|DIR [FILE|DIR]...`
+
+- For links invoke `open` with multiple arguments: `open -- LINK [LINK]...`

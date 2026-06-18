@@ -15,9 +15,6 @@ SESSIONS="$CLAUDE_CONFIG_DIR/.var/sessions"
 MD="$SESSIONS/$SESSION_ID.md"
 mkdir -p -- "$SESSIONS"
 
-# shellcheck disable=SC2016
-NOTIFY=(jq -e --compact-output --argjson n 28 '{ title: null, message: (.[$field] | if length > $n then .[:$n] + "…" else . end) }')
-
 case "$EVENT" in
 SessionStart)
   if [[ -v TMUX_PANE ]]; then
@@ -50,13 +47,8 @@ PostToolUse)
 UserPromptSubmit)
   ROLE='user'
   ;;
-Stop)
+Stop | StopFailure)
   ROLE='assistant'
-  "${NOTIFY[@]}" --arg field 'last_assistant_message' <<< "$JSON" | "$BASE/notification.sh"
-  ;;
-StopFailure)
-  ROLE='assistant'
-  "${NOTIFY[@]}" --arg field 'error' <<< "$JSON" | "$BASE/notification.sh"
   ;;
 *)
   set -x
