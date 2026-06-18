@@ -20,7 +20,7 @@ SessionStart)
   if [[ -v TMUX_PANE ]]; then
     tmux set-option -t "$TMUX_PANE" -p @claude_session "$SESSION_ID"
 
-    tmux bind-key f run-shell -- "env -- CLAUDE_CONFIG_DIR=${CLAUDE_CONFIG_DIR@Q} ${LIBEXEC@Q}/read-session.sh"
+    tmux bind-key f run-shell -- "env -- CLAUDE_CONFIG_DIR=${CLAUDE_CONFIG_DIR@Q} ~/.local/bin/hp ${LIBEXEC@Q}/read-session.sh"
   fi
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;

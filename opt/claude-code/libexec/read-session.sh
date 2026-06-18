@@ -16,7 +16,7 @@ fi
 
 if [[ -v RECUR ]]; then
   if command -v -- prettier > /dev/null; then
-    ~/.local/bin/hp markdown-fmt --tabsize=2 --filename _.md < "$MARKDOWN" | sponge -- "$MARKDOWN"
+    markdown-fmt --tabsize=2 --filename _.md < "$MARKDOWN" | sponge -- "$MARKDOWN"
   fi
   exec -- printf -- '\n' >> "$MARKDOWN"
 fi
