@@ -2,16 +2,5 @@
   "$docs": "https://code.claude.com/docs/en/settings",
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
   "hooks": {
-    "PostToolUse": [
-      {
-        "hooks": [
-          {
-            "command": ".claude/hooks/run-post.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "Edit|Write"
-      }
-    ]
   }
 }

@@ -17,6 +17,9 @@ case "$FILE_PATH" in
 */repart.d/*.conf | */systemd/**/*.conf | */*.network.d/*.conf)
   systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
   ;;
+*.json)
+  jq -- . < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
+  ;;
 *.toml)
   if command -v -- taplo > /dev/null; then
     RUST_LOG=warn taplo format -- "$FILE_PATH" || exit 2
@@ -48,10 +51,9 @@ case "$FILE_PATH" in
     esac
   fi
   ;;
-*.md | *.json)
-  FILE_PATH="$(realpath -- "$FILE_PATH")" || exit 2
+*.md)
   if command -v -- prettier > /dev/null; then
-    prettier --log-level warn --write -- "$FILE_PATH" || exit 2
+    markdown-fmt --tabsize=2 --filename _.md < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
   fi
   ;;
 # *.lua)
