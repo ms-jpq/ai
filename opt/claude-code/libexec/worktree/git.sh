@@ -34,20 +34,7 @@ rebase)
   exec -- git -C "$TOP" rebase -- "$ONTO"
   ;;
 m | merge)
-  TOP="$(git rev-parse --show-toplevel)"
-  if [[ $TOP == "$ROOT" ]]; then
-    WORKER="${1:-}"
-    if [[ -z $WORKER ]]; then
-      set -x
-      exit 2
-    fi
-
-    TOP="$ROOT/.worktrees/$WORKER"
-    if [[ ! -e "$TOP/.git" ]]; then
-      set -x
-      exit 2
-    fi
-  fi
+  "$0" rebase "$@"
   BRANCH="$(git -C "$TOP" rev-parse --abbrev-ref HEAD)"
   exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
   ;;
