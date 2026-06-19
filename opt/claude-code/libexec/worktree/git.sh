@@ -35,8 +35,7 @@ rebase)
   ;;
 m | merge)
   "$0" rebase "$@"
-  TOP="$(git rev-parse --show-toplevel)"
-  BRANCH="$(git -C "$TOP" rev-parse --abbrev-ref HEAD)"
+  BRANCH="${TARGET:-"$(git rev-parse --abbrev-ref HEAD)"}"
   exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
   ;;
 b | backup)
