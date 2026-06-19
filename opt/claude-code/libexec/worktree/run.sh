@@ -24,7 +24,7 @@ SESSION="$("$SELF/pool.sh" session "$NAME")"
 NOTES="$ROOT_NOTES/worktrees/$NAME"
 TASK="$NOTES/TASK.md"
 
-if [[ $ACTION == @(r|resume|rm|remove|reap) && -z $NAME ]]; then
+if [[ $ACTION == @(r|resume|rm|remove) && -z $NAME ]]; then
   tee -- >&2 <<- EOF
 	$PROG: $ACTION needs a worker name
 EOF
@@ -127,18 +127,12 @@ rm | remove)
   tmux kill-session -t "=$SESSION" || true
   "$SELF/pool.sh" remove "$NAME"
   ;;
-reap)
-  if (($# > 1)); then
-    exec -- "${FANOUT[@]}" reap < <(printf -- '%s\0' "$@")
-  fi
-
-  # TODO:
-  printf -- '%s\n' "reap $NAME — not yet implemented" >&2
-  exit 69
+rebase | m | merge | b | backup | restore | reap)
+  exec -- "$SELF/git.sh" "$ACTION" "$@"
   ;;
 *)
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {open,edit,resume,watch,remove,reap} ...
+	usage: $PROG [-h] {open,edit,resume,watch,remove,rebase,merge,backup,restore,reap} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
