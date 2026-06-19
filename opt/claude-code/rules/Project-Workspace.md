@@ -27,7 +27,7 @@ Worktree Layout:
 |-- .exp/
 |   `-- ...
 |-- .notes/
-|   |-- TASK.md
+|   |-- LIVE_CONTEXT.md
 |   |-- @peers/
 |   |-- @root/
 |   `-- <topic>/

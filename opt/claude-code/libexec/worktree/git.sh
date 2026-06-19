@@ -42,7 +42,7 @@ m | merge)
   else
     BRANCH="$(git rev-parse --abbrev-ref HEAD)"
   fi
-  exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
+  exec -- git -C "$ROOT" merge --no-ff --message "$BRANCH" -- "$BRANCH"
   ;;
 b | backup)
   if [[ -z $TARGET ]]; then

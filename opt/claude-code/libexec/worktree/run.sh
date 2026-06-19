@@ -22,7 +22,7 @@ ROOT="${COMMON%/.git}"
 ROOT_NOTES="$ROOT/.notes"
 SESSION="$("$SELF/pool.sh" session "$NAME")"
 NOTES="$ROOT_NOTES/worktrees/$NAME"
-TASK="$NOTES/TASK.md"
+TASK="$NOTES/LIVE_CONTEXT.md"
 
 if [[ $ACTION == @(r|resume|rm|remove) && -z $NAME ]]; then
   tee -- >&2 <<- EOF
@@ -58,7 +58,7 @@ EOF
     fi
     BRIEF="$ROOT_NOTES/tasks/$NAME.md"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
-    DST="$WORKTREE/.notes/TASK.md"
+    DST="$WORKTREE/.notes/LIVE_CONTEXT.md"
     if [[ -f $BRIEF && ! -L $BRIEF ]]; then
       mv -- "$BRIEF" "$DST"
     fi
