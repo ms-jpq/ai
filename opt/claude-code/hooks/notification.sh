@@ -36,6 +36,10 @@ Stop | StopFailure)
   ;;
 esac
 
-TITLE="Chatty ~ $(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
+if [[ -v TMUX_PANE ]]; then
+  TITLE="$(tmux display-message -t "$TMUX_PANE" -p '#{pane_title}')"
+else
+  TITLE="Chatty ~ $(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
+fi
 
 jq --null-input --arg title "$TITLE" --arg message "$MESSAGE" '{$title, $message}' | "${0%/*}/../libexec/notify.sh"
