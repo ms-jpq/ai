@@ -127,12 +127,12 @@ rm | remove)
   tmux kill-session -t "=$SESSION" || true
   "$SELF/pool.sh" remove "$NAME"
   ;;
-b | backup | restore | m | merge | rebase | reap)
+rebase | m | merge | b | backup | restore | reap)
   exec -- "$SELF/git.sh" "$ACTION" "$@"
   ;;
 *)
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {open,edit,resume,watch,remove,reap,backup,restore,merge,rebase} ...
+	usage: $PROG [-h] {open,edit,resume,watch,remove,rebase,merge,backup,restore,reap} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2

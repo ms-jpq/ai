@@ -15,6 +15,35 @@ ROOT_NOTES="$ROOT/.notes"
 REPO="${ROOT##*/}"
 
 case "$ACTION" in
+rebase)
+  TOP="$(git rev-parse --show-toplevel)"
+  if [[ $TOP == "$ROOT" ]]; then
+    WORKER="${1:-}"
+    if [[ -z $WORKER ]]; then
+      set -x
+      exit 2
+    fi
+
+    TOP="$ROOT/.worktrees/$WORKER"
+    if [[ ! -e "$TOP/.git" ]]; then
+      set -x
+      exit 2
+    fi
+  fi
+  ONTO="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)"
+  exec -- git -C "$TOP" rebase -- "$ONTO"
+  ;;
+m | merge)
+  TOP="$(git rev-parse --show-toplevel)"
+  if [[ $TOP == "$ROOT" ]]; then
+    tee -- >&2 <<- EOF
+	$PROG: $ACTION must run from a worker worktree, not the root
+EOF
+    exit 2
+  fi
+  BRANCH="$(git -C "$TOP" rev-parse --abbrev-ref HEAD)"
+  exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
+  ;;
 b | backup)
   # Namespace every $exp and $notes* branch under the root repo's name on a
   # target git repo: <repo>/$exp, <repo>/$notes, <repo>/$notes$<worker>.
@@ -92,28 +121,6 @@ EOF
     printf -- '%s -> %s\n' "$BRANCH" "$DIR"
   done
   ;;
-rebase)
-  TOP="$(git rev-parse --show-toplevel)"
-  if [[ $TOP == "$ROOT" ]]; then
-    tee -- >&2 <<- EOF
-	$PROG: $ACTION must run from a worker worktree, not the root
-EOF
-    exit 2
-  fi
-  ONTO="$(git -C "$ROOT" rev-parse --abbrev-ref HEAD)"
-  exec -- git -C "$TOP" rebase -- "$ONTO"
-  ;;
-m | merge)
-  TOP="$(git rev-parse --show-toplevel)"
-  if [[ $TOP == "$ROOT" ]]; then
-    tee -- >&2 <<- EOF
-	$PROG: $ACTION must run from a worker worktree, not the root
-EOF
-    exit 2
-  fi
-  BRANCH="$(git -C "$TOP" rev-parse --abbrev-ref HEAD)"
-  exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
-  ;;
 reap)
   # A reap is a backup followed by selective pruning: archive everything to the
   # target, then drop the named workers' now-backed-up notes ($notes$<worker>).
@@ -144,7 +151,7 @@ EOF
   ;;
 *)
   tee -- >&2 <<- EOF
-	usage: $PROG {backup,restore} <target> | $PROG {merge,rebase} | $PROG reap <target> <worker>...
+	usage: $PROG rebase [worker] | $PROG merge | $PROG {backup,restore} <target> | $PROG reap <target> <worker>...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
