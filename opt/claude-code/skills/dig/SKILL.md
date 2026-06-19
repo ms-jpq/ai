@@ -4,7 +4,7 @@ description: Hypothesis test by experimenting. Write disposable tools — don't 
 
 # Clarify
 
-- Derive 2-4 candidate hypotheses.
+- Derive 5-10 candidate hypotheses.
 
   - State each hypothesis in one sentence.
 

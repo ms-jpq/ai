@@ -26,13 +26,14 @@
 
 - One category of change at a time.
 
+- Enumerate falsibable hypotheses, test them. See @./skills/dig/SKILL.md.
+
 - Propose distilling recurrences into tools and skills.
 
 ---
 
 # Tools
 
-- Iteratively test hypotheses with tools. See @./skills/dig/SKILL.md.
 
   - Accrue disposable tools in `.exp/`.
 
