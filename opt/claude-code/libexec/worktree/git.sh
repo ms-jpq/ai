@@ -14,17 +14,17 @@ ROOT="${COMMON%/.git}"
 ROOT_NOTES="$ROOT/.notes"
 REPO="${ROOT##*/}"
 
+TARGET="${1:-}"
 case "$ACTION" in
 rebase)
   TOP="$(git rev-parse --show-toplevel)"
   if [[ $TOP == "$ROOT" ]]; then
-    WORKER="${1:-}"
-    if [[ -z $WORKER ]]; then
+    if [[ -z $TARGET ]]; then
       set -x
       exit 2
     fi
 
-    TOP="$ROOT/.worktrees/$WORKER"
+    TOP="$ROOT/.worktrees/$TARGET"
     if [[ ! -e "$TOP/.git" ]]; then
       set -x
       exit 2
@@ -35,20 +35,17 @@ rebase)
   ;;
 m | merge)
   "$0" rebase "$@"
+  TOP="$(git rev-parse --show-toplevel)"
   BRANCH="$(git -C "$TOP" rev-parse --abbrev-ref HEAD)"
   exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
   ;;
 b | backup)
-  # Namespace every $exp and $notes* branch under the root repo's name on a
-  # target git repo: <repo>/$exp, <repo>/$notes, <repo>/$notes$<worker>.
-  TARGET="${1:-}"
   if [[ -z $TARGET ]]; then
     tee -- >&2 <<- EOF
 	$PROG: $ACTION needs a target git repo
 EOF
     exit 2
   fi
-  # git -C <worktree> runs with a different cwd, so a relative path would break.
   if [[ -e $TARGET ]]; then
     TARGET="$(realpath -- "$TARGET")"
   fi
