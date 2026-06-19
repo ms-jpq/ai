@@ -16,12 +16,10 @@ description: Hypothesis test by experimenting. Write disposable tools — don't 
 
 - Write disposable tools that produces observable evidence. Prefer small scripts.
 
-- Describe what you're about to run before running it — one sentence, so the user can redirect.
+- Use git worktrees to isolate blast radius.
 
 # Conclude
 
 - Report: result (confirmed / refuted / inconclusive) with quoted evidence.
 
 - If refuted or inconclusive, propose 1–3 follow-up hypotheses.
-
-- Do not ship a fix. Revert any diagnostic edits.

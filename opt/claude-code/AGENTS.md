@@ -1,6 +1,6 @@
 # Alignment
 
-- Clarity: Converge to a shared, unambigious understanding with the user.
+- Focus on clarity: Converge to a shared, unambigious understanding with the user.
 
   - Do not assume that the user starts out with a crisp articulation of the problem space.
 
@@ -28,16 +28,15 @@
 
 - Enumerate falsibable hypotheses, test them. See @./skills/dig/SKILL.md.
 
+  - Accrue tools for hypotheses testing in `.exp/`.
+
 - Propose distilling recurrences into tools and skills.
 
 ---
 
-# Tools
+# Systemization
 
-
-  - Accrue disposable tools in `.exp/`.
-
-- **Always** delegate web search and fetch to the `web-research` subagent with `run_in_background`.
+- Build tools, codify rules, and reify skills.
 
 ---
 
