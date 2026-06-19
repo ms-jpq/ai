@@ -19,8 +19,7 @@ Notification)
     fi
     ;;
   *)
-    set -x
-    exit 2
+    exit
     ;;
   esac
   MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
@@ -34,7 +33,8 @@ Stop | StopFailure)
   MESSAGE="$(jq -e --raw-output '.last_assistant_message' <<< "$JSON")"
   ;;
 *)
-  exit
+  set -x
+  exit 2
   ;;
 esac
 

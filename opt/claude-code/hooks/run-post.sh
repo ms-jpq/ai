@@ -17,8 +17,11 @@ case "$FILE_PATH" in
 */repart.d/*.conf | */systemd/**/*.conf | */*.network.d/*.conf)
   systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
   ;;
-*.json | *.jsonl)
+*.json)
   jq --sort-keys -- . < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
+  ;;
+*.jsonl)
+  jq --sort-keys --compact-output -- . < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
   ;;
 *.toml)
   if command -v -- taplo > /dev/null; then
