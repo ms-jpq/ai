@@ -43,7 +43,7 @@ Stop | StopFailure)
 esac
 
 if [[ -v TMUX_PANE ]]; then
-  TITLE="$(tmux display-message -t "$TMUX_PANE" -p '#{pane_title}')"
+  TITLE="$(tmux display-message -t "$TMUX_PANE" -p '#{pane_title}' | sed -E 's/^[⠀-⣿]+[[:space:]]*//')"
 else
   TITLE="Chatty ~ $(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
 fi
