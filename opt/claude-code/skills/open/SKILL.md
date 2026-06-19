@@ -16,4 +16,4 @@ Open what we're currently working on:
 
 - For files and directories invoke `tmux-edit` with multiple arguments: `tmux-edit FILE|DIR [FILE|DIR]...`
 
-- For links invoke `open` with multiple arguments: `open -- LINK [LINK]...`
+- For links invoke `$BROWSER` with multiple arguments: `$BROWSER LINK [LINK]...`
