@@ -3,7 +3,7 @@
 set -o pipefail
 
 PROG="${0##*/}"
-SELF="${PROG%/*}"
+SELF="${0%/*}"
 
 ACTION="${1:-}"
 if (($#)); then
@@ -55,7 +55,7 @@ EOF
     TARGET="$(realpath -- "$TARGET")"
   fi
 
-  LOCAL="$(git -C "$ROOT" for-each-ref --format='%(refname:short)' 'refs/heads/$')"
+  LOCAL="$(git -C "$ROOT" for-each-ref --format='%(refname:short)' 'refs/heads/$*')"
   if [[ -z $LOCAL ]]; then
     exit 0
   fi
@@ -112,24 +112,12 @@ EOF
       mkdir -p -- "${DIR%/*}"
       git -C "$ROOT" worktree add --force --quiet -- "$DIR" "$BRANCH"
     fi
-    printf -- '%s -> %s\n' "$BRANCH" "$DIR"
+    printf -- '%s -> %s\n' "$BRANCH" "$DIR" >&2
   done
   ;;
 reap)
-  # A reap is a backup followed by selective pruning: archive everything to the
-  # target, then drop the named workers' now-backed-up notes ($notes$<worker>).
-  TARGET="${1:-}"
-  if [[ -z $TARGET ]]; then
-    tee -- >&2 <<- EOF
-	$PROG: $ACTION needs a target git repo
-EOF
-    exit 2
-  fi
-  shift -- 1
-
-  # set -e (shebang) aborts here if the backup fails, so pruning only runs once
-  # the notes are safely on the target.
   "$0" backup "$TARGET"
+  shift -- 1
 
   for SRC in "$@"; do
     WORKER="$("$SELF/task-name.sh" "$SRC")"
@@ -145,7 +133,7 @@ EOF
     if git -C "$ROOT" show-ref --verify --quiet -- "refs/heads/$BRANCH"; then
       git -C "$ROOT" branch --delete --force -- "$BRANCH"
     fi
-    printf -- '%s -> reaped\n' "$WORKER"
+    printf -- '%s -> reaped\n' "$WORKER" >&2
   done
   ;;
 *)
