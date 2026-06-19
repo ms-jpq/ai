@@ -49,11 +49,9 @@ EOF
     TARGET="$(realpath -- "$TARGET")"
   fi
 
-  # shellcheck disable=SC2016 # literal $exp / $notes are branch names
-  LOCAL="$(git -C "$ROOT" for-each-ref --format='%(refname:short)' 'refs/heads/$exp' 'refs/heads/$notes*')"
+  LOCAL="$(git -C "$ROOT" for-each-ref --format='%(refname:short)' 'refs/heads/$')"
   if [[ -z $LOCAL ]]; then
-    printf -- '%s\n' "$PROG: nothing to back up" >&2
-    exit 1
+    exit 0
   fi
   readarray -t -- BRANCHES <<< "$LOCAL"
 
