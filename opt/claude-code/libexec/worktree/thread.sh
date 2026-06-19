@@ -136,9 +136,12 @@ reap)
   printf -- '%s\n' "reap $NAME — not yet implemented" >&2
   exit 69
   ;;
+b | backup | restore | m | merge | rebase)
+  exec -- "$SELF/git.sh" "$ACTION" "$@"
+  ;;
 *)
   tee -- >&2 <<- EOF
-	usage: $PROG [-h] {open,edit,resume,watch,remove,reap} ...
+	usage: $PROG [-h] {open,edit,resume,watch,remove,reap,backup,restore,merge,rebase} ...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2

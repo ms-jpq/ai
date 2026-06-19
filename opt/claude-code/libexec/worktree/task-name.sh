@@ -9,7 +9,7 @@ ROOT="${COMMON%/.git}"
 if [[ $SRC != @(.|..|*/*) && -n $ROOT && -d "$ROOT/.notes/worktrees/$SRC" ]]; then
   NAME="$SRC"
 elif [[ -d $SRC ]]; then
-  TOP="$(git -C "$SRC" rev-parse --show-toplevel)"
+  TOP="$(git -C "$SRC" rev-parse --show-toplevel 2> /dev/null)" || TOP=""
   if [[ $TOP == "$ROOT" ]]; then
     NAME=""
   else
