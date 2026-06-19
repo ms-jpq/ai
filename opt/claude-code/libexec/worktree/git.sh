@@ -46,9 +46,7 @@ m | merge)
   ;;
 b | backup)
   if [[ -z $TARGET ]]; then
-    tee -- >&2 <<- EOF
-	$PROG: $ACTION needs a target git repo
-EOF
+    set -x
     exit 2
   fi
   if [[ -e $TARGET ]]; then
@@ -57,6 +55,7 @@ EOF
 
   LOCAL="$(git -C "$ROOT" for-each-ref --format='%(refname:short)' 'refs/heads/$*')"
   if [[ -z $LOCAL ]]; then
+    set -x
     exit 0
   fi
   readarray -t -- BRANCHES <<< "$LOCAL"
@@ -70,32 +69,34 @@ EOF
 restore)
   TARGET="${1:-}"
   if [[ -z $TARGET ]]; then
-    tee -- >&2 <<- EOF
-	$PROG: $ACTION needs a target git repo
-EOF
+    set -x
     exit 2
   fi
   if [[ -e $TARGET ]]; then
     TARGET="$(realpath -- "$TARGET")"
   fi
 
-  # --key=2 sorts by refname so $notes lands before $notes$<worker> — the
-  # parent worktree dir must exist before its nested worktrees are added.
   REMOTE="$(git -C "$ROOT" ls-remote --heads -- "$TARGET" "refs/heads/$REPO/*" | sort --key=2)"
   if [[ -z $REMOTE ]]; then
-    printf -- '%s\n' "$PROG: no backup for ${REPO@Q} at $TARGET" >&2
-    exit 1
+    set -x
+    exit 0
   fi
+
   readarray -t -- LINES <<< "$REMOTE"
 
   for LINE in "${LINES[@]}"; do
-    # ls-remote line is "<sha>\trefs/heads/<repo>/<branch>"; branch has no /.
     BRANCH="${LINE##*/}"
-    # shellcheck disable=SC2016 # literal $exp / $notes are branch names
+    # shellcheck disable=SC2016
     case "$BRANCH" in
-    '$exp') DIR="$ROOT/.exp" ;;
-    '$notes') DIR="$ROOT_NOTES" ;;
-    '$notes$'*) DIR="$ROOT_NOTES/worktrees/${BRANCH#\$notes\$}" ;;
+    '$exp')
+      DIR="$ROOT/.exp"
+      ;;
+    '$notes')
+      DIR="$ROOT_NOTES"
+      ;;
+    '$notes$'*)
+      DIR="$ROOT_NOTES/worktrees/${BRANCH#\$notes\$}"
+      ;;
     *)
       set -x
       exit 2
@@ -104,7 +105,6 @@ EOF
 
     REF="refs/heads/$REPO/$BRANCH"
     if [[ -e "$DIR/.git" ]]; then
-      # Branch is checked out here; FETCH_HEAD + reset moves it and the tree.
       git -C "$DIR" fetch --no-tags --quiet -- "$TARGET" "$REF"
       git -C "$DIR" reset --hard --quiet FETCH_HEAD
     else
@@ -131,9 +131,8 @@ reap)
     fi
     BRANCH="\$notes\$$WORKER"
     if git -C "$ROOT" show-ref --verify --quiet -- "refs/heads/$BRANCH"; then
-      git -C "$ROOT" branch --delete --force -- "$BRANCH"
+      git -C "$ROOT" branch --delete --force --verbose -- "$BRANCH"
     fi
-    printf -- '%s -> reaped\n' "$WORKER" >&2
   done
   ;;
 *)
