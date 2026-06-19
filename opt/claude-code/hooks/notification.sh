@@ -34,8 +34,7 @@ Stop | StopFailure)
   MESSAGE="$(jq -e --raw-output '.last_assistant_message' <<< "$JSON")"
   ;;
 *)
-  set -x
-  exit 2
+  exit
   ;;
 esac
 
