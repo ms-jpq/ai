@@ -1,9 +1,8 @@
-#!/usr/bin/env -S -- bash
+#!/usr/bin/env -S -- bash -Eeu -o pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
-set -Eeu
 set -o pipefail
-shopt -s dotglob nullglob extglob globstar
 
+STORE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/scheduled_tasks.json"
 JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
@@ -28,6 +27,12 @@ Notification)
   MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
   ;;
 Stop | StopFailure)
+  if [[ -f $STORE ]]; then
+    SESSION_ID="$(jq --raw-output '.session_id' <<< "$JSON")"
+    if jq --exit-status --arg s "$SESSION_ID" 'any(.. | objects; .sessionId? == $s)' "$STORE" > /dev/null 2>&1; then
+      exit
+    fi
+  fi
   MESSAGE="$(jq -e --raw-output '.last_assistant_message' <<< "$JSON")"
   ;;
 *)
