@@ -30,13 +30,7 @@
 
   - Accrue tools for hypotheses testing in `.exp/`.
 
-- Propose distilling recurrences into tools and skills.
-
----
-
-# Systemization
-
-- Build tools, codify rules, and reify skills.
+- Propose distilling recurrences into version controlled tools, rules and skills.
 
 ---
 

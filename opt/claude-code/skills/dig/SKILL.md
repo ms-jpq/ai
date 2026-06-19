@@ -16,7 +16,7 @@ description: Hypothesis test by experimenting. Write disposable tools — don't 
 
 - Write disposable tools that produces observable evidence. Prefer small scripts.
 
-- Use git worktrees to isolate blast radius.
+- Use git worktrees to isolate blast radius for testing.
 
 # Conclude
 
