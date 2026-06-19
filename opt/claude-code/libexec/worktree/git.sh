@@ -36,10 +36,17 @@ rebase)
 m | merge)
   TOP="$(git rev-parse --show-toplevel)"
   if [[ $TOP == "$ROOT" ]]; then
-    tee -- >&2 <<- EOF
-	$PROG: $ACTION must run from a worker worktree, not the root
-EOF
-    exit 2
+    WORKER="${1:-}"
+    if [[ -z $WORKER ]]; then
+      set -x
+      exit 2
+    fi
+
+    TOP="$ROOT/.worktrees/$WORKER"
+    if [[ ! -e "$TOP/.git" ]]; then
+      set -x
+      exit 2
+    fi
   fi
   BRANCH="$(git -C "$TOP" rev-parse --abbrev-ref HEAD)"
   exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
@@ -151,7 +158,7 @@ EOF
   ;;
 *)
   tee -- >&2 <<- EOF
-	usage: $PROG rebase [worker] | $PROG merge | $PROG {backup,restore} <target> | $PROG reap <target> <worker>...
+	usage: $PROG {rebase,merge} [worker] | $PROG {backup,restore} <target> | $PROG reap <target> <worker>...
 	$PROG: error: argument command: invalid choice: '$ACTION'
 EOF
   exit 2
