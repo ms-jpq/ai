@@ -2,11 +2,12 @@
 
 set -o pipefail
 
-STORE="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/scheduled_tasks.json"
 JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
+CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
+STORE="${CLAUDE_PROJECT_DIR:-$CWD}/.claude/scheduled_tasks.json"
 
 case "$EVENT" in
 Notification)
@@ -29,7 +30,7 @@ Notification)
 Stop | StopFailure)
   if [[ -f $STORE ]]; then
     SESSION_ID="$(jq --raw-output '.session_id' <<< "$JSON")"
-    if jq --exit-status --arg s "$SESSION_ID" 'any(.. | objects; .sessionId? == $s)' "$STORE" > /dev/null 2>&1; then
+    if jq --exit-status --arg s "$SESSION_ID" 'any(.tasks[]?; .createdBySessionId == $s)' "$STORE" > /dev/null 2>&1; then
       exit
     fi
   fi
