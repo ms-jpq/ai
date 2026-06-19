@@ -3,6 +3,7 @@
 set -o pipefail
 
 PROG="${0##*/}"
+SELF="${PROG%/*}"
 
 ACTION="${1:-}"
 if (($#)); then
@@ -19,12 +20,13 @@ case "$ACTION" in
 rebase)
   TOP="$(git rev-parse --show-toplevel)"
   if [[ $TOP == "$ROOT" ]]; then
-    if [[ -z $TARGET ]]; then
+    WORKER="$("$SELF/task-name.sh" "$TARGET")"
+    if [[ -z $WORKER ]]; then
       set -x
       exit 2
     fi
 
-    TOP="$ROOT/.worktrees/$TARGET"
+    TOP="$ROOT/.worktrees/$WORKER"
     if [[ ! -e "$TOP/.git" ]]; then
       set -x
       exit 2
@@ -35,7 +37,11 @@ rebase)
   ;;
 m | merge)
   "$0" rebase "$@"
-  BRANCH="${TARGET:-"$(git rev-parse --abbrev-ref HEAD)"}"
+  if [[ -n $TARGET ]]; then
+    BRANCH="$("$SELF/task-name.sh" "$TARGET")"
+  else
+    BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+  fi
   exec -- git -C "$ROOT" merge --no-ff --no-edit -- "$BRANCH"
   ;;
 b | backup)
@@ -125,7 +131,12 @@ EOF
   # the notes are safely on the target.
   "$0" backup "$TARGET"
 
-  for WORKER in "$@"; do
+  for SRC in "$@"; do
+    WORKER="$("$SELF/task-name.sh" "$SRC")"
+    if [[ -z $WORKER ]]; then
+      set -x
+      exit 2
+    fi
     DIR="$ROOT_NOTES/worktrees/$WORKER"
     if [[ -e "$DIR/.git" ]]; then
       git -C "$ROOT" worktree remove --force -- "$DIR"
