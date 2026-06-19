@@ -23,9 +23,13 @@ shopt -s dotglob nullglob extglob globstar
 ```
 
 - Reusable arguments in arrays: `GREP=(grep --recursive ...)`, `${GREP[@]}`.
+
   - For long or numerous arguments (over `\ ` escaping)
+
   - For code reuse across invocations (over functions)
+
   - When branches invoke the same command with different arguments
+
   - Build arrays incrementally with `+=()` based on conditionals
 
 ```bash
@@ -56,6 +60,7 @@ esac
 - Null bytes as delimiters where possible — `find ... -print0 | xargs --null ...`
 
 - Standalone `.jq`, `.awk`, `.sed` executables over inlined scripts.
+
   - Heredoc when inlining.
 
 ```bash
@@ -77,7 +82,9 @@ fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 ```
 
 - `printf -- '%s' ...` over `echo` for single statements.
+
   - `printf -v VAR -- '<fmt>' args` to assign formatted output without a subshell.
+
   - Heredocs for multi-line statements with interpolations:
 
 ```bash
@@ -88,7 +95,9 @@ EOF >&2
 ```
 
 - Redirects over `echo`/`printf` pipes.
+
   - `jq <<< "$JSON"` over `echo "$JSON" | jq`
+
   - `cmd < "$FILE"` or `$(< "$FILE")` over `cat "$FILE" | cmd`
 
 - `exec --` when no code follows.
@@ -107,9 +116,12 @@ DIR="${FILE%/*}"
 
 - `readarray -t` to capture multi-line output into arrays. Single process, newline-safe — subshell loops and word splitting both mangle whitespace.
 
+  - Feed from `< <(printf -- %s "$VAR")` over `<<< "$VAR"`, when newline safety is required.
+
 - `${ARRAY[*]}` over `${ARRAY[0]}` to stringify a single-element array.
 
 - Env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc.
+
   - For `flock`, `xargs`, and mode-switching.
 
 ```bash

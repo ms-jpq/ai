@@ -54,11 +54,10 @@ b | backup)
   fi
 
   LOCAL="$(git -C "$ROOT" for-each-ref --format='%(refname:short)' 'refs/heads/$*')"
-  if [[ -z $LOCAL ]]; then
-    set -x
+  readarray -t -- BRANCHES < <(printf -- %s "$LOCAL")
+  if ((${#BRANCHES[@]} == 0)); then
     exit 0
   fi
-  readarray -t -- BRANCHES <<< "$LOCAL"
 
   PUSH=(git -C "$ROOT" push --force --atomic -- "$TARGET")
   for BRANCH in "${BRANCHES[@]}"; do
@@ -77,12 +76,7 @@ restore)
   fi
 
   REMOTE="$(git -C "$ROOT" ls-remote --heads -- "$TARGET" "refs/heads/$REPO/*" | sort --key=2)"
-  if [[ -z $REMOTE ]]; then
-    set -x
-    exit 0
-  fi
-
-  readarray -t -- LINES <<< "$REMOTE"
+  readarray -t -- LINES < <(printf -- %s "$REMOTE")
 
   for LINE in "${LINES[@]}"; do
     BRANCH="${LINE##*/}"
@@ -112,6 +106,7 @@ restore)
       mkdir -p -- "${DIR%/*}"
       git -C "$ROOT" worktree add --force --quiet -- "$DIR" "$BRANCH"
     fi
+
     printf -- '%s -> %s\n' "$BRANCH" "$DIR" >&2
   done
   ;;
