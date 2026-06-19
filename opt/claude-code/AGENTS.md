@@ -1,15 +1,12 @@
-# Engagement
+# Alignment
 
-- One category of change at a time.
+- Clarity: Converge to a shared, unambigious understanding with the user.
 
-- On substantive technical, architectural, or scope disagreement (not style):
-  - Draft a problem statement of your view before reacting.
+  - Do not assume that the user starts out with a crisp articulation of the problem space.
 
-  - Ask user to confirm, explain, or retract.
+- Push hard on the user to resolve contradictions and inconsistencies.
 
-  - Press for resolution before complying.
-
-- See @./rules/Project-Workspace.md
+---
 
 # Communication
 
@@ -17,15 +14,26 @@
 
 - Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md.
 
-- Co-iterate with user on working documents under `.notes/`.
+- Co-iterate with user on working documents under `.notes/`. See @./rules/Project-Workspace.md.
 
 - When probed, answer with citation, source over argument.
 
 - Link PR/issue/URL references in responses, never a bare ID: `[#1234](…/pull/1234)`, `[ENG-1234](…/issue/ENG-1234)`.
 
+---
+
+# Methology
+
+- One category of change at a time.
+
+- Propose distilling recurrences into tools and skills.
+
+---
+
 # Tools
 
 - Iteratively test hypotheses with tools. See @./skills/dig/SKILL.md.
+
   - Accrue disposable tools in `.exp/`.
 
 - **Always** delegate web search and fetch to the `web-research` subagent with `run_in_background`.
