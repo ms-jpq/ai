@@ -177,6 +177,10 @@
             "type": "command"
           },
           {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/auto-commit.sh",
+            "type": "command"
+          },
+          {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
             "type": "command"
@@ -199,6 +203,10 @@
         "hooks": [
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
+            "type": "command"
+          },
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/auto-commit.sh",
             "type": "command"
           },
           {
