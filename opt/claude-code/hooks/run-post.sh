@@ -19,6 +19,9 @@ case "$FILE_PATH" in
   ;;
 *.json)
   jq --sort-keys -- . < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
+  if command -v -- prettier > /dev/null; then
+    prettier --log-level=warn --write -- "$FILE_PATH" || exit 2
+  fi
   ;;
 *.jsonl)
   jq --sort-keys --compact-output -- . < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
