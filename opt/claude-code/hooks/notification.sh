@@ -39,9 +39,10 @@ Stop | StopFailure)
 esac
 
 if [[ -v TMUX_PANE ]]; then
-  TITLE="$(tmux display-message -t "$TMUX_PANE" -p '#{pane_title}' | sed -E 's/^[⠀-⣿]+[[:space:]]*//')"
+  LINE="$(tmux display-message -t "$TMUX_PANE" -p '#{pane_title}' | sed -E 's/^[⠀-⣿✱]+[[:space:]]*//')"
 else
-  TITLE="Chatty ~ $(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
+  LINE="$(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"
 fi
 
+TITLE="✻ $LINE"
 jq --null-input --arg title "$TITLE" --arg message "$MESSAGE" '{$title, $message}' | "${0%/*}/../libexec/notify.sh"
