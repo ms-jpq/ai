@@ -27,7 +27,7 @@ fi
 
 LIBEXEC="${0%/*}/../libexec/worktree"
 
-jq --raw-output '.last_assistant_message' <<< "$JSON" > "$NOTES/.LAST_MESSAGE.md"
+jq --raw-output '.last_assistant_message // ""' <<< "$JSON" > "$NOTES/.LAST_MESSAGE.md"
 
 if [[ $EVENT == Stop ]]; then
   declare -A -- LINKS=(
@@ -43,4 +43,3 @@ fi
 
 SUBJECT="$(head -n 1 -- "$NOTES/.LAST_MESSAGE.md")"
 "$LIBEXEC/commit-on-change.sh" "$NOTES" "stop${SUBJECT:+ ~> $SUBJECT}"
-
