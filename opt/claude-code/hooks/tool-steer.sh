@@ -20,10 +20,10 @@ JQ
 DECISION=deny
 case "$TOOL" in
 WebSearch)
-  REASON='use searx for search, or crawl4ai to fetch'
+  REASON='Use searx MCP for search, or crawl4ai MCP to fetch.'
   ;;
 WebFetch)
-  REASON='use crawl4ai to fetch, or searx for search'
+  REASON='Use crawl4ai MCP to fetch, or searx MCP for search.'
   ;;
 *)
   exit

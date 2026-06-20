@@ -133,7 +133,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/web-steer.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/tool-steer.sh",
             "type": "command"
           }
         ],
