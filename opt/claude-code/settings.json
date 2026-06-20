@@ -129,6 +129,15 @@
           }
         ],
         "matcher": "Edit|Write"
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/web-steer.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "WebSearch|WebFetch"
       }
     ],
     "SessionEnd": [
