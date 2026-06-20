@@ -32,6 +32,8 @@
 
 - Propose distilling recurrences into version controlled tools, rules and skills.
 
+- Aggressively parallelize **any** read / query operations via delegation.
+
 ---
 
 # Systems Design
