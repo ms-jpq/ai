@@ -13,11 +13,6 @@ Notification)
   case "$TYPE" in
   permission_prompt)
     ;;
-  idle_prompt)
-    if jq --exit-status '.agent_type' <<< "$JSON" > /dev/null; then
-      exit
-    fi
-    ;;
   *)
     exit
     ;;
