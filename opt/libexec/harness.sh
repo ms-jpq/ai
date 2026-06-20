@@ -25,7 +25,7 @@ linux*)
 esac
 
 SANDBOX=(
-  ~/.local/opt/sandbox/libexec/dispatch.sh
+  ~/.local/libexec/sandbox/libexec/dispatch.sh
   --auth
   --network
 )
