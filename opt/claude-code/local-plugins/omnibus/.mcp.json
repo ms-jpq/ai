@@ -1,9 +1,4 @@
 {
-  "channel": {
-    "alwaysLoad": true,
-    "command": "${HOME}/.local/opt/ai/opt/claude-code/libexec/worktree/channel.ts",
-    "type": "stdio"
-  },
   "gateway": {
     "alwaysLoad": true,
     "type": "http",
