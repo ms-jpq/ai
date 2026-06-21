@@ -17,21 +17,11 @@ import { createServer, type Socket } from "node:net"
 import { join } from "node:path"
 import process, { exit, stderr, stdin, stdout } from "node:process"
 import { createInterface } from "node:readline"
+import { setTimeout as sleep } from "node:timers/promises"
 
-const NAME = "wt"
+const NAME = "channel"
 
-const TOOLS = [
-  {
-    name: "reply",
-    description:
-      "Send a line back to the CLI talking to this worker. Your transcript output never reaches it — only reply does.",
-    inputSchema: {
-      type: "object",
-      properties: { text: { type: "string", description: "The line to send back." } },
-      required: ["text"],
-    },
-  },
-] satisfies Tool[]
+const TOOLS = [] satisfies Tool[]
 
 const clients = new Set<Socket>()
 
@@ -133,8 +123,19 @@ const serve = async (sock: string) => {
   ])
 }
 
+const waitForNotes = async (intervalMs = 250) => {
+  for (;;) {
+    try {
+      return await realpath(".notes")
+    } catch {
+      await sleep(intervalMs)
+    }
+  }
+}
+
 const main = async () => {
-  const sock = join(await realpath(".notes"), "channel.sock")
+  const notes = await waitForNotes()
+  const sock = join(notes, ".channel.sock")
 
   try {
     await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(sock)])

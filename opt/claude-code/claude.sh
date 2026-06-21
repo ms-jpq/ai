@@ -35,6 +35,8 @@ for PLUGIN in "${PLUGINS[@]}"; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done
 
+# ARGV+=(--dangerously-load-development-channels plugin:channel@omnibus)
+
 EXEC=(
   "$BASE/../libexec/harness.sh"
   "$CC" "${ARGV[@]}"
