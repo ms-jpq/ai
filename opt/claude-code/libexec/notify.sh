@@ -35,6 +35,8 @@ else
   fi
 fi
 
+ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 TITLE="$(jq -e --raw-output '.title' <<< "$JSON")"
 MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
-exec -- ~/.local/libexec/notify/dispatch.sh "$TITLE" "$MESSAGE"
+
+exec -- ~/.local/libexec/notify/dispatch.sh --id "$ID" "$TITLE" "$MESSAGE"

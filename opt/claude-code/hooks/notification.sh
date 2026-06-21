@@ -6,6 +6,7 @@ JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
+SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 case "$EVENT" in
 Notification)
@@ -40,4 +41,4 @@ else
 fi
 
 TITLE="✻ $LINE"
-jq --null-input --arg title "$TITLE" --arg message "$MESSAGE" '{$title, $message}' | "${0%/*}/../libexec/notify.sh"
+jq --null-input --arg session_id "$SESSION_ID" --arg title "$TITLE" --arg message "$MESSAGE" '{$session_id, $title, $message}' | "${0%/*}/../libexec/notify.sh"
