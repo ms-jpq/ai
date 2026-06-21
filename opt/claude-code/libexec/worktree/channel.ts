@@ -12,10 +12,10 @@ import type {
   Tool,
 } from "@modelcontextprotocol/sdk/types.js"
 import { once } from "node:events"
-import { realpath, unlink } from "node:fs/promises"
+import { mkdir, realpath, unlink } from "node:fs/promises"
 import { createServer, type Socket } from "node:net"
 import { join } from "node:path"
-import process, { exit, stderr, stdin, stdout } from "node:process"
+import process, { exit, pid, stderr, stdin, stdout } from "node:process"
 import { createInterface } from "node:readline"
 import { setTimeout as sleep } from "node:timers/promises"
 
@@ -135,7 +135,9 @@ const waitForNotes = async (intervalMs = 250) => {
 
 const main = async () => {
   const notes = await waitForNotes()
-  const sock = join(notes, ".channel.sock")
+  const dir = join(notes, ".channels")
+  await mkdir(dir, { recursive: true })
+  const sock = join(dir, `${pid}.sock`)
 
   try {
     await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(sock)])
