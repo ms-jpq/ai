@@ -1,16 +1,14 @@
 ---
-description: Open the files, directories, and links relevant to the current task.
+description: Open the files, directories, and links relevant to the current context.
 ---
 
-Open what we're currently working on:
+Open what's currently in focus — not the entire session history.
 
-- Collect the relevant set from the current task context:
+- If arguments are provided, that is the set. Open exactly those.
 
-  - Arguments, if any.
+- Otherwise, default to recently mentioned items from this turn's immediate context: files just edited, paths just read, URLs just discussed. Recency over completeness.
 
-  - Notes edited, read, or discussed this session.
-
-  - URLs and links referenced.
+- Cap at 5 even when the recent set is larger. if there are too many canddiates, ask before opening.
 
 - Make each path absolute.
 
