@@ -13,6 +13,8 @@ if [[ -t 0 ]]; then
 fi
 
 JSON="$(tee)"
+ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
+DISPATCH=(~/.local/libexec/notify/dispatch.sh --id "$ID")
 
 if [[ -v RECUR ]]; then
   jq . <<< "$JSON" >&2
@@ -23,7 +25,7 @@ else
   if [[ -v TMUX_PANE ]]; then
     STATUS="$(tmux display-message -t "$TMUX_PANE" -p '#{session_active}#{window_active}')"
     if [[ $STATUS == 11 ]]; then
-      exit
+      exec -- "${DISPATCH[@]}" '' ''
     fi
   fi
 
@@ -35,8 +37,6 @@ else
   fi
 fi
 
-ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 TITLE="$(jq -e --raw-output '.title' <<< "$JSON")"
 MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
-
-exec -- ~/.local/libexec/notify/dispatch.sh --id "$ID" "$TITLE" "$MESSAGE"
+exec -- "${DISPATCH[@]}" "$TITLE" "$MESSAGE"
