@@ -32,7 +32,7 @@ jq --raw-output '.last_assistant_message // ""' <<< "$JSON" > "$NOTES/.LAST_MESS
 if [[ $EVENT == Stop ]]; then
   declare -A -- LINKS=(
     [".HISTORY.md"]="$HISTORY"
-    [".TRANSCRIPT.json"]="$TRANSCRIPT"
+    [".TRANSCRIPT.jsonl"]="$TRANSCRIPT"
   )
   for DEST in "${!LINKS[@]}"; do
     if ! [[ -L "$NOTES/$DEST" ]]; then
