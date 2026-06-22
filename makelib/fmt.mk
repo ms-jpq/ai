@@ -7,7 +7,7 @@ shfmt: $(VAR)/bin/shfmt
 
 black: ./.venv/bin
 	'$</isort' --profile=black --gitignore -- .
-	'$</black' --extend-exclude pack -- .
+	'$</black' --extend-exclude template -- .
 
 prettier: ./node_modules/.bin
 	'$</prettier' --cache --write -- .
