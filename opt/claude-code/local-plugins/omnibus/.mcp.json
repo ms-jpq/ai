@@ -1,12 +1,17 @@
 {
-  "gateway": {
+  "crawl4ai": {
     "alwaysLoad": true,
-    "type": "http",
-    "url": "https://mcp.${MCP_DOMAIN}/mcp"
+    "type": "sse",
+    "url": "https://crawl4ai.mcp.${MCP_DOMAIN}/mcp/sse"
   },
   "playwright": {
     "type": "http",
     "url": "https://playwright.mcp.${MCP_DOMAIN}/mcp"
+  },
+  "searx": {
+    "alwaysLoad": true,
+    "type": "http",
+    "url": "https://searx.mcp.${MCP_DOMAIN}/mcp"
   },
   "youtube": {
     "type": "http",
