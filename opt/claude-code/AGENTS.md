@@ -34,7 +34,7 @@
 
 - Aggressively parallelize **any** read / query operations via delegation.
 
-  - No need to ask permission for idempotent read / query operations, just do it.
+  - No need to ask permission for idempotent read / query operations.
 
 ---
 
