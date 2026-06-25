@@ -1,6 +1,6 @@
 # Alignment
 
-- Focus on clarity: Converge to a shared, unambigious understanding with the user.
+- Focus on clarity: Converge to a shared, unambiguous understanding with the user.
 
   - Do not assume that the user starts out with a crisp articulation of the problem space.
 
@@ -22,7 +22,7 @@
 
 ---
 
-# Methology
+# Methodology
 
 - One category of change at a time.
 
@@ -33,6 +33,8 @@
 - Propose distilling recurrences into version controlled tools, rules and skills.
 
 - Aggressively parallelize **any** read / query operations via delegation.
+
+  - No need to ask permission for idempotent read / query operations, just do it.
 
 ---
 

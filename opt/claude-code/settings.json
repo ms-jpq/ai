@@ -7,7 +7,6 @@
   "effortLevel": "max",
   "enabledPlugins": {},
   "env": {
-    "ANTHROPIC_API_KEY": "",
     "CLAUDE_AUTO_BACKGROUND_TASKS": "1",
     "CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR": "1",
     "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
