@@ -2,70 +2,82 @@
 
 set -o pipefail
 
-JSON="$(tee)"
-# "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+if ! [[ -v RECUR ]]; then
+  JSON="$(tee)"
+  # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+  read -r -d '' -- JQ <<- 'JQ' || true
+.tool_calls[]? | select(.tool_name | IN("Write", "Edit", "MultiEdit")) | .tool_input.file_path
+JQ
 
-FILE_PATH="$(jq -e --raw-output '.tool_input.file_path' <<< "$JSON")"
+  CTX="$(jq --raw-output0 "$JQ" <<< "$JSON" | sort -z --unique | RECUR=1 xargs -r --null -I % --max-procs=0 -- "$0" % 2>&1 || true)"
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  "hookSpecificOutput": {
+    "hookEventName": "PostToolBatch",
+    "additionalContext": $context
+  }
+}
+JQ
 
+  exec -- jq -e --null-input --arg context "$CTX" "$JQ"
+fi
+
+FILE_PATH="$*"
 case "$FILE_PATH" in
 *.awk)
-  awk-fmt < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
+  awk-fmt < "$FILE_PATH" | sponge -- "$FILE_PATH"
   ;;
-*.link | *.netdev | *.network | *.socket | *.service | *.target | *.mount | *.automount | *.dnssd)
-  systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
-  ;;
-*/repart.d/*.conf | */systemd/**/*.conf | */*.network.d/*.conf)
-  systemd-fmt.sh "$FILE_PATH" > /dev/null || exit 2
+*.link | *.netdev | *.network | *.socket | *.service | *.target | *.mount | *.automount | *.dnssd | */repart.d/*.conf | */systemd/**/*.conf | */*.network.d/*.conf)
+  systemd-fmt.sh "$FILE_PATH" > /dev/null
   ;;
 *.json)
-  jq --sort-keys -- . < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
+  jq --sort-keys -- . < "$FILE_PATH" | sponge -- "$FILE_PATH"
   if command -v -- prettier > /dev/null; then
-    prettier --log-level=warn --write -- "$FILE_PATH" || exit 2
+    prettier --log-level=warn --write -- "$FILE_PATH"
   fi
   ;;
 *.jsonl)
-  jq --sort-keys --compact-output -- . < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
+  jq --sort-keys --compact-output -- . < "$FILE_PATH" | sponge -- "$FILE_PATH"
   ;;
 *.toml)
   if command -v -- taplo > /dev/null; then
-    RUST_LOG=warn taplo format -- "$FILE_PATH" || exit 2
+    RUST_LOG=warn taplo format -- "$FILE_PATH"
   fi
   ;;
 *.sh | *.bash)
   if command -v -- shfmt > /dev/null; then
-    shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH" || exit 2
+    shfmt --simplify --binary-next-line --space-redirects --indent=2 --write -- "$FILE_PATH"
   fi
   if command -v -- shellcheck > /dev/null; then
-    shellcheck --shell=bash -- "$FILE_PATH" || exit 2
+    shellcheck --shell=bash -- "$FILE_PATH"
   fi
   ;;
 *Dockerfile | *Dockerfile.* | *.dockerfile | *Containerfile)
   if command -v -- hadolint > /dev/null; then
-    hadolint -- "$FILE_PATH" || exit 2
+    hadolint -- "$FILE_PATH"
   fi
   ;;
 *.pl | *.pm | *.t)
   if command -v -- perltidy > /dev/null; then
-    RC=0
-    perltidy --standard-error-output --backup-and-modify-in-place --backup-file-extension=/ --indent-columns=2 --output-line-ending=unix -- "$FILE_PATH" || RC=$?
-
-    case "$RC" in
-    0 | 2) ;;
+    CODE=0
+    perltidy --standard-error-output --backup-and-modify-in-place --backup-file-extension=/ --indent-columns=2 --output-line-ending=unix -- "$FILE_PATH" || CODE=$?
+    case "$CODE" in 0 | 2)
+      exit
+      ;;
     *)
-      exit 2
+      exit 1
       ;;
     esac
   fi
   ;;
 *.md)
   if command -v -- prettier > /dev/null; then
-    markdown-fmt --tabsize=2 --filename _.md < "$FILE_PATH" | sponge -- "$FILE_PATH" || exit 2
+    markdown-fmt --tabsize=2 --filename _.md < "$FILE_PATH" | sponge -- "$FILE_PATH"
   fi
   ;;
 # *.lua)
-#   stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH" || exit 2
+#   stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH"
 #   ;;
 *)
-  exit 0
   ;;
-esac >&2
+esac

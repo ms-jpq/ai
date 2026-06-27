@@ -4,7 +4,6 @@
   "alwaysThinkingEnabled": true,
   "autoUpdatesChannel": "stable",
   "channelsEnabled": true,
-  "effortLevel": "max",
   "enabledPlugins": {},
   "env": {
     "CLAUDE_AUTO_BACKGROUND_TASKS": "1",
@@ -61,6 +60,17 @@
         ]
       }
     ],
+    "PostToolBatch": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "Edit|Write"
+      }
+    ],
     "PostToolUse": [
       {
         "hooks": [
@@ -80,15 +90,6 @@
           }
         ],
         "matcher": "ExitPlanMode"
-      },
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "Edit|Write"
       }
     ],
     "PostToolUseFailure": [
