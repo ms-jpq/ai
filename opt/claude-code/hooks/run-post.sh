@@ -66,13 +66,9 @@ case "$FILE_PATH" in
   if command -v -- perltidy > /dev/null; then
     CODE=0
     perltidy --standard-error-output --backup-and-modify-in-place --backup-file-extension=/ --indent-columns=2 --output-line-ending=unix -- "$FILE_PATH" || CODE=$?
-    case "$CODE" in 0 | 2)
-      exit
-      ;;
-    *)
+    if ((CODE != 0 && CODE != 2)); then
       exit 1
-      ;;
-    esac
+    fi
   fi
   ;;
 *.md)
