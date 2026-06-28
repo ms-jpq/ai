@@ -57,6 +57,11 @@ case "$FILE_PATH" in
     hadolint -- "$FILE_PATH"
   fi
   ;;
+*.lua)
+  if command -v -- stylua > /dev/null; then
+    stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH"
+  fi
+  ;;
 *.pl | *.pm | *.t)
   if command -v -- perltidy > /dev/null; then
     CODE=0
@@ -75,9 +80,6 @@ case "$FILE_PATH" in
     markdown-fmt --tabsize=2 --filename _.md < "$FILE_PATH" | sponge -- "$FILE_PATH"
   fi
   ;;
-# *.lua)
-#   stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH"
-#   ;;
 *)
   ;;
 esac
