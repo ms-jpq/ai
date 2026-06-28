@@ -94,10 +94,7 @@ type Role = TranscriptMessage["type"]
 type BlockKind = typeof GEN_AI_OPERATION_NAME_VALUE_CHAT | typeof GEN_AI_OPERATION_NAME_VALUE_EXECUTE_TOOL
 
 type GroupedKind =
-  | BlockKind
-  | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT
-  | typeof GEN_AI_OPERATION_NAME_VALUE_CREATE_AGENT
-
+  BlockKind | typeof GEN_AI_OPERATION_NAME_VALUE_INVOKE_AGENT | typeof GEN_AI_OPERATION_NAME_VALUE_CREATE_AGENT
 type ExtractedBlockType = typeof GEN_AI_TOKEN_TYPE_VALUE_INPUT | typeof GEN_AI_TOKEN_TYPE_VALUE_OUTPUT
 
 type MessagePart = Readonly<{ type: string } & Record<string, unknown>>
