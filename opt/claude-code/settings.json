@@ -67,8 +67,7 @@
             "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
             "type": "command"
           }
-        ],
-        "matcher": "Edit|Write"
+        ]
       }
     ],
     "PostToolUse": [
