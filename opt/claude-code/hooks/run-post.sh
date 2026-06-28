@@ -30,6 +30,11 @@ case "$FILE_PATH" in
 *.link | *.netdev | *.network | *.socket | *.service | *.target | *.mount | *.automount | *.dnssd | */repart.d/*.conf | */systemd/**/*.conf | */*.network.d/*.conf)
   systemd-fmt.sh "$FILE_PATH" > /dev/null
   ;;
+*.yml | *.yaml | *.css | *.scss)
+  if command -v -- prettier > /dev/null; then
+    prettier --log-level=warn --write -- "$FILE_PATH"
+  fi
+  ;;
 *.json)
   jq --sort-keys -- . < "$FILE_PATH" | sponge -- "$FILE_PATH"
   if command -v -- prettier > /dev/null; then
@@ -60,6 +65,11 @@ case "$FILE_PATH" in
 *.lua)
   if command -v -- stylua > /dev/null; then
     stylua --syntax=LuaJit --indent-type=Spaces --indent-width=2 --sort-requires --call-parentheses=None -- "$FILE_PATH"
+  fi
+  ;;
+*.go)
+  if command -v -- goimports > /dev/null; then
+    goimports -w -- "$FILE_PATH"
   fi
   ;;
 *.pl | *.pm | *.t)
