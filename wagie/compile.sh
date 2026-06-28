@@ -12,6 +12,9 @@ mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
 
 rm -fr -- "$CLAUDE_CONFIG_DIR/skills/shitpost" "$CLAUDE_CONFIG_DIR/agents/web-research.md"
 
+mkdir -v -p -- "$OUT/opt"
+cp -af -- "$SELF/../opt/mcp" "$OUT/opt/mcp/"
+
 LAYERS=(
   agents.d
   hooks.d
