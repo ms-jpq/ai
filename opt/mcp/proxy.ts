@@ -76,28 +76,32 @@ const ensure = async (sid: string, session: Session): Promise<StdioClientTranspo
   }
 
   session.spawning ??= (async () => {
+    const transport = new StdioClientTransport({ command: serverCmd, args: serverArgs })
+
+    transport.onclose = transport.onerror = () => {
+      session.http.closeStandaloneSSEStream()
+      session.stdio = undefined
+    }
+
+    transport.onmessage = async (msg) => {
+      try {
+        await session.http.send(msg)
+      } catch (err) {
+        log(`send: ${err}`)
+      }
+    }
+
     try {
-      const transport = new StdioClientTransport({ command: serverCmd, args: serverArgs })
-
-      transport.onclose = transport.onerror = () => {
-        session.http.closeStandaloneSSEStream()
-        session.stdio = undefined
-      }
-
-      transport.onmessage = async (msg) => {
-        try {
-          await session.http.send(msg)
-        } catch (err) {
-          log(`send: ${err}`)
-        }
-      }
-
       await transport.start()
-      session.stdio = transport
-      return transport
+    } catch (err) {
+      transport.close()
+      throw err
     } finally {
       session.spawning = undefined
     }
+
+    session.stdio = transport
+    return transport
   })()
 
   return session.spawning
@@ -143,7 +147,7 @@ const sig = { signal: ctrl.signal }
 const respond_error = (res: ServerResponse, status: number, code: number, message: string) => {
   res
     .writeHead(status, { "content-type": "application/json" })
-    .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message }, id: undefined } satisfies JSONRPCErrorResponse))
+    .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message } } satisfies JSONRPCErrorResponse))
 }
 
 const server = createServer(async (req, res) => {
