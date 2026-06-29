@@ -20,14 +20,16 @@ const {
   values,
 } = parseArgs({
   options: {
-    port: { type: "string", short: "p", default: env.PORT ?? "3000" },
-    ttl: { type: "string", default: env.SESSION_TTL ?? "30000" },
+    port: { type: "string", short: "p", default: env.PORT || "3000" },
+    ttl: { type: "string", default: env.SESSION_TTL || "30000" },
   },
   allowPositionals: true,
 })
 
+const log = (msg: string) => stderr.write(`${import.meta.filename}: ${msg}${EOL}`)
+
 if (!serverCmd) {
-  stderr.write(`usage: ${import.meta.filename} [--port <n>] [--ttl <ms>] <command> [args...]${EOL}`)
+  log(`usage: [--port <n>] [--ttl <ms>] <command> [args...]`)
   exit(2)
 }
 
@@ -77,7 +79,14 @@ const ensure = async (sid: string): Promise<StdioClientTransport> => {
         httpTransport.closeStandaloneSSEStream()
         s.transport = undefined
       }
-      transport.onmessage = (msg) => httpTransport.send(msg)
+
+      transport.onmessage = async (msg) => {
+        try {
+          await httpTransport.send(msg)
+        } catch (err) {
+          log(`send: ${err}`)
+        }
+      }
 
       await transport.start()
       s.transport = transport
@@ -124,4 +133,4 @@ const sig = { signal: ctrl.signal }
 const server = createServer((req, res) => httpTransport.handleRequest(req, res)).listen(PORT)
 
 await once(server, "listening", sig)
-stderr.write(`${import.meta.filename}: :${PORT} → ${serverCmd} ${serverArgs.join(" ")}${EOL}`)
+log(`:${PORT} → ${serverCmd} ${serverArgs.join(" ")}`)
