@@ -10,12 +10,17 @@ import { EOL } from "node:os"
 import { exit, stderr } from "node:process"
 import { parseArgs } from "node:util"
 
-type Session = {
-  http: StreamableHTTPServerTransport
-  spawning?: Promise<StdioClientTransport>
-  stdio?: StdioClientTransport
-  timer?: ReturnType<typeof setTimeout>
-}
+type Session = { http: StreamableHTTPServerTransport; timer: ReturnType<typeof setTimeout> } & (
+  | { phase: "idle" }
+  | {
+      phase: "spawning"
+      spawning: Promise<StdioClientTransport>
+    }
+  | {
+      phase: "live"
+      stdio: StdioClientTransport
+    }
+)
 
 const {
   positionals: [serverCmd, ...serverArgs],
@@ -45,18 +50,15 @@ const teardown = async (sid: string) => {
   if (!s) {
     return
   }
+
+  clearTimeout(s.timer)
   sessions.delete(sid)
 
-  if (s.timer) {
-    clearTimeout(s.timer)
-  }
-
   const closes = function* (): Generator<Promise<void>> {
-    if (s.spawning) {
+    if (s.phase === "spawning") {
       yield s.spawning.then((t) => t.close())
-      s.spawning = undefined
     }
-    if (s.stdio) {
+    if (s.phase === "live") {
       yield s.stdio.close()
     }
     yield s.http.close()
@@ -65,66 +67,95 @@ const teardown = async (sid: string) => {
   await Promise.all(closes())
 }
 
-const ensure = async (sid: string, session: Session): Promise<StdioClientTransport> => {
-  if (session.timer) {
-    clearTimeout(session.timer)
-  }
-  session.timer = setTimeout(() => teardown(sid), SESSION_TTL_MS)
-
-  if (session.stdio) {
-    return session.stdio
+const ensure = async (sid: string): Promise<StdioClientTransport> => {
+  const s = sessions.get(sid)
+  if (!s) {
+    throw new Error("Session not found")
   }
 
-  session.spawning ??= (async () => {
-    const transport = new StdioClientTransport({ command: serverCmd, args: serverArgs })
-
-    transport.onclose = transport.onerror = () => {
-      session.http.closeStandaloneSSEStream()
-      session.stdio = undefined
+  switch (s.phase) {
+    case "live": {
+      clearTimeout(s.timer)
+      sessions.set(sid, { ...s, timer: setTimeout(() => teardown(sid), SESSION_TTL_MS) })
+      return s.stdio
     }
+    case "spawning": {
+      clearTimeout(s.timer)
+      sessions.set(sid, { ...s, timer: setTimeout(() => teardown(sid), SESSION_TTL_MS) })
+      return s.spawning
+    }
+    case "idle": {
+      clearTimeout(s.timer)
+      const timer = setTimeout(() => teardown(sid), SESSION_TTL_MS)
 
-    transport.onmessage = async (msg) => {
-      try {
-        await session.http.send(msg)
-      } catch (err) {
-        log(`send: ${err}`)
+      const transport = new StdioClientTransport({ command: serverCmd, args: serverArgs })
+
+      transport.onclose = transport.onerror = () => {
+        const cur = sessions.get(sid)
+        if (!cur) {
+          return
+        }
+        cur.http.closeStandaloneSSEStream()
+        if (cur.phase === "live") {
+          sessions.set(sid, { phase: "idle", http: cur.http, timer: cur.timer })
+        }
       }
+
+      transport.onmessage = async (msg) => {
+        try {
+          const cur = sessions.get(sid)
+          if (cur) {
+            await cur.http.send(msg)
+          }
+        } catch (err) {
+          log(`send: ${err}`)
+        }
+      }
+
+      const spawning = (async () => {
+        try {
+          await transport.start()
+          const cur = sessions.get(sid)
+          if (cur && cur.phase === "spawning") {
+            sessions.set(sid, { phase: "live", http: cur.http, timer: cur.timer, stdio: transport })
+          }
+          return transport
+        } catch (err) {
+          const cur = sessions.get(sid)
+          if (cur && cur.phase === "spawning") {
+            sessions.set(sid, { phase: "idle", http: cur.http, timer: setTimeout(() => teardown(sid), SESSION_TTL_MS) })
+          }
+          transport.close()
+          throw err
+        }
+      })()
+
+      sessions.set(sid, { phase: "spawning", http: s.http, timer, spawning })
+      return spawning
     }
-
-    try {
-      await transport.start()
-    } catch (err) {
-      transport.close()
-      throw err
-    } finally {
-      session.spawning = undefined
-    }
-
-    session.stdio = transport
-    return transport
-  })()
-
-  return session.spawning
+  }
 }
 
 const new_session = (sid: string): Session => {
-  const session = {
+  const session: Session = {
+    phase: "idle",
     http: new StreamableHTTPServerTransport({
       sessionIdGenerator: () => sid,
       onsessionclosed: () => teardown(sid),
     }),
     timer: setTimeout(() => teardown(sid), SESSION_TTL_MS),
-  } satisfies Session
+  }
 
   session.http.onmessage = async (msg) => {
     try {
-      const stdio = await ensure(sid, session)
+      const stdio = await ensure(sid)
       await stdio.send(msg)
     } catch (err) {
       log(`forward: ${err}`)
     }
   }
 
+  sessions.set(sid, session)
   return session
 }
 
@@ -158,7 +189,6 @@ const server = createServer(async (req, res) => {
   if (!sid) {
     const new_sid = randomUUID()
     session = new_session(new_sid)
-    sessions.set(new_sid, session)
   } else {
     const existing = sessions.get(sid)
     if (!existing) {
