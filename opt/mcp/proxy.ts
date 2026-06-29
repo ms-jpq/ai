@@ -10,8 +10,8 @@ import { exit, stderr } from "node:process"
 import { parseArgs } from "node:util"
 
 type Session = {
-  transport?: StdioClientTransport
   spawning?: Promise<StdioClientTransport>
+  stdio?: StdioClientTransport
   timer?: ReturnType<typeof setTimeout>
 }
 
@@ -60,8 +60,8 @@ const teardown = async (sid: string) => {
       yield s.spawning.then((t) => t.close())
       s.spawning = undefined
     }
-    if (s.transport) {
-      yield s.transport.close()
+    if (s.stdio) {
+      yield s.stdio.close()
     }
   }
 
@@ -76,8 +76,8 @@ const ensure = async (sid: string): Promise<StdioClientTransport> => {
   }
   s.timer = setTimeout(() => teardown(sid), SESSION_TTL_MS)
 
-  if (s.transport) {
-    return s.transport
+  if (s.stdio) {
+    return s.stdio
   }
 
   s.spawning ??= (async () => {
@@ -86,7 +86,7 @@ const ensure = async (sid: string): Promise<StdioClientTransport> => {
 
       transport.onclose = transport.onerror = () => {
         httpTransport.closeStandaloneSSEStream()
-        s.transport = undefined
+        s.stdio = undefined
       }
 
       transport.onmessage = async (msg) => {
@@ -98,7 +98,7 @@ const ensure = async (sid: string): Promise<StdioClientTransport> => {
       }
 
       await transport.start()
-      s.transport = transport
+      s.stdio = transport
       return transport
     } finally {
       s.spawning = undefined
