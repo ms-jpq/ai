@@ -4,12 +4,13 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
 import { randomUUID } from "node:crypto"
 import { once } from "node:events"
-import { createServer } from "node:http"
+import { createServer, type ServerResponse } from "node:http"
 import { EOL } from "node:os"
 import { exit, stderr } from "node:process"
 import { parseArgs } from "node:util"
 
 type Session = {
+  http: StreamableHTTPServerTransport
   spawning?: Promise<StdioClientTransport>
   stdio?: StdioClientTransport
   timer?: ReturnType<typeof setTimeout>
@@ -37,18 +38,12 @@ const PORT = parseInt(values.port, 10)
 const SESSION_TTL_MS = parseInt(values.ttl, 10)
 
 const sessions = new Map<string, Session>()
-sessions.getOrInsert =
-  sessions.getOrInsert ??
-  function (this: Map<string, Session>, key: string, value: Session): Session {
-    if (this.has(key)) {
-      return this.get(key)!
-    }
-    this.set(key, value)
-    return value
-  }
 
 const teardown = async (sid: string) => {
-  const s = sessions.get(sid) ?? {}
+  const s = sessions.get(sid)
+  if (!s) {
+    return
+  }
   sessions.delete(sid)
 
   if (s.timer) {
@@ -63,64 +58,70 @@ const teardown = async (sid: string) => {
     if (s.stdio) {
       yield s.stdio.close()
     }
+    yield s.http.close()
   }
 
   await Promise.all(closes())
 }
 
-const ensure = async (sid: string): Promise<StdioClientTransport> => {
-  const s = sessions.getOrInsert(sid, {})
-
-  if (s.timer) {
-    clearTimeout(s.timer)
+const ensure = async (sid: string, session: Session): Promise<StdioClientTransport> => {
+  if (session.timer) {
+    clearTimeout(session.timer)
   }
-  s.timer = setTimeout(() => teardown(sid), SESSION_TTL_MS)
+  session.timer = setTimeout(() => teardown(sid), SESSION_TTL_MS)
 
-  if (s.stdio) {
-    return s.stdio
+  if (session.stdio) {
+    return session.stdio
   }
 
-  s.spawning ??= (async () => {
+  session.spawning ??= (async () => {
     try {
       const transport = new StdioClientTransport({ command: serverCmd, args: serverArgs })
 
       transport.onclose = transport.onerror = () => {
-        httpTransport.closeStandaloneSSEStream()
-        s.stdio = undefined
+        session.http.closeStandaloneSSEStream()
+        session.stdio = undefined
       }
 
       transport.onmessage = async (msg) => {
         try {
-          await httpTransport.send(msg)
+          await session.http.send(msg)
         } catch (err) {
           log(`send: ${err}`)
         }
       }
 
       await transport.start()
-      s.stdio = transport
+      session.stdio = transport
       return transport
     } finally {
-      s.spawning = undefined
+      session.spawning = undefined
     }
   })()
 
-  return s.spawning
+  return session.spawning
 }
 
-const httpTransport = (() => {
-  const t = new StreamableHTTPServerTransport({
-    sessionIdGenerator: () => randomUUID(),
-    onsessionclosed: (sid: string) => teardown(sid),
-  })
+const new_session = (sid: string): Session => {
+  const session = {
+    http: new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => sid,
+      onsessionclosed: () => teardown(sid),
+    }),
+    timer: setTimeout(() => teardown(sid), SESSION_TTL_MS),
+  } satisfies Session
 
-  t.onmessage = async (msg) => {
-    const stdio = await ensure(t.sessionId!)
-    await stdio.send(msg)
+  session.http.onmessage = async (msg) => {
+    try {
+      const stdio = await ensure(sid, session)
+      await stdio.send(msg)
+    } catch (err) {
+      log(`forward: ${err}`)
+    }
   }
 
-  return t
-})()
+  return session
+}
 
 const ctrl = new AbortController()
 const sig = { signal: ctrl.signal }
@@ -133,13 +134,41 @@ const sig = { signal: ctrl.signal }
   }
 
   await Promise.all([
-    httpTransport.close(),
-    new Promise((resolve, reject) => server.close((err) => (err ? reject(err) : resolve(undefined)))),
     ...Array.from(sessions, ([sid]) => teardown(sid)),
+    new Promise((resolve, reject) => server.close((err) => (err ? reject(err) : resolve(undefined)))),
   ])
 })()
 
-const server = createServer((req, res) => httpTransport.handleRequest(req, res)).listen(PORT)
+const respond_error = (res: ServerResponse, status: number, code: number, message: string) => {
+  res
+    .writeHead(status, { "content-type": "application/json" })
+    .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message }, id: null }))
+}
+
+const server = createServer(async (req, res) => {
+  const header = req.headers["mcp-session-id"]
+  const sid = Array.isArray(header) ? header[0] : header
+
+  let session: Session
+  if (!sid) {
+    const new_sid = randomUUID()
+    session = new_session(new_sid)
+    sessions.set(new_sid, session)
+  } else {
+    const existing = sessions.get(sid)
+    if (!existing) {
+      respond_error(res, 404, -32001, "Session not found")
+      return
+    }
+    session = existing
+  }
+
+  try {
+    await session.http.handleRequest(req, res)
+  } catch (err) {
+    log(`handleRequest: ${err}`)
+  }
+}).listen(PORT)
 
 await once(server, "listening", sig)
 log(`:${PORT} → ${serverCmd} ${serverArgs.join(" ")}`)
