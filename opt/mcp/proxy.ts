@@ -20,8 +20,8 @@ const {
   values,
 } = parseArgs({
   options: {
-    port: { type: "string", short: "p", default: env.PORT || "3000" },
-    ttl: { type: "string", default: env.SESSION_TTL || "30000" },
+    port: { type: "string", short: "p", default: env.PORT || String(3000) },
+    ttl: { type: "string", default: env.SESSION_TTL || String(30000) },
   },
   allowPositionals: true,
 })
@@ -37,6 +37,15 @@ const PORT = parseInt(values.port, 10)
 const SESSION_TTL_MS = parseInt(values.ttl, 10)
 
 const sessions = new Map<string, Session>()
+sessions.getOrInsert =
+  sessions.getOrInsert ??
+  function (this: Map<string, Session>, key: string, value: Session): Session {
+    if (this.has(key)) {
+      return this.get(key)!
+    }
+    this.set(key, value)
+    return value
+  }
 
 const teardown = async (sid: string) => {
   const s = sessions.get(sid) ?? {}
