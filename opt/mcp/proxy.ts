@@ -2,6 +2,7 @@
 
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js"
+import type { JSONRPCErrorResponse } from "@modelcontextprotocol/sdk/types.js"
 import { randomUUID } from "node:crypto"
 import { once } from "node:events"
 import { createServer, type ServerResponse } from "node:http"
@@ -142,7 +143,7 @@ const sig = { signal: ctrl.signal }
 const respond_error = (res: ServerResponse, status: number, code: number, message: string) => {
   res
     .writeHead(status, { "content-type": "application/json" })
-    .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message }, id: null }))
+    .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message }, id: undefined } satisfies JSONRPCErrorResponse))
 }
 
 const server = createServer(async (req, res) => {
