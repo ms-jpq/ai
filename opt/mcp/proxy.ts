@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto"
 import { once } from "node:events"
 import { createServer } from "node:http"
 import { EOL } from "node:os"
-import { env, exit, stderr } from "node:process"
+import { exit, stderr } from "node:process"
 import { parseArgs } from "node:util"
 
 type Session = {
@@ -20,8 +20,8 @@ const {
   values,
 } = parseArgs({
   options: {
-    port: { type: "string", short: "p", default: env.PORT || String(3000) },
-    ttl: { type: "string", default: env.SESSION_TTL || String(30000) },
+    port: { type: "string", short: "p", default: String(3000) },
+    ttl: { type: "string", default: String(30000) },
   },
   allowPositionals: true,
 })
