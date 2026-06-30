@@ -179,6 +179,38 @@ const new_session = (sid: string): Session => {
   return session
 }
 
+const respond_error = (res: ServerResponse, status: number, code: number, message: string) =>
+  res
+    .writeHead(status, { "content-type": "application/json" })
+    .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message } } satisfies JSONRPCErrorResponse))
+
+const server = createServer(async (req, res) => {
+  const header = req.headers["mcp-session-id"]
+  const sid = Array.isArray(header) ? header[0] : header
+
+  const session = (() => {
+    if (!sid) {
+      return new_session(randomUUID())
+    }
+    const existing = sessions.get(sid)
+    if (!existing) {
+      respond_error(res, 404, -32001, "Session not found")
+      return undefined
+    }
+    return existing
+  })()
+
+  if (!session) {
+    return
+  }
+
+  try {
+    await session.http.handleRequest(req, res)
+  } catch (err) {
+    log`handleRequest: ${err}`
+  }
+})
+
 const ctrl = new AbortController()
 const sig = { signal: ctrl.signal }
 
@@ -194,35 +226,6 @@ const sig = { signal: ctrl.signal }
     new Promise((resolve, reject) => server.close((err) => (err ? reject(err) : resolve(undefined)))),
   ])
 })()
-
-const respond_error = (res: ServerResponse, status: number, code: number, message: string) =>
-  res
-    .writeHead(status, { "content-type": "application/json" })
-    .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message } } satisfies JSONRPCErrorResponse))
-
-const server = createServer(async (req, res) => {
-  const header = req.headers["mcp-session-id"]
-  const sid = Array.isArray(header) ? header[0] : header
-
-  let session: Session
-  if (!sid) {
-    const new_sid = randomUUID()
-    session = new_session(new_sid)
-  } else {
-    const existing = sessions.get(sid)
-    if (!existing) {
-      respond_error(res, 404, -32001, "Session not found")
-      return
-    }
-    session = existing
-  }
-
-  try {
-    await session.http.handleRequest(req, res)
-  } catch (err) {
-    log`handleRequest: ${err}`
-  }
-})
 
 await once(server.listen(PORT), "listening", sig)
 log`:${PORT} → ${serverCmd} ${serverArgs.join(" ")}`
