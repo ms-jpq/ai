@@ -46,6 +46,11 @@ const SESSION_TTL_MS = parseInt(values.ttl, 10)
 
 const sessions = new Map<string, Session>()
 
+const set_timer = (sid: string) => {
+  const timer = setTimeout(() => guard(sid, timer), SESSION_TTL_MS)
+  return timer
+}
+
 const guard = async (sid: string, fired: ReturnType<typeof setTimeout>) => {
   if (sessions.get(sid)?.timer === fired) {
     try {
@@ -118,7 +123,7 @@ const spawn = (
     } catch (err) {
       const cur = sessions.get(sid)
       if (cur && cur.phase === "spawning") {
-        const timer = setTimeout(() => guard(sid, timer), SESSION_TTL_MS)
+        const timer = set_timer(sid)
         sessions.set(sid, { phase: "idle", http: cur.http, timer })
       }
       transport.close()
@@ -137,7 +142,7 @@ const ensure = async (sid: string): Promise<StdioClientTransport> => {
   }
 
   clearTimeout(s.timer)
-  const timer = setTimeout(() => guard(sid, timer), SESSION_TTL_MS)
+  const timer = set_timer(sid)
   sessions.set(sid, { ...s, timer })
 
   switch (s.phase) {
@@ -151,7 +156,7 @@ const ensure = async (sid: string): Promise<StdioClientTransport> => {
 }
 
 const new_session = (sid: string): Session => {
-  const timer = setTimeout(() => guard(sid, timer), SESSION_TTL_MS)
+  const timer = set_timer(sid)
   const session: Session = {
     phase: "idle",
     http: new StreamableHTTPServerTransport({
@@ -190,11 +195,10 @@ const sig = { signal: ctrl.signal }
   ])
 })()
 
-const respond_error = (res: ServerResponse, status: number, code: number, message: string) => {
+const respond_error = (res: ServerResponse, status: number, code: number, message: string) =>
   res
     .writeHead(status, { "content-type": "application/json" })
     .end(JSON.stringify({ jsonrpc: "2.0", error: { code, message } } satisfies JSONRPCErrorResponse))
-}
 
 const server = createServer(async (req, res) => {
   const header = req.headers["mcp-session-id"]
@@ -218,7 +222,7 @@ const server = createServer(async (req, res) => {
   } catch (err) {
     log`handleRequest: ${err}`
   }
-}).listen(PORT)
+})
 
-await once(server, "listening", sig)
+await once(server.listen(PORT), "listening", sig)
 log`:${PORT} → ${serverCmd} ${serverArgs.join(" ")}`
