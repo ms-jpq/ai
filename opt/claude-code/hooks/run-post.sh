@@ -25,7 +25,16 @@ fi
 FILE_PATH="$*"
 
 # shellcheck disable=SC2154,SC2094
-"$XDG_CONFIG_HOME/nvim/libexec/fmt.sh" "$FILE_PATH" < "$FILE_PATH" | sponge -- "$FILE_PATH"
-if command -v -- shellcheck > /dev/null; then
-  shellcheck --shell=bash -- "$FILE_PATH"
+if FMT="$("$XDG_CONFIG_HOME/nvim/libexec/fmt.sh" "$FILE_PATH" < "$FILE_PATH")"; then
+  sponge -- "$FILE_PATH" <<< "$FMT"
 fi
+
+case "$FILE_PATH" in
+*.sh | *.bash)
+  if command -v -- shellcheck > /dev/null; then
+    shellcheck --shell=bash -- "$FILE_PATH"
+  fi
+  ;;
+*)
+  ;;
+esac

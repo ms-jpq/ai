@@ -8,8 +8,7 @@ SOCK="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/claude.notify.sock"
 
 if [[ -t 0 ]]; then
   mkdir -p -- "${SOCK%/*}"
-  RECUR=1 socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
-  exit
+  RECUR=1 exec -- socat UNIX-LISTEN:"$SOCK",fork EXEC:"$0"
 fi
 
 JSON="$(tee)"
