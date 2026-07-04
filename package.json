@@ -11,6 +11,7 @@
   "devDependencies": {
     "@anthropic-ai/claude-agent-sdk": "*",
     "@modelcontextprotocol/sdk": "*",
+    "@opencode-ai/plugin": "*",
     "@types/node": "*",
     "typescript": "*"
   },
