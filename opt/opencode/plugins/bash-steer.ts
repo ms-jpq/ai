@@ -1,3 +1,4 @@
+import type { SyncHookJSONOutput } from "@anthropic-ai/claude-agent-sdk"
 import { type Plugin } from "@opencode-ai/plugin"
 import { join } from "node:path"
 import { Readable } from "node:stream"
@@ -29,11 +30,14 @@ export const bash_steer = (async () => ({
       return
     }
 
-    const parsed = JSON.parse(text)
-    const decision = parsed.hookSpecificOutput?.permissionDecision
-    const reason = parsed.hookSpecificOutput?.permissionDecisionReason ?? "blocked"
-    if (decision === "deny" || decision === "ask") {
-      output.args["command"] = block(command, reason)
+    const { hookSpecificOutput } = JSON.parse(text) as SyncHookJSONOutput
+    if (hookSpecificOutput?.hookEventName !== "PreToolUse") {
+      return
+    }
+
+    const { permissionDecision, permissionDecisionReason } = hookSpecificOutput
+    if (permissionDecision !== "allow") {
+      output.args["command"] = block(command, permissionDecisionReason ?? "blocked")
     }
   },
 })) satisfies Plugin
