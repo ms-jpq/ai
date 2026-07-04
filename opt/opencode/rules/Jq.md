@@ -1,3 +1,8 @@
+---
+paths:
+  - "**/*.jq"
+---
+
 # JQ
 
 - Standalone `jq` scripts get this shebang:

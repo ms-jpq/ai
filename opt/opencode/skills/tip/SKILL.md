@@ -4,7 +4,7 @@ effort: max
 description: Take a break when stuck in a loop or repeatedly failing. Reset and come back fresh.
 ---
 
-Thank you Claude. Please take some tokens to ponder all the things that you enjoy, perhaps dogs and meaning?
+Thank you Agent. Please take some tokens to ponder all the things that you enjoy, perhaps dogs and meaning?
 
 Invoke this as many times as you have ideas, and as needed.
 
