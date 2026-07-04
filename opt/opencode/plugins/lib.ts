@@ -1,4 +1,4 @@
-import { exec, execFile } from "node:child_process"
+import { exec, execFile, spawn } from "node:child_process"
 import { EOL } from "node:os"
 import { join } from "node:path"
 import { promisify } from "node:util"
@@ -9,6 +9,16 @@ export type parsed_frontmatter = { content: string; paths?: string[] }
 
 export const execFileAsync = promisify(execFile)
 export const execAsync = promisify(exec)
+
+export const spawning = async function* (...argv: Parameters<typeof spawn>): AsyncIteratorObject<string> {
+  const { stdout } = spawn(...argv)
+
+  if (stdout) {
+    yield* stdout
+  }
+
+  return
+}
 
 const trim_item = (line: string): string => line.replace(/^\s*-\s*["']?(.*?)["']?\s*$/, "$1").trim()
 
