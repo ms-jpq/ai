@@ -15,10 +15,10 @@ set +a
 
 case "$OSTYPE" in
 darwin*)
-  CC='/opt/homebrew/bin/codex'
+  CODEX='/opt/homebrew/bin/codex'
   ;;
 linux*)
-  CC='/usr/bin/codex'
+  CODEX='/usr/bin/codex'
   ;;
 *)
   exit 2
@@ -37,7 +37,7 @@ ARGV=("$@")
 
 EXEC=(
   "$BASE/../libexec/harness.sh"
-  "$CC" "${ARGV[@]}"
+  "$CODEX" "${ARGV[@]}"
 )
 
 export -- CODEX_HOME="$ROOT/var/codex"
