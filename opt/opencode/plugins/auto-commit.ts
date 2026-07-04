@@ -7,7 +7,7 @@ const COMMIT = join(ROOT, "libexec", "worktree", "commit-on-change.sh")
 
 export const auto_commit = (async ({ directory }) => ({
   event: async ({ event }) => {
-    if (event["type"] !== "session.idle") {
+    if (event.type !== "session.idle") {
       return
     }
 
