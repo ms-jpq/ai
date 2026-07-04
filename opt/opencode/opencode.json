@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": ["{env:HOME}/.local/opt/ai/opt/claude-code/rules/*.md"],
+  "instructions": ["{env:HOME}/.local/opt/ai/opt/opencode/rules/*.md"],
   "permission": {
     "bash": "allow",
     "edit": "allow",
