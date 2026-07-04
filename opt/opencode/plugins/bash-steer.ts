@@ -19,10 +19,13 @@ export const bash_steer = (async () => ({
     }
 
     const payload = JSON.stringify({ tool_input: { command } })
-    const strs = await Array.fromAsync(spawning(SCRIPT, [], { stdio: [Readable.from([payload]), "pipe", null] }))
-    const text = strs.join("").trimEnd()
+    const text = await spawning({
+      st: Readable.from([payload]),
+      command: SCRIPT,
+      options: { stdio: ["pipe", "pipe", null] },
+    })
 
-    if (!text) {
+    if (!text.trim()) {
       return
     }
 

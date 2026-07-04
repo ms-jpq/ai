@@ -1,6 +1,10 @@
-import { exec, execFile, spawn } from "node:child_process"
-import { EOL } from "node:os"
+import { exec, execFile, spawn, type SpawnOptions } from "node:child_process"
+import { createWriteStream } from "node:fs"
+import { devNull, EOL } from "node:os"
 import { join } from "node:path"
+import { Readable } from "node:stream"
+import { text } from "node:stream/consumers"
+import { pipeline } from "node:stream/promises"
 import { promisify } from "node:util"
 
 export const ROOT = join(import.meta.dirname, "..", "..", "..")
@@ -10,14 +14,30 @@ export type parsed_frontmatter = { content: string; paths?: string[] }
 export const execFileAsync = promisify(execFile)
 export const execAsync = promisify(exec)
 
-export const spawning = async function* (...argv: Parameters<typeof spawn>): AsyncIteratorObject<string> {
-  const { stdout } = spawn(...argv)
+export const spawning = async ({
+  st,
+  command,
+  args = [],
+  options = {},
+}: {
+  st: Readable
+  command: string
+  args?: readonly string[]
+  options?: SpawnOptions
+}): Promise<string> => {
+  const ctrl = new AbortController()
+  options.signal = ctrl.signal
+  const { stdin, stdout } = spawn(command, args, options)
 
-  if (stdout) {
-    yield* stdout
+  try {
+    const [, txt] = await Promise.all([
+      pipeline(st, stdin ?? createWriteStream(devNull), { signal: ctrl.signal }),
+      text(stdout ?? Readable.from("")),
+    ])
+    return txt
+  } finally {
+    ctrl.abort()
   }
-
-  return
 }
 
 const trim_item = (line: string): string => line.replace(/^\s*-\s*["']?(.*?)["']?\s*$/, "$1").trim()
