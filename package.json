@@ -15,5 +15,8 @@
     "@types/node": "*",
     "typescript": "*"
   },
+  "scripts": {
+    "test": "node --test -- 'opt/**/*.test.ts'"
+  },
   "type": "module"
 }

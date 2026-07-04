@@ -1,11 +1,16 @@
+import { exec, execFile } from "node:child_process"
 import { EOL } from "node:os"
 import { join } from "node:path"
 import { env } from "node:process"
+import { promisify } from "node:util"
 
 export const CONF_DIR = env["OPENCODE_CONFIG_DIR"] ?? ""
 export const ROOT = join(CONF_DIR, "..", "..")
 
 export type parsed_frontmatter = { content: string; paths?: string[] }
+
+export const execFileAsync = promisify(execFile)
+export const execAsync = promisify(exec)
 
 const trim_item = (line: string): string => line.replace(/^\s*-\s*["']?(.*?)["']?\s*$/, "$1").trim()
 

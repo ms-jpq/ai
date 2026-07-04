@@ -1,13 +1,7 @@
 import { type Plugin, type WorkspaceAdapter, type WorkspaceInfo } from "@opencode-ai/plugin"
-import { exec, execFile } from "node:child_process"
 import { join } from "node:path"
 import { cwd } from "node:process"
-import { promisify } from "node:util"
-import { ROOT } from "./lib.ts"
-
-const execFileAsync = promisify(execFile)
-const execAsync = promisify(exec)
-
+import { execAsync, execFileAsync, ROOT } from "./lib.ts"
 const POOL = join(ROOT, "libexec", "worktree", "pool.sh")
 
 const resolveRoot = async (config: WorkspaceInfo): Promise<string> => {
