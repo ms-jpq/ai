@@ -43,7 +43,7 @@ const wrap = (content: string): string => `<system-reminder>${EOL}${content}${EO
 const format_block = (rule: Rule): string =>
   `Contents of ${rule.path} (project instructions, checked into the codebase):${EOL}${EOL}${rule.content.trim()}`
 
-export const Rules: Plugin = async ({ directory: cwd }) => {
+export const rules = (async ({ directory: cwd }) => {
   const rules = await Array.fromAsync(load_rules())
   const unconditional = rules.filter((r) => !r.globs)
   const conditional = rules.filter((r) => r.globs)
@@ -79,4 +79,4 @@ export const Rules: Plugin = async ({ directory: cwd }) => {
       output.output += `${EOL}${EOL}${wrap(reminder)}`
     },
   }
-}
+}) satisfies Plugin

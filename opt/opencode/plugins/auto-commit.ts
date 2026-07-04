@@ -5,7 +5,7 @@ import { execFileAsync, ROOT } from "./lib.ts"
 
 const COMMIT = join(ROOT, "libexec", "worktree", "commit-on-change.sh")
 
-export const AutoCommit: Plugin = async ({ directory }) => ({
+export const auto_commit = (async ({ directory }) => ({
   event: async ({ event }) => {
     if (event["type"] !== "session.idle") {
       return
@@ -20,4 +20,4 @@ export const AutoCommit: Plugin = async ({ directory }) => ({
 
     await execFileAsync(COMMIT, [notes, "stop"])
   },
-})
+})) satisfies Plugin

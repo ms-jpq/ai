@@ -31,7 +31,7 @@ const adapter = {
   }),
 } satisfies WorkspaceAdapter
 
-export const Workspace: Plugin = async ({ experimental_workspace }) => {
+export const workspace = (async ({ experimental_workspace }) => {
   experimental_workspace.register("worktree", adapter)
   return {}
-}
+}) satisfies Plugin
