@@ -1,4 +1,9 @@
 import { EOL } from "node:os"
+import { join } from "node:path"
+import { env } from "node:process"
+
+export const CONF_DIR = env["OPENCODE_CONFIG_DIR"] ?? ""
+export const ROOT = join(CONF_DIR, "..", "..")
 
 export type parsed_frontmatter = { content: string; paths?: string[] }
 

@@ -1,6 +1,21 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "formatter": {
+    "biome": {
+      "disabled": true
+    },
+    "clang": {
+      "disabled": true
+    },
+    "cljfmt": {
+      "disabled": true
+    },
+    "dart": {
+      "disabled": true
+    },
+    "dfmt": {
+      "disabled": true
+    },
     "fmt": {
       "command": ["{env:HOME}/.local/opt/ai/opt/opencode/libexec/fmt.sh", "$FILE"],
       "extensions": [
@@ -1303,6 +1318,69 @@
         ".zut",
         ".🔥"
       ]
+    },
+    "gleam": {
+      "disabled": true
+    },
+    "gofmt": {
+      "disabled": true
+    },
+    "htmlbeautifier": {
+      "disabled": true
+    },
+    "ktlint": {
+      "disabled": true
+    },
+    "latexindent": {
+      "disabled": true
+    },
+    "mix": {
+      "disabled": true
+    },
+    "nixfmt": {
+      "disabled": true
+    },
+    "ocamlformat": {
+      "disabled": true
+    },
+    "ormolu": {
+      "disabled": true
+    },
+    "oxfmt": {
+      "disabled": true
+    },
+    "pint": {
+      "disabled": true
+    },
+    "prettier": {
+      "disabled": true
+    },
+    "rlang": {
+      "disabled": true
+    },
+    "rubocop": {
+      "disabled": true
+    },
+    "ruff": {
+      "disabled": true
+    },
+    "rustfmt": {
+      "disabled": true
+    },
+    "shfmt": {
+      "disabled": true
+    },
+    "standardrb": {
+      "disabled": true
+    },
+    "terraform": {
+      "disabled": true
+    },
+    "uvformat": {
+      "disabled": true
+    },
+    "zig": {
+      "disabled": true
     }
   },
   "instructions": [],

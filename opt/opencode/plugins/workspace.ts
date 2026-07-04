@@ -1,0 +1,43 @@
+import { type Plugin, type WorkspaceAdapter, type WorkspaceInfo } from "@opencode-ai/plugin"
+import { exec, execFile } from "node:child_process"
+import { join } from "node:path"
+import { cwd } from "node:process"
+import { promisify } from "node:util"
+import { ROOT } from "./lib.ts"
+
+const execFileAsync = promisify(execFile)
+const execAsync = promisify(exec)
+
+const POOL = join(ROOT, "libexec", "worktree", "pool.sh")
+
+const resolveRoot = async (config: WorkspaceInfo): Promise<string> => {
+  const result = await execAsync("git rev-parse --show-toplevel", {
+    cwd: config.directory ?? cwd(),
+    encoding: "utf-8",
+  })
+  return result["stdout"].trim()
+}
+
+const adapter = {
+  name: "worktree",
+  description: "git worktree",
+  configure: (config) => config,
+
+  create: async (config) => {
+    await execFileAsync(POOL, ["add", config.name], { cwd: await resolveRoot(config) })
+  },
+
+  remove: async (config) => {
+    await execFileAsync(POOL, ["remove", config.name], { cwd: await resolveRoot(config) })
+  },
+
+  target: async (config) => ({
+    type: "local",
+    directory: join(await resolveRoot(config), ".worktrees", config.name),
+  }),
+} satisfies WorkspaceAdapter
+
+export const Workspace: Plugin = async ({ experimental_workspace }) => {
+  experimental_workspace.register("worktree", adapter)
+  return {}
+}

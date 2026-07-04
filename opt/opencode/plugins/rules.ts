@@ -2,8 +2,7 @@ import { type Plugin } from "@opencode-ai/plugin"
 import { opendir, readFile } from "node:fs/promises"
 import { EOL } from "node:os"
 import { basename, join } from "node:path"
-import { env } from "node:process"
-import { match_glob, parse_frontmatter } from "./lib.ts"
+import { ROOT, match_glob, parse_frontmatter } from "./lib.ts"
 
 const PATH_TOOLS = new Set(["read", "write", "edit"])
 
@@ -12,8 +11,7 @@ const PREFACE = [
   "IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.",
 ].join(" ")
 
-const CONF_DIR = env["OPENCODE_CONFIG_DIR"] ?? ""
-const RULES = join(CONF_DIR, "..", "..", "opt", "opencode", "rules")
+const RULES = join(ROOT, "opt", "opencode", "rules")
 
 type Rule = {
   stem: string
