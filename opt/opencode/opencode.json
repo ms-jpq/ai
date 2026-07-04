@@ -1305,7 +1305,7 @@
       ]
     }
   },
-  "instructions": ["{env:HOME}/.local/opt/ai/opt/opencode/rules/*.md"],
+  "instructions": [],
   "lsp": {},
   "mcp": {
     "crawl4ai": {
