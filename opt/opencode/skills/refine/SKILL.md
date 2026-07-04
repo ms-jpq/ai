@@ -1,4 +1,5 @@
 ---
+name: refine
 description: Iteratively improve writing.
 ---
 

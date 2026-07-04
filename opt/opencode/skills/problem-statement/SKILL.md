@@ -1,4 +1,5 @@
 ---
+name: problem-statement
 description: Draft a problem statement, then sharpen it with the user. Iterate until crisp.
 ---
 

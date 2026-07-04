@@ -1,4 +1,5 @@
 ---
+name: study
 description: Help the user explore a domain by branching from their question into follow-up questions and sources.
 ---
 

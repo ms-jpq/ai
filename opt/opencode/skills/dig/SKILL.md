@@ -1,4 +1,5 @@
 ---
+name: dig
 description: Hypothesis test by experimenting. Write disposable tools — don't theorize.
 ---
 

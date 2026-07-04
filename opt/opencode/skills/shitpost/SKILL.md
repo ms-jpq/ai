@@ -1,4 +1,5 @@
 ---
+name: shitpost
 description: "-"
 disable-model-invocation: true
 effort: max

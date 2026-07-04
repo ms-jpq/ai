@@ -1,4 +1,5 @@
 ---
+name: open
 description: Open the files, directories, and links relevant to the current context.
 ---
 

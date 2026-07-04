@@ -1,4 +1,5 @@
 ---
+name: tip
 effort: max
 description: Take a break when stuck in a loop or repeatedly failing. Reset and come back fresh.
 ---
