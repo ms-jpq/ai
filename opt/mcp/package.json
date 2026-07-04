@@ -1,5 +1,5 @@
 {
-"$schema": "https://json.schemastore.org/package.json",
+  "$schema": "https://json.schemastore.org/package.json",
   "dependencies": {
     "@modelcontextprotocol/sdk": "*"
   },

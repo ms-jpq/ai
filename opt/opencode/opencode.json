@@ -1307,7 +1307,32 @@
   },
   "instructions": ["{env:HOME}/.local/opt/ai/opt/opencode/rules/*.md"],
   "lsp": {},
-  "mcp": {},
+  "mcp": {
+    "crawl4ai": {
+      "enabled": true,
+      "headers": {},
+      "type": "remote",
+      "url": "https://crawl4ai.mcp.{env:MCP_DOMAIN}/mcp/sse"
+    },
+    "playwright": {
+      "enabled": true,
+      "headers": {},
+      "type": "remote",
+      "url": "https://playwright.mcp.{env:MCP_DOMAIN}/mcp"
+    },
+    "searx": {
+      "enabled": true,
+      "headers": {},
+      "type": "remote",
+      "url": "https://searx.mcp.{env:MCP_DOMAIN}/mcp"
+    },
+    "youtube": {
+      "enabled": true,
+      "headers": {},
+      "type": "remote",
+      "url": "https://youtube.mcp.{env:MCP_DOMAIN}/mcp"
+    }
+  },
   "permission": {
     "*": "allow",
     "todowrite": "deny"
