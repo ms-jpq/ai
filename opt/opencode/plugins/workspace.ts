@@ -15,7 +15,8 @@ const resolveRoot = async (config: WorkspaceInfo): Promise<string> => {
 const adapter = {
   name: "worktree",
   description: "git worktree",
-  configure: (config) => config,
+
+  configure: async (config) => config,
 
   create: async (config) => {
     await execFileAsync(POOL, ["add", config.name], { cwd: await resolveRoot(config) })
