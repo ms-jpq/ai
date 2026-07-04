@@ -10,7 +10,7 @@ const RULES = join(CONF_DIR, "..", "..", "opt", "opencode", "rules")
 export const Rules: Plugin = async (_ctx) => {
   return {
     "experimental.chat.system.transform": async (_i, o) => {
-      o.system.push(`${EOL}**Rules**:${EOL}`)
+      o.system.push(EOL, EOL, `Read`, EOL, EOL)
 
       for await (const dirent of await opendir(RULES)) {
         const stem = basename(dirent.name, ".md")
@@ -19,8 +19,7 @@ export const Rules: Plugin = async (_ctx) => {
         }
 
         const path = join(dirent.parentPath, dirent.name)
-
-        o.system.push(`rule: ${stem} → ${path}${EOL}`)
+        o.system.push(EOL, `rule: ${stem} → @${path}`, EOL)
       }
     },
   }
