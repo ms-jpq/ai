@@ -7,8 +7,8 @@ CLAUDE_CONFIG_DIR="$OUT/.claude"
 SELF="${0%/*}"
 
 mkdir -v -p -- "$CLAUDE_CONFIG_DIR"
-cp -af -- "$SELF/../opt/claude-code"/{agents,bin,hooks,libexec,AGENTS.md,keybindings.json} "$CLAUDE_CONFIG_DIR/"
-cp -af -- "$SELF/../opt/opencode"/{rules,skills} "$CLAUDE_CONFIG_DIR/"
+cp -af -- "$SELF/../opt/claude-code"/{bin,hooks,libexec,keybindings.json} "$CLAUDE_CONFIG_DIR/"
+cp -af -- "$SELF/../opt/opencode"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
 mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
 
 rm -fr -- "$CLAUDE_CONFIG_DIR/skills/shitpost" "$CLAUDE_CONFIG_DIR/agents/web-research.md"

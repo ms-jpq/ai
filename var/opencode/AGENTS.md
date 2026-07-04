@@ -1,1 +1,1 @@
-../../opt/claude-code/AGENTS.md
+../../opt/opencode/AGENTS.md
