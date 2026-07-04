@@ -1,8 +1,11 @@
-#!/usr/bin/env -S -- bash -Eeu -o pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
+#!/usr/bin/env -S -- bash
 
+set -Eeu
 set -o pipefail
+shopt -s nullglob extglob globstar
 
 FILE="$1"
+PATH="/opt/homebrew/bin:$PATH"
 
 # shellcheck disable=SC2154,SC2094
 if FMT="$("$XDG_CONFIG_HOME/nvim/libexec/fmt.sh" "$FILE" < "$FILE")"; then
