@@ -1,7 +1,7 @@
 ---
 paths:
-  - "**/Makefile"
-  - "**/*.mk"
+  - "Makefile"
+  - "*.mk"
 ---
 
 # Makefile

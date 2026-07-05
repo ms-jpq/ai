@@ -1,6 +1,7 @@
 ---
 paths:
-  - "**/*.{yml,yaml}"
+  - "*.yml"
+  - "*.yaml"
 ---
 
 # YAML

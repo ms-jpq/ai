@@ -1,6 +1,13 @@
 ---
 paths:
-  - "**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}"
+  - "*.cjs"
+  - "*.cts"
+  - "*.js"
+  - "*.jsx"
+  - "*.mjs"
+  - "*.mts"
+  - "*.ts"
+  - "*.tsx"
 ---
 
 # TypeScript

@@ -1,6 +1,6 @@
 ---
 paths:
-  - "**/*.md"
+  - "*.md"
 ---
 
 # README Style
