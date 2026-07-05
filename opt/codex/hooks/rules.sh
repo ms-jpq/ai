@@ -7,15 +7,10 @@ EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 BASE="$(realpath -- "${0%/*}/..")"
-PREFACE="$(< "$BASE/libexec/rules-preface.txt")"
 PATHS="$BASE/libexec/frontmatter-path.sed"
-MATCH="$BASE/libexec/frontmatter-path-match.sh"
-
-WRAP=(printf -- '<system-reminder>\n%s\n</system-reminder>')
 
 RULES="$BASE/rules"
-SESSIONS="$HOME/.local/opt/ai/var/sessions"
-SENTINELS="$SESSIONS/$SESSION_ID.rules"
+SENTINELS="$HOME/.local/opt/ai/var/sessions/$SESSION_ID.rules"
 
 read -r -d '' -- AWK << 'AWK' || true
 NR == 1 && /^---$/ {
@@ -38,64 +33,73 @@ SessionStart)
   mkdir -p -- "$SENTINELS"
   find "$SENTINELS" -mindepth 1 -delete
 
-  CONTEXT=""
+  PREFACE="$(< "$BASE/libexec/rules-preface.txt")"
+  CONTEXT=("# agentsMd"$'\n'"$PREFACE")
 
   for RULE in "$RULES"/*.md; do
-    GLOBS_RAW="$("$PATHS" "$RULE")"
-    readarray -t -- GLOBS <<< "$GLOBS_RAW"
-    if ((${#GLOBS[0]})); then
+    if "$PATHS" "$RULE" | grep --quiet -e .; then
       continue
     fi
 
-    RAW="$(< "$RULE")"
-
-    CONTENT="$(awk "$AWK" <<< "$RAW")"
-    CONTEXT+="Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"${CONTENT}"$'\n\n'
+    CONTENT="$(awk "$AWK" < "$RULE")"
+    CONTEXT+=("Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"$CONTENT")
   done
-
-  CONTEXT="# agentsMd"$'\n'"$PREFACE"$'\n\n'"$CONTEXT"
-
-  CONTEXT="$("${WRAP[@]}" "$CONTEXT")"
   ;;
 PostToolUse)
-  FILEPATH="$(jq -e --raw-output '.tool_input.file_path // .tool_input.filePath' <<< "$JSON")"
-  CONTEXT=""
-  STEMS=()
+  TMP="$(mktemp)"
+  trap 'rm -fr -- "$TMP"' EXIT
+
+  jq -e --raw-output0 '[.tool_input, .tool_response] | .. | strings | ., scan("[^\\s\"'\''`|;&()<>]+")' <<< "$JSON" > "$TMP"
+  readarray -d '' -t -- PATHNAMES < "$TMP"
 
   mkdir -p -- "$SENTINELS"
 
+  CONTEXT=()
   for RULE in "$RULES"/*.md; do
     STEM="${RULE##*/}"
     STEM="${STEM%.md}"
 
-    if [[ -e $SENTINELS/$STEM ]]; then
+    if [[ -e $SENTINELS/$STEM ]] || ! GB="$("$PATHS" "$RULE" | grep -e .)"; then
+      continue
+    fi
+    readarray -t -- GLOBS < <(printf -- '%s' "$GB")
+
+    MATCHED=0
+    for PATHNAME in "${PATHNAMES[@]}"; do
+      if "$BASE/libexec/frontmatter-path-match.sh" "$PATHNAME" "${GLOBS[@]}"; then
+        MATCHED=1
+        break
+      fi
+    done
+
+    if ! ((MATCHED)); then
       continue
     fi
 
-    GLOBS_RAW="$("$PATHS" "$RULE")"
-    readarray -t -- GLOBS <<< "$GLOBS_RAW"
-    if ((${#GLOBS[0]} == 0)) || ! "$MATCH" "$FILEPATH" "${GLOBS[@]}"; then
+    if ! (
+      set -o noclobber
+      : > "$SENTINELS/$STEM"
+    ) 2> /dev/null; then
       continue
     fi
 
-    RAW="$(< "$RULE")"
-    CONTENT="$(awk "$AWK" <<< "$RAW")"
-    CONTEXT+="Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"${CONTENT}"$'\n\n'
-    STEMS+=("$STEM")
+    CONTENT="$(awk "$AWK" < "$RULE")"
+    CONTEXT+=("Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"$CONTENT")
   done
 
-  if ! ((${#STEMS[@]})); then
-    exit
-  fi
-
-  touch -- "${STEMS[@]/#/$SENTINELS/}"
-  CONTEXT="$("${WRAP[@]}" "${CONTEXT%$'\n\n'}")"
   ;;
 *)
   set -x
   exit 2
   ;;
 esac
+
+if ! ((${#CONTEXT[@]})); then
+  exit
+fi
+
+printf -v CONTEXT_TEXT -- '%s\n\n' "${CONTEXT[@]}"
+printf -v CONTEXT_TEXT -- '<system-reminder>\n%s\n</system-reminder>' "${CONTEXT_TEXT%$'\n\n'}"
 
 read -r -d '' -- JQ <<- 'JQ' || true
 {
@@ -105,4 +109,4 @@ read -r -d '' -- JQ <<- 'JQ' || true
   }
 }
 JQ
-exec -- jq -e --null-input --arg event "$EVENT" --arg context "$CONTEXT" "$JQ"
+jq -e --null-input --arg event "$EVENT" --arg context "$CONTEXT_TEXT" "$JQ"

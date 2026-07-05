@@ -1,3 +1,8 @@
+---
+paths:
+  - "*.py"
+---
+
 # Python
 
 Typical script prelude:
@@ -23,12 +28,19 @@ def render(template, *, context, strict=False): ...
 ```
 
 - Control flow idioms:
+
   - `match/case` over `isinstance` chains and nested `if/elif` on type or shape.
+
   - `:=` to collapse assign-then-test into one expression.
+
   - `suppress()` over bare `try/except`.
+
   - `...` for noop bodies.
+
   - Scripts execute at module scope — top-level code runs on invocation.
+
   - `with nullcontext(): ...` to group related statements.
+
   - Single `with a, b:` over nested `with a: with b:`.
 
 - Only for Python: Prefix non-exported module-level names with `_` — constants, functions, classes.
@@ -48,8 +60,11 @@ def render(template, *, context, strict=False): ...
 - `getLogger()` over `print`. Call inline at each site. `"%s"` format, f-string argument: `getLogger().info("%s", f"{count} entries")`. Errors: `getLogger().error("%s", e, exc_info=True)`.
 
 - `argparse` for CLIs.
+
   - Spell out keyword arguments: `action=`, `type=`, `default=`, `nargs=`, `required=`.
+
   - `add_mutually_exclusive_group()` for conflicting flags.
+
   - `add_subparsers(dest=..., required=True)` for multi-command CLIs, dispatch with `match`/`case`.
 
 ```python
