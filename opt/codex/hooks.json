@@ -7,7 +7,8 @@
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
           }
-        ]
+        ],
+        "matcher": "apply_patch|Read|Write|Edit"
       }
     ],
     "PreToolUse": [
