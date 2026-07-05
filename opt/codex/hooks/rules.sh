@@ -9,7 +9,7 @@ EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
 BASE="$(realpath -- "${0%/*}/..")"
-PATHS="$BASE/libexec/frontmatter-path.sed"
+PARSE_PATHS="$BASE/libexec/frontmatter-path.sed"
 
 RULES="$BASE/rules"
 SENTINELS="$HOME/.local/opt/ai/var/sessions/$SESSION_ID.rules"
@@ -39,7 +39,8 @@ SessionStart)
   CONTEXT=("# agentsMd"$'\n'"$PREFACE")
 
   for RULE in "$RULES"/*.md; do
-    if "$PATHS" "$RULE" | grep --quiet -e .; then
+    if PATHS="$("$PARSE_PATHS" "$RULE" | grep -e .)"; then
+      CONTEXT+=("Rule $RULE applies to paths:"$'\n'"$(tr -- '\n' ' ' <<< "$PATHS")")
       continue
     fi
 
@@ -51,18 +52,7 @@ PostToolUse)
   TMP="$(mktemp)"
   trap 'rm -fr -- "$TMP"' EXIT
 
-  read -r -d '' -- JQ <<- 'JQ' || true
-if .tool_name == "apply_patch" then
-  (.tool_input.command | scan("(?m)^\\*\\*\\* (?:Add|Update|Delete) File: (.+)$")[]),
-  (.tool_input.command | scan("(?m)^\\*\\*\\* Move to: (.+)$")[])
-elif (.tool_name | IN("Read", "Write", "Edit")) then
-  .tool_input.file_path // .tool_input.filePath // empty
-else
-  empty
-end
-JQ
-
-  if ! jq -e --raw-output0 "$JQ" <<< "$JSON" > "$TMP"; then
+  if ! "$BASE/libexec/rules-paths.jq" --raw-output0 <<< "$JSON" > "$TMP"; then
     exit
   fi
   readarray -d '' -t -- PATHNAMES < "$TMP"
@@ -74,7 +64,7 @@ JQ
     STEM="${RULE##*/}"
     STEM="${STEM%.md}"
 
-    if [[ -e $SENTINELS/$STEM ]] || ! GB="$("$PATHS" "$RULE" | grep -e .)"; then
+    if [[ -e $SENTINELS/$STEM ]] || ! GB="$("$PARSE_PATHS" "$RULE" | grep -e .)"; then
       continue
     fi
     readarray -t -- GLOBS < <(printf -- '%s' "$GB")
