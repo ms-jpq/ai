@@ -53,8 +53,8 @@ PostToolUse)
 
   read -r -d '' -- JQ <<- 'JQ' || true
 if .tool_name == "apply_patch" then
-  (.tool_input.command | scan("(?m)^\\*\\*\\* (?:Add|Update|Delete) File: (.+)$")),
-  (.tool_input.command | scan("(?m)^\\*\\*\\* Move to: (.+)$"))
+  (.tool_input.command | scan("(?m)^\\*\\*\\* (?:Add|Update|Delete) File: (.+)$")[]),
+  (.tool_input.command | scan("(?m)^\\*\\*\\* Move to: (.+)$")[])
 elif (.tool_name | IN("Read", "Write", "Edit")) then
   .tool_input.file_path // .tool_input.filePath // empty
 else

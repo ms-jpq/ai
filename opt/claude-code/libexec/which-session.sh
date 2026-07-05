@@ -1,1 +1,1 @@
-../../../codex/libexec/which-session.sh
+../../codex/libexec/which-session.sh
