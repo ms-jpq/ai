@@ -52,7 +52,7 @@ PostToolUse)
   TMP="$(mktemp)"
   trap 'rm -fr -- "$TMP"' EXIT
 
-  if ! "$BASE/libexec/rules-paths.jq" --raw-output0 <<< "$JSON" > "$TMP"; then
+  if ! "$BASE/libexec/parse-hook-paths.sh" <<< "$JSON" > "$TMP"; then
     exit
   fi
   readarray -d '' -t -- PATHNAMES < "$TMP"

@@ -11,4 +11,4 @@ paths:
 #!/usr/bin/env -S -- awk -f
 ```
 
-- Local variables in functions are named with `L_` prefix.
+- Function-local (non-input) variables are named with the `L_` prefix.

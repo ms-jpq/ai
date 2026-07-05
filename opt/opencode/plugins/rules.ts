@@ -44,9 +44,10 @@ const wrap = (content: string): string => `<system-reminder>${EOL}${content}${EO
 const format_block = (rule: Rule): string =>
   `Contents of ${rule.path} (project instructions, checked into the codebase):${EOL}${EOL}${rule.content.trim()}`
 
+const format_conditional = (rule: Rule): string => `Rule ${rule.path} applies to paths:${EOL}${rule.globs?.join(" ")}`
+
 export const rules = (async () => {
   const rules = await Array.fromAsync(load_rules())
-  const unconditional = rules.filter((r) => !r.globs)
   const conditional = rules.filter((r) => r.globs)
 
   const preface = await readFile(PREFACE_PATH, encoding)
@@ -55,11 +56,11 @@ export const rules = (async () => {
 
   return {
     "experimental.chat.system.transform": async (_i, o) => {
-      if (!unconditional.length) {
+      if (!rules.length) {
         return
       }
 
-      const blocks = unconditional.map(format_block)
+      const blocks = rules.map((rule) => (rule.globs ? format_conditional(rule) : format_block(rule)))
       o.system.push(wrap(`# agentsMd${EOL}${preface.trim()}${EOL}${EOL}${blocks.join(EOL + EOL)}`))
     },
 
