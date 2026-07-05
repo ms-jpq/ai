@@ -27,13 +27,17 @@ esac
 
 ARGV=("$@")
 
-# PLUGINS=(
-#   "$BASE/local-plugins"/*/
-#   "$ROOT/var/claude-plugins"/*/
-# )
-# for PLUGIN in "${PLUGINS[@]}"; do
-#   ARGV+=(--plugin-dir "$PLUGIN")
-# done
+CONFIG_JSON="$BASE/config.json"
+read -r -d '' -- JQ <<- 'JQ' || true
+del(."$schema") | paths(scalars) as $p | "\($p | join("."))=\(getpath($p))"
+JQ
+
+LS="$(jq -e --raw-output "$JQ" "$CONFIG_JSON")"
+readarray -t LINES --- <<< "$LS"
+
+for LINE in "${LINES[@]}"; do
+  ARGV+=(--config "$LINE")
+done
 
 EXEC=(
   "$BASE/../libexec/harness.sh"

@@ -1,8 +1,0 @@
-#:schema https://developers.openai.com/codex/config-schema.json
-
-sandbox_mode = "danger-full-access"
-
-[model_providers.open-router]
-base_url = "https://openrouter.ai/api/v1"
-env_key  = "OPENROUTER_API_KEY"
-name     = "open-router"

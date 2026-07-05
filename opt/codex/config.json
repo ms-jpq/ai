@@ -1,0 +1,22 @@
+{
+  "$schema": "https://developers.openai.com/codex/config-schema.json",
+  "approvals_reviewer": "auto_review",
+  "model_providers": {
+    "deepseek": {
+      "base_url": "https://api.deepseek.com",
+      "env_key": "DEEPSEEK_API_KEY",
+      "name": "deepseek"
+    },
+    "open-router": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "env_key": "OPENROUTER_API_KEY",
+      "name": "open-router"
+    },
+    "z-ai": {
+      "base_url": "https://api.z.ai/api/paas/v4",
+      "env_key": "ZAI_API_KEY",
+      "name": "z-ai"
+    }
+  },
+  "sandbox_mode": "danger-full-access"
+}
