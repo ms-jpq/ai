@@ -3,6 +3,8 @@
 set -o pipefail
 
 JSON="$(tee)"
+# "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
+
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
@@ -49,7 +51,20 @@ PostToolUse)
   TMP="$(mktemp)"
   trap 'rm -fr -- "$TMP"' EXIT
 
-  jq -e --raw-output0 '[.tool_input, .tool_response] | .. | strings | ., scan("[^\\s\"'\''`|;&()<>]+")' <<< "$JSON" > "$TMP"
+  read -r -d '' -- JQ <<- 'JQ' || true
+if .tool_name == "apply_patch" then
+  (.tool_input.command | scan("(?m)^\\*\\*\\* (?:Add|Update|Delete) File: (.+)$")),
+  (.tool_input.command | scan("(?m)^\\*\\*\\* Move to: (.+)$"))
+elif (.tool_name | IN("Read", "Write", "Edit")) then
+  .tool_input.file_path // .tool_input.filePath // empty
+else
+  empty
+end
+JQ
+
+  if ! jq -e --raw-output0 "$JQ" <<< "$JSON" > "$TMP"; then
+    exit
+  fi
   readarray -d '' -t -- PATHNAMES < "$TMP"
 
   mkdir -p -- "$SENTINELS"
