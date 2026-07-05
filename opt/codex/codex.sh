@@ -27,12 +27,12 @@ esac
 
 ARGV=("$@")
 
-CONFIG_JSON="$BASE/config.json"
+OVERRIDE="$BASE/condex.json"
 read -r -d '' -- JQ <<- 'JQ' || true
 del(."$schema") | paths(scalars) as $p | "\($p | join("."))=\(getpath($p))"
 JQ
 
-LS="$(jq -e --raw-output "$JQ" "$CONFIG_JSON")"
+LS="$(jq -e --raw-output "$JQ" "$OVERRIDE")"
 readarray -t LINES --- <<< "$LS"
 
 for LINE in "${LINES[@]}"; do
