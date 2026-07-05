@@ -11,8 +11,7 @@ set -o pipefail
 ```bash
 #!/usr/bin/env -S -- bash
 
-set -Eeu
-set -o pipefail
+set -Eeu -o pipefail
 shopt -s dotglob nullglob extglob globstar
 ```
 
