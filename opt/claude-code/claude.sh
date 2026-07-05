@@ -25,12 +25,12 @@ linux*)
   ;;
 esac
 
-ARGV=("$@")
-
 PLUGINS=(
   "$BASE/local-plugins"/*/
   "$ROOT/var/claude-plugins"/*/
 )
+
+ARGV=("$@")
 for PLUGIN in "${PLUGINS[@]}"; do
   ARGV+=(--plugin-dir "$PLUGIN")
 done

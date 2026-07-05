@@ -25,9 +25,7 @@ linux*)
   ;;
 esac
 
-ARGV=("$@")
-
-OVERRIDE="$BASE/condex.json"
+OVERRIDE="$BASE/codex.json"
 read -r -d '' -- JQ <<- 'JQ' || true
 del(."$schema") | paths(scalars) as $p | "\($p | join("."))=\(getpath($p))"
 JQ
@@ -35,6 +33,7 @@ JQ
 LS="$(jq -e --raw-output "$JQ" "$OVERRIDE")"
 readarray -t LINES --- <<< "$LS"
 
+ARGV=(--strict-config)
 for LINE in "${LINES[@]}"; do
   ARGV+=(--config "$LINE")
 done
@@ -42,6 +41,7 @@ done
 EXEC=(
   "$BASE/../libexec/harness.sh"
   "$CODEX" "${ARGV[@]}"
+  "$@"
 )
 
 export -- CODEX_HOME="$ROOT/var/codex"

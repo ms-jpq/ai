@@ -25,8 +25,6 @@ linux*)
   ;;
 esac
 
-ARGV=("$@")
-
 # PLUGINS=(
 #   "$BASE/local-plugins"/*/
 #   "$ROOT/var/claude-plugins"/*/
@@ -35,6 +33,7 @@ ARGV=("$@")
 #   ARGV+=(--plugin-dir "$PLUGIN")
 # done
 
+ARGV=("$@")
 EXEC=(
   "$BASE/../libexec/harness.sh"
   "$OPENCODE" "${ARGV[@]}"
