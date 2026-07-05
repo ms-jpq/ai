@@ -18,5 +18,16 @@
       "name": "z-ai"
     }
   },
-  "sandbox_mode": "danger-full-access"
+  "sandbox_mode": "danger-full-access",
+  "tui": {
+    "status_line": [
+      "run-state",
+      "model-with-reasoning",
+      "fast-mode",
+      "context-used",
+      "context-window-size",
+      "project-name",
+      "task-progress"
+    ]
+  }
 }

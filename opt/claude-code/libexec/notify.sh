@@ -4,7 +4,7 @@ set -Eeu
 set -o pipefail
 shopt -s dotglob nullglob extglob globstar
 
-SOCK="${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.var/claude.notify.sock"
+SOCK=~/.local/opt/ai/var/claude.notify.sock
 
 if [[ -t 0 ]]; then
   mkdir -p -- "${SOCK%/*}"

@@ -2,7 +2,7 @@
 
 set -Eeu
 set -o pipefail
-shopt -s nullglob extglob globstar
+shopt -s dotglob nullglob extglob globstar
 
 unset -- BASH_ENV
 PATH="/opt/homebrew/bin:$PATH"

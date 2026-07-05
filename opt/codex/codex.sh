@@ -27,13 +27,25 @@ esac
 
 OVERRIDE="$BASE/codex.json"
 read -r -d '' -- JQ <<- 'JQ' || true
-del(."$schema") | paths(scalars) as $p | "\($p | join("."))=\(getpath($p))"
+def leaf_paths:
+  def walk($prefix):
+    if type == "object" then
+      to_entries[] as $entry | $entry.value | walk($prefix + [$entry.key])
+    else
+      $prefix
+    end;
+  walk([]);
+
+del(."$schema") | leaf_paths as $p | "\($p | join("."))=\(getpath($p) | tojson)"
 JQ
 
 LS="$(jq -e --raw-output "$JQ" "$OVERRIDE")"
 readarray -t LINES --- <<< "$LS"
 
-ARGV=(--strict-config)
+ARGV=()
+if [[ $* != login ]]; then
+  ARGV+=(--strict-config)
+fi
 for LINE in "${LINES[@]}"; do
   ARGV+=(--config "$LINE")
 done
