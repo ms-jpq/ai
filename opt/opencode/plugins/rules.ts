@@ -2,15 +2,11 @@ import { type Plugin } from "@opencode-ai/plugin"
 import { opendir, readFile } from "node:fs/promises"
 import { EOL } from "node:os"
 import { basename, join } from "node:path"
-import { ROOT, match_glob, parse_frontmatter } from "./lib.ts"
+import { encoding, match_glob, parse_frontmatter, ROOT } from "./lib.ts"
 
 const PATH_TOOLS = new Set(["read", "write", "edit"])
 
-const PREFACE = [
-  "Codebase and user instructions are shown below. Be sure to adhere to these instructions.",
-  "IMPORTANT: These instructions OVERRIDE any default behavior and you MUST follow them exactly as written.",
-].join(" ")
-
+const PREFACE_PATH = join(ROOT, "opt", "codex", "libexec", "rules-preface.txt")
 const RULES = join(ROOT, "opt", "opencode", "rules")
 
 type Rule = {
@@ -29,7 +25,7 @@ const load_rules = async function* (): AsyncIteratorObject<Rule> {
       }
 
       const path = join(dirent.parentPath, dirent.name)
-      const raw = await readFile(path, "utf-8")
+      const raw = await readFile(path, encoding)
       const { content, paths } = parse_frontmatter(raw)
 
       yield { stem, path, content, globs: paths }
@@ -48,6 +44,10 @@ export const rules = (async ({ directory: cwd }) => {
   const unconditional = rules.filter((r) => !r.globs)
   const conditional = rules.filter((r) => r.globs)
 
+  const preface = await readFile(PREFACE_PATH, encoding)
+
+  const sent = new Set<string>()
+
   return {
     "experimental.chat.system.transform": async (_i, o) => {
       if (!unconditional.length) {
@@ -55,7 +55,11 @@ export const rules = (async ({ directory: cwd }) => {
       }
 
       const blocks = unconditional.map(format_block)
-      o.system.push(wrap(`# agentsMd${EOL}${PREFACE}${EOL}${EOL}${blocks.join(EOL + EOL)}`))
+      o.system.push(wrap(`# agentsMd${EOL}${preface.trim()}${EOL}${EOL}${blocks.join(EOL + EOL)}`))
+    },
+
+    "experimental.session.compacting": async () => {
+      sent.clear()
     },
 
     "tool.execute.after": async (input, output) => {
@@ -68,14 +72,19 @@ export const rules = (async ({ directory: cwd }) => {
         return
       }
 
-      const matched = conditional.filter(
-        (rule) => rule.globs?.length && match_glob({ filepath, patterns: rule.globs, root: cwd }),
+      const unsent = conditional.filter(
+        (rule) =>
+          !sent.has(rule.stem) && rule.globs?.length && match_glob({ filepath, patterns: rule.globs, root: cwd }),
       )
-      if (!matched.length) {
+      if (!unsent.length) {
         return
       }
 
-      const reminder = matched.map(format_block).join(EOL + EOL)
+      for (const rule of unsent) {
+        sent.add(rule.stem)
+      }
+
+      const reminder = unsent.map(format_block).join(EOL + EOL)
       output.output += `${EOL}${EOL}${wrap(reminder)}`
     },
   }

@@ -1,13 +1,13 @@
 import { type Plugin, type WorkspaceAdapter, type WorkspaceInfo } from "@opencode-ai/plugin"
 import { join } from "node:path"
 import { cwd } from "node:process"
-import { execAsync, execFileAsync, ROOT } from "./lib.ts"
+import { encoding, execAsync, execFileAsync, ROOT } from "./lib.ts"
 const POOL = join(ROOT, "libexec", "worktree", "pool.sh")
 
 const resolveRoot = async (config: WorkspaceInfo): Promise<string> => {
   const result = await execAsync("git rev-parse --show-toplevel", {
     cwd: config.directory ?? cwd(),
-    encoding: "utf-8",
+    encoding,
   })
   return result["stdout"].trim()
 }

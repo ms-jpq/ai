@@ -7,6 +7,8 @@ import { text } from "node:stream/consumers"
 import { pipeline } from "node:stream/promises"
 import { promisify } from "node:util"
 
+export const encoding = "utf-8" satisfies BufferEncoding
+
 export const ROOT = join(import.meta.dirname, "..", "..", "..")
 
 export type parsed_frontmatter = { content: string; paths?: string[] }

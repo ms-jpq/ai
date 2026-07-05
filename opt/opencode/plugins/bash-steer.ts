@@ -4,7 +4,7 @@ import { join } from "node:path"
 import { Readable } from "node:stream"
 import { ROOT, spawning } from "./lib.ts"
 
-const SCRIPT = join(ROOT, "opt", "claude-code", "hooks", "bash-steer.sh")
+const SCRIPT = join(ROOT, "opt", "codex", "hooks", "bash-steer.sh")
 
 const block = (cmd: string, reason: string) => `>&2 printf -- '%s\\n' 'blocked: ${reason}' && exit 1; { ${cmd}; }`
 
