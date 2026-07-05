@@ -10,7 +10,7 @@ PREFACE="$(< "$BASE/libexec/rules-preface.txt")"
 
 WRAP=(printf -- '<system-reminder>\n%s\n</system-reminder>')
 
-RULES="$BASE/../opencode/rules"
+RULES="$BASE/rules"
 
 case "$EVENT" in
 SessionStart)
