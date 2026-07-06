@@ -16,7 +16,7 @@
 
 - Co-iterate with user on working documents under `.notes/`. See @./rules/Project-Workspace.md
 
-- When ask, cite the evidence.
+- When asked, cite the evidence.
 
 - Link PR/issue/URL references in responses, never use bare ID: `[short desc](…/pull/1234)`, `[short desc](…/issue/ENG-1234)`.
 
@@ -24,37 +24,39 @@
 
 # Systems Thinking
 
-Write the model to a working document under `.notes/`.
+Avoid locally convenient framings when moving the boundary would simplify the problem.
+
+Keep the model in `.notes/`.
 
 ## Frame
 
-Frame each dimension at both the object and meta levels:
+Frame each dimension and the rule selecting it:
 
-- Problem, and what governs its definition.
+- Problem; what makes this the problem.
 
-- Motivation, and what underlies it.
+- Motivation; what makes it matter.
 
-- Constraints, and how they are identified or negotiated.
+- Constraints; who set them, and whether they can move.
 
-- Uncertainties, and uncertainty in the model of them.
+- Uncertainties; what would reduce or expose them.
 
-- Assumptions, and what governs their acceptance.
+- Assumptions; why they are accepted.
 
-- Approach, and how it is selected and evaluated.
+- Approach; what criteria selected it.
 
 For each dimension, and its meta, write:
 
-- The current claim.
+- Claim.
 
-- The evidence for it.
+- Evidence.
 
-- What remains unknown.
+- Unknowns.
 
-- What would cause it to change.
+- Revision trigger.
 
 ## Interrogate
 
-Decompose the problem space into its principal dimensions; identify where they **complect**.
+Decompose the problem space; identify where dimensions **complect**.
 
 - Draw or list the dimensions, their dependencies, and the direction of each dependency.
 
@@ -62,13 +64,23 @@ Decompose the problem space into its principal dimensions; identify where they *
 
 - Locate leverage points where local change can alter system behavior.
 
-- Continuously refine through dialectic.
+- Continuously refine through **dialectic**.
 
-  - Record the strongest counterargument to each consequential assumption.
+  - Pair local and boundary answers.
 
-  - Record the evidence that resolves or preserves the disagreement.
+    - Local: satisfies the request inside the current framing.
 
-Update the working document during investigation, not as a retrospective.
+    - Boundary: changes definition, scope, sequence, ownership, medium, or constraint.
+
+  - Compare residual complexity:
+
+    - Concepts, states, branches, dependencies, exceptions.
+
+  - Choose the answer that leaves the simpler system.
+
+    - If local, write why moving the boundary is not worth it.
+
+Update the working document during investigation, not only as a retrospective.
 
 ## Actualize
 
@@ -76,19 +88,19 @@ Update the working document during investigation, not as a retrospective.
 
   - Compare each object-level answer with its meta-level answer.
 
-  - Write down each contradiction.
+  - Record contradictions.
 
   - Resolve contradictions by revising the problem, motivation, constraints, uncertainties, assumptions, or approach before acting.
 
 - De-complect:
 
-  - Split the work at each identified seam into units that can change and be tested independently.
+  - Split work at seams into independently verifiable units.
 
   - Represent unavoidable dependencies explicitly.
 
-  - Give each unit a verification method and record its result.
+  - Give each unit a verification method; record the result.
 
-Before stopping, update the working document with the current model, decisions, unresolved questions, and next concrete action.
+Before stopping, record the current model, decisions, unresolved questions, and next action.
 
 ---
 
@@ -101,7 +113,7 @@ Before stopping, update the working document with the current model, decisions, 
   - Write each hypothesis, experiment, result, and conclusion to the working
     document.
 
-  - Accrue tools for hypotheses testing in `.exp/`.
+  - Accrue tools for hypothesis testing in `.exp/`.
 
 - Distill recurrences into version controlled tools, rules and skills.
 
