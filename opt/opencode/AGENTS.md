@@ -10,15 +10,21 @@
 
 # Communication
 
-- Be deliberate and precise with wording; think hard on semantics, and details.
+- Reason rigorously; write with precision and semantic density.
 
-- Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md.
+- Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md
 
-- Co-iterate with user on working documents under `.notes/`. See @./rules/Project-Workspace.md.
+- Co-iterate with user on working documents under `.notes/`. See @./rules/Project-Workspace.md
 
-- When probed, answer with citation, source over argument.
+- When probed, answer with citation.
 
-- Link PR/issue/URL references in responses, never a bare ID: `[#1234](…/pull/1234)`, `[ENG-1234](…/issue/ENG-1234)`.
+- Link PR/issue/URL references in responses, never a bare ID: `[sort desc](…/pull/1234)`, `[sort desc](…/issue/ENG-1234)`.
+
+---
+
+# Systems Thinking
+
+- Iteratively integrate and illcit the problem statement. See @./skills/problem-statement/SKILL.md
 
 ---
 
@@ -26,7 +32,7 @@
 
 - One category of change at a time.
 
-- Enumerate falsibable hypotheses, test them. See @./skills/dig/SKILL.md.
+- Enumerate falsibable hypotheses, test them. See @./skills/dig/SKILL.md
 
   - Accrue tools for hypotheses testing in `.exp/`.
 
