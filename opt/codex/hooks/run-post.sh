@@ -12,6 +12,7 @@ BASE="${0%/*}/.."
 SESSIONS="$HOME/.local/opt/ai/var/sessions"
 POST_DIR="$SESSIONS/$SESSION_ID.fmt"
 
+mkdir -p -- "$POST_DIR"
 CONTEXT=()
 
 case "$EVENT" in
@@ -23,8 +24,6 @@ PostToolUse)
     exit
   fi
   readarray -d '' -t -- PATHNAMES < "$TMP"
-
-  mkdir -p -- "$POST_DIR"
 
   for PATHNAME in "${PATHNAMES[@]}"; do
     HASH="$(b3sum <<< "$PATHNAME")"
@@ -67,10 +66,6 @@ Stop)
   exit 2
   ;;
 esac
-
-if ! ((${#CONTEXT[@]})); then
-  exit
-fi
 
 printf -v CONTEXT_TEXT -- '%s\n\n' "${CONTEXT[@]}"
 printf -v CONTEXT_TEXT -- '%s' "${CONTEXT_TEXT%$'\n\n'}"
