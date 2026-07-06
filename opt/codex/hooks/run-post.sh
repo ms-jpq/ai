@@ -12,13 +12,13 @@ BASE="${0%/*}/.."
 SESSIONS="$HOME/.local/opt/ai/var/sessions"
 POST_DIR="$SESSIONS/$SESSION_ID.fmt"
 
+TMP="$(mktemp)"
+trap 'rm -fr -- "$TMP"' EXIT
 mkdir -p -- "$POST_DIR"
 CONTEXT=()
 
 case "$EVENT" in
 PostToolUse)
-  TMP="$(mktemp)"
-  trap 'rm -fr -- "$TMP"' EXIT
 
   if ! "$BASE/libexec/parse-hook-paths.sh" <<< "$JSON" > "$TMP"; then
     exit
@@ -31,12 +31,13 @@ PostToolUse)
     printf -- '%s\0' "$PATHNAME" > "$POST_DIR/$HASH"
   done
   ;;
-Stop)
-  shopt -u failglob
-  PATHS="$(cat -- /dev/null "$POST_DIR"/*)"
+Stop | StopFailure)
+  (
+    shopt -u failglob
+    cat -- /dev/null "$POST_DIR"/*
+  ) > "$TMP"
+  readarray -d '' -t -- PATHNAMES < "$TMP"
   find "$POST_DIR" -mindepth 1 -delete
-
-  readarray -d '' -t -- PATHNAMES < <(printf -- '%s' "$PATHS")
 
   for PATHNAME in "${PATHNAMES[@]}"; do
     if ! [[ -f $PATHNAME ]]; then

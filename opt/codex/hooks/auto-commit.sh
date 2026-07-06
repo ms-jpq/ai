@@ -25,7 +25,7 @@ if ! [[ -d $NOTES && -e "$NOTES/.git" ]]; then
   exit
 fi
 
-LIBEXEC="${0%/*}/../../../libexec/worktree"
+LIBEXEC="${0%/*}/../libexec/worktree"
 
 jq --raw-output '.last_assistant_message // ""' <<< "$JSON" > "$NOTES/.LAST_MESSAGE.md"
 

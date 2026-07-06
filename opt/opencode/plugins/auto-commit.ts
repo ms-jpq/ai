@@ -3,7 +3,7 @@ import { access } from "node:fs/promises"
 import { join } from "node:path"
 import { execFileAsync, ROOT } from "./lib.ts"
 
-const COMMIT = join(ROOT, "libexec", "worktree", "commit-on-change.sh")
+const COMMIT = join(ROOT, "opt", "codex", "libexec", "worktree", "commit-on-change.sh")
 
 export const auto_commit = (async ({ directory }) => ({
   event: async ({ event }) => {

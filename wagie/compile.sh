@@ -7,11 +7,12 @@ CLAUDE_CONFIG_DIR="$OUT/.claude"
 SELF="${0%/*}"
 
 mkdir -v -p -- "$CLAUDE_CONFIG_DIR"
-cp -af --dereference -- "$SELF/../opt/claude-code"/{bin,hooks,libexec,keybindings.json} "$CLAUDE_CONFIG_DIR/"
+cp -af --dereference -- "$SELF/../opt/claude-code"/{bin,hooks,keybindings.json} "$CLAUDE_CONFIG_DIR/"
+mkdir -v -p -- "$CLAUDE_CONFIG_DIR/libexec"
+rsync --archive --copy-links --exclude worktree -- "$SELF/../opt/claude-code/libexec/" "$CLAUDE_CONFIG_DIR/libexec/"
+rsync --archive -- "$SELF/../opt/codex/libexec/worktree/" "$CLAUDE_CONFIG_DIR/libexec/worktree/"
 cp -af --dereference -- "$SELF/../opt/opencode"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
 mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
-mkdir -v -p -- "$CLAUDE_CONFIG_DIR/libexec/worktree"
-cp -af --dereference -- "$SELF/../libexec/worktree/commit-on-change.sh" "$CLAUDE_CONFIG_DIR/libexec/worktree/"
 
 rm -fr -- "$CLAUDE_CONFIG_DIR/skills/shitpost" "$CLAUDE_CONFIG_DIR/agents/web-research.md"
 
