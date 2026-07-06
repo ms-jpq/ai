@@ -3,6 +3,6 @@ path:
   - "*.html"
 ---
 
-# Explorables
+# Generating Artifacts
 
 - Prefer SVGs for structural diagrams.
