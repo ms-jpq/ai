@@ -6,6 +6,10 @@
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
+          },
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
+            "type": "command"
           }
         ],
         "matcher": "Bash|apply_patch"
@@ -60,6 +64,10 @@
           },
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/sessions.sh",
+            "type": "command"
+          },
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
             "type": "command"
           }
         ]

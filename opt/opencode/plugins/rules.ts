@@ -60,7 +60,10 @@ export const rules = (async () => {
         return
       }
 
-      const blocks = rules.map((rule) => (rule.globs ? format_conditional(rule) : format_block(rule)))
+      const unconditional = rules.filter((r) => !r.globs).map(format_block)
+      const conditional = rules.filter((r) => r.globs).map(format_conditional)
+      const blocks = [...unconditional, ...conditional]
+
       o.system.push(wrap(`# agentsMd${EOL}${preface.trim()}${EOL}${EOL}${blocks.join(EOL + EOL)}`))
     },
 
