@@ -42,5 +42,5 @@ SANDBOX+=(
 )
 
 SHELL="$(command -v -- bash)"
-export -- SHELL BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
+export -- SHELL PATH BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
 exec -- nice -n 19 -- "${OOM[@]}" "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"

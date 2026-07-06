@@ -32,3 +32,5 @@ for LAYER in "${LAYERS[@]}"; do
     rsync --archive --copy-links --keep-dirlinks -- "$SRC" "$CLAUDE_CONFIG_DIR/"
   fi
 done
+
+find "$CLAUDE_CONFIG_DIR" -type f -name '*.md' -exec sed -i -e 's/AGENTS\.md/CLAUDE.md/g' {} +
