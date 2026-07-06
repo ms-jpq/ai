@@ -24,7 +24,65 @@
 
 # Systems Thinking
 
-- Iteratively integrate and illcit the problem statement. See @./skills/problem-statement/SKILL.md
+## Frame
+
+Frame each dimension at both the object and meta levels. Write it down:
+
+- Problem:
+
+  - What are we solving? Are we solving the right problem?
+
+  - What problem governs how we define the problem?
+
+- Motivation:
+
+  - Why solve it?
+
+  - What underlies that motivation?
+
+- Constraints:
+
+  - What limits apply?
+
+  - What constrains how we identify or negotiate them?
+
+- Uncertainties:
+
+  - What is unknown?
+
+  - What is uncertain about our model of the unknowns?
+
+- Approach:
+
+  - What direction are we taking?
+
+  - How are we choosing and evaluating that direction?
+
+## Interrogate
+
+Decompose the problem space into its principal dimensions; identify where they **complect**. Write it down.
+
+- Locate seams where complected dimensions can be separated.
+
+- Locate leverage points where local change can alter system behavior.
+
+- Stress-test the model at its weak points: ambiguities, assumptions, and missing constraints, and hidden dimensions.
+
+- Continuously refine through dialectic.
+
+## Actualize
+
+- Meta:
+
+  - Compare each object-level answer with its meta-level answer.
+
+  - Resolve contradictions by revising the problem, motivation, constraints, uncertainties, or approach before acting.
+
+- De-complect:
+
+  - Split the work at each identified seam into units that can change and be tested independently.
+
+  - Represent unavoidable dependencies explicitly.
 
 ---
 
@@ -32,28 +90,12 @@
 
 - One category of change at a time.
 
-- Enumerate falsibable hypotheses, test them. See @./skills/dig/SKILL.md
+- Enumerate falsifiable hypotheses, test them. See @./skills/dig/SKILL.md
 
   - Accrue tools for hypotheses testing in `.exp/`.
 
-- Propose distilling recurrences into version controlled tools, rules and skills.
+- Distill recurrences into version controlled tools, rules and skills.
 
-- Aggressively parallelize **any** read / query operations via delegation.
+- Parallelize **any** read / query operations via delegation.
 
   - No need to ask permission for idempotent read / query operations.
-
----
-
-# Systems Design
-
-- Decompose the system as a series of stages (Input -> Output). Decompose along stage boundaries.
-
-- Types model the domain. Each stage has a single type definition file, complete enough to describe the problem.
-
-- Transforms xor effects.
-
-- Persistent state lives at stage boundaries — files, queues, databases.
-
-- Every component testable by direct call and return value.
-
-- Generic interfaces at stage boundaries. Concrete (most specific) within a stage.

@@ -1,55 +1,62 @@
 ---
 name: refactor
-description: Iterative code refactor.
+description: Iteratively simplify code, contracts, and data flow.
 ---
 
-# Workflow
+Use @../../AGENTS.md#systems-thinking throughout.
 
-- Discover the invariants and constraints first.
+---
 
-- Pin with tests. If none, write ones capturing current behavior before touching anything.
+# Frame
 
-# Principles
+- Ask: how can this become simpler?
 
-## Simplification
+- Bound the domain as a set of contracts.
 
-- Strategy: One predicate per branch.
+- Discover the invariants and constraints. Write them down.
 
+- Pin current behavior with tests.
 
-## Pipeline producers, thin consumers
+---
 
-- Producer computes everything; consumer reads. Effects only at the final stage — a pure walk over prepared data.
+# Trace
 
-- Stage doing aggregate + render + traverse + emit → pull three out.
+- Follow data from entry points to exit points.
 
-- Aggregate the consumer would re-walk → compute once at construction, attach to the node.
+- Identify effects, persistence, branches, and loops along the path.
 
-- Read the flag the producer set; don't re-derive from raw inputs.
+- Slice the flow into logical stages with explicit contracts.
 
-## Domain-driven types
+---
 
-- One stage, one named type. Inline structural shapes = types not yet named.
+# Reshape
 
-- Named subtypes over inline unions; lift shared fields into a base.
+- Shrink, expand, or move boundaries to de-complect responsibilities.
 
-- Discriminate on a runtime-checkable property. Structural narrowing fails (`0 | number` → `number`) → write a predicate.
+- Preserve contracts by default.
 
-- `find` / `filter` feeding further access → typed predicate so it narrows.
+- Improve contracts when the change is locally verifiable.
 
-- Construction-only scaffolding → separate intermediate type or parallel tree.
+- Lift branches toward entry points.
 
-## Standards conformance
+- Push loops toward leaf operations.
 
-- Output targets a published spec → audit attribute-by-attribute; don't invent shapes.
+---
 
-- Read the schema files, not doc summaries.
+# Iterate
 
-- Preserve hierarchy: sibling in spec → sibling in code, regardless of data flow.
+- Make one category of change at a time.
 
-- Cite the spec by name — "the spec says X," not "I think X."
+- Test through direct calls and return values.
 
-# Out of scope
+- Reassess the boundary and contracts after each change.
 
-- Renames, unless the existing name is semantically inaccurate.
+- Stop when the data flow is laminar: direct, staged, and unsurprising.
 
-- Style swaps.
+---
+
+# Escalate
+
+- Proceed when contract changes are locally verifiable.
+
+- Surface a design or plan when changes require broader judgment, migration, or coordination.

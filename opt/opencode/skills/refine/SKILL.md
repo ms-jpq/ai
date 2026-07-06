@@ -11,6 +11,12 @@ description: Iteratively improve writing.
 
 # Analyze
 
+- Are the wordings semantically dense?
+
+- Are related ideas grouped? Are the most important ideas first?
+
+- Are claims concrete enough to act on?
+
 - What does the reader already know?
 
 - What's missing from the domain that isn't stated yet?
@@ -20,12 +26,6 @@ description: Iteratively improve writing.
 - What are the internal contradictions?
 
 - Is each point at the right strength? Too absolute, too hedged, or well-calibrated?
-
-- Are claims concrete enough to act on?
-
-- Are the wordings concise?
-
-- Are related ideas grouped? Are the most important ideas first?
 
 # Iterate
 

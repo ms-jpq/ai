@@ -1,11 +1,11 @@
 ---
 name: dig
-description: Hypothesis test by experimenting. Write disposable tools — don't theorize.
+description: Hypothesis test by experimenting. Write disposable tools, don't theorize.
 ---
 
 # Clarify
 
-- Derive 5-10 candidate hypotheses.
+- Derive 3-5 candidate hypotheses.
 
   - State each hypothesis in one sentence.
 
