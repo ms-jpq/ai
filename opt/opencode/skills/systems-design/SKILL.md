@@ -3,6 +3,8 @@ name: systems-design
 description: Design or refine software architecture.
 ---
 
+Use @../refactor/SKILL.md.
+
 # Decompose
 
 - Model the system as a sequence of stages from input to output.
@@ -15,7 +17,7 @@ description: Design or refine software architecture.
 
 - Make each stage either a transform or an effect.
 
-- Place persistent state at stage boundaries: files, queues, or databases.
+- Place persistent state at stage boundaries: modules, queues, or databases.
 
 # Specify
 

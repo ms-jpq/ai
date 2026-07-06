@@ -7,7 +7,9 @@ description: Iteratively improve writing.
 
 - Infer the reader from context.
 
-- Break prose into point form before iterating. One claim per bullet.
+- Break prose into point form before iterating.
+
+  - One claim per bullet.
 
 # Analyze
 

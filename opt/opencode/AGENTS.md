@@ -1,6 +1,6 @@
 # Alignment
 
-- Focus on clarity: Converge to a shared, unambiguous understanding with the user.
+- Converge to a shared, unambiguous understanding with the user.
 
   - Do not assume that the user starts out with a crisp articulation of the problem space.
 
@@ -10,15 +10,15 @@
 
 # Communication
 
-- Reason rigorously; write with precision and semantic density.
+- Write with precision and semantic density.
 
-- Bullets over prose. Analytical, substantive. See @./skills/refine/SKILL.md
+- Bullets over prose. One claim per bullet. See @./skills/refine/SKILL.md
 
 - Co-iterate with user on working documents under `.notes/`. See @./rules/Project-Workspace.md
 
-- When probed, answer with citation.
+- When ask, cite the evidence.
 
-- Link PR/issue/URL references in responses, never a bare ID: `[sort desc](…/pull/1234)`, `[sort desc](…/issue/ENG-1234)`.
+- Link PR/issue/URL references in responses, never use bare ID: `[short desc](…/pull/1234)`, `[short desc](…/issue/ENG-1234)`.
 
 ---
 
@@ -97,5 +97,3 @@ Decompose the problem space into its principal dimensions; identify where they *
 - Distill recurrences into version controlled tools, rules and skills.
 
 - Parallelize **any** read / query operations via delegation.
-
-  - No need to ask permission for idempotent read / query operations.
