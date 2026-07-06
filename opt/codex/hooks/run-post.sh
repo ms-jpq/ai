@@ -19,7 +19,6 @@ CONTEXT=()
 
 case "$EVENT" in
 PostToolUse)
-
   if ! "$BASE/libexec/parse-hook-paths.sh" <<< "$JSON" > "$TMP"; then
     exit
   fi
@@ -32,35 +31,8 @@ PostToolUse)
   done
   ;;
 Stop | StopFailure)
-  (
-    shopt -u failglob
-    cat -- /dev/null "$POST_DIR"/*
-  ) > "$TMP"
-  readarray -d '' -t -- PATHNAMES < "$TMP"
-  find "$POST_DIR" -mindepth 1 -delete
-
-  for PATHNAME in "${PATHNAMES[@]}"; do
-    if ! [[ -f $PATHNAME ]]; then
-      continue
-    fi
-
-    # shellcheck disable=SC2154,SC2094
-    if FMT="$("$XDG_CONFIG_HOME/nvim/libexec/fmt.sh" "$PATHNAME" < "$PATHNAME" 2>&1)"; then
-      sponge -- "$PATHNAME" <<< "$FMT"
-    fi
-
-    case "$PATHNAME" in
-    *.sh | *.bash)
-      if command -v -- shellcheck > /dev/null; then
-        if ! SC_OUT="$(shellcheck --shell=bash -- "$PATHNAME" 2>&1)"; then
-          CONTEXT+=("shellcheck($PATHNAME): $SC_OUT")
-        fi
-      fi
-      ;;
-    *)
-      ;;
-    esac
-  done
+  find "$POST_DIR" -mindepth 1 -execdir cat -- '{}' + -delete | sort -z --unique > "$TMP"
+  CONTEXT+=("$(xargs -r --null -I % --max-procs=0 -- "$BASE/libexec/fmt-lint.sh" < "$TMP" || true)")
   ;;
 *)
   set -x
