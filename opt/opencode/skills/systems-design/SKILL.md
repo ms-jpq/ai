@@ -9,20 +9,22 @@ Use @../refactor/SKILL.md.
 
 - Model the system as a sequence of stages from input to output.
 
-- Decompose along stage boundaries.
+- Split stages where data changes meaning, ownership, or crosses an effect boundary.
 
-- Define one complete domain type file per stage.
+- Define explicit input and output types for each stage.
 
 # Separate
 
 - Make each stage either a transform or an effect.
 
-- Place persistent state at stage boundaries: modules, queues, or databases.
+- Place persistent state behind stage boundaries: files, queues, or databases.
 
 # Specify
 
-- Use generic interfaces at stage boundaries.
+- Define stage boundaries as contracts with substitutable implementations.
 
 - Use the most specific concrete implementation within each stage.
 
-- Make every component testable through direct calls and return values.
+- Keep transform stages referentially transparent.
+
+- Test effect stages through substitutable boundary implementations.
