@@ -1,3 +1,9 @@
+---
+paths:
+  - "*.test.*"
+  - "*_test.*"
+---
+
 # Testing
 
 ## Parallelism
