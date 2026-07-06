@@ -8,28 +8,13 @@
 set -o pipefail
 ```
 
-```bash
-#!/usr/bin/env -S -- bash
-
-set -Eeu -o pipefail
-shopt -s dotglob nullglob extglob globstar
-```
-
-- Long flags over short (`--delimiter` not `-d`). `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
+- Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`). `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
 ```bash
 "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
 ```
 
-- Reusable arguments in arrays: `GREP=(grep --recursive ...)`, `${GREP[@]}`.
-
-  - For long or numerous arguments (over `\ ` escaping)
-
-  - For code reuse across invocations (over functions)
-
-  - When branches invoke the same command with different arguments
-
-  - Build arrays incrementally with `+=()` based on conditionals
+- Use arrays for long or conditional command invocations, or when invoking the same command repeatedly: `GREP=(grep --recursive ...)`, `"${GREP[@]}"`.
 
 ```bash
 CURL=(curl --fail --location)
@@ -54,13 +39,15 @@ case "$VARIABLE" in
 esac
 ```
 
-- Inline code over functions. Explicit error checks over traps. Both functions and traps obscure error propagation under `set -e`.
+- Inline one-use logic. Prefer explicit error checks to traps; functions invoked from conditional contexts and traps complicate `set -e` propagation.
 
-- Null bytes as delimiters where possible — `find ... -print0 | xargs --null ...`
+- Use NUL delimiters for path streams: `find ... -print0 | xargs --null ...`
 
-- Standalone `.jq`, `.awk`, `.sed` executables over inlined scripts.
+- Pass trivial `sed`, `jq`, and `awk` programs directly as command arguments.
 
-  - Heredoc when inlining.
+- Embed short, non-trivial programs with heredocs.
+
+- Keep substantial or reusable programs in standalone `.sed`, `.jq`, or `.awk` executables.
 
 ```bash
 read -r -d '' -- JQ <<- 'JQ' || true
