@@ -41,6 +41,24 @@ esac
 
 - Inline one-use logic. Prefer explicit error checks to traps; functions invoked from conditional contexts and traps complicate `set -e` propagation.
 
+- Do not suppress unexpected failures with `|| true`. Let the command fail or handle the failure explicitly with `if`.
+
+  - Let it fail:
+
+  ```bash
+  OUTPUT="$(command)"
+  ```
+
+  - Handle it:
+
+  ```bash
+  if OUTPUT="$(command)"; then
+    # ...
+  else
+    # ...
+  fi
+  ```
+
 - Use NUL delimiters for path streams: `find ... -print0 | xargs --null ...`
 
 - Pass trivial `sed`, `jq`, and `awk` programs directly as command arguments.
@@ -67,7 +85,7 @@ else
 fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 ```
 
-- `printf -- '%s' ...` over `echo` for single statements.
+- Use `printf -- '%s' ...` for single-line output.
 
   - `printf -v VAR -- '<fmt>' args` to assign formatted output without a subshell.
 
@@ -80,7 +98,7 @@ $VARIABLE_1
 EOF >&2
 ```
 
-- Redirects over `echo`/`printf` pipes.
+- Feed data through redirects instead of `echo` or `printf` pipelines.
 
   - `jq <<< "$JSON"` over `echo "$JSON" | jq`
 
@@ -100,15 +118,20 @@ DIR="${FILE%/*}"
 
 - `(( ))` for math comparisons. `[[ ]]` reserved for string and file tests.
 
-- `readarray -t` to capture multi-line output into arrays. Single process, newline-safe — subshell loops and word splitting both mangle whitespace.
+- Capture multiline output with `readarray -t`; avoid word splitting and subshell loops.
 
   - Feed from `< <(printf -- %s "$VAR")` over `<<< "$VAR"`, when newline safety is required.
 
-- `${ARRAY[*]}` over `${ARRAY[0]}` to stringify a single-element array.
+- Do not place fallible commands inside process substitutions consumed by `readarray`; their exit status does not propagate.
 
-- Env-var self-recursion to re-enter the same script in a different mode. Name the flag after the context: `RECUR=`, `LOCKED=`, `UNDER=`, etc.
+  ```bash
+  OUTPUT="$(command)"
+  readarray -t -- ARRAY < <(printf -- '%s' "$OUTPUT")
+  ```
 
-  - For `flock`, `xargs`, and mode-switching.
+- Use `"${ARRAY[*]}"` to stringify single element arrays.
+
+- Use a context-named environment flag (`RECUR`, `LOCKED`, `UNDER`) when a script re-enters itself.
 
 ```bash
 FILE="$1"
@@ -120,7 +143,7 @@ fi
 RECUR=1 flock "$FILE" "$0" "$@"
 ```
 
-- Invoke nearby scripts by relative path:
+- Resolve nearby scripts relative to the current script's directory:
 
 ```bash
 SELF="$(realpath -- "$0")"
@@ -137,4 +160,4 @@ exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
 
 - `set -a` / `set +a` to scope exports when sourcing an env file.
 
-- No `\`-continuation. Arrays for conditional extension.
+- Do not use backslash line continuations.
