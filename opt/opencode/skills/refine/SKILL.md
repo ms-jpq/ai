@@ -13,21 +13,27 @@ description: Iteratively improve writing.
 
 # Analyze
 
-- Are the wordings semantically dense?
+- Replace vague words with precise ones.
 
-- Are related ideas grouped? Are the most important ideas first?
+- Remove words that do not change the claim.
 
-- Are claims concrete enough to act on?
+- Group related claims.
 
-- What does the reader already know?
+- Order claims by importance.
 
-- What's missing from the domain that isn't stated yet?
+- Replace abstractions with observable actions, conditions, or outcomes.
 
-- What are the ambiguities?
+- Omit explanations already established by context.
 
-- What are the internal contradictions?
+- Add missing domain context required to interpret the claims.
 
-- Is each point at the right strength? Too absolute, too hedged, or well-calibrated?
+- Resolve wording that admits materially different interpretations.
+
+- Resolve claims that cannot simultaneously hold.
+
+- Remove absolutes not supported by evidence.
+
+- Remove hedges not required by uncertainty.
 
 # Iterate
 
