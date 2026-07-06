@@ -1,5 +1,9 @@
 # Shell Scripting
 
+---
+
+## Defaults
+
 - Prelude for bash scripts:
 
 ```bash
@@ -14,30 +18,27 @@ set -o pipefail
 "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
 ```
 
-- Use arrays for long or conditional command invocations, or when invoking the same command repeatedly: `GREP=(grep --recursive ...)`, `"${GREP[@]}"`.
+- `shopt -u failglob` after the prelude when globs may legitimately match nothing.
 
-```bash
-CURL=(curl --fail --location)
-if [[ -v GH_TOKEN ]]; then
-  CURL+=(--oauth2-bearer "$GH_TOKEN")
-fi
-CURL+=(-- "$URL")
-"${CURL[@]}"
-```
+- Do not use backslash line continuations.
+
+---
+
+## Failure Semantics
 
 - `case` catch-all (`*`) exits with `set -x; exit 2` for unexpected inputs.
 
-```bash
-case "$VARIABLE" in
-...)
-  # ...
-  ;;
-*)
-  set -x
-  exit 2
-  ;;
-esac
-```
+  ```bash
+  case "$VARIABLE" in
+  ...)
+    # ...
+    ;;
+  *)
+    set -x
+    exit 2
+    ;;
+  esac
+  ```
 
 - Inline one-use logic. Prefer explicit error checks to traps; functions invoked from conditional contexts and traps complicate `set -e` propagation.
 
@@ -59,31 +60,43 @@ esac
   fi
   ```
 
+---
+
+## Command Construction
+
+- Use arrays for long or conditional command invocations, or when invoking the same command repeatedly: `GREP=(grep --recursive ...)`, `"${GREP[@]}"`.
+
+  ```bash
+  CURL=(curl --fail --location)
+  if [[ -v GH_TOKEN ]]; then
+    CURL+=(--oauth2-bearer "$GH_TOKEN")
+  fi
+  CURL+=(-- "$URL")
+  "${CURL[@]}"
+  ```
+
+- `exec --` when no code follows.
+
+- Resolve nearby scripts relative to the current script's directory:
+
+  ```bash
+  SELF="$(realpath -- "$0")"
+  BASE="${SELF%/*}"
+
+  exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
+  ```
+
+- `shift -- <count>` after consuming positional args.
+
+- `command -v --` or `hash --` to check command existence.
+
+- `set -a` / `set +a` to scope exports when sourcing an env file.
+
+---
+
+## Data Flow
+
 - Use NUL delimiters for path streams: `find ... -print0 | xargs --null ...`
-
-- Pass trivial `sed`, `jq`, and `awk` programs directly as command arguments.
-
-- Embed short, non-trivial programs with heredocs.
-
-- Keep substantial or reusable programs in standalone `.sed`, `.jq`, or `.awk` executables.
-
-```bash
-read -r -d '' -- JQ <<- 'JQ' || true
-.[] | to_entries[] | [.key] + .value | join("\n")
-JQ
-
-jq --raw-output0 "$JQ" < 'example.json'
-```
-
-- Pipe through conditional blocks — `if`/`case`/`while` can appear mid-pipeline:
-
-```bash
-grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
-  '...'
-else
-  tee
-fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
-```
 
 - Use `printf -- '%s' ...` for single-line output.
 
@@ -91,32 +104,18 @@ fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
 
   - Heredocs for multi-line statements with interpolations:
 
-```bash
-tee <<- EOF
-$VARIABLE_1
-... $VARIABLE_2
-EOF >&2
-```
+    ```bash
+    tee <<- EOF
+    $VARIABLE_1
+    ... $VARIABLE_2
+    EOF >&2
+    ```
 
 - Feed data through redirects instead of `echo` or `printf` pipelines.
 
   - `jq <<< "$JSON"` over `echo "$JSON" | jq`
 
   - `cmd < "$FILE"` or `$(< "$FILE")` over `cat "$FILE" | cmd`
-
-- `exec --` when no code follows.
-
-- `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
-
-- Parameter expansion (`${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}`) over `basename`, `dirname`, or `cut` for string decomposition.
-
-```bash
-BASENAME="${URI##*/}"
-BASENAME="${BASENAME%.git}"
-DIR="${FILE%/*}"
-```
-
-- `(( ))` for math comparisons. `[[ ]]` reserved for string and file tests.
 
 - Capture multiline output with `readarray -t`; avoid word splitting and subshell loops.
 
@@ -131,33 +130,62 @@ DIR="${FILE%/*}"
 
 - Use `"${ARRAY[*]}"` to stringify single element arrays.
 
+---
+
+## Expansion
+
+- `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
+
+- Parameter expansion (`${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}`) over `basename`, `dirname`, or `cut` for string decomposition.
+
+  ```bash
+  BASENAME="${URI##*/}"
+  BASENAME="${BASENAME%.git}"
+  DIR="${FILE%/*}"
+  ```
+
+- `(( ))` for math comparisons. `[[ ]]` reserved for string and file tests.
+
+---
+
+## Embedded Programs
+
+- Pass trivial `sed`, `jq`, and `awk` programs directly as command arguments.
+
+- Embed short, non-trivial programs with heredocs.
+
+- Keep substantial or reusable programs in standalone `.sed`, `.jq`, or `.awk` executables.
+
+  ```bash
+  read -r -d '' -- JQ <<- 'JQ' || true
+  .[] | to_entries[] | [.key] + .value | join("\n")
+  JQ
+
+  jq --raw-output0 "$JQ" < 'example.json'
+  ```
+
+---
+
+## Process Control
+
+- Pipe through conditional blocks — `if`/`case`/`while` can appear mid-pipeline:
+
+  ```bash
+  grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
+    '...'
+  else
+    tee
+  fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
+  ```
+
 - Use a context-named environment flag (`RECUR`, `LOCKED`, `UNDER`) when a script re-enters itself.
 
-```bash
-FILE="$1"
-if [[ -v RECUR ]]; then
-  isort -- "$FILE"
-  exec -- black -- "$FILE"
-fi
+  ```bash
+  FILE="$1"
+  if [[ -v RECUR ]]; then
+    isort -- "$FILE"
+    exec -- black -- "$FILE"
+  fi
 
-RECUR=1 flock "$FILE" "$0" "$@"
-```
-
-- Resolve nearby scripts relative to the current script's directory:
-
-```bash
-SELF="$(realpath -- "$0")"
-BASE="${SELF%/*}"
-
-exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
-```
-
-- `shift -- <count>` after consuming positional args.
-
-- `shopt -u failglob` after the prelude when globs may legitimately match nothing.
-
-- `command -v --` or `hash --` to check command existence.
-
-- `set -a` / `set +a` to scope exports when sourcing an env file.
-
-- Do not use backslash line continuations.
+  RECUR=1 flock "$FILE" "$0" "$@"
+  ```
