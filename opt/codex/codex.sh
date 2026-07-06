@@ -25,20 +25,10 @@ linux*)
 esac
 
 OVERRIDE="$BASE/codex.json"
-read -r -d '' -- JQ <<- 'JQ' || true
-def leaf_paths:
-  def walk($prefix):
-    if type == "object" then
-      to_entries[] as $entry | $entry.value | walk($prefix + [$entry.key])
-    else
-      $prefix
-    end;
-  walk([]);
+MCP_SRC="$ROOT/opt/claude-code/local-plugins/omnibus/.mcp.json"
 
-del(."$schema") | leaf_paths as $p | "\($p | join("."))=\(getpath($p) | tojson)"
-JQ
-
-LS="$(jq -e --raw-output "$JQ" "$OVERRIDE")"
+MCP_RAW="$(envsubst < "$MCP_SRC")"
+LS="$("$BASE/libexec/codex.jq" --raw-output --argjson mcp "$MCP_RAW" "$OVERRIDE")"
 readarray -t LINES --- <<< "$LS"
 
 ARGV=()
