@@ -13,7 +13,9 @@ cp -af -- "$SELF/../opt/claude-code/libexec"/{notify.sh,otel-headers-helper.sh} 
 cp -af --dereference -- "$SELF/../opt/claude-code/libexec"/{fmt-lint.sh,log-hooks.sh,read-session.sh,session-file.sh,which-session.sh} "$CLAUDE_CONFIG_DIR/libexec/"
 cp -af -- "$SELF/../opt/codex/libexec/worktree" "$CLAUDE_CONFIG_DIR/libexec/"
 cp -af --dereference -- "$SELF/../opt/opencode"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
-mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
+if [[ -f $CLAUDE_CONFIG_DIR/AGENTS.md ]]; then
+  mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
+fi
 
 rm -fr -- "$CLAUDE_CONFIG_DIR/skills/shitpost" "$CLAUDE_CONFIG_DIR/agents/web-research.md"
 
