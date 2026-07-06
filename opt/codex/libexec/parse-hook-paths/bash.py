@@ -1,7 +1,6 @@
 #!/usr/bin/env -S -- PYTHONSAFEPATH= python3
 
 from argparse import ArgumentParser
-from collections import deque
 from collections.abc import Iterable, Iterator, MutableSequence, Sequence
 from dataclasses import dataclass
 from itertools import chain
@@ -103,30 +102,30 @@ def _heredocs(command: Iterable[str], *, patch: bool) -> Iterator[_Heredoc]:
 
 
 def _sed_paths(arguments: Iterable[str]) -> Iterator[str]:
-    tokens = deque(arguments)
+    tokens = iter(arguments)
     has_script = False
-    while tokens:
-        token = tokens.popleft()
-        if token.isdigit() and tokens and _is_redirection(tokens[0]):
-            token = tokens.popleft()
+    while token := next(tokens, None):
+        if token.isdigit() and (following := next(tokens, None)) is not None:
+            if _is_redirection(following):
+                token = following
+            else:
+                tokens = chain((following,), tokens)
 
         if _is_redirection(token):
-            target = tokens.popleft() if tokens else ""
-            if token in {"<", "<>"} and target:
+            if (target := next(tokens, "")) and token in {"<", "<>"}:
                 yield target
             continue
 
         if token == "--":
-            if not has_script and tokens:
+            if not has_script:
                 has_script = True
-                tokens.popleft()
+                next(tokens, None)
             yield from tokens
             return
 
         if token in {"-e", "--expression"}:
             has_script = True
-            if tokens:
-                tokens.popleft()
+            next(tokens, None)
             continue
 
         if token.startswith("--expression="):
@@ -135,8 +134,8 @@ def _sed_paths(arguments: Iterable[str]) -> Iterator[str]:
 
         if token == "--file":
             has_script = True
-            if tokens:
-                yield tokens.popleft()
+            if argument := next(tokens, ""):
+                yield argument
             continue
 
         if token.startswith("--file="):
@@ -147,8 +146,8 @@ def _sed_paths(arguments: Iterable[str]) -> Iterator[str]:
         if program := _short_program_option(token):
             option, argument = program
             has_script = True
-            if not argument and tokens:
-                argument = tokens.popleft()
+            if not argument:
+                argument = next(tokens, "")
             if option == "f" and argument:
                 yield argument
             continue
@@ -180,12 +179,6 @@ def _read_too() -> bool:
     return bool(parser.parse_args().read_too)
 
 
-def _run_patch(patch: Iterable[str]) -> None:
-    source = "\n".join(chain(patch, ("",)))
-    stdout.buffer.flush()
-    run([_AWK], input=source.encode(), check=True)
-
-
 def _heredoc_body(document: _Heredoc, *, lines: Iterator[str]) -> Iterator[str]:
     for raw_line in lines:
         line = raw_line.removesuffix("\n").removesuffix("\r")
@@ -195,13 +188,19 @@ def _heredoc_body(document: _Heredoc, *, lines: Iterator[str]) -> Iterator[str]:
         yield candidate
 
 
+def _run_patch(patch: Iterable[str]) -> None:
+    source = "\n".join(chain(patch, ("",)))
+    stdout.flush()
+    run([_AWK], input=source.encode(), check=True)
+
+
 def _consume_heredoc(document: _Heredoc, *, lines: Iterator[str]) -> None:
     body = _heredoc_body(document, lines=lines)
     if document.patch:
         _run_patch(body)
         return
     for _ in body:
-        ...
+        pass
 
 
 def _main() -> None:
