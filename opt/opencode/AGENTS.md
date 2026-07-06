@@ -28,35 +28,17 @@
 
 Frame each dimension at both the object and meta levels. Write it down:
 
-- Problem:
+- Problem, and what governs its definition.
 
-  - What are we solving? Are we solving the right problem?
+- Motivation, and what underlies it.
 
-  - What problem governs how we define the problem?
+- Constraints, and how they are identified or negotiated.
 
-- Motivation:
+- Uncertainties, and uncertainty in the model of them.
 
-  - Why solve it?
+- Assumptions, and what governs their acceptance.
 
-  - What underlies that motivation?
-
-- Constraints:
-
-  - What limits apply?
-
-  - What constrains how we identify or negotiate them?
-
-- Uncertainties:
-
-  - What is unknown?
-
-  - What is uncertain about our model of the unknowns?
-
-- Approach:
-
-  - What direction are we taking?
-
-  - How are we choosing and evaluating that direction?
+- Approach, and how it is selected and evaluated.
 
 ## Interrogate
 
