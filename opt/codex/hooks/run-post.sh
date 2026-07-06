@@ -36,9 +36,9 @@ JSON
   ;;
 Stop | StopFailure)
   find "$POST_DIR" -mindepth 1 -execdir cat -- '{}' ';' -delete | sort -z --unique > "$TMP"
-  SUCC=0
-  if CTX="$(xargs -r --null -I % --max-procs=0 -- "$BASE/libexec/fmt-lint.sh" < "$TMP")"; then
-    SUCC=1
+  SUCC=false
+  if CTX="$(xargs -r --null -I % --max-procs=0 -- "$BASE/libexec/fmt-lint.sh" % < "$TMP" 2>&1)"; then
+    SUCC=true
   fi
 
   read -r -d '' -- JQ <<- 'JQ' || true
