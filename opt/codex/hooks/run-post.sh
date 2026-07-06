@@ -43,8 +43,8 @@ Stop | StopFailure)
 
   read -r -d '' -- JQ <<- 'JQ' || true
 {
-  "decision": (if $success == 1 then null else "block" end),
-  "reason": (if $success == 1 then null else $reason end)
+  "decision": (if $success then null else "block" end),
+  "reason": (if $success then null else $reason end)
 }
 JQ
   jq -e --null-input --argjson success "$SUCC" --arg reason "$CTX" "$JQ"
