@@ -9,15 +9,6 @@
           }
         ],
         "matcher": "Bash|apply_patch"
-      },
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/codex/hooks/run-post.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "apply_patch"
       }
     ],
     "PreToolUse": [
@@ -29,6 +20,15 @@
           }
         ],
         "matcher": "Bash"
+      },
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/codex/hooks/run-post.sh",
+            "type": "command"
+          }
+        ],
+        "matcher": "Bash|apply_patch"
       }
     ],
     "SessionEnd": [

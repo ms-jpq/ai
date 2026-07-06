@@ -17,7 +17,7 @@ trap 'rm -fr -- "$TMP"' EXIT
 mkdir -p -- "$POST_DIR"
 
 case "$EVENT" in
-PostToolUse)
+PreToolUse)
   if ! "$BASE/libexec/parse-hook-paths.sh" <<< "$JSON" > "$TMP"; then
     exit
   fi
@@ -30,12 +30,19 @@ PostToolUse)
   done
 
   read -r -d '' -- JSON <<- 'JSON' || true
-{ "hookSpecificOutput": { "hookEventName": "PostToolUse" } }
+{ "hookSpecificOutput": { "hookEventName": "PreToolUse" } }
 JSON
   printf -- '%s' "$JSON"
   ;;
 Stop | StopFailure)
   find "$POST_DIR" -mindepth 1 -execdir cat -- '{}' ';' -delete | sort -z --unique > "$TMP"
+  readarray -d '' -t -- PATHNAMES < "$TMP"
+  for PATHNAME in "${PATHNAMES[@]}"; do
+    if [[ -f $PATHNAME ]]; then
+      printf -- '%s\0' "$PATHNAME"
+    fi
+  done > "$TMP"
+
   SUCC=false
   if CTX="$(xargs -r --null -I % --max-procs=0 -- "$BASE/libexec/fmt-lint.sh" % < "$TMP" 2>&1)"; then
     SUCC=true
