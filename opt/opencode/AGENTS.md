@@ -66,9 +66,9 @@ Decompose the problem space into its principal dimensions; identify where they *
 
 - Locate leverage points where local change can alter system behavior.
 
-- Stress-test the model at its weak points: ambiguities, assumptions, and missing constraints, and hidden dimensions.
-
 - Continuously refine through dialectic.
+
+  - Stress-test the model, and the assumptions adversially.
 
 ## Actualize
 

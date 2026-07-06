@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 - Find all source files relevant to the topic:
 
-  - Read every file — don't sample.
+  - Define the corpus boundary, then read every file within it.
 
   - Include invocations.
 
@@ -20,4 +20,4 @@ disable-model-invocation: true
 
 # Record
 
-- Write `<topic>.md` to the user's current working directory, not this skill's directory.
+- Write `.notes/research/<topic>.md` relative to the user's current working directory.

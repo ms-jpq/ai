@@ -5,7 +5,7 @@ description: Iteratively improve writing.
 
 # Prepare
 
-- Infer the reader from context.
+- Write for the reader's goal, knowledge, and vocabulary evident from context.
 
 - Break prose into point form before iterating.
 
