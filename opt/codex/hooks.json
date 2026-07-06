@@ -6,13 +6,18 @@
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
-          },
+          }
+        ],
+        "matcher": "Bash|apply_patch"
+      },
+      {
+        "hooks": [
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/run-post.sh",
             "type": "command"
           }
         ],
-        "matcher": "Bash|apply_patch"
+        "matcher": "apply_patch"
       }
     ],
     "PreToolUse": [

@@ -15,7 +15,6 @@ POST_DIR="$SESSIONS/$SESSION_ID.fmt"
 TMP="$(mktemp)"
 trap 'rm -fr -- "$TMP"' EXIT
 mkdir -p -- "$POST_DIR"
-CONTEXT=()
 
 case "$EVENT" in
 PostToolUse)
@@ -29,26 +28,29 @@ PostToolUse)
     HASH="${HASH%% *}"
     printf -- '%s\0' "$PATHNAME" > "$POST_DIR/$HASH"
   done
+
+  read -r -d '' -- JSON <<- 'JSON' || true
+{ "hookSpecificOutput": { "hookEventName": "PostToolUse" } }
+JSON
+  printf -- '%s' "$JSON"
   ;;
 Stop | StopFailure)
-  find "$POST_DIR" -mindepth 1 -execdir cat -- '{}' + -delete | sort -z --unique > "$TMP"
-  CONTEXT+=("$(xargs -r --null -I % --max-procs=0 -- "$BASE/libexec/fmt-lint.sh" < "$TMP" || true)")
+  find "$POST_DIR" -mindepth 1 -execdir cat -- '{}' ';' -delete | sort -z --unique > "$TMP"
+  SUCC=0
+  if CTX="$(xargs -r --null -I % --max-procs=0 -- "$BASE/libexec/fmt-lint.sh" < "$TMP")"; then
+    SUCC=1
+  fi
+
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  "decision": (if $success == 1 then null else "block" end),
+  "reason": (if $success == 1 then null else $reason end)
+}
+JQ
+  jq -e --null-input --argjson success "$SUCC" --arg reason "$CTX" "$JQ"
   ;;
 *)
   set -x
   exit 2
   ;;
 esac
-
-printf -v CONTEXT_TEXT -- '%s\n\n' "${CONTEXT[@]}"
-printf -v CONTEXT_TEXT -- '%s' "${CONTEXT_TEXT%$'\n\n'}"
-
-read -r -d '' -- JQ <<- 'JQ' || true
-{
-  "hookSpecificOutput": {
-    "hookEventName": $event,
-    "additionalContext": $context
-  }
-}
-JQ
-jq -e --null-input --arg event "$EVENT" --arg context "$CONTEXT_TEXT" "$JQ"

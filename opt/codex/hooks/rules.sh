@@ -110,7 +110,11 @@ if ! ((${#CONTEXT[@]})); then
 fi
 
 printf -v CONTEXT_TEXT -- '%s\n\n' "${CONTEXT[@]}"
-printf -v CONTEXT_TEXT -- '<system-reminder>\n%s\n</system-reminder>' "${CONTEXT_TEXT%$'\n\n'}"
+read -r -d '' -- CONTEXT_TEXT <<- EOF || true
+<system-reminder>
+${CONTEXT_TEXT%$'\n\n'}
+</system-reminder>
+EOF
 
 read -r -d '' -- JQ <<- 'JQ' || true
 {
