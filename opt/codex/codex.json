@@ -19,6 +19,10 @@
     }
   },
   "sandbox_mode": "danger-full-access",
+  "shell_environment_policy": {
+    "ignore_default_excludes": true,
+    "inherit": "all"
+  },
   "tui": {
     "status_line": [
       "run-state",
