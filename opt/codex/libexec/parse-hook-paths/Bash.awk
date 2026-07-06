@@ -4,6 +4,21 @@
   scan_commands($0)
 }
 
+function command_start(argv, argc, L_i)
+{
+  if (! argc) {
+    return 0
+  }
+  L_i = 1
+  if (argv[L_i] == "command") {
+    L_i++
+  }
+  if (L_i > argc) {
+    return 0
+  }
+  return L_i
+}
+
 function emit(path)
 {
   printf "%s%c", path, 0
@@ -19,12 +34,9 @@ function flush(argv, argc, token)
 
 function parse_command(argv, argc, L_has_script, L_i, L_sed)
 {
-  if (! argc) {
+  L_sed = command_start(argv, argc)
+  if (! L_sed) {
     return
-  }
-  L_sed = 1
-  if (argv[L_sed] == "command") {
-    L_sed++
   }
   if (argv[L_sed] != "sed") {
     return
