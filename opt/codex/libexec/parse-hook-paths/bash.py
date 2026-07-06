@@ -1,8 +1,10 @@
 #!/usr/bin/env -S -- PYTHONSAFEPATH= python3
 
 from argparse import ArgumentParser, Namespace
-from collections.abc import Iterable, Iterator
+from collections import deque
+from collections.abc import Iterable, Iterator, MutableSequence, Sequence
 from dataclasses import dataclass
+from itertools import chain
 from pathlib import Path
 from shlex import shlex
 from subprocess import run
@@ -18,25 +20,54 @@ class _Heredoc:
     strip_tabs: bool
 
 
+@dataclass(frozen=True)
+class _Command:
+    name: str
+    arguments: Sequence[str]
+
+
 def _tokens(source: str) -> Iterator[str]:
-    lexer = shlex(source, posix=True, punctuation_chars=";&|()<>")
-    lexer.commenters = "#"
-    lexer.whitespace_split = True
-    return lexer
+    lex = shlex(source, posix=True, punctuation_chars=";&|()<>")
+    lex.commenters = "#"
+    lex.whitespace_split = True
+    return lex
 
 
-def _commands(tokens: Iterable[str]) -> list[list[str]]:
-    commands: list[list[str]] = [[]]
+def _run_patch(patch: Iterable[str]) -> None:
+    source = "\n".join(chain(patch, ("",)))
+    stdout.buffer.flush()
+    run([_AWK], input=source.encode(), check=True)
+
+
+def _emit(path: str) -> None:
+    if path:
+        stdout.buffer.write(path.encode() + b"\0")
+
+
+def _commands(tokens: Iterable[str]) -> Iterator[Sequence[str]]:
+    acc: MutableSequence[str] = []
     for token in tokens:
         if token and all(character in ";&|()" for character in token):
-            if commands[-1]:
-                commands.append([])
+            if acc:
+                yield acc
+                acc = []
             continue
-        commands[-1].append(token)
-    return [command for command in commands if command]
+        acc.append(token)
+    if acc:
+        yield acc
 
 
-def _command_index(command: list[str]) -> int | None:
+def _is_assignment(token: str) -> bool:
+    name, sep, _ = token.partition("=")
+    return bool(
+        sep
+        and name
+        and (name[0].isalpha() or name[0] == "_")
+        and all(chr.isalnum() or chr == "_" for chr in name)
+    )
+
+
+def _parse_command(command: Sequence[str]) -> _Command | None:
     index = 0
     while index < len(command) and _is_assignment(command[index]):
         index += 1
@@ -48,50 +79,45 @@ def _command_index(command: list[str]) -> int | None:
             return None
         if index < len(command) and command[index] == "--":
             index += 1
-    return index if index < len(command) else None
+    if index >= len(command):
+        return None
+    return _Command(
+        name=Path(command[index]).name,
+        arguments=command[index + 1 :],
+    )
 
 
-def _emit(path: str) -> None:
-    if path:
-        stdout.buffer.write(path.encode() + b"\0")
-
-
-def _heredocs(command: list[str], *, patch: bool) -> list[_Heredoc]:
-    documents: list[_Heredoc] = []
-    index = 0
-    while index < len(command):
-        if command[index] != "<<":
-            index += 1
+def _heredocs(command: Iterable[str], *, patch: bool) -> Iterator[_Heredoc]:
+    tokens = iter(command)
+    for token in tokens:
+        if token != "<<":
             continue
-        index += 1
-        if index >= len(command):
+        if (delimiter := next(tokens, None)) is None:
             break
-        delimiter = command[index]
         strip_tabs = delimiter.startswith("-")
         if strip_tabs:
             delimiter = delimiter[1:]
-        documents.append(
-            _Heredoc(delimiter=delimiter, patch=patch, strip_tabs=strip_tabs)
+        yield _Heredoc(
+            delimiter=delimiter,
+            patch=patch,
+            strip_tabs=strip_tabs,
         )
-        index += 1
-    return documents
-
-
-def _is_assignment(token: str) -> bool:
-    name, separator, _ = token.partition("=")
-    return bool(
-        separator
-        and name
-        and (name[0].isalpha() or name[0] == "_")
-        and all(character.isalnum() or character == "_" for character in name)
-    )
 
 
 def _is_redirection(token: str) -> bool:
     return bool(token) and all(character in "<>&|" for character in token)
 
 
-def _parse_sed(arguments: list[str]) -> None:
+def _short_program_option(token: str) -> tuple[str, str] | None:
+    if not token.startswith("-") or token.startswith("--"):
+        return None
+    for index, option in enumerate(token[1:], start=2):
+        if option in {"e", "f"}:
+            return option, token[index:]
+    return None
+
+
+def _sed_paths(arguments: Sequence[str]) -> Iterator[str]:
     has_script = False
     index = 0
     while index < len(arguments):
@@ -106,7 +132,7 @@ def _parse_sed(arguments: list[str]) -> None:
         if _is_redirection(token):
             index += 1
             if index < len(arguments) and token.startswith("<") and "<<" not in token:
-                _emit(arguments[index])
+                yield arguments[index]
             index += 1
             continue
         if token == "--":
@@ -114,85 +140,57 @@ def _parse_sed(arguments: list[str]) -> None:
             if not has_script and index < len(arguments):
                 has_script = True
                 index += 1
-            for path in arguments[index:]:
-                _emit(path)
+            yield from arguments[index:]
             return
         if token in {"-e", "--expression"}:
             has_script = True
             index += 2
             continue
-        if token.startswith("-e") or token.startswith("--expression="):
+        if token.startswith("--expression="):
             has_script = True
             index += 1
             continue
-        if token in {"-f", "--file"}:
+        if token == "--file":
             has_script = True
             if index + 1 < len(arguments):
-                _emit(arguments[index + 1])
+                yield arguments[index + 1]
             index += 2
-            continue
-        if token.startswith("-f"):
-            has_script = True
-            _emit(token[2:])
-            index += 1
             continue
         if token.startswith("--file="):
             has_script = True
-            _emit(token.removeprefix("--file="))
+            yield token.removeprefix("--file=")
+            index += 1
+            continue
+        if program := _short_program_option(token):
+            option, argument = program
+            has_script = True
+            if not argument and index + 1 < len(arguments):
+                index += 1
+                argument = arguments[index]
+            if option == "f":
+                yield argument
             index += 1
             continue
         if token.startswith("-") and token != "-":
-            option_argument = token[1:]
-            option_argument = option_argument[
-                min(
-                    (
-                        position
-                        for position in (
-                            option_argument.find("e"),
-                            option_argument.find("f"),
-                        )
-                        if position >= 0
-                    ),
-                    default=len(option_argument),
-                ) :
-            ]
-            if option_argument.startswith("e"):
-                has_script = True
-                if option_argument == "e":
-                    index += 1
-            elif option_argument.startswith("f"):
-                has_script = True
-                path = option_argument[1:]
-                if not path and index + 1 < len(arguments):
-                    index += 1
-                    path = arguments[index]
-                _emit(path)
             index += 1
             continue
         if not has_script:
             has_script = True
         else:
-            _emit(token)
+            yield token
         index += 1
 
 
-def _scan(source: str, *, read_too: bool) -> list[_Heredoc]:
-    documents: list[_Heredoc] = []
-    for command in _commands(_tokens(source)):
-        if (index := _command_index(command)) is None:
+def _scan(source: str, *, read_too: bool) -> Iterator[_Heredoc | str]:
+    for tokens in _commands(_tokens(source)):
+        if (command := _parse_command(tokens)) is None:
             continue
-        name = Path(command[index]).name
-        patch = name == "apply_patch"
-        documents.extend(_heredocs(command[index + 1 :], patch=patch))
-        if read_too and name == "sed":
-            _parse_sed(command[index + 1 :])
-    return documents
-
-
-def _run_patch(body: list[str]) -> None:
-    source = "\n".join(body) + "\n"
-    stdout.buffer.flush()
-    run([_AWK], input=source.encode(), check=True)
+        yield from _heredocs(
+            command.arguments,
+            patch=command.name == "apply_patch",
+        )
+        if read_too and command.name == "sed":
+            yield from _sed_paths(command.arguments)
 
 
 def _parse_args() -> Namespace:
@@ -203,8 +201,8 @@ def _parse_args() -> Namespace:
 
 def _main() -> None:
     args = _parse_args()
-    pending: list[_Heredoc] = []
-    body: list[str] = []
+    pending = deque[_Heredoc]()
+    body: MutableSequence[str] = []
     logical_line = ""
 
     for raw_line in stdin:
@@ -215,7 +213,7 @@ def _main() -> None:
             if candidate == document.delimiter:
                 if document.patch:
                     _run_patch(body)
-                pending.pop(0)
+                pending.popleft()
                 body = []
             elif document.patch:
                 body.append(candidate)
@@ -226,7 +224,12 @@ def _main() -> None:
             continue
         logical_line += raw_line
         try:
-            pending.extend(_scan(logical_line, read_too=args.read_too))
+            for event in _scan(logical_line, read_too=args.read_too):
+                match event:
+                    case _Heredoc():
+                        pending.append(event)
+                    case str():
+                        _emit(event)
         except ValueError as error:
             if str(error) not in {"No closing quotation", "No escaped character"}:
                 raise
