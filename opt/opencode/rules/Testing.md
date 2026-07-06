@@ -8,10 +8,14 @@ paths:
 
 ## Parallelism
 
-- All unit tests run in parallel. Each test independent.
+- Run all unit tests in parallel; keep each test independent.
 
 - Shuffle test execution order.
 
+---
+
 ## Testability
 
-- Tests call functions directly and assert on return values. Stay in-process — return values and exceptions are the test surface.
+- Test transforms in-process through direct calls, return values, and exceptions.
+
+- Test effects through substitutable boundary implementations.

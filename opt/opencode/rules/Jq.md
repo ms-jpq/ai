@@ -5,7 +5,7 @@ paths:
 
 # JQ
 
-- Standalone `jq` scripts get this shebang:
+- Start standalone `jq` scripts with:
 
 ```jq
 #!/usr/bin/env -S -- jq --exit-status --from-file

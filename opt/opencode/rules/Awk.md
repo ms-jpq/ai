@@ -5,10 +5,10 @@ paths:
 
 # Awk
 
-- Standalone `awk` scripts get this shebang:
+- Start standalone `awk` scripts with:
 
 ```awk
 #!/usr/bin/env -S -- awk -f
 ```
 
-- Function-local (non-input) variables are named with the `L_` prefix.
+- Prefix function-local, non-input variables with `L_`.

@@ -1,13 +1,15 @@
 # Planning
 
-- Draft plans under `.notes/plans/*` instead of using plan mode.
+## Draft
 
-  - Name should follow `YY-MM-DD-<slug>.md`
+- Draft plans under `.notes/plans/YY-MM-DD-<slug>.md`; do not use plan mode.
 
-- Use the `/open` skill once document has been drafted.
+---
 
-  - Pause before implementation.
+## Review
 
-- Expect the user to edit the planning document.
+- Use `/open` after drafting the plan.
 
-  - Re-read the document after pause.
+- Pause before implementation so the user can edit the plan.
+
+- Re-read the plan after the pause.

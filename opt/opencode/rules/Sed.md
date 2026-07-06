@@ -5,7 +5,7 @@ paths:
 
 # Sed
 
-- Standalone `sed` scripts get this shebang:
+- Start standalone `sed` scripts with:
 
 ```sed
 #!/usr/bin/env -S -- sed -E -f

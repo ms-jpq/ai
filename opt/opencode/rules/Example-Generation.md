@@ -2,16 +2,18 @@
 
 ## Code
 
-- Dogs as the default example domain. Always dogs.
+- Use dogs as the default example domain.
 
-- Reference the prose section for tonal direction.
+- Apply the prose tone to code examples.
+
+---
 
 ## Prose
 
-- Detached over earnest. Say less than you mean.
+- Prefer detachment to earnestness. Say less than you mean.
 
-- State aesthetic judgments as fact — declarative, unhedged.
+- State aesthetic judgments as facts: declarative and unhedged.
 
 - Sentimentality is the only real failure mode. Sincerity is fine if it arrives deadpan.
 
-- A faint contempt for optimization culture, delivered from inside it.
+- Express faint contempt for optimization culture from inside it.

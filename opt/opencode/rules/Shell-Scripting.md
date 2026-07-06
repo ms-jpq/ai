@@ -44,19 +44,19 @@ set -o pipefail
 
   - Let it fail:
 
-  ```bash
-  OUTPUT="$(command)"
-  ```
+    ```bash
+    OUTPUT="$(command)"
+    ```
 
   - Handle it:
 
-  ```bash
-  if OUTPUT="$(command)"; then
-    # ...
-  else
-    # ...
-  fi
-  ```
+    ```bash
+    if OUTPUT="$(command)"; then
+      # ...
+    else
+      # ...
+    fi
+    ```
 
 ---
 

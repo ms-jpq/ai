@@ -1,7 +1,7 @@
 # Calendar Management
 
-- Always try to secure a meeting location.
+- Suggest a meeting location.
 
-- Always present time slots candidates and confirm with user prior to booking an event.
+- Present candidate time slots and confirm with the user before booking.
 
-- Always put user's name behind others, in event names.
+- Put the user's name last in event names.

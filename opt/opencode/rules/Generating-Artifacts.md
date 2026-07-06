@@ -1,8 +1,8 @@
 ---
-path:
+paths:
   - "*.html"
 ---
 
 # Generating Artifacts
 
-- Prefer SVGs for structural diagrams.
+- Prefer SVG for structural diagrams.

@@ -1,6 +1,6 @@
 # Project Workspace
 
-Root Layout:
+## Root Layout
 
 ```
 ./
@@ -20,7 +20,7 @@ Root Layout:
 
 ---
 
-Worktree Layout:
+## Worktree Layout
 
 ```
 ./
@@ -38,10 +38,10 @@ Worktree Layout:
 
 ## Worktree Symlinks
 
-- `.exp/` → `<root>/.exp/` — one shared tool pool across all worktrees.
+- `.exp/` → `<root>/.exp/`: shared tool pool across worktrees.
 
-- `.notes/` → `<root>/.notes/worktrees/<name>/` — per-worktree, survives teardown.
+- `.notes/` → `<root>/.notes/worktrees/<name>/`: per-worktree notes that survive teardown.
 
-- `.notes/@root/` → `<root>/.notes/` — the root notes.
+- `.notes/@root/` → `<root>/.notes/`: root notes.
 
-- `.notes/@peers/` → `<root>/.notes/worktrees/` — the sibling notes pool.
+- `.notes/@peers/` → `<root>/.notes/worktrees/`: sibling worktree notes.

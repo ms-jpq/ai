@@ -6,4 +6,4 @@ paths:
 
 # YAML
 
-- `.yml` over `.yaml`.
+- Prefer `.yml` to `.yaml`.

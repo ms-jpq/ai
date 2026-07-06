@@ -1,11 +1,11 @@
 # Web Search
 
-- The configured search engine may proxy popular sites through privacy mirrors. Result URLs land on the mirror host, not the canonical one:
+- Expect the configured search engine to proxy popular sites through privacy mirrors:
 
   - `x.com` / `twitter.com` → nitter
 
   - `reddit.com` → libreddit / redlib / teddit
 
-  - (others may apply)
+  - Other sites may also use mirrors.
 
-- The mirrored sites are both expected, and preferred.
+- Prefer mirrored result URLs to their canonical equivalents.

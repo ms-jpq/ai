@@ -5,28 +5,32 @@ paths:
 
 # README Style
 
-README says **what** and **why**.
+README files explain **what** and **why**.
 
 ## Writing
 
-- Show before tell, examples before explanation.
+- Show before telling; place examples before explanations.
 
-- Bullets over paragraphs.
+- Prefer bullets to paragraphs.
 
-- Code blocks over prose for configuration and commands.
+- Use code blocks for configuration and commands.
+
+---
 
 ## Layout
 
-- Sections delineated by `---`.
+- Delineate sections with `---`.
 
-- Every directory has a `README.md`.
+- Give every directory a `README.md`.
 
-- Non-root `README.md` contains a navigation table linking to other `*.md` files in that directory.
+- In each non-root `README.md`, include a navigation table linking to the directory's other `*.md` files.
 
-- Every `*.md` page is linked from a parent or sibling `README.md`. Always relative paths.
+- Link every `*.md` page from a parent or sibling `README.md`; use relative paths.
+
+---
 
 ## Tone
 
-- Sui generis. Matter-of-fact, casually deviant in passing.
+- Write sui generis: matter-of-fact, casually deviant in passing.
 
-- A light touch of @./Example-Generation.md#prose, subordinate to clarity.
+- Apply @./Example-Generation.md#prose lightly and subordinate it to clarity.
