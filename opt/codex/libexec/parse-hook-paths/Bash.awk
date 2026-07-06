@@ -1,7 +1,7 @@
 #!/usr/bin/env -S -- awk -f
 
 {
-  tokenize($0)
+  scan_commands($0)
 }
 
 function emit(path)
@@ -17,7 +17,7 @@ function flush(argv, argc, token)
   return argc
 }
 
-function parse(argv, argc, L_has_script, L_i, L_sed)
+function parse_command(argv, argc, L_has_script, L_i, L_sed)
 {
   if (! argc) {
     return
@@ -74,7 +74,7 @@ function parse(argv, argc, L_has_script, L_i, L_sed)
   }
 }
 
-function tokenize(line, argv, L_argc, L_char, L_escaped, L_i, L_j, L_quote, L_token)
+function scan_commands(line, argv, L_argc, L_char, L_escaped, L_i, L_j, L_quote, L_token)
 {
   L_argc = 0
   L_quote = ""
@@ -110,7 +110,7 @@ function tokenize(line, argv, L_argc, L_char, L_escaped, L_i, L_j, L_quote, L_to
     }
     if (L_char ~ /[;&|()]/) {
       L_argc = flush(argv, L_argc, L_token)
-      parse(argv, L_argc)
+      parse_command(argv, L_argc)
       for (L_j in argv) {
         delete argv[L_j]
       }
@@ -121,5 +121,5 @@ function tokenize(line, argv, L_argc, L_char, L_escaped, L_i, L_j, L_quote, L_to
     L_token = L_token L_char
   }
   L_argc = flush(argv, L_argc, L_token)
-  parse(argv, L_argc)
+  parse_command(argv, L_argc)
 }

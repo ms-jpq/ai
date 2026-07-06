@@ -1,9 +1,9 @@
 ---
 name: problem-statement
-description: Draft a problem statement, then sharpen it with the user. Iterate until crisp.
+description: Formulate a problem statement, then sharpen it. Iterate until crisp.
 ---
 
-# Draft
+# Hypotheize
 
 - Problem: what are you solving?
 
@@ -19,6 +19,8 @@ description: Draft a problem statement, then sharpen it with the user. Iterate u
 
 # Sharpen
 
-- Surface the weakest line — ambiguity, assumption, missing constraint.
+- Surface the weakest points: ambiguity, assumption, missing constraint.
 
-- Iterate with the user per @../refine/SKILL.md. Loop until the statement is crisp.
+- Decompose the problem space into its principal dimensions; identify where they **complect**.
+
+- Loop until the statement is crisp. See @../refine/SKILL.md

@@ -1,7 +1,6 @@
 ---
 name: go
 description: Delegate task(s) to background sub-agent(s).
-agent: general-purpose
 disable-model-invocation: true
 ---
 

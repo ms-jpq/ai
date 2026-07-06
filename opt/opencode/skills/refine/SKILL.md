@@ -19,7 +19,7 @@ description: Iteratively improve writing.
 
 - What are the internal contradictions?
 
-- Is each point at the right strength — too absolute, too hedged, or well-calibrated?
+- Is each point at the right strength? Too absolute, too hedged, or well-calibrated?
 
 - Are claims concrete enough to act on?
 
