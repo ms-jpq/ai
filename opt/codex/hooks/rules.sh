@@ -38,15 +38,21 @@ SessionStart)
   PREFACE="$(< "$BASE/libexec/rules-preface.txt")"
   CONTEXT=("# agentsMd"$'\n'"$PREFACE")
 
+  PATH_CONTEXT=()
   for RULE in "$RULES"/*.md; do
     if PATHS="$("$PARSE_PATHS" "$RULE" | grep -e .)"; then
-      CONTEXT+=("Rule $RULE applies to paths:"$'\n'"$(tr -- '\n' ' ' <<< "$PATHS")")
+      PATH_CONTEXT+=("Rule $RULE applies to paths:"$'\n'"$(tr -- '\n' ' ' <<< "$PATHS")")
       continue
     fi
 
     CONTENT="$(awk "$AWK" < "$RULE")"
     CONTEXT+=("Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"$CONTENT")
   done
+
+  if ((${#PATH_CONTEXT[@]})); then
+    CONTEXT+=('---')
+  fi
+  CONTEXT+=("${PATH_CONTEXT[@]}")
   ;;
 PostToolUse)
   TMP="$(mktemp)"
