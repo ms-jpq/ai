@@ -5,6 +5,10 @@ paths:
 
 # Python
 
+---
+
+## Defaults
+
 Typical script prelude:
 
 ```python
@@ -18,60 +22,78 @@ with nullcontext():
     basicConfig(format="%(message)s", level=INFO)
 ```
 
-- `from module import name` for all imports.
+- Import names directly with `from module import name`.
 
-- Functions with multiple parameters use `*` after the first positional argument — forces keyword passing for the rest.
+- Prefix non-exported module-level constants, functions, and classes with `_`.
 
-```python
-def fetch(url, *, timeout=30, retries=3): ...
-def render(template, *, context, strict=False): ...
-```
+---
 
-- Control flow idioms:
+## Functions
 
-  - `match/case` over `isinstance` chains and nested `if/elif` on type or shape.
+- After the first positional parameter, use `*` to make remaining parameters keyword-only.
 
-  - `:=` to collapse assign-then-test into one expression.
+  ```python
+  def fetch(url, *, timeout=30, retries=3): ...
+  def render(template, *, context, strict=False): ...
+  ```
 
-  - `suppress()` over bare `try/except`.
+- Use generators instead of closures with `nonlocal` for incremental stateful iteration.
 
-  - `...` for noop bodies.
+---
 
-  - Scripts execute at module scope — top-level code runs on invocation.
+## Control Flow
 
-  - `with nullcontext(): ...` to group related statements.
+- Use `match`/`case` instead of `isinstance` chains or nested `if`/`elif` branches on type or shape.
 
-  - Single `with a, b:` over nested `with a: with b:`.
+- Use `:=` when a value is both assigned and tested.
 
-- Only for Python: Prefix non-exported module-level names with `_` — constants, functions, classes.
+- Use `suppress()` when intentionally ignoring a specific exception; never use bare `except`.
 
-- `@dataclass(frozen=True)` for data types.
+- Use `...` for intentional no-op bodies.
 
-- `@contextmanager` to extract repeated try/except/log, timing, and atomic I/O patterns.
+- Execute scripts at module scope.
 
-- `TypedDict` for JSON input shapes — model the structure, use typed field access.
+- Use `with nullcontext(): ...` to give related statements a visual scope.
 
-- `.get()` over `["key"]` on untrusted data. Reserve bracket access for shapes that are known to the type checker.
+- Combine context managers in one `with a, b:` statement.
 
-- `dict.setdefault()` over check-then-insert.
+---
 
-- Generators over closure/nonlocal for stateful iteration that yields results incrementally.
+## Data Modeling
 
-- `getLogger()` over `print`. Call inline at each site. `"%s"` format, f-string argument: `getLogger().info("%s", f"{count} entries")`. Errors: `getLogger().error("%s", e, exc_info=True)`.
+- Use `@dataclass(frozen=True)` for immutable data types.
 
-- `argparse` for CLIs.
+- Model JSON object shapes with `TypedDict` and typed field access.
+
+- Use `.get()` for optional keys in untrusted mappings. Use bracket access for required keys represented in the type.
+
+- Use `dict.setdefault()` instead of check-then-insert.
+
+---
+
+## Effects
+
+- Use `@contextmanager` to extract repeated setup, teardown, timing, logging, and atomic I/O patterns.
+
+- Use `getLogger()` instead of `print`; call it inline at each site. Pass format arguments separately: `getLogger().info("%d entries", count)`. Inside exception handlers, include the traceback: `getLogger().error("%s", error, exc_info=True)`.
+
+---
+
+## Command-Line Interfaces
+
+- Use `argparse` for CLIs.
 
   - Spell out keyword arguments: `action=`, `type=`, `default=`, `nargs=`, `required=`.
 
-  - `add_mutually_exclusive_group()` for conflicting flags.
+  - Use `add_mutually_exclusive_group()` for conflicting flags.
 
-  - `add_subparsers(dest=..., required=True)` for multi-command CLIs, dispatch with `match`/`case`.
+  - Use `add_subparsers(dest=..., required=True)` for multi-command CLIs; dispatch with `match`/`case`.
 
-```python
-def _parse_args() -> Namespace:
-    parser = ArgumentParser()
-    parser.add_argument("--output", required=True)
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("paths", nargs="+")
-    return parser.parse_args()
-```
+  ```python
+  def _parse_args() -> Namespace:
+      parser = ArgumentParser()
+      parser.add_argument("--output", required=True)
+      parser.add_argument("--dry-run", action="store_true")
+      parser.add_argument("paths", nargs="+")
+      return parser.parse_args()
+  ```

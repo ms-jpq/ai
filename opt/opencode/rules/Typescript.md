@@ -12,99 +12,113 @@ paths:
 
 # TypeScript
 
-- `const foo = () => {}` over `function foo() {}`.
+## Functions
 
-- `const foo = function*() {}` for generators. Must use `IteratorObject<T>` for sync, `AsyncIteratorObject<T>` for async.
+- Prefer `const foo = () => {}` to `function foo() {}`.
 
-  - Explicit `return` at body end.
+- Define generators with `const foo = function*() {}`. Use `IteratorObject<T>` for synchronous generators and `AsyncIteratorObject<T>` for asynchronous generators.
 
-- `({ ... })` — single params object for multi-argument functions. Inline the type unless shared.
+  - End generator bodies with an explicit `return`.
 
-```typescript
-const fetch = ({ url, timeout = 30, retries = 3 }: { url: string; timeout?: number; retries?: number }) => {}
-```
+- Accept one destructured parameters object when a function requires multiple arguments. Inline its type unless shared.
 
-- `satisfies` over type annotations where possible. Preserves literal/narrowed types.
+  ```typescript
+  const fetch = ({ url, timeout = 30, retries = 3 }: { url: string; timeout?: number; retries?: number }) => {}
+  ```
 
-- IIFEs `(() => {})()` to localize or eliminate mutable state.
+---
 
-- Closures over classes for stateful objects:
+## Types
 
-```typescript
-const buffer = <T>() => {
-  const acc: T[] = []
-  return {
-    push: (x: T) => acc.push(x),
-    drain: function* () {
-      yield* acc
-      acc.length = 0
-    },
+- Use `satisfies` to validate a shape without widening inferred literal types.
+
+- Attach metadata to domain types with `unique symbol` keys.
+
+  ```typescript
+  const META: unique symbol = Symbol("meta")
+  type Decorated = Base & { [META]: Meta }
+  ```
+
+- Use `undefined` consistently; do not use `null`.
+
+- Use `??` for nullish coalescing. Reserve `||` for boolean short-circuiting.
+
+- Use control-flow narrowing instead of casts. Reserve `as` for `as const`.
+
+- Annotate every function signature. Otherwise, add annotations only when inference loses required precision.
+
+- Use `import type` for type-only imports.
+
+---
+
+## State
+
+- Use IIFEs `(() => {})()` to scope or eliminate mutable state.
+
+- Model stateful objects with closures instead of classes:
+
+  ```typescript
+  const buffer = <T>() => {
+    const acc: T[] = []
+    return {
+      push: (x: T) => acc.push(x),
+      drain: function* () {
+        yield* acc
+        acc.length = 0
+      },
+    }
   }
-}
-```
+  ```
 
-- Resources as factory-returned `AsyncDisposable` records — state captured in the closure, teardown in `[Symbol.asyncDispose]`.
+- Model resources as factory-returned `AsyncDisposable` records; capture state in the closure and teardown in `[Symbol.asyncDispose]`.
 
-- `unique symbol` keys for metadata attached to domain types.
+- Prefer `const` to `let`. Replace reassignment with conditional expressions, destructuring, `.entries()`, or intermediate constants.
 
-```typescript
-const META: unique symbol = Symbol("meta")
-type Decorated = Base & { [META]: Meta }
-```
+- Destructure values instead of repeatedly accessing indexes.
 
-- `undefined` over `null`. Pick one nullable form — `undefined` — and stick to it.
+  ```typescript
+  const [key, value] = entry
+  const [, year, month] = match
+  ```
 
-- `??` over `||` for nullish coalescing. `||` only for boolean short-circuit.
+---
 
-- Narrow types to refine them. `as` casts only for `as const`.
+## Modern Builtins
 
-- Annotate types where inference fails. Always annotate function signatures.
+- Use `using` / `await using` with `Symbol.dispose` / `Symbol.asyncDispose` instead of `try`/`finally` for cleanup.
 
-- `const` over `let`. Restructure with ternary destructuring, `.entries()`, or intermediate expressions to avoid mutation.
+- Collect async iterables with `Array.fromAsync()`.
 
-- Destructure over index access — names beat positions.
+- Use iterator helpers (`.map()`, `.filter()`, `.toArray()`) instead of spreading into arrays.
 
-```typescript
-const [key, value] = entry
-const [, year, month] = match
-```
+  - Enter iterator pipelines from arrays with `.values()`.
 
-- `import type` for type-only imports.
+  - Compose generator pipelines directly: `f(g(h(xs.values())))`. Delegate inner iterables with `yield*`.
 
-- Modern builtins:
+  - Call `.toArray()` only at a leaf that requires random access or multiple passes; use iterator helpers for scalar folds.
 
-  - `using` / `Symbol.dispose` over `try/finally` for cleanup.
+- Use `Set` methods: `.union()`, `.intersection()`, `.difference()`, `.symmetricDifference()`, `.isSubsetOf()`.
 
-  - `Array.fromAsync()` to collect async iterables.
+- Use `Object.groupBy()` / `Map.groupBy()` instead of a manual reduction.
 
-  - Iterator helpers (`.map()`, `.filter()`, `.toArray()`, etc.) over spreading into arrays.
+- Use `Promise.withResolvers()` instead of wrapping a constructor manually.
 
-    - Arrays enter via `.values()`.
+---
 
-    - `function*` pipelines compose by direct chaining — `f(g(h(xs.values())))`. `yield*` to delegate inner iterables.
+## Node Standard Library
 
-    - `.toArray()` only at the leaf — random access, multiple passes, or scalar fold.
+- Prefer asynchronous APIs when synchronous and asynchronous variants both exist.
 
-  - `Set` methods: `.union()`, `.intersection()`, `.difference()`, `.symmetricDifference()`, `.isSubsetOf()`.
+- Make `switch` exhaustive with `default: fail(value satisfies never)`; import `fail` from `node:assert/strict`.
 
-  - `Object.groupBy()` / `Map.groupBy()` over manual reduce.
+- Use `node:*` imports instead of globals: `import { env, exit } from "node:process"`.
 
-  - `Promise.withResolvers()` over manual constructor wrapping.
+- Use `ok()` from `node:assert/strict` instead of `if`/`throw`.
 
-- Node stdlib:
+- Convert a stream to a string with `text(stream)` from `node:stream/consumers`.
 
-  - Async over sync when both exist.
+- Await stream completion with `finished(stream)` from `node:stream/promises`.
 
-  - Exhaustive `switch` via `default: fail(value satisfies never)` — `fail` from `node:assert/strict`.
+- Convert an event to a promise with `once(emitter, event)` from `node:events`.
 
-  - `node:*` imports — `import { env, exit } from "node:process"` over `process.*` globals.
-
-  - `ok()` from `node:assert/strict` over `if/throw`.
-
-  - `text(stream)` from `node:stream/consumers` — stream to string.
-
-  - `finished(stream)` from `node:stream/promises` — await stream end.
-
-  - `once(emitter, event)` from `node:events` — event to promise.
-
-  - `Readable.from(asyncIterable)` — async iterable to stream.
+- Convert an async iterable to a stream with `Readable.from(asyncIterable)`.

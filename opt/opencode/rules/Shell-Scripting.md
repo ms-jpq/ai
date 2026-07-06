@@ -1,7 +1,5 @@
 # Shell Scripting
 
----
-
 ## Defaults
 
 - Prelude for bash scripts:

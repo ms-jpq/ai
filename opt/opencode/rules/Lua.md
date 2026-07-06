@@ -5,26 +5,38 @@ paths:
 
 # Lua
 
-- Closure factories for stateful objects. Plain tables for stateless modules.
+## State and Scope
 
-- `table.insert` / `table.remove` over manual index arithmetic.
+- Use closure factories for stateful objects and plain tables for stateless modules.
 
-- `unpack()` for destructuring, including single-element extraction.
+- Scope related declarations with `do...end` blocks.
 
-- `pairs` over `ipairs`.
+- Use an IIFE `(function() ... end)()` for computed constants.
 
-- `do...end` blocks to scope related declarations together.
+---
 
-- `[[...]]` raw strings for content with backslashes or angle brackets.
+## Tables and Iteration
 
-- IIFE `(function() ... end)()` for computed constants.
+- Use `table.insert` / `table.remove` instead of manual index arithmetic.
 
-## Neovim stdlib
+- Use `unpack()` for destructuring, including single-element extraction.
 
-- Prefer `string.gsub` / `string.match` lua patterns. `vim.fn.escape` / `vim.re` when lua patterns lack the feature.
+- Prefer `pairs` to `ipairs`; use `ipairs` when iteration requires contiguous numeric order and hole termination.
 
-- `vim.fs.joinpath` over manual `/` concatenation.
+---
 
-- `vim.split(s, sep, { plain = true })` for non-regex splitting.
+## Strings
 
-- `vim.iter` for functional iteration over tables and iterators.
+- Use `[[...]]` raw strings for content containing backslashes or angle brackets.
+
+---
+
+## Neovim Standard Library
+
+- Prefer Lua patterns with `string.gsub` / `string.match`. Use `vim.fn.escape` / `vim.re` when Lua patterns cannot express the operation.
+
+- Use `vim.fs.joinpath` instead of concatenating `/` manually.
+
+- Use `vim.split(s, sep, { plain = true })` for literal splitting.
+
+- Use `vim.iter` for functional iteration over tables and iterators.
