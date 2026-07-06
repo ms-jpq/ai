@@ -3,6 +3,7 @@
 set -o pipefail
 
 JSON="$(tee)"
+PREFIX="${0%/*}/parse-hook-paths"
 
 READ_TOO=0
 if (($#)); then
@@ -25,4 +26,17 @@ fi
 TOOL="$(jq -e --raw-output '.tool_name | select(IN("Bash", "apply_patch"))' <<< "$JSON")"
 COMMAND="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
 
-exec -- "${0%/*}/parse-hook-paths/$TOOL.awk" -v READ_TOO="$READ_TOO" <<< "$COMMAND"
+case "$TOOL" in
+apply_patch)
+  ARGV=("$PREFIX/apply_patch.awk")
+  ;;
+Bash)
+  ARGV=("$PREFIX/Bash.awk" -v "APPLY_PATCH_AWK=$PREFIX/apply_patch.awk")
+  ;;
+*)
+  set -x
+  exit 1
+  ;;
+esac
+
+exec -- "${ARGV[@]}" -v READ_TOO="$READ_TOO" <<< "$COMMAND"

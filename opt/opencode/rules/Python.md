@@ -5,22 +5,20 @@ paths:
 
 # Python
 
----
-
 ## Defaults
 
-Typical script prelude:
+- Typical script prelude:
 
-```python
-#!/usr/bin/env -S -- PYTHONSAFEPATH= python3
+  ```python
+  #!/usr/bin/env -S -- PYTHONSAFEPATH= python3
 
-from contextlib import nullcontext
-from logging import INFO, basicConfig, captureWarnings
+  from contextlib import nullcontext
+  from logging import INFO, basicConfig, captureWarnings
 
-with nullcontext():
-    captureWarnings(True)
-    basicConfig(format="%(message)s", level=INFO)
-```
+  with nullcontext():
+      captureWarnings(True)
+      basicConfig(format="%(message)s", level=INFO)
+  ```
 
 - Import names directly with `from module import name`.
 

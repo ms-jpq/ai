@@ -4,11 +4,13 @@
 
 - Prelude for bash scripts:
 
-```bash
-#!/usr/bin/env -S -- bash -Eeu -O dotglob -O nullglob -O extglob -O failglob -O globstar
+  ```bash
+  #!/usr/bin/env -S -- bash -Eeu -o pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
-set -o pipefail
-```
+  set -o pipefail
+  ```
+
+  - The redundant `-o pipefail` is here for shellcheck analysis.
 
 - Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`). `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
