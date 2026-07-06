@@ -28,10 +28,10 @@ COMMAND="$(jq -e --raw-output '.tool_input.command' <<< "$JSON")"
 
 case "$TOOL" in
 apply_patch)
-  ARGV=("$PREFIX/apply_patch.awk")
+  ARGV=("$PREFIX/apply_patch.awk" -v "READ_TOO=$READ_TOO")
   ;;
 Bash)
-  ARGV=("$PREFIX/Bash.awk" -v "APPLY_PATCH_AWK=$PREFIX/apply_patch.awk")
+  ARGV=("$PREFIX/bash.py" "$READ_TOO")
   ;;
 *)
   set -x
@@ -39,4 +39,4 @@ Bash)
   ;;
 esac
 
-exec -- "${ARGV[@]}" -v READ_TOO="$READ_TOO" <<< "$COMMAND"
+exec -- "${ARGV[@]}" <<< "$COMMAND"
