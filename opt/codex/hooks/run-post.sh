@@ -8,7 +8,7 @@ JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 
-BASE="$(realpath -- "${0%/*}/..")"
+BASE="${0%/*}/.."
 SESSIONS="$HOME/.local/opt/ai/var/sessions"
 POST_DIR="$SESSIONS/$SESSION_ID.fmt"
 
@@ -32,18 +32,10 @@ PostToolUse)
     printf -- '%s\0' "$PATHNAME" > "$POST_DIR/$HASH"
   done
   ;;
-Stop | StopFailure)
-  if ! [[ -d $POST_DIR ]]; then
-    exit
-  fi
-
+Stop)
   shopt -u failglob
   PATHS="$(cat -- /dev/null "$POST_DIR"/*)"
   find "$POST_DIR" -mindepth 1 -delete
-
-  if [[ -z $PATHS ]]; then
-    exit
-  fi
 
   readarray -d '' -t -- PATHNAMES < <(printf -- '%s' "$PATHS")
 
