@@ -45,6 +45,14 @@
       {
         "hooks": [
           {
+            "command": "~/.local/opt/ai/opt/codex/hooks/workspace.sh",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
           }
