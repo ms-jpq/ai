@@ -1,6 +1,6 @@
 #!/usr/bin/env -S -- jq --exit-status --from-file
 
-def envsub: gsub("[$]\\{MCP_DOMAIN\\}"; "{env:MCP_DOMAIN}");
+def envsub: gsub("[$]\\{(?<var>[A-Za-z_][A-Za-z0-9_]*)\\}"; "{env:\(.var)}");
 
 def xform:
   if (.command // null) then
@@ -18,4 +18,4 @@ def xform:
   end
   | .enabled = true;
 
-.formatter.fmt.extensions = ($m[0] | keys | unique) | .mcp = (($c[0].mcpServers // $c[0]) | map_values(xform))
+.formatter._.extensions = ($m[0] | keys | unique) | .mcp = (($c[0].mcpServers // $c[0]) | map_values(xform))
