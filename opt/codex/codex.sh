@@ -14,6 +14,7 @@ set +a
 
 case "$OSTYPE" in
 darwin*)
+  export -- SSL_CERT_FILE=/etc/ssl/cert.pem
   CODEX='/opt/homebrew/bin/codex'
   ;;
 linux*)
