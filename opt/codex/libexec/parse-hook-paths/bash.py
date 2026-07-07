@@ -21,6 +21,11 @@ class _Heredoc:
     strip_tabs: bool
 
 
+@dataclass(frozen=True)
+class _PatchFile:
+    path: str
+
+
 def _is_assign(token: str) -> bool:
     name, sep, _ = token.partition("=")
     return bool(sep) and name.isidentifier()
@@ -102,6 +107,13 @@ def _heredocs(command: Iterable[str], *, patch: bool) -> Iterator[_Heredoc]:
         )
 
 
+def _patch_redirects(arguments: Iterable[str]) -> Iterator[_PatchFile]:
+    tokens = iter(arguments)
+    for token in tokens:
+        if token == "<" and (path := next(tokens, "")):
+            yield _PatchFile(path=path)
+
+
 def _sed_paths(arguments: Iterable[str]) -> Iterator[str]:
     tokens = iter(arguments)
     has_script = False
@@ -162,14 +174,19 @@ def _sed_paths(arguments: Iterable[str]) -> Iterator[str]:
             yield token
 
 
-def _scan(tokens: Iterable[str], *, read_too: bool) -> Iterator[_Heredoc | str]:
+def _scan(
+    tokens: Iterable[str], *, read_too: bool
+) -> Iterator[_Heredoc | _PatchFile | str]:
     for command_tokens in _commands(tokens):
         if not (command := _unwrap_command(iter(command_tokens))):
             continue
         arg0, *args = command
         name = PurePath(arg0).name
 
-        yield from _heredocs(args, patch=name == "apply_patch")
+        if name == "apply_patch":
+            yield from _heredocs(args, patch=True)
+            if read_too:
+                yield from _patch_redirects(args)
         if read_too and name == "sed":
             yield from _sed_paths(args)
 
@@ -204,6 +221,10 @@ def _consume_heredoc(document: _Heredoc, *, lines: Iterator[str]) -> None:
         pass
 
 
+def _emit(path: str) -> None:
+    stdout.write(f"{expanduser(expandvars(path))}\0")
+
+
 def _main() -> None:
     read_too = _read_too()
     logical_line: MutableSequence[str] = []
@@ -221,8 +242,10 @@ def _main() -> None:
             match event:
                 case _Heredoc():
                     _consume_heredoc(event, lines=lines)
+                case _PatchFile():
+                    _emit(event.path)
                 case str() if event:
-                    stdout.buffer.write(expanduser(expandvars(event)).encode() + b"\0")
+                    _emit(event)
         logical_line.clear()
 
 
