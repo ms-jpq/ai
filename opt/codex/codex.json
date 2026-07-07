@@ -7,7 +7,9 @@
   "model_providers": {
     "deepseek": {
       "base_url": "https://litellm.${MCP_DOMAIN}/v1",
-      "env_key": "DEEPSEEK_API_KEY",
+      "env_http_headers": {
+        "x-api-key": "DEEPSEEK_API_KEY"
+      },
       "name": "deepseek"
     },
     "open-router": {
@@ -17,7 +19,9 @@
     },
     "z-ai": {
       "base_url": "https://litellm.${MCP_DOMAIN}/v1",
-      "env_key": "ZAI_API_KEY",
+      "env_http_headers": {
+        "x-api-key": "ZAI_API_KEY"
+      },
       "name": "z-ai"
     }
   },
