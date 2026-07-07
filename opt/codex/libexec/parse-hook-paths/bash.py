@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from collections.abc import Iterable, Iterator, MutableSequence, Sequence
 from dataclasses import dataclass
 from itertools import chain
+from os.path import expanduser, expandvars
 from pathlib import Path, PurePath
 from shlex import shlex
 from subprocess import run
@@ -221,7 +222,7 @@ def _main() -> None:
                 case _Heredoc():
                     _consume_heredoc(event, lines=lines)
                 case str() if event:
-                    stdout.buffer.write(event.encode() + b"\0")
+                    stdout.buffer.write(expanduser(expandvars(event)).encode() + b"\0")
         logical_line.clear()
 
 
