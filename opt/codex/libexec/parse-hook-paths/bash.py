@@ -174,6 +174,26 @@ def _sed_paths(arguments: Iterable[str]) -> Iterator[str]:
             yield token
 
 
+def _cat_paths(arguments: Iterable[str]) -> Iterator[str]:
+    tokens = iter(arguments)
+    while token := next(tokens, None):
+        if token.isdigit() and (following := next(tokens, None)) is not None:
+            if _is_redirection(following):
+                token = following
+            else:
+                tokens = chain((following,), tokens)
+        if token == "--":
+            yield from tokens
+            return
+        if _is_redirection(token):
+            if (target := next(tokens, "")) and token in {"<", "<>"}:
+                yield target
+            continue
+        if token.startswith("-"):
+            continue
+        yield token
+
+
 def _scan(
     tokens: Iterable[str], *, read_too: bool
 ) -> Iterator[_Heredoc | _PatchFile | str]:
@@ -183,12 +203,15 @@ def _scan(
         arg0, *args = command
         name = PurePath(arg0).name
 
-        if name == "apply_patch":
-            yield from _heredocs(args, patch=True)
-            if read_too:
-                yield from _patch_redirects(args)
-        if read_too and name == "sed":
-            yield from _sed_paths(args)
+        match name:
+            case "apply_patch":
+                yield from _heredocs(args, patch=True)
+                if read_too:
+                    yield from _patch_redirects(args)
+            case "sed" if read_too:
+                yield from _sed_paths(args)
+            case "cat" if read_too:
+                yield from _cat_paths(args)
 
 
 def _read_too() -> bool:
