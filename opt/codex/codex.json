@@ -6,7 +6,7 @@
   "approvals_reviewer": "auto_review",
   "model_providers": {
     "deepseek": {
-      "base_url": "https://api.deepseek.com",
+      "base_url": "https://litellm.${MCP_DOMAIN}/v1",
       "env_key": "DEEPSEEK_API_KEY",
       "name": "deepseek"
     },
@@ -16,7 +16,7 @@
       "name": "open-router"
     },
     "z-ai": {
-      "base_url": "https://api.z.ai/api/paas/v4",
+      "base_url": "https://litellm.${MCP_DOMAIN}/v1",
       "env_key": "ZAI_API_KEY",
       "name": "z-ai"
     }

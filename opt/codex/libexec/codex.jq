@@ -12,6 +12,6 @@ def leaf_paths:
 def mcp_servers:
   to_entries | map(.key as $name | .value | del(.type, .alwaysLoad) | {key: $name, value: .}) | from_entries;
 
-del(."$schema") * {mcp_servers: ($mcp | mcp_servers)}
+. * {mcp_servers: ($mcp | mcp_servers)}
 | leaf_paths as $p
 | "\($p | join("."))=\(getpath($p) | tojson)"

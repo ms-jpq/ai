@@ -24,17 +24,18 @@ linux*)
   ;;
 esac
 
-OVERRIDE="$BASE/codex.json"
-MCP_SRC="$ROOT/opt/claude-code/local-plugins/omnibus/.mcp.json"
-
-MCP_RAW="$(envsubst < "$MCP_SRC")"
-LS="$("$BASE/libexec/codex.jq" --raw-output --argjson mcp "$MCP_RAW" "$OVERRIDE")"
+MCP="$(envsubst < "$ROOT/opt/claude-code/local-plugins/omnibus/.mcp.json")"
+LS="$(jq -e 'del(."$schema")' "$BASE/codex.json" | envsubst | "$BASE/libexec/codex.jq" --raw-output --argjson mcp "$MCP")"
 readarray -t LINES --- <<< "$LS"
 
 ARGV=()
-if [[ $* != login ]]; then
+case "${1:-}" in
+"" | exec | review | resume | fork | app-server | mcp-server | exec-server)
   ARGV+=(--strict-config)
-fi
+  ;;
+*)
+  ;;
+esac
 for LINE in "${LINES[@]}"; do
   ARGV+=(--config "$LINE")
 done
