@@ -37,6 +37,7 @@ fi
 LIB="$HOME/Library"
 SANDBOX+=(
   --dir "$ROOT"
+  --dir "$ROOT/opt/codex/profiles:rw"
   --dir "$VAR:rw"
   --dir "$LIB/Application Support/opencode:rw"
 )

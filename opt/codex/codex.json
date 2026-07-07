@@ -22,7 +22,7 @@
       "env_http_headers": {
         "x-api-key": "ZAI_API_KEY"
       },
-      "name": "zai"
+      "name": "z-ai"
     }
   },
   "sandbox_mode": "danger-full-access",
