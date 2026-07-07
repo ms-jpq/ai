@@ -3,7 +3,7 @@
   "analytics": {
     "enabled": false
   },
-  "approvals_reviewer": "auto_review",
+  "approvals_reviewer": "user",
   "model_providers": {
     "deepseek": {
       "base_url": "https://litellm.${MCP_DOMAIN}/v1",

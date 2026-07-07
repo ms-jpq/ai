@@ -12,7 +12,8 @@ BASE="$(realpath -- "${0%/*}/..")"
 PARSE_PATHS="$BASE/libexec/frontmatter-path.sed"
 
 RULES="$BASE/rules"
-SENTINELS="$HOME/.local/opt/ai/var/sessions/$SESSION_ID.rules"
+SESSIONS="$HOME/.local/opt/ai/var/sessions"
+SENTINELS="$SESSIONS/$SESSION_ID.rules"
 
 read -r -d '' -- AWK << 'AWK' || true
 NR == 1 && /^---$/ {
@@ -32,6 +33,25 @@ AWK
 
 CONTEXT=()
 case "$EVENT" in
+Stop)
+  RESET_EVERY=9
+  COUNTER="$SESSIONS/$SESSION_ID.turn"
+
+  COUNT=0
+  if [[ -f $COUNTER ]]; then
+    COUNT="$(< "$COUNTER")"
+  fi
+  COUNT="${COUNT//[!0-9]/}"
+  ((COUNT)) || COUNT=0
+  COUNT=$((COUNT + 1))
+  printf -- '%s' "$COUNT" > "$COUNTER"
+
+  if ((COUNT % RESET_EVERY == 0)); then
+    rm -fr -- "$SENTINELS"
+  fi
+
+  exit
+  ;;
 SessionStart | PostCompact)
   # TODO: -- SessionStart + PostCompact can reinject, IFF PostCompact accepts `hookSpecificOutput`
   rm -fr -- "$SENTINELS"

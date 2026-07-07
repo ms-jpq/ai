@@ -90,6 +90,10 @@
             "type": "command"
           },
           {
+            "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
+            "type": "command"
+          },
+          {
             "command": "~/.local/opt/ai/opt/codex/hooks/run-post.sh",
             "type": "command"
           }
