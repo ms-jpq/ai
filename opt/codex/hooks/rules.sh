@@ -30,13 +30,22 @@ in_front && /^---$/ {
 }
 AWK
 
+CONTEXT=()
 case "$EVENT" in
-SessionStart)
+SessionStart | PostCompact)
+  # TODO: -- SessionStart + PostCompact can work, IFF PostCompact accepts `hookSpecificOutput`
+  rm -fr -- "$SENTINELS"
+  ;;
+UserPromptSubmit)
+  if [[ -d $SENTINELS ]]; then
+    exit
+  fi
+
   mkdir -p -- "$SENTINELS"
   find "$SENTINELS" -mindepth 1 -delete
 
   PREFACE="$(< "$BASE/libexec/rules-preface.txt")"
-  CONTEXT=("# agentsMd"$'\n'"$PREFACE")
+  CONTEXT+=("# agentsMd"$'\n'"$PREFACE")
 
   PATH_CONTEXT=()
   for RULE in "$RULES"/*.md; do
@@ -65,7 +74,6 @@ PostToolUse)
 
   mkdir -p -- "$SENTINELS"
 
-  CONTEXT=()
   for RULE in "$RULES"/*.md; do
     STEM="${RULE##*/}"
     STEM="${STEM%.md}"

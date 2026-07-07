@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "hooks": [
@@ -57,7 +67,7 @@
             "type": "command"
           }
         ],
-        "matcher": "startup|clear|compact"
+        "matcher": "startup|clear"
       },
       {
         "hooks": [
@@ -105,6 +115,10 @@
         "hooks": [
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/sessions.sh",
+            "type": "command"
+          },
+          {
+            "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
           }
         ]
