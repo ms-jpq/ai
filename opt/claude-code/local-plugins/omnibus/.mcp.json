@@ -2,7 +2,7 @@
   "crawl4ai": {
     "alwaysLoad": true,
     "type": "sse",
-    "url": "https://crawl4ai.mcp.${MCP_DOMAIN}/mcp/sse"
+    "url": "https://crawl4ai.mcp.${MCP_DOMAIN}/mcp"
   },
   "playwright": {
     "type": "http",
@@ -12,9 +12,5 @@
     "alwaysLoad": true,
     "type": "http",
     "url": "https://searx.mcp.${MCP_DOMAIN}/mcp"
-  },
-  "youtube": {
-    "type": "http",
-    "url": "https://youtube.mcp.${MCP_DOMAIN}/mcp"
   }
 }

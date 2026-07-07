@@ -1390,7 +1390,7 @@
       "enabled": true,
       "headers": {},
       "type": "remote",
-      "url": "https://crawl4ai.mcp.{env:MCP_DOMAIN}/mcp/sse"
+      "url": "https://crawl4ai.mcp.{env:MCP_DOMAIN}/mcp"
     },
     "playwright": {
       "enabled": true,
@@ -1403,12 +1403,6 @@
       "headers": {},
       "type": "remote",
       "url": "https://searx.mcp.{env:MCP_DOMAIN}/mcp"
-    },
-    "youtube": {
-      "enabled": true,
-      "headers": {},
-      "type": "remote",
-      "url": "https://youtube.mcp.{env:MCP_DOMAIN}/mcp"
     }
   },
   "permission": {
