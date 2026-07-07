@@ -33,7 +33,7 @@ AWK
 CONTEXT=()
 case "$EVENT" in
 SessionStart | PostCompact)
-  # TODO: -- SessionStart + PostCompact can work, IFF PostCompact accepts `hookSpecificOutput`
+  # TODO: -- SessionStart + PostCompact can reinject, IFF PostCompact accepts `hookSpecificOutput`
   rm -fr -- "$SENTINELS"
   ;;
 UserPromptSubmit)
