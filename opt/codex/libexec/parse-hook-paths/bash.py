@@ -2,6 +2,7 @@
 
 from argparse import ArgumentParser
 from collections.abc import Iterable, Iterator, MutableSequence, Sequence
+from contextlib import suppress
 from dataclasses import dataclass
 from itertools import chain
 from os.path import expanduser, expandvars
@@ -42,10 +43,9 @@ def _tokens(source: str) -> Sequence[str] | None:
     lex = shlex(source, posix=True, punctuation_chars=";&|()<>")
     lex.commenters = "#"
     lex.whitespace_split = True
-    try:
+    with suppress(ValueError):
         return tuple(lex)
-    except ValueError:
-        return None
+    return None
 
 
 def _commands(tokens: Iterable[str]) -> Iterator[Sequence[str]]:

@@ -1,0 +1,4 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+model          = "gpt-5.5"
+model_provider = "openai"

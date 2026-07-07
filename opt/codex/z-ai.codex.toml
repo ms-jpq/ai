@@ -1,0 +1,4 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+model          = "zai/glm-5"
+model_provider = "z-ai"
