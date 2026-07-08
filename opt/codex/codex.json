@@ -4,6 +4,7 @@
     "enabled": false
   },
   "approvals_reviewer": "user",
+  "model_catalog_json": "${CODEX_HOME}/model_catalog.json",
   "model_providers": {
     "deepseek": {
       "base_url": "https://litellm.${MCP_DOMAIN}/v1",

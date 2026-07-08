@@ -25,6 +25,8 @@ linux*)
   ;;
 esac
 
+export -- CODEX_HOME="$ROOT/var/codex"
+
 MCP="$(envsubst < "$ROOT/opt/claude-code/local-plugins/omnibus/.mcp.json")"
 LS="$(jq -e 'del(."$schema")' "$BASE/codex.json" | envsubst | "$BASE/libexec/codex.jq" --raw-output --argjson mcp "$MCP")"
 readarray -t LINES --- <<< "$LS"
@@ -46,7 +48,5 @@ EXEC=(
   "$CODEX" "${ARGV[@]}"
   "$@"
 )
-
-export -- CODEX_HOME="$ROOT/var/codex"
 
 "${EXEC[@]}"
