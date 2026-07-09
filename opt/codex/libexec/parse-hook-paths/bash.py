@@ -215,7 +215,7 @@ def _scan(
                 yield from _patch_redirects(args)
             case "sed" if read_too:
                 yield from _sed_paths(args)
-            case "cat" if read_too:
+            case "cat" | "tee" if read_too:
                 yield from _cat_paths(args)
 
 
