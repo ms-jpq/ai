@@ -100,11 +100,10 @@ def _heredocs(command: Iterable[str], *, patch: bool) -> Iterator[_Heredoc]:
         if (delimiter := next(tokens, None)) is None:
             break
 
-        strip_tabs = delimiter.startswith("-")
         yield _Heredoc(
             delimiter=delimiter.removeprefix("-"),
             patch=patch,
-            strip_tabs=strip_tabs,
+            strip_tabs=delimiter.startswith("-"),
         )
 
 
