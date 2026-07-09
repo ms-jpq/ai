@@ -234,11 +234,6 @@ _PATH_COMMANDS = {
 }
 
 
-def _is_assign(token: str) -> bool:
-    name, sep, _ = token.partition("=")
-    return bool(sep) and name.isidentifier()
-
-
 def _is_redirection(token: str) -> bool:
     return bool(token) and all(chr in "<>&|" for chr in token)
 
@@ -368,7 +363,8 @@ def _commands(tokens: Iterable[str]) -> Iterator[Sequence[str]]:
 
 def _unwrap_command(tokens: Iterator[str]) -> Sequence[str] | None:
     for name in tokens:
-        if not _is_assign(name):
+        _assign_name, _assign_sep, _ = name.partition("=")
+        if not (_assign_sep and _assign_name.isidentifier()):
             break
     else:
         return None
@@ -431,17 +427,6 @@ def _redirect_target(
     return None
 
 
-def _args(arguments: Iterable[str]) -> Iterator[str]:
-    tokens = iter(arguments)
-    while token := next(tokens, None):
-        if token.isdigit() and (following := next(tokens, None)) is not None:
-            if _is_redirection(following):
-                token = following
-            else:
-                tokens = chain((following,), tokens)
-        yield token
-
-
 def _patch_redirects(arguments: Iterable[str]) -> Iterator[_PatchFile]:
     tokens = iter(arguments)
     for token in tokens:
@@ -450,9 +435,14 @@ def _patch_redirects(arguments: Iterable[str]) -> Iterator[_PatchFile]:
 
 
 def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[str]:
-    tokens = _args(arguments)
+    tokens = iter(arguments)
     yield_operands = spec.yield_operands
-    for token in tokens:
+    while token := next(tokens, None):
+        if token.isdigit() and (following := next(tokens, None)) is not None:
+            if _is_redirection(following):
+                token = following
+            else:
+                tokens = chain((following,), tokens)
         match token:
             case _ if target := _redirect_target(
                 token, tokens, include_writes=spec.include_writes
@@ -533,19 +523,15 @@ def _heredoc_body(document: _Heredoc, *, lines: Iterator[str]) -> Iterator[str]:
         yield candidate
 
 
-def _run_patch(patch: Iterable[str]) -> None:
-    source = "\n".join(chain(patch, ("",)))
-    stdout.flush()
-    run([_AWK], input=source.encode(), check=True)
-
-
 def _consume_heredoc(document: _Heredoc, *, lines: Iterator[str]) -> None:
     body = _heredoc_body(document, lines=lines)
     if document.patch:
-        _run_patch(body)
+        source = "\n".join(chain(body, ("",)))
+        stdout.flush()
+        run([_AWK], input=source.encode(), check=True)
         return
     for _ in body:
-        pass
+        ...
 
 
 def _emit(path: str) -> None:
