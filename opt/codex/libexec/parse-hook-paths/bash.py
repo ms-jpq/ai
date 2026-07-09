@@ -75,11 +75,12 @@ def _unwrap_command(tokens: Iterator[str]) -> Sequence[str] | None:
 
     if name == "command":
         for name in tokens:
-            if name == "--":
-                name = next(tokens, "")
-                break
-            if not name.startswith("-") or name == "-":
-                break
+            match name:
+                case "--":
+                    name = next(tokens, "")
+                    break
+                case "-" | _ if not name.startswith("-"):
+                    break
             options = set(name[1:])
             if options & {"v", "V"} or not options <= {"p"}:
                 return None
@@ -124,37 +125,36 @@ def _sed_paths(arguments: Iterable[str]) -> Iterator[str]:
             else:
                 tokens = chain((following,), tokens)
 
-        if _is_redirection(token):
-            if (target := next(tokens, "")) and token in {"<", "<>"}:
-                yield target
-            continue
-
-        if token == "--":
-            if not has_script:
+        match token:
+            case "<" | "<>":
+                if target := next(tokens, ""):
+                    yield target
+                continue
+            case _ if _is_redirection(token):
+                next(tokens, None)
+                continue
+            case "--":
+                if not has_script:
+                    has_script = True
+                    next(tokens, None)
+                yield from tokens
+                return
+            case "-e" | "--expression":
                 has_script = True
                 next(tokens, None)
-            yield from tokens
-            return
-
-        if token in {"-e", "--expression"}:
-            has_script = True
-            next(tokens, None)
-            continue
-
-        if token.startswith("--expression="):
-            has_script = True
-            continue
-
-        if token == "--file":
-            has_script = True
-            if argument := next(tokens, ""):
+                continue
+            case _ if token.startswith("--expression="):
+                has_script = True
+                continue
+            case "--file":
+                has_script = True
+                if argument := next(tokens, ""):
+                    yield argument
+                continue
+            case _ if (argument := token.removeprefix("--file=")) != token:
+                has_script = True
                 yield argument
-            continue
-
-        if token.startswith("--file="):
-            has_script = True
-            yield token.removeprefix("--file=")
-            continue
+                continue
 
         if program := _short_program_option(token):
             option, argument = program
@@ -182,13 +182,20 @@ def _cat_paths(arguments: Iterable[str]) -> Iterator[str]:
                 token = following
             else:
                 tokens = chain((following,), tokens)
-        if token == "--":
-            yield from tokens
-            return
-        if _is_redirection(token):
-            if (target := next(tokens, "")) and token in {"<", "<>"}:
-                yield target
-            continue
+        match token:
+            case "--":
+                yield from tokens
+                return
+            case "<<" | "<<-":
+                next(tokens, None)
+                continue
+            case "<" | "<>" | ">" | ">>" | ">|":
+                if target := next(tokens, ""):
+                    yield target
+                continue
+            case _ if _is_redirection(token):
+                next(tokens, None)
+                continue
         if token.startswith("-"):
             continue
         yield token
@@ -203,11 +210,10 @@ def _scan(
         arg0, *args = command
         name = PurePath(arg0).name
 
+        yield from _heredocs(args, patch=name == "apply_patch")
         match name:
-            case "apply_patch":
-                yield from _heredocs(args, patch=True)
-                if read_too:
-                    yield from _patch_redirects(args)
+            case "apply_patch" if read_too:
+                yield from _patch_redirects(args)
             case "sed" if read_too:
                 yield from _sed_paths(args)
             case "cat" if read_too:
