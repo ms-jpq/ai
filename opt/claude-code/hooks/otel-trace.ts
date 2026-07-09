@@ -58,11 +58,9 @@ import {
 import { fail, ok } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { randomUUID } from "node:crypto"
-import { createReadStream } from "node:fs"
-import { mkdir, readFile, rename, writeFile } from "node:fs/promises"
+import { mkdir, open, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
-import { createInterface } from "node:readline"
 import { text } from "node:stream/consumers"
 import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
@@ -158,6 +156,8 @@ type Grouped = Readonly<{
 
 type Ctx = { userId: string; sessionId: string }
 
+const encoding = "utf-8" satisfies BufferEncoding
+
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
 const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
 
@@ -200,12 +200,12 @@ const openState = async (hook: HookInput): Promise<AsyncDisposable & { uuid?: st
   const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
   const tmp = `${path}.${randomUUID()}.tmp`
 
-  const uuid = (await readFile(path, "utf-8").catch(() => "")).trim() || undefined
+  const uuid = (await readFile(path, encoding).catch(() => "")).trim() || undefined
   const state = {
     uuid,
     async [Symbol.asyncDispose]() {
       await mkdir(dirname(path), { recursive: true })
-      await writeFile(tmp, state.uuid ?? "", "utf-8")
+      await writeFile(tmp, state.uuid ?? "", encoding)
       await rename(tmp, path)
     },
   }
@@ -251,11 +251,8 @@ const openProvider = (hook: HookInput): (AsyncDisposable & { provider: BasicTrac
 }
 
 const readJsonL = async function* (path: string): AsyncIteratorObject<TranscriptMessage> {
-  const rl = createInterface({
-    input: createReadStream(path, { encoding: "utf-8" }),
-    crlfDelay: Infinity,
-  })
-  for await (const line of rl) {
+  await using file = await open(path)
+  for await (const line of file.readLines({ encoding })) {
     if (line) {
       yield JSON.parse(line)
     }

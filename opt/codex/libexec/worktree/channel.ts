@@ -115,12 +115,8 @@ const serve = async (sock: string) => {
     }
   })
 
-  await Promise.all([
-    new Promise<void>((r) => server.listen(sock, r)),
-    once(server, "error").then(([e]) => {
-      throw e
-    }),
-  ])
+  server.listen(sock)
+  await once(server, "listening")
 }
 
 const waitForNotes = async (intervalMs = 250) => {
@@ -139,9 +135,12 @@ const main = async () => {
   await mkdir(dir, { recursive: true })
   const sock = join(dir, `${pid}.sock`)
 
+  const ctrl = new AbortController()
+  const sig = { signal: ctrl.signal }
   try {
-    await Promise.race([once(process, "SIGINT"), once(process, "SIGTERM"), listen(), serve(sock)])
+    await Promise.race([once(process, "SIGINT", sig), once(process, "SIGTERM", sig), listen(), serve(sock)])
   } finally {
+    ctrl.abort()
     await unlink(sock).catch(() => {})
   }
 }
