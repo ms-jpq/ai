@@ -97,7 +97,7 @@ const listen = async () => {
   }
 }
 
-const serve = async (sock: string) => {
+const serve = async (sig: AbortSignal, sock: string) => {
   await unlink(sock).catch(() => {})
 
   const server = createServer(async (s) => {
@@ -115,8 +115,7 @@ const serve = async (sock: string) => {
     }
   })
 
-  server.listen(sock)
-  await once(server, "listening")
+  await once(server.listen(sock), "listening", sig)
 }
 
 const waitForNotes = async (intervalMs = 250) => {
@@ -138,7 +137,7 @@ const main = async () => {
   const ctrl = new AbortController()
   const sig = { signal: ctrl.signal }
   try {
-    await Promise.race([once(process, "SIGINT", sig), once(process, "SIGTERM", sig), listen(), serve(sock)])
+    await Promise.race([once(process, "SIGINT", sig), once(process, "SIGTERM", sig), listen(), serve(sig.signal, sock)])
   } finally {
     ctrl.abort()
     await unlink(sock).catch(() => {})
