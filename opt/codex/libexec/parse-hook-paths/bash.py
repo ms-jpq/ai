@@ -209,9 +209,9 @@ def _scan(
         arg0, *args = command
         name = PurePath(arg0).name
 
-        yield from _heredocs(args, patch=name == "apply_patch")
+        yield from _heredocs(args, patch=name in ("apply_patch", "applypatch"))
         match name:
-            case "apply_patch" if read_too:
+            case "apply_patch" | "applypatch" if read_too:
                 yield from _patch_redirects(args)
             case "sed" if read_too:
                 yield from _sed_paths(args)

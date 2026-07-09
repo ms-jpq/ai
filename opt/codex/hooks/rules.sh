@@ -11,7 +11,6 @@ SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 BASE="$(realpath -- "${0%/*}/..")"
 PARSE_PATHS="$BASE/libexec/frontmatter-path.sed"
 
-RULES="$BASE/rules"
 SESSIONS="$HOME/.local/opt/ai/var/sessions"
 SENTINELS="$SESSIONS/$SESSION_ID.rules"
 
@@ -68,7 +67,7 @@ UserPromptSubmit)
   CONTEXT+=("# agentsMd"$'\n'"$PREFACE")
 
   PATH_CONTEXT=()
-  for RULE in "$RULES"/*.md; do
+  for RULE in "$BASE"/{rules,rules.d}/*.md; do
     if PATHS="$("$PARSE_PATHS" "$RULE" | grep -e .)"; then
       PATH_CONTEXT+=("Rule $RULE applies to paths:"$'\n'"$(tr -- '\n' ' ' <<< "$PATHS")")
       continue
@@ -94,7 +93,7 @@ PostToolUse)
 
   mkdir -p -- "$SENTINELS"
 
-  for RULE in "$RULES"/*.md; do
+  for RULE in "$BASE"/{rules,rules.d}/*.md; do
     STEM="${RULE##*/}"
     STEM="${STEM%.md}"
 

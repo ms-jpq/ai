@@ -32,5 +32,5 @@ $(VAR)/codex/model_catalog.json: $(CO)/libexec/model_catalog.jq | $(VAR)/codex
 	set -a
 	source -- ./.env
 	set +a
-	URL="https://litellm.$${MCP_DOMAIN}/v1/models"
+	URL="https://openrouter.ai/api/v1/models"
 	$(CURL) -- "$$URL" | '$<' > '$@'

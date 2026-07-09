@@ -4,7 +4,10 @@
 
 {
   sub(/\r$/, "", $0)
-  if ($0 == "*** Begin Patch") {
+  L_trimmed = $0
+  sub(/^[ \t]+/, "", L_trimmed)
+  sub(/[ \t]+$/, "", L_trimmed)
+  if (L_trimmed == "*** Begin Patch") {
     clear_paths()
     IN_PATCH = 1
     next
@@ -12,13 +15,13 @@
   if (! IN_PATCH) {
     next
   }
-  if ($0 == "*** End Patch") {
+  if (L_trimmed == "*** End Patch") {
     emit_paths()
     IN_PATCH = 0
     next
   }
-  if ((sub(/^\*\*\* (Add|Update|Delete) File: /, "", $0)) || (sub(/^\*\*\* Move to: /, "", $0))) {
-    save($0)
+  if ((sub(/^\*\*\* (Add|Update|Delete) File: /, "", L_trimmed)) || (sub(/^\*\*\* Move to: /, "", L_trimmed))) {
+    save(L_trimmed)
   }
 }
 

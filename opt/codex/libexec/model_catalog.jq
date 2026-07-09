@@ -4,25 +4,24 @@
 | map(
     select((.id | test("/[*]$") or . == "*") | not)
     | {
-        slug: .id,
-        display_name: (.id | sub(".*/"; "")),
+        apply_patch_tool_type: "freeform",
         base_instructions: "",
-        description: ("LiteLLM model " + .id),
-        context_window: (.max_input_tokens // 128000),
-        supported_reasoning_levels: [],
-        shell_type: "shell_command",
-        visibility: "list",
-        supported_in_api: true,
-        priority: 0,
-        supports_reasoning_summaries: false,
-        support_verbosity: false,
-        supports_parallel_tool_calls: true,
         experimental_supported_tools: [],
-        truncation_policy: { mode: "tokens", limit: 10000 }
+        priority: 0,
+        shell_type: "default",
+        support_verbosity: false,
+        supported_in_api: true,
+        supported_reasoning_levels: [],
+        supports_parallel_tool_calls: true,
+        supports_reasoning_summaries: false,
+        visibility: "list",
+
+        context_window: (.max_input_tokens // 128000),
+        description: .id,
+        display_name: (.id | sub(".*/"; "")),
+        slug: .id,
+        truncation_policy: { mode: "tokens", limit: 10000 },
       }
   )
 | sort_by(.slug)
-| {
-    "$schema": "https://developers.openai.com/codex/config-schema.json",
-    models: .
-  }
+| { models: .  }
