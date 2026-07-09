@@ -238,45 +238,31 @@ def _is_redirection(token: str) -> bool:
     return bool(token) and all(chr in "<>&|" for chr in token)
 
 
-def _short_option_value(token: str, options: Set[str]) -> tuple[str, str] | None:
-    if not token.startswith("-") or token.startswith("--"):
-        return None
-    for index, option in enumerate(token[1:], start=2):
-        short = f"-{option}"
-        if short in options:
-            return short, token[index:]
-    return None
-
-
-def _long_option_value(token: str, options: Set[str]) -> tuple[str, str] | None:
-    option, sep, argument = token.partition("=")
-    if sep and option in options:
-        return option, argument
-    return None
-
-
 def _option_value(
     token: str, tokens: Iterator[str], options: Set[str]
 ) -> tuple[str, str] | None:
-    if value := _long_option_value(token, options):
-        return value
+    option, sep, argument = token.partition("=")
+    if sep and option in options:
+        return option, argument
     if token in options:
         return token, next(tokens, "")
-    if value := _short_option_value(token, options):
-        option, argument = value
-        return option, argument or next(tokens, "")
+    if token.startswith("-") and not token.startswith("--"):
+        for index, short_option in enumerate(token[1:], start=2):
+            short = f"-{short_option}"
+            if short in options:
+                return short, token[index:] or next(tokens, "")
     return None
 
 
 def _substitution_step(
     source: str, *, index: int, depth: int, quote: str
 ) -> tuple[int, int, str]:
-    character = source[index]
-    match quote, character:
-        case _, _ if character == quote:
+    chr = source[index]
+    match quote, chr:
+        case _, _ if chr == quote:
             return index + 1, depth, ""
         case "", "'" | '"':
-            return index + 1, depth, character
+            return index + 1, depth, chr
         case "", "(":
             return index + 1, depth + 1, quote
         case "", ")":
@@ -351,12 +337,13 @@ def _tokens(source: str) -> Sequence[str] | None:
 def _commands(tokens: Iterable[str]) -> Iterator[Sequence[str]]:
     acc: MutableSequence[str] = []
     for token in tokens:
-        if token and all(character in ";&|()" for character in token):
-            if acc:
-                yield acc
-                acc = []
-            continue
-        acc.append(token)
+        match token:
+            case _ if token and all(chr in ";&|()" for chr in token):
+                if acc:
+                    yield acc
+                    acc = []
+            case _:
+                acc.append(token)
     if acc:
         yield acc
 
@@ -427,13 +414,6 @@ def _redirect_target(
     return None
 
 
-def _patch_redirects(arguments: Iterable[str]) -> Iterator[_PatchFile]:
-    tokens = iter(arguments)
-    for token in tokens:
-        if token == "<" and (path := next(tokens, "")):
-            yield _PatchFile(path=path)
-
-
 def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[str]:
     tokens = iter(arguments)
     yield_operands = spec.yield_operands
@@ -494,7 +474,10 @@ def _command_events(
         return
 
     if name in _PATCH_COMMANDS:
-        yield from _patch_redirects(args)
+        tokens = iter(args)
+        for token in tokens:
+            if token == "<" and (path := next(tokens, "")):
+                yield _PatchFile(path=path)
     elif spec := _PATH_COMMANDS.get(name):
         yield from _path_operands(args, spec=spec)
 
