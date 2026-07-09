@@ -1,5 +1,7 @@
 #!/usr/bin/env -S -- awk -f
 
+# https://developers.openai.com/api/docs/guides/tools-apply-patch
+
 {
   sub(/\r$/, "", $0)
   if ($0 == "*** Begin Patch") {
