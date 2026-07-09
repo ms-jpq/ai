@@ -44,6 +44,8 @@ Frame each dimension and the rule selecting it:
 
 - Approach; what criteria selected it.
 
+- Generalization; the broader problem class and its solution shapes.
+
 For each dimension, and its meta, write:
 
 - Claim.
