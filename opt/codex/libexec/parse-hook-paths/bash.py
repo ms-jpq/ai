@@ -40,11 +40,16 @@ class _PathCommand:
 
 
 _PATCH_COMMANDS = {"apply_patch", "applypatch"}
-_CAT_COMMANDS = {"cat", "tee"}
 _PATH_COMMANDS = {
     "base64": _PathCommand(
         path_options={"-i", "--input"},
         value_options={"-i", "--input"},
+        yield_operands=True,
+        include_writes=True,
+    ),
+    "cat": _PathCommand(
+        path_options=frozenset(),
+        value_options=frozenset(),
         yield_operands=True,
         include_writes=True,
     ),
@@ -219,6 +224,12 @@ _PATH_COMMANDS = {
         path_options={"-f", "--file"},
         program_value_options={"-e", "--expression"},
         path_options_are_program=True,
+    ),
+    "tee": _PathCommand(
+        path_options=frozenset(),
+        value_options=frozenset(),
+        yield_operands=True,
+        include_writes=True,
     ),
 }
 
@@ -438,23 +449,6 @@ def _patch_redirects(arguments: Iterable[str]) -> Iterator[_PatchFile]:
             yield _PatchFile(path=path)
 
 
-def _cat_paths(arguments: Iterable[str]) -> Iterator[str]:
-    tokens = _args(arguments)
-    while token := next(tokens, None):
-        match token:
-            case "--":
-                yield from tokens
-                return
-            case _ if target := _redirect_target(token, tokens, include_writes=True):
-                yield target
-                continue
-            case _ if _is_redirection(token):
-                continue
-        if token.startswith("-"):
-            continue
-        yield token
-
-
 def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[str]:
     tokens = _args(arguments)
     yield_operands = spec.yield_operands
@@ -511,8 +505,6 @@ def _command_events(
 
     if name in _PATCH_COMMANDS:
         yield from _patch_redirects(args)
-    elif name in _CAT_COMMANDS:
-        yield from _cat_paths(args)
     elif spec := _PATH_COMMANDS.get(name):
         yield from _path_operands(args, spec=spec)
 
