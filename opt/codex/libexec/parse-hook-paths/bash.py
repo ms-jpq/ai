@@ -97,7 +97,7 @@ def _heredocs(command: Iterable[str], *, patch: bool) -> Iterator[_Heredoc]:
     for token in tokens:
         if token != "<<":
             continue
-        if (delimiter := next(tokens, None)) is None:
+        if not (delimiter := next(tokens, None)):
             break
 
         yield _Heredoc(
