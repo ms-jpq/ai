@@ -4,6 +4,7 @@ CLOBBER += $(VAR)/codex/model_catalog.json
 CC := ./opt/claude-code
 OC := ./opt/opencode
 CO := ./opt/codex
+CO_PROFILES := $(basename $(notdir $(wildcard $(CO)/profiles/*.toml)))
 
 cc: $(CC)/local-plugins/omnibus/.lsp.json
 $(CC)/local-plugins/omnibus/.lsp.json: ~/.config/nvim/libexec/cc.lua
@@ -15,7 +16,19 @@ $(OC)/opencode.json: $(OC)/libexec/opencode.jq ./node_modules/.bin $(CC)/local-p
 	./node_modules/.bin/prettier --write -- '$@'
 
 co: $(VAR)/codex/model_catalog.json
-$(VAR)/codex/model_catalog.json: $(CO)/libexec/model_catalog.jq | $(VAR)
+
+$(VAR)/codex: | $(VAR)
+	mkdir -v -p -- '$@'
+
+define CO_PROFILE_TEMPLATE
+co: $(VAR)/codex/$1.config.toml
+$(VAR)/codex/$1.config.toml: $(CO)/profiles/$1.toml $(CO)/libexec/materialize-profile.sh | $(VAR)/codex
+	'$(CO)/libexec/materialize-profile.sh' '$$<' '$$@'
+endef
+
+$(foreach profile,$(CO_PROFILES),$(eval $(call CO_PROFILE_TEMPLATE,$(profile))))
+
+$(VAR)/codex/model_catalog.json: $(CO)/libexec/model_catalog.jq | $(VAR)/codex
 	set -a
 	source -- ./.env
 	set +a
