@@ -405,8 +405,9 @@ def _unwrap_command(tokens: Iterator[str]) -> Sequence[str] | None:
             for name in tokens:
                 match name:
                     case "--":
-                        if (name := next(tokens, None)) is None:
+                        if (command_name := next(tokens, None)) is None:
                             return None
+                        name = command_name
                         break
                     case _ if not name.startswith("-"):
                         break
@@ -485,9 +486,9 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
                 yield from tokens
                 return
             case _ if option := _option_match(token, tokens, spec.options):
-                option_spec, arguments = option
+                option_spec, option_arguments = option
                 if option_spec.path_index is not None:
-                    if path := arguments[option_spec.path_index]:
+                    if path := option_arguments[option_spec.path_index]:
                         yield path
                 if option_spec.program:
                     yield_operands = True
