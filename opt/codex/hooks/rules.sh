@@ -52,15 +52,26 @@ Stop)
 
   exit
   ;;
-SessionStart | PostCompact)
-  # TODO: -- SessionStart + PostCompact can reinject, IFF PostCompact accepts `hookSpecificOutput`
+PostCompact)
+  "${RESET[@]}"
+  exit
+  ;;
+SessionStart)
   "${RESET[@]}"
   ;;
-UserPromptSubmit)
-  if [[ -d $SENTINELS ]]; then
-    exit
-  fi
+UserPromptSubmit | PostToolUse)
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac
 
+if [[ $EVENT == UserPromptSubmit && -d $SENTINELS ]]; then
+  exit
+fi
+
+if ! [[ -d $SENTINELS ]]; then
   mkdir -p -- "$SENTINELS"
   find "$SENTINELS" -mindepth 1 -delete
 
@@ -82,8 +93,9 @@ UserPromptSubmit)
     CONTEXT+=('---')
   fi
   CONTEXT+=("${PATH_CONTEXT[@]}")
-  ;;
-PostToolUse)
+fi
+
+if [[ $EVENT == PostToolUse ]]; then
   TMP="$(mktemp)"
   trap 'rm -fr -- "$TMP"' EXIT
 
@@ -125,13 +137,7 @@ PostToolUse)
     CONTENT="$(awk "$AWK" < "$RULE")"
     CONTEXT+=("Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"$CONTENT")
   done
-
-  ;;
-*)
-  set -x
-  exit 2
-  ;;
-esac
+fi
 
 if ! ((${#CONTEXT[@]})); then
   exit
