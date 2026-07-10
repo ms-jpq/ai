@@ -26,7 +26,7 @@
 
 - Do not indent patch markers. Do not put shell prompts inside the patch.
 
-## Example
+## Command
 
 ```bash
 apply_patch <<'PATCH'
