@@ -41,6 +41,7 @@ class _PatchFile:
 
 
 _PATCH_COMMANDS = {"apply_patch", "applypatch"}
+_REDIRECT_ONLY_COMMANDS = {"printf"}
 _PATH_COMMANDS = {
     "base64": _PathCommand(
         include_writes=True,
@@ -455,6 +456,20 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
                 yield_operands = True
 
 
+def _redirect_operands(
+    arguments: Iterable[str], *, include_writes: bool
+) -> Iterator[str]:
+    tokens = iter(arguments)
+    while (token := next(tokens, None)) is not None:
+        if token.isdigit() and (following := next(tokens, None)) is not None:
+            if _is_redirection(following):
+                token = following
+            else:
+                tokens = chain((following,), tokens)
+        if target := _redirect_target(token, tokens, include_writes=include_writes):
+            yield target
+
+
 def _command_events(
     command: Sequence[str], *, read_too: bool
 ) -> Iterator[_Heredoc | _PatchFile | str]:
@@ -465,14 +480,16 @@ def _command_events(
     if not read_too:
         return
 
-    if name in _PATCH_COMMANDS:
-        tokens = iter(args)
-        for token in tokens:
-            if token == "<" and (path := next(tokens, None)):
-                yield _PatchFile(path=path)
-
-    elif spec := _PATH_COMMANDS.get(name):
-        yield from _path_operands(args, spec=spec)
+    match None:
+        case _ if name in _PATCH_COMMANDS:
+            tokens = iter(args)
+            for token in tokens:
+                if token == "<" and (path := next(tokens, None)):
+                    yield _PatchFile(path=path)
+        case _ if name in _REDIRECT_ONLY_COMMANDS:
+            yield from _redirect_operands(args, include_writes=True)
+        case _ if spec := _PATH_COMMANDS.get(name):
+            yield from _path_operands(args, spec=spec)
 
 
 def _scan(
