@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from collections.abc import Iterable, Iterator, MutableSequence, Sequence, Set
 from contextlib import suppress
 from dataclasses import dataclass
+from enum import IntEnum
 from itertools import chain
 from os.path import expanduser, expandvars
 from pathlib import Path, PurePath
@@ -15,16 +16,20 @@ _AWK = Path(__file__).resolve(strict=True).parent / "apply_patch.awk"
 _EXPANSION = "\0"
 
 
+class _OperandMode(IntEnum):
+    AFTER_PROGRAM = 0
+    ALWAYS = 1
+    NEVER = 2
+
+
 @dataclass(frozen=True)
 class _PathCommand:
     include_writes: bool = False
-    path_options_are_program: bool = False
-    value_options_are_program: bool = False
-    yield_operands: bool = False
-    yield_operands_after_program: bool = True
+    operand_mode: _OperandMode = _OperandMode.AFTER_PROGRAM
 
     named_path_options: Set[str] = frozenset()
     path_options: Set[str] = frozenset()
+    program_options: Set[str] = frozenset()
     two_value_options: Set[str] = frozenset()
     value_options: Set[str] = frozenset()
 
@@ -45,16 +50,16 @@ _PATCH_COMMANDS = {"apply_patch", "applypatch"}
 _PATH_COMMANDS = {
     "base64": _PathCommand(
         include_writes=True,
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         path_options={"-i", "--input"},
     ),
     "cat": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "cut": _PathCommand(
         include_writes=True,
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         value_options={
             "-b",
             "-c",
@@ -68,13 +73,13 @@ _PATH_COMMANDS = {
     ),
     "ed": _PathCommand(
         include_writes=True,
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         path_options={"-f", "--script"},
         value_options={"-p", "--prompt"},
     ),
     "echo": _PathCommand(
         include_writes=True,
-        yield_operands_after_program=False,
+        operand_mode=_OperandMode.NEVER,
     ),
     "grep": _PathCommand(
         include_writes=True,
@@ -103,15 +108,15 @@ _PATH_COMMANDS = {
     ),
     "head": _PathCommand(
         include_writes=True,
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         value_options={"-c", "-n", "--bytes", "--lines"},
     ),
     "ls": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "nl": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
         value_options={
             "-b",
@@ -141,13 +146,13 @@ _PATH_COMMANDS = {
         },
     ),
     "perl": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
         value_options={"-0", "-e", "-E", "-I", "-m", "-M", "-x"},
     ),
     "printf": _PathCommand(
         include_writes=True,
-        yield_operands_after_program=False,
+        operand_mode=_OperandMode.NEVER,
     ),
     "rg": _PathCommand(
         include_writes=True,
@@ -186,49 +191,47 @@ _PATH_COMMANDS = {
         },
     ),
     "stat": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "tail": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
         value_options={"-c", "-n", "--bytes", "--lines", "--pid", "--sleep-interval"},
     ),
     "wc": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "awk": _PathCommand(
-        path_options_are_program=True,
+        program_options={"-f", "--file"},
         value_options={"-F", "-v", "--assign", "--field-separator"},
         path_options={"-f", "--file"},
     ),
     "gawk": _PathCommand(
-        path_options_are_program=True,
+        program_options={"-f", "--file"},
         value_options={"-F", "-v", "--assign", "--field-separator"},
         path_options={"-f", "--file"},
     ),
     "gsed": _PathCommand(
-        path_options_are_program=True,
+        program_options={"-e", "-f", "--expression", "--file"},
         path_options={"-f", "--file"},
-        value_options_are_program=True,
         value_options={"-e", "--expression"},
     ),
     "jq": _PathCommand(
-        path_options_are_program=True,
+        program_options={"-f", "--from-file"},
         named_path_options={"--argfile", "--rawfile", "--slurpfile"},
         path_options={"-f", "--from-file"},
         two_value_options={"--arg", "--argjson"},
         value_options={"-L", "--indent"},
     ),
     "sed": _PathCommand(
-        path_options_are_program=True,
-        value_options_are_program=True,
+        program_options={"-e", "-f", "--expression", "--file"},
         path_options={"-f", "--file"},
         value_options={"-e", "--expression"},
     ),
     "tee": _PathCommand(
-        yield_operands=True,
+        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
 }
@@ -421,7 +424,7 @@ def _redirect_target(
 
 def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[str]:
     tokens = iter(arguments)
-    yield_operands = spec.yield_operands
+    yield_operands = spec.operand_mode is _OperandMode.ALWAYS
     while (token := next(tokens, None)) is not None:
         if token.isdigit() and (following := next(tokens, None)) is not None:
             if _is_redirection(following):
@@ -436,17 +439,17 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
             case _ if _is_redirection(token):
                 ...
             case "--":
-                if not spec.yield_operands_after_program:
+                if spec.operand_mode is _OperandMode.NEVER:
                     continue
                 if not yield_operands:
                     next(tokens, None)
                 yield from tokens
                 return
             case _ if value := _option_value(token, tokens, spec.path_options):
-                _, argument = value
+                option, argument = value
                 if argument:
                     yield argument
-                if spec.path_options_are_program:
+                if option in spec.program_options:
                     yield_operands = True
             case _ if token in spec.named_path_options:
                 next(tokens, None)
@@ -456,14 +459,15 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
                 next(tokens, None)
                 next(tokens, None)
             case _ if value := _option_value(token, tokens, spec.value_options):
-                if spec.value_options_are_program:
+                option, _ = value
+                if option in spec.program_options:
                     yield_operands = True
             case _ if token.startswith("-") and token != "-":
                 ...
             case _ if yield_operands:
                 yield token
             case _:
-                yield_operands = spec.yield_operands_after_program
+                yield_operands = spec.operand_mode is _OperandMode.AFTER_PROGRAM
 
 
 def _command_events(
@@ -476,7 +480,7 @@ def _command_events(
     if not read_too:
         return
 
-    match None:
+    match name:
         case _ if name in _PATCH_COMMANDS:
             tokens = iter(args)
             for token in tokens:
