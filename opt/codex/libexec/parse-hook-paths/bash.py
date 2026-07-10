@@ -73,6 +73,9 @@ class _PatchFile:
     path: str
 
 
+_Event = _Heredoc | _PatchFile | str
+
+
 _PATCH_COMMANDS = {"apply_patch", "applypatch"}
 _PATH_COMMANDS = {
     "base64": _PathCommand(
@@ -462,15 +465,33 @@ def _redirect_target(
     return None
 
 
+def _normalized_arguments(arguments: Sequence[str]) -> Iterator[str]:
+    index = 0
+    while index < len(arguments):
+        token = arguments[index]
+        following = arguments[index + 1] if index + 1 < len(arguments) else None
+        if token.isdigit() and following is not None and _is_redirection(following):
+            yield following
+            index += 2
+            continue
+        yield token
+        index += 1
+
+
+def _option_effect(
+    option: tuple[_OptionSpec, tuple[str | None, ...]],
+) -> tuple[str | None, bool]:
+    option_spec, option_arguments = option
+    path = None
+    if option_spec.path_index is not None:
+        path = option_arguments[option_spec.path_index]
+    return path, option_spec.program
+
+
 def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[str]:
-    tokens = iter(arguments)
+    tokens = iter(_normalized_arguments(tuple(arguments)))
     yield_operands = spec.operand_mode is _OperandMode.ALWAYS
     while (token := next(tokens, None)) is not None:
-        if token.isdigit() and (following := next(tokens, None)) is not None:
-            if _is_redirection(following):
-                token = following
-            else:
-                tokens = chain((following,), tokens)
         match token:
             case _ if target := _redirect_target(
                 token, tokens, include_writes=spec.include_writes
@@ -486,11 +507,10 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
                 yield from tokens
                 return
             case _ if option := _option_match(token, tokens, spec.options):
-                option_spec, option_arguments = option
-                if option_spec.path_index is not None:
-                    if path := option_arguments[option_spec.path_index]:
-                        yield path
-                if option_spec.program:
+                path, is_program = _option_effect(option)
+                if path:
+                    yield path
+                if is_program:
                     yield_operands = True
             case _ if token.startswith("-") and token != "-":
                 ...
@@ -500,9 +520,14 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
                 yield_operands = spec.operand_mode is _OperandMode.AFTER_PROGRAM
 
 
-def _command_events(
-    command: Sequence[str], *, read_too: bool
-) -> Iterator[_Heredoc | _PatchFile | str]:
+def _patch_redirects(arguments: Iterable[str]) -> Iterator[_PatchFile]:
+    tokens = iter(arguments)
+    for token in tokens:
+        if token == "<" and (path := next(tokens, None)):
+            yield _PatchFile(path=path)
+
+
+def _command_events(command: Sequence[str], *, read_too: bool) -> Iterator[_Event]:
     arg0, *args = command
     name = PurePath(arg0).name
 
@@ -512,17 +537,12 @@ def _command_events(
 
     match name:
         case _ if name in _PATCH_COMMANDS:
-            tokens = iter(args)
-            for token in tokens:
-                if token == "<" and (path := next(tokens, None)):
-                    yield _PatchFile(path=path)
+            yield from _patch_redirects(args)
         case _ if spec := _PATH_COMMANDS.get(name):
             yield from _path_operands(args, spec=spec)
 
 
-def _scan(
-    tokens: Iterable[str], *, read_too: bool
-) -> Iterator[_Heredoc | _PatchFile | str]:
+def _scan(tokens: Iterable[str], *, read_too: bool) -> Iterator[_Event]:
     for command_tokens in _commands(tokens):
         if not (command := _unwrap_command(iter(command_tokens))):
             continue
