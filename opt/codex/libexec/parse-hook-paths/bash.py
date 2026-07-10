@@ -410,8 +410,8 @@ def _redirect_target(
 def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[str]:
     tokens = iter(arguments)
     yield_operands = spec.yield_operands
-    while token := next(tokens, None):
-        if token.isdigit() and (following := next(tokens, None)):
+    while (token := next(tokens, None)) is not None:
+        if token.isdigit() and (following := next(tokens, None)) is not None:
             if _is_redirection(following):
                 token = following
             else:
