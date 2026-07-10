@@ -480,6 +480,7 @@ def _command_events(
         for token in tokens:
             if token == "<" and (path := next(tokens, "")):
                 yield _PatchFile(path=path)
+
     elif spec := _PATH_COMMANDS.get(name):
         yield from _path_operands(args, spec=spec)
 
@@ -503,6 +504,7 @@ def _heredoc_body(document: _Heredoc, *, lines: Iterator[str]) -> Iterator[str]:
     for raw_line in lines:
         line = raw_line.removesuffix("\n").removesuffix("\r")
         candidate = line.lstrip("\t") if document.strip_tabs else line
+
         if candidate == document.delimiter:
             return
         yield candidate
