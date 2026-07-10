@@ -34,6 +34,10 @@ AWK
 
 CONTEXT=()
 case "$EVENT" in
+PostCompact)
+  "${RESET[@]}"
+  exit
+  ;;
 Stop)
   RESET_EVERY=16
 
@@ -50,10 +54,6 @@ Stop)
     "${RESET[@]}"
   fi
 
-  exit
-  ;;
-PostCompact)
-  "${RESET[@]}"
   exit
   ;;
 SessionStart)
