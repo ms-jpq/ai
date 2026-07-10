@@ -179,7 +179,7 @@ _PATH_COMMANDS = {
     ),
     "perl": _PathCommand(
         include_writes=True,
-        options=_options(value={"-0", "-e", "-E", "-I", "-m", "-M", "-x"}),
+        options=_options(value={"-0", "-e", "-E", "-I", "-m", "-M", "-n", "-p", "-x"}),
     ),
     "printf": _PathCommand(
         include_writes=True,
