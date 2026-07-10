@@ -65,6 +65,12 @@ _PATH_COMMANDS = {
             "--fields",
         },
     ),
+    "ed": _PathCommand(
+        include_writes=True,
+        yield_operands=True,
+        path_options={"-f", "--script"},
+        value_options={"-p", "--prompt"},
+    ),
     "grep": _PathCommand(
         include_writes=True,
         path_options={"-f", "--file", "--exclude-from"},
