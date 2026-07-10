@@ -231,17 +231,17 @@ def _is_redirection(token: str) -> bool:
 
 def _option_value(
     token: str, tokens: Iterator[str], options: Set[str]
-) -> tuple[str, str] | None:
+) -> tuple[str, str | None] | None:
     option, sep, argument = token.partition("=")
     if sep and option in options:
         return option, argument
     if token in options:
-        return token, next(tokens, "")
+        return token, next(tokens, None)
     if token.startswith("-") and not token.startswith("--"):
         for index, short_option in enumerate(token[1:], start=2):
             short = f"-{short_option}"
             if short in options:
-                return short, token[index:] or next(tokens, "")
+                return short, token[index:] or next(tokens, None)
     return None
 
 
@@ -354,7 +354,8 @@ def _unwrap_command(tokens: Iterator[str]) -> Sequence[str] | None:
             for name in tokens:
                 match name:
                     case "--":
-                        name = next(tokens, "")
+                        if (name := next(tokens, None)) is None:
+                            return None
                         break
                     case _ if not name.startswith("-"):
                         break
@@ -369,11 +370,13 @@ def _unwrap_command(tokens: Iterator[str]) -> Sequence[str] | None:
 
 
 def _heredoc(tokens: Iterator[str], *, patch: bool) -> _Heredoc | None:
-    match next(tokens, ""):
-        case "":
+    match next(tokens, None):
+        case None:
             return None
         case "-":
-            return _Heredoc(delimiter=next(tokens, ""), patch=patch, strip_tabs=True)
+            if (delimiter := next(tokens, None)) is None:
+                return None
+            return _Heredoc(delimiter=delimiter, patch=patch, strip_tabs=True)
         case delimiter:
             return _Heredoc(
                 delimiter=delimiter.removeprefix("-"),
@@ -399,9 +402,9 @@ def _redirect_target(
         case "<<" | "<<-":
             _heredoc(tokens, patch=False)
         case "<" | "<>":
-            return next(tokens, "")
+            return next(tokens, None)
         case ">" | ">>" | ">|" if include_writes:
-            return next(tokens, "")
+            return next(tokens, None)
         case _ if _is_redirection(token):
             next(tokens, None)
     return None
@@ -436,7 +439,7 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
                     yield_operands = True
             case _ if token in spec.named_path_options:
                 next(tokens, None)
-                if argument := next(tokens, ""):
+                if argument := next(tokens, None):
                     yield argument
             case _ if token in spec.two_value_options:
                 next(tokens, None)
@@ -465,7 +468,7 @@ def _command_events(
     if name in _PATCH_COMMANDS:
         tokens = iter(args)
         for token in tokens:
-            if token == "<" and (path := next(tokens, "")):
+            if token == "<" and (path := next(tokens, None)):
                 yield _PatchFile(path=path)
 
     elif spec := _PATH_COMMANDS.get(name):
