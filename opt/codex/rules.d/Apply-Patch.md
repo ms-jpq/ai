@@ -2,17 +2,6 @@
 
 - Use `apply_patch` with a quoted heredoc containing one complete V4A patch.
 
-  ```bash
-  apply_patch <<'PATCH'
-  *** Begin Patch
-  *** Update File: dogs.txt
-  @@
-  -lil is sleepy.
-  +lil is awake.
-  *** End Patch
-  PATCH
-  ```
-
 - Do not construct patches with `printf`, `echo`, or generated shell pipelines.
 
 ---
@@ -37,9 +26,10 @@
 
 - Do not indent patch markers. Do not put shell prompts inside the patch.
 
-## Full Example
+## Example
 
-```patch
+```bash
+apply_patch <<'PATCH'
 *** Begin Patch
 *** Update File: dogs.txt
 @@
@@ -52,4 +42,5 @@ Optimization happened. Nobody improved.
 
 *** Delete File: no-dogs.txt
 *** End Patch
+PATCH
 ```
