@@ -1,9 +1,9 @@
 #!/usr/bin/env -S -- PYTHONSAFEPATH= python3
 
 from argparse import ArgumentParser
-from collections.abc import Iterable, Iterator, MutableSequence, Sequence, Set
+from collections.abc import Iterable, Iterator, Mapping, MutableSequence, Sequence
 from contextlib import suppress
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum
 from itertools import chain
 from os.path import expanduser, expandvars
@@ -23,15 +23,42 @@ class _OperandMode(IntEnum):
 
 
 @dataclass(frozen=True)
+class _OptionSpec:
+    values: int = 1
+    path_index: int | None = None
+    program: bool = False
+
+
+def _options(
+    *,
+    named_path: Iterable[str] = (),
+    path: Iterable[str] = (),
+    program_path: Iterable[str] = (),
+    program_value: Iterable[str] = (),
+    two_value: Iterable[str] = (),
+    value: Iterable[str] = (),
+) -> Mapping[str, _OptionSpec]:
+    options: dict[str, _OptionSpec] = {}
+    for name in named_path:
+        options[name] = _OptionSpec(values=2, path_index=1)
+    for name in path:
+        options[name] = _OptionSpec(path_index=0)
+    for name in program_path:
+        options[name] = _OptionSpec(path_index=0, program=True)
+    for name in program_value:
+        options[name] = _OptionSpec(program=True)
+    for name in two_value:
+        options[name] = _OptionSpec(values=2)
+    for name in value:
+        options[name] = _OptionSpec()
+    return options
+
+
+@dataclass(frozen=True)
 class _PathCommand:
     include_writes: bool = False
-    operand_mode: _OperandMode = _OperandMode.AFTER_PROGRAM
-
-    named_path_options: Set[str] = frozenset()
-    path_options: Set[str] = frozenset()
-    program_options: Set[str] = frozenset()
-    two_value_options: Set[str] = frozenset()
-    value_options: Set[str] = frozenset()
+    operand_mode: _OperandMode = _OperandMode.ALWAYS
+    options: Mapping[str, _OptionSpec] = field(default_factory=_options)
 
 
 @dataclass(frozen=True)
@@ -50,188 +77,200 @@ _PATCH_COMMANDS = {"apply_patch", "applypatch"}
 _PATH_COMMANDS = {
     "base64": _PathCommand(
         include_writes=True,
-        operand_mode=_OperandMode.ALWAYS,
-        path_options={"-i", "--input"},
+        options=_options(path={"-i", "--input"}),
     ),
     "cat": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "cut": _PathCommand(
         include_writes=True,
-        operand_mode=_OperandMode.ALWAYS,
-        value_options={
-            "-b",
-            "-c",
-            "-d",
-            "-f",
-            "--bytes",
-            "--characters",
-            "--delimiter",
-            "--fields",
-        },
+        options=_options(
+            value={
+                "-b",
+                "-c",
+                "-d",
+                "-f",
+                "--bytes",
+                "--characters",
+                "--delimiter",
+                "--fields",
+            },
+        ),
     ),
     "ed": _PathCommand(
         include_writes=True,
-        operand_mode=_OperandMode.ALWAYS,
-        path_options={"-f", "--script"},
-        value_options={"-p", "--prompt"},
+        options=_options(
+            path={"-f", "--script"},
+            value={"-p", "--prompt"},
+        ),
     ),
     "echo": _PathCommand(
         include_writes=True,
         operand_mode=_OperandMode.NEVER,
     ),
     "grep": _PathCommand(
+        operand_mode=_OperandMode.AFTER_PROGRAM,
         include_writes=True,
-        path_options={"-f", "--file", "--exclude-from"},
-        value_options={
-            "-A",
-            "-B",
-            "-C",
-            "-D",
-            "-d",
-            "-e",
-            "-m",
-            "--after-context",
-            "--before-context",
-            "--binary-files",
-            "--context",
-            "--devices",
-            "--directories",
-            "--exclude",
-            "--exclude-dir",
-            "--include",
-            "--label",
-            "--max-count",
-            "--regexp",
-        },
+        options=_options(
+            path={"-f", "--file", "--exclude-from"},
+            value={
+                "-A",
+                "-B",
+                "-C",
+                "-D",
+                "-d",
+                "-e",
+                "-m",
+                "--after-context",
+                "--before-context",
+                "--binary-files",
+                "--context",
+                "--devices",
+                "--directories",
+                "--exclude",
+                "--exclude-dir",
+                "--include",
+                "--label",
+                "--max-count",
+                "--regexp",
+            },
+        ),
     ),
     "head": _PathCommand(
         include_writes=True,
-        operand_mode=_OperandMode.ALWAYS,
-        value_options={"-c", "-n", "--bytes", "--lines"},
+        options=_options(value={"-c", "-n", "--bytes", "--lines"}),
     ),
     "ls": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "nl": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
-        value_options={
-            "-b",
-            "-d",
-            "-f",
-            "-h",
-            "-i",
-            "-l",
-            "-n",
-            "-s",
-            "-v",
-            "-w",
-            "--body-numbering",
-            "--footer-numbering",
-            "--header-numbering",
-            "--increment",
-            "--join-blank-lines",
-            "--line-increment",
-            "--line-number-format",
-            "--no-renumber",
-            "--number-format",
-            "--number-separator",
-            "--number-width",
-            "--page-increment",
-            "--section-delimiter",
-            "--starting-line-number",
-        },
+        options=_options(
+            value={
+                "-b",
+                "-d",
+                "-f",
+                "-h",
+                "-i",
+                "-l",
+                "-n",
+                "-s",
+                "-v",
+                "-w",
+                "--body-numbering",
+                "--footer-numbering",
+                "--header-numbering",
+                "--increment",
+                "--join-blank-lines",
+                "--line-increment",
+                "--line-number-format",
+                "--no-renumber",
+                "--number-format",
+                "--number-separator",
+                "--number-width",
+                "--page-increment",
+                "--section-delimiter",
+                "--starting-line-number",
+            },
+        ),
     ),
     "perl": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
-        value_options={"-0", "-e", "-E", "-I", "-m", "-M", "-x"},
+        options=_options(value={"-0", "-e", "-E", "-I", "-m", "-M", "-x"}),
     ),
     "printf": _PathCommand(
         include_writes=True,
         operand_mode=_OperandMode.NEVER,
     ),
     "rg": _PathCommand(
+        operand_mode=_OperandMode.AFTER_PROGRAM,
         include_writes=True,
-        path_options={"-f", "--file"},
-        value_options={
-            "-A",
-            "-B",
-            "-C",
-            "-E",
-            "-e",
-            "-g",
-            "-M",
-            "-m",
-            "-T",
-            "-t",
-            "--after-context",
-            "--before-context",
-            "--context",
-            "--context-separator",
-            "--engine",
-            "--glob",
-            "--glob-case-insensitive",
-            "--iglob",
-            "--max-columns",
-            "--max-count",
-            "--max-depth",
-            "--path-separator",
-            "--regexp",
-            "--replace",
-            "--sort",
-            "--sortr",
-            "--type",
-            "--type-add",
-            "--type-clear",
-            "--type-not",
-        },
+        options=_options(
+            path={"-f", "--file"},
+            value={
+                "-A",
+                "-B",
+                "-C",
+                "-E",
+                "-e",
+                "-g",
+                "-M",
+                "-m",
+                "-T",
+                "-t",
+                "--after-context",
+                "--before-context",
+                "--context",
+                "--context-separator",
+                "--engine",
+                "--glob",
+                "--glob-case-insensitive",
+                "--iglob",
+                "--max-columns",
+                "--max-count",
+                "--max-depth",
+                "--path-separator",
+                "--regexp",
+                "--replace",
+                "--sort",
+                "--sortr",
+                "--type",
+                "--type-add",
+                "--type-clear",
+                "--type-not",
+            },
+        ),
     ),
     "stat": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "tail": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
-        value_options={"-c", "-n", "--bytes", "--lines", "--pid", "--sleep-interval"},
+        options=_options(
+            value={"-c", "-n", "--bytes", "--lines", "--pid", "--sleep-interval"}
+        ),
     ),
     "wc": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
     "awk": _PathCommand(
-        program_options={"-f", "--file"},
-        value_options={"-F", "-v", "--assign", "--field-separator"},
-        path_options={"-f", "--file"},
+        operand_mode=_OperandMode.AFTER_PROGRAM,
+        options=_options(
+            program_path={"-f", "--file"},
+            value={"-F", "-v", "--assign", "--field-separator"},
+        ),
     ),
     "gawk": _PathCommand(
-        program_options={"-f", "--file"},
-        value_options={"-F", "-v", "--assign", "--field-separator"},
-        path_options={"-f", "--file"},
+        operand_mode=_OperandMode.AFTER_PROGRAM,
+        options=_options(
+            program_path={"-f", "--file"},
+            value={"-F", "-v", "--assign", "--field-separator"},
+        ),
     ),
     "gsed": _PathCommand(
-        program_options={"-e", "-f", "--expression", "--file"},
-        path_options={"-f", "--file"},
-        value_options={"-e", "--expression"},
+        operand_mode=_OperandMode.AFTER_PROGRAM,
+        options=_options(
+            program_path={"-f", "--file"},
+            program_value={"-e", "--expression"},
+        ),
     ),
     "jq": _PathCommand(
-        program_options={"-f", "--from-file"},
-        named_path_options={"--argfile", "--rawfile", "--slurpfile"},
-        path_options={"-f", "--from-file"},
-        two_value_options={"--arg", "--argjson"},
-        value_options={"-L", "--indent"},
+        operand_mode=_OperandMode.AFTER_PROGRAM,
+        options=_options(
+            named_path={"--argfile", "--rawfile", "--slurpfile"},
+            program_path={"-f", "--from-file"},
+            two_value={"--arg", "--argjson"},
+            value={"-L", "--indent"},
+        ),
     ),
     "sed": _PathCommand(
-        program_options={"-e", "-f", "--expression", "--file"},
-        path_options={"-f", "--file"},
-        value_options={"-e", "--expression"},
+        operand_mode=_OperandMode.AFTER_PROGRAM,
+        options=_options(
+            program_path={"-f", "--file"},
+            program_value={"-e", "--expression"},
+        ),
     ),
     "tee": _PathCommand(
-        operand_mode=_OperandMode.ALWAYS,
         include_writes=True,
     ),
 }
@@ -241,19 +280,19 @@ def _is_redirection(token: str) -> bool:
     return bool(token) and all(chr in "<>&|" for chr in token)
 
 
-def _option_value(
-    token: str, tokens: Iterator[str], options: Set[str]
-) -> tuple[str, str | None] | None:
+def _option_match(
+    token: str, tokens: Iterator[str], options: Mapping[str, _OptionSpec]
+) -> tuple[_OptionSpec, tuple[str | None, ...]] | None:
     option, sep, argument = token.partition("=")
-    if sep and option in options:
-        return option, argument
-    if token in options:
-        return token, next(tokens, None)
+    if sep and (spec := options.get(option)) and spec.values == 1:
+        return spec, (argument,)
+    if spec := options.get(token):
+        return spec, tuple(next(tokens, None) for _ in range(spec.values))
     if token.startswith("-") and not token.startswith("--"):
         for index, short_option in enumerate(token[1:], start=2):
             short = f"-{short_option}"
-            if short in options:
-                return short, token[index:] or next(tokens, None)
+            if (spec := options.get(short)) and spec.values == 1:
+                return spec, (token[index:] or next(tokens, None),)
     return None
 
 
@@ -445,22 +484,12 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
                     next(tokens, None)
                 yield from tokens
                 return
-            case _ if value := _option_value(token, tokens, spec.path_options):
-                option, argument = value
-                if argument:
-                    yield argument
-                if option in spec.program_options:
-                    yield_operands = True
-            case _ if token in spec.named_path_options:
-                next(tokens, None)
-                if argument := next(tokens, None):
-                    yield argument
-            case _ if token in spec.two_value_options:
-                next(tokens, None)
-                next(tokens, None)
-            case _ if value := _option_value(token, tokens, spec.value_options):
-                option, _ = value
-                if option in spec.program_options:
+            case _ if option := _option_match(token, tokens, spec.options):
+                option_spec, arguments = option
+                if option_spec.path_index is not None:
+                    if path := arguments[option_spec.path_index]:
+                        yield path
+                if option_spec.program:
                     yield_operands = True
             case _ if token.startswith("-") and token != "-":
                 ...
