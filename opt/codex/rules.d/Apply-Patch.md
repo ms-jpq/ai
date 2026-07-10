@@ -37,7 +37,7 @@
 
 - Do not indent patch markers. Do not put shell prompts inside the patch.
 
-## Example
+## Full Example
 
 ```patch
 *** Begin Patch
