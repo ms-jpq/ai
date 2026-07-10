@@ -350,34 +350,36 @@ def _commands(tokens: Iterable[str]) -> Iterator[Sequence[str]]:
 
 def _unwrap_command(tokens: Iterator[str]) -> Sequence[str] | None:
     for name in tokens:
-        _assign_name, _assign_sep, _ = name.partition("=")
-        if not (_assign_sep and _assign_name.isidentifier()):
+        assigned, sep, _ = name.partition("=")
+        if not (sep and assigned.isidentifier()):
             break
     else:
         return None
 
-    if name == "command":
-        for name in tokens:
-            match name:
-                case "--":
-                    name = next(tokens, "")
-                    break
-                case "-" | _ if not name.startswith("-"):
-                    break
-            options = set(name[1:])
-            if options & {"v", "V"} or not options <= {"p"}:
-                return None
-        else:
+    match name:
+        case "":
             return None
+        case "command":
+            for name in tokens:
+                match name:
+                    case "--":
+                        name = next(tokens, "")
+                        break
+                    case _ if not name.startswith("-"):
+                        break
+                    case _ if (options := set(name[1:])) and (
+                        options & {"v", "V"} or not options <= {"p"}
+                    ):
+                        return None
+            else:
+                return None
 
-    if not name:
-        return None
     return name, *tokens
 
 
 def _heredoc(tokens: Iterator[str], *, patch: bool) -> _Heredoc | None:
-    match next(tokens, None):
-        case None | "":
+    match next(tokens, ""):
+        case "":
             return None
         case "-":
             return _Heredoc(delimiter=next(tokens, ""), patch=patch, strip_tabs=True)
@@ -418,7 +420,7 @@ def _path_operands(arguments: Iterable[str], *, spec: _PathCommand) -> Iterator[
     tokens = iter(arguments)
     yield_operands = spec.yield_operands
     while token := next(tokens, None):
-        if token.isdigit() and (following := next(tokens, None)) is not None:
+        if token.isdigit() and (following := next(tokens, None)):
             if _is_redirection(following):
                 token = following
             else:
