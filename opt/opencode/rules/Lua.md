@@ -5,17 +5,9 @@ paths:
 
 # Lua
 
-## State and Scope
+## Defaults
 
-- Use closure factories for stateful objects and plain tables for stateless modules.
-
-- Scope related declarations with `do...end` blocks.
-
-- Use an IIFE `(function() ... end)()` for computed constants.
-
----
-
-## Tables and Iteration
+- Prefer `local fn = function(...)` for function declarations.
 
 - Use `table.insert` / `table.remove` instead of manual index arithmetic.
 
@@ -23,11 +15,17 @@ paths:
 
 - Prefer `pairs` to `ipairs`; use `ipairs` when iteration requires contiguous numeric order and hole termination.
 
+- Use `[[...]]` raw strings for content containing backslashes or angle brackets.
+
 ---
 
-## Strings
+## State and Scope
 
-- Use `[[...]]` raw strings for content containing backslashes or angle brackets.
+- Use closure factories for stateful objects and plain tables for stateless modules.
+
+- Scope related declarations with `do...end` blocks.
+
+- Use an IIFE `(function() ... end)()` for computed constants.
 
 ---
 

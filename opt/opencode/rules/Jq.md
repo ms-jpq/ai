@@ -5,6 +5,8 @@ paths:
 
 # JQ
 
+## Defaults
+
 - Start standalone `jq` scripts with:
 
 ```jq

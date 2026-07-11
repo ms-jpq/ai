@@ -5,6 +5,8 @@ paths:
 
 # Sed
 
+## Defaults
+
 - Start standalone `sed` scripts with:
 
 ```sed

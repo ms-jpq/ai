@@ -5,6 +5,8 @@ paths:
 
 # Awk
 
+## Defaults
+
 - Start standalone `awk` scripts with:
 
 ```awk

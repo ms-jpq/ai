@@ -12,6 +12,27 @@ paths:
 
 # TypeScript
 
+## Defaults
+
+- Annotate every function signature. Otherwise, add annotations only when inference loses required precision.
+
+- Prefer `const` to `let`. Replace reassignment with conditional expressions, destructuring, `.entries()`, or intermediate constants.
+
+- Destructure values instead of repeatedly accessing indexes.
+
+  ```typescript
+  const [key, value] = entry
+  const [, year, month] = match
+  ```
+
+- Use `undefined` consistently; do not use `null`.
+
+- Use `??` for nullish coalescing. Reserve `||` for boolean short-circuiting.
+
+- Use `import type` for type-only imports.
+
+---
+
 ## Functions
 
 - Prefer `const foo = () => {}` to `function foo() {}`.
@@ -39,15 +60,7 @@ paths:
   type Decorated = Base & { [META]: Meta }
   ```
 
-- Use `undefined` consistently; do not use `null`.
-
-- Use `??` for nullish coalescing. Reserve `||` for boolean short-circuiting.
-
 - Use control-flow narrowing instead of casts. Reserve `as` for `as const`.
-
-- Annotate every function signature. Otherwise, add annotations only when inference loses required precision.
-
-- Use `import type` for type-only imports.
 
 ---
 
@@ -71,15 +84,6 @@ paths:
   ```
 
 - Model resources as factory-returned `AsyncDisposable` records; capture state in the closure and teardown in `[Symbol.asyncDispose]`.
-
-- Prefer `const` to `let`. Replace reassignment with conditional expressions, destructuring, `.entries()`, or intermediate constants.
-
-- Destructure values instead of repeatedly accessing indexes.
-
-  ```typescript
-  const [key, value] = entry
-  const [, year, month] = match
-  ```
 
 ---
 

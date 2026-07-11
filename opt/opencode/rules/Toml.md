@@ -5,4 +5,6 @@ paths:
 
 # TOML
 
+## Defaults
+
 - Add `#:schema <schema-url>`.

@@ -6,4 +6,6 @@ paths:
 
 # JSON
 
+## Defaults
+
 - Add `"$schema": "<schema-url>"`.
