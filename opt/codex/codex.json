@@ -4,6 +4,7 @@
     "enabled": false
   },
   "approvals_reviewer": "user",
+  "check_for_update_on_startup": false,
   "model_catalog_json": "${CODEX_HOME}/model_catalog.json",
   "model_providers": {
     "deepseek": {
