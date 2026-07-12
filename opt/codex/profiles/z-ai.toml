@@ -1,10 +1,10 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-model              = "z-ai/glm-5.2[1m]"
+model              = "zai/glm-5.2"
 model_catalog_json = "${CODEX_HOME}/model_catalog.json"
 model_provider     = "z-ai"
 
 [model_providers.z-ai]
-base_url = "https://litellm.${MCP_DOMAIN}/v1"
-env_key  = "ZAI_API_KEY"
-name     = "z-ai"
+base_url         = "https://litellm.${MCP_DOMAIN}/v1"
+env_http_headers = { "x-api-key" = "ZAI_API_KEY" }
+name             = "z-ai"

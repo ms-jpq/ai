@@ -14,10 +14,9 @@
     "status_line": [
       "run-state",
       "model-with-reasoning",
-      "fast-mode",
       "context-used",
       "context-window-size",
-      "project-name",
+      "thread-title",
       "task-progress"
     ]
   }

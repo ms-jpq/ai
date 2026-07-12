@@ -5,6 +5,6 @@ model_catalog_json = "${CODEX_HOME}/model_catalog.json"
 model_provider     = "deepseek"
 
 [model_providers.deepseek]
-base_url = "https://litellm.${MCP_DOMAIN}/v1"
+base_url = "https://moon-bridge.${MCP_DOMAIN}/v1"
 env_key  = "DEEPSEEK_API_KEY"
 name     = "deepseek"
