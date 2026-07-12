@@ -1,5 +1,17 @@
 #!/usr/bin/env -S -- awk -f
 
+BEGIN {
+  KEY = ""
+  LINE = ""
+  TABLE = ""
+  PROFILE_N = 0
+  PROFILE_IN_TABLE = 0
+  DST_N = 0
+  DST_IN_TABLE = 0
+  DST_SKIP_TABLE = 0
+  DST_STARTED = 0
+}
+
 FNR == NR {
   PROFILE[++PROFILE_N] = $0
   TABLE = table_header($0)
@@ -15,10 +27,6 @@ FNR == NR {
   next
 }
 
-! PRINTED_PROFILE {
-  print_profile()
-}
-
 {
   TABLE = table_header($0)
   if (TABLE != "") {
@@ -28,7 +36,7 @@ FNR == NR {
       next
     }
     DST_STARTED = 1
-    print
+    DST[++DST_N] = $0
     next
   }
   if (DST_SKIP_TABLE) {
@@ -46,23 +54,17 @@ FNR == NR {
     next
   }
   DST_STARTED = 1
-  print
+  DST[++DST_N] = $0
 }
 
 END {
-  print_profile()
-}
-
-function print_profile(L_i)
-{
-  if (PRINTED_PROFILE) {
-    return
-  }
   for (L_i = 1; L_i <= PROFILE_N; L_i += 1) {
     print PROFILE[L_i]
   }
   print ""
-  PRINTED_PROFILE = 1
+  for (L_i = 1; L_i <= DST_N; L_i += 1) {
+    print DST[L_i]
+  }
 }
 
 function table_header(value, L_header)
@@ -87,7 +89,6 @@ function top_key(value, L_key)
 function trim(value, L_value)
 {
   L_value = value
-  sub(/^[[:space:]]+/, "", L_value)
-  sub(/[[:space:]]+$/, "", L_value)
+  gsub(/^[[:space:]]+|[[:space:]]+$/, "", L_value)
   return L_value
 }
