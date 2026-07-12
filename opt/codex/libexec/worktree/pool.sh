@@ -13,7 +13,7 @@ if (($#)); then
   shift -- 1
 fi
 
-if ! GITDIR="$(git rev-parse --path-format=absolute --git-common-dir)" 2> /dev/null; then
+if ! GITDIR="$(git rev-parse --path-format=absolute --git-common-dir 2> /dev/null)"; then
   exit
 fi
 
