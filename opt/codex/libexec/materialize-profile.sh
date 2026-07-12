@@ -4,8 +4,10 @@ set -o pipefail
 
 SRC="$1"
 DST="$2"
+DST_DIR="${DST%/*}"
+DST_DIR="$(realpath -- "$DST_DIR")"
 
-mkdir -p -- "${DST%/*}"
+mkdir -p -- "$DST_DIR"
 if [[ -L $DST ]]; then
   rm -f -- "$DST"
 fi
@@ -24,14 +26,17 @@ GENERATOR=(
 LS="$("${GENERATOR[@]}")"
 readarray -t -- LINES < <(printf -- '%s' "$LS")
 
+MCJ='model_catalog_json'
 ARGV=(sed -E)
 for LINE in "${LINES[@]}"; do
   ARGV+=(-e "$LINE")
 done
+ARGV+=(-e "/^[[:space:]]*${MCJ}[[:space:]]*=/d")
 ARGV+=(-e '/[^[:space:]]/,$!d')
 
 {
   cat -- "$SRC"
+  printf -- '%s = "%s"\n' "$MCJ" "$DST_DIR/model_catalog.json"
   printf -- '\n\n'
   "${ARGV[@]}" -- "$DST"
 } | sponge -- "$DST"
