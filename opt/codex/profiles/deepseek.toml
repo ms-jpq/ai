@@ -1,4 +1,4 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-model          = "deepseek-v4-pro"
+model          = "deepseek/deepseek-v4-pro"
 model_provider = "deepseek"
