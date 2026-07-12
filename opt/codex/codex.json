@@ -5,23 +5,6 @@
   },
   "approvals_reviewer": "user",
   "check_for_update_on_startup": false,
-  "model_providers": {
-    "deepseek": {
-      "base_url": "https://litellm.${MCP_DOMAIN}/v1",
-      "env_key": "DEEPSEEK_API_KEY",
-      "name": "deepseek"
-    },
-    "open-router": {
-      "base_url": "https://openrouter.ai/api/v1",
-      "env_key": "OPENROUTER_API_KEY",
-      "name": "open-router"
-    },
-    "z-ai": {
-      "base_url": "https://litellm.${MCP_DOMAIN}/v1",
-      "env_key": "ZAI_API_KEY",
-      "name": "z-ai"
-    }
-  },
   "sandbox_mode": "danger-full-access",
   "shell_environment_policy": {
     "ignore_default_excludes": true,

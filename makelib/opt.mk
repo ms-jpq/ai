@@ -22,7 +22,7 @@ $(VAR)/codex: | $(VAR)
 
 define CO_PROFILE_TEMPLATE
 co: $(VAR)/codex/$1.config.toml
-$(VAR)/codex/$1.config.toml: $(CO)/profiles/$1.toml $(CO)/libexec/materialize-profile.sh | $(VAR)/codex
+$(VAR)/codex/$1.config.toml: $(CO)/profiles/$1.toml $(CO)/libexec/materialize-profile.sh $(CO)/libexec/materialize-profile.awk | $(VAR)/codex
 	'$(CO)/libexec/materialize-profile.sh' '$$<' '$$@'
 endef
 
