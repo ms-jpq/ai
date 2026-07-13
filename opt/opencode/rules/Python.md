@@ -30,22 +30,18 @@ paths:
 
 ## Functions
 
-- When writing functions, require named parameters after the first positional argument.
+- When writing and calling functions, use named parameters after the first positional argument.
 
   ```python
-  def fetch(url, *, timeout=30, retries=3): ...
-  ```
+  def fetch(url: str, *, timeout: float = 30.0, retries: int = 3) -> bytes: ...
 
-- When calling functions, pass arguments by name unless the parameter is the primary object being acted on.
-
-  ```python
   fetch(source, timeout=30, retries=3)
   ```
 
-- Use generators instead of closures with `nonlocal` for incremental stateful iteration.
+- Use generators to keep incremental iteration state inside the iterator.
 
   ```python
-  def chunks(items, *, size):
+  def chunks[T](items: Sequence[T], *, size: int) -> Iterator[Sequence[T]]:
       index = 0
       while index < len(items):
           yield items[index : index + size]
@@ -56,9 +52,10 @@ paths:
 
 ## Control Flow
 
-- Use `match`/`case` to enumerate all possible cases.
+- Use `match`/`case` to enumerate the state space.
 
   ```python
+  state: Literal["idle", "running", "done"]
   match state:
       case "idle":
           start()
@@ -93,17 +90,16 @@ paths:
 
 ## Data Access
 
-- After parsing, reading, decoding, or transforming, bind the expected shape before using it.
+- Read typed records through destructuring or typed field access.
 
   ```python
+  payload: object
   match payload:
       case {"name": str(name), "limit": int(limit)}:
           ...
       case _:
           raise TypeError(payload)
   ```
-
-- Read typed records through destructuring or typed field access.
 
 ---
 
@@ -114,6 +110,7 @@ paths:
 - Use comprehensions, generator expressions, `map()`, `filter()`, and `dict`/`list` constructors for local transforms.
 
   ```python
+  pairs: Iterable[tuple[str, int | None]]
   selected = {key: value for key, value in pairs if value is not None}
   ```
 
@@ -141,7 +138,7 @@ paths:
 
   ```python
   @contextmanager
-  def managed(resource):
+  def managed(resource: IO[str]) -> Iterator[IO[str]]:
       try:
           yield resource
       finally:
@@ -151,20 +148,9 @@ paths:
 - Use `getLogger()` instead of `print`; call it inline at each site.
 
   ```python
+  count: int
   getLogger().info("%d entries", count)
 
+  error: Exception
   getLogger().error("%s", error, exc_info=True)
   ```
-
----
-
-## Command-Line Interfaces
-
-```python
-def _parse_args() -> Namespace:
-    parser = ArgumentParser()
-    parser.add_argument("--output", required=True)
-    parser.add_argument("--dry-run", action="store_true")
-    parser.add_argument("paths", nargs="+")
-    return parser.parse_args()
-```
