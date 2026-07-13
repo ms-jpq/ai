@@ -15,4 +15,6 @@ Open what's currently in focus — not the entire session history.
 
 - For files and directories invoke `tmux-edit` with multiple arguments: `tmux-edit FILE|DIR [FILE|DIR]...`
 
+  - `tmux-edit` uses `nvim` as `$EDITOR`, so line jumps work: `tmux-edit '+<lineno>' '<filename>'`
+
 - For links invoke `$BROWSER` with multiple arguments: `$BROWSER LINK [LINK]...`
