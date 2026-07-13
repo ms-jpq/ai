@@ -42,6 +42,20 @@ paths:
 
 - Use `Enumerator.new` as Ruby's generator form; keep incremental state inside the enumerator.
 
+  ```ruby
+  def product(*iterables, repeat: 1)
+    pools = iterables.map(&:to_a) * repeat
+
+    Enumerator.new do |y|
+      result = [[]]
+      pools.each do |pool|
+        result = result.flat_map { |xs| pool.map { xs + [_1] } }
+      end
+      result.each(&y)
+    end
+  end
+  ```
+
 ---
 
 ## Control Flow
