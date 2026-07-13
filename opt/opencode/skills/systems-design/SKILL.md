@@ -28,3 +28,15 @@ Use @../refactor/SKILL.md.
 - Keep transform stages referentially transparent.
 
 - Test effect stages through substitutable boundary implementations.
+
+---
+
+# Generalize
+
+- Identify the generic problem underneath the specific request.
+
+- Build a small library for the generic problem.
+
+- Test the generic library directly; generic tests are usually smaller and clearer.
+
+- Solve the specific problem by adapting inputs and outputs around the library.
