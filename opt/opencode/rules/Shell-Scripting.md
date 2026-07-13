@@ -14,7 +14,7 @@
 
 - Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`).
 
-  - Use `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
+- Use `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
 - Build long pipeline commands from arrays.
 
@@ -30,12 +30,12 @@
 
 ## Failure Semantics
 
-- `case` catch-all (`*`) exits with `set -x; exit 2` for unexpected inputs.
+- Use `case` to narrow the input state space; the catch-all (`*`) exits with `set -x; exit 2`.
 
   ```bash
-  case "$VARIABLE" in
-  ...)
-    # ...
+  case "$MODE" in
+  start | stop)
+    run -- "$MODE"
     ;;
   *)
     set -x
@@ -44,9 +44,9 @@
   esac
   ```
 
-- Inline one-use logic. Prefer explicit error checks to traps; functions invoked from conditional contexts and traps complicate `set -e` propagation.
+- Prefer explicit error checks to traps; functions invoked from conditionals and traps complicate `set -e`.
 
-- Do not suppress unexpected failures with `|| true`. Let the command fail or handle the failure explicitly with `if`.
+- Do not suppress unexpected failures with `|| true`. Let the command fail or handle the failure explicitly.
 
   - Let it fail:
 
@@ -68,7 +68,7 @@
 
 ## Command Construction
 
-- Use arrays for long or conditional command invocations, or when invoking the same command repeatedly: `GREP=(grep --recursive ...)`, `"${GREP[@]}"`.
+- Use arrays for long, conditional, or repeated command invocations.
 
   ```bash
   CURL=(curl --fail --location)
@@ -81,13 +81,13 @@
 
 - `exec --` when no code follows.
 
-- Resolve nearby scripts relative to the current script's directory:
+- Resolve nearby scripts from the current script path:
 
   ```bash
   SELF="$(realpath -- "$0")"
   BASE="${SELF%/*}"
 
-  exec -- "$BASE/<script-name.sh>" '<arg1>' '<arg2>' '...'
+  exec -- "$BASE/tool.sh" "$@"
   ```
 
 - `shift -- <count>` after consuming positional args.
@@ -123,7 +123,7 @@
 
 - Capture multiline output with `readarray -t`; avoid word splitting and subshell loops.
 
-  - Feed from `< <(printf -- %s "$VAR")` over `<<< "$VAR"`, when newline safety is required.
+  - Feed from `< <(printf -- '%s' "$VAR")` over `<<< "$VAR"` when newline safety matters.
 
 - Do not place fallible commands inside process substitutions consumed by `readarray`; their exit status does not propagate.
 
@@ -132,11 +132,11 @@
   readarray -t -- ARRAY < <(printf -- '%s' "$OUTPUT")
   ```
 
-- Use `"${ARRAY[*]}"` when intentionally collapsing an array to one string, even if it currently has one element.
+- Use `"${ARRAY[*]}"` to intentionally collapse an array to one string, even if it currently has one element.
 
   ```bash
   ARGS=(--flag "$VALUE")
-  printf -v COMMAND -- '%q ' "${ARGS[*]}"
+  printf -v COMMAND -- '%s' "${ARGS[*]}"
   ```
 
 ---
@@ -145,7 +145,7 @@
 
 - `$var` over `${var}` unless braces are needed for disambiguation (`${var}_suffix`).
 
-- Parameter expansion (`${var%%pat}` / `${var##pat}` / `${var%pat}` / `${var#pat}`) over `basename`, `dirname`, or `cut` for string decomposition.
+- Prefer parameter expansion over `basename`, `dirname`, or `cut` for string decomposition.
 
   ```bash
   BASENAME="${URI##*/}"
@@ -173,7 +173,7 @@
   jq --raw-output0 "$JQ" < 'example.json'
   ```
 
-  - The `|| true` exception is only for `read -d ''` reaching EOF while filling a variable from a heredoc.
+  - `|| true` is allowed here because `read -d ''` returns nonzero at heredoc EOF.
 
 ---
 
