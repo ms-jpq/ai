@@ -195,17 +195,7 @@
 
 ---
 
-## Process Control and Concurrency
-
-- Pipe through conditional blocks; `if`, `case`, and `while` can appear mid-pipeline.
-
-  ```bash
-  grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
-    '...'
-  else
-    tee
-  fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
-  ```
+## Process Control
 
 - Use a context-named environment flag `RECUR` when a script re-enters itself.
 
@@ -219,6 +209,20 @@
   RECUR=1 flock "$FILE" "$0" "$@"
   ```
 
+- Pipe through conditional blocks; `if`, `case`, and `while` can appear mid-pipeline.
+
+  ```bash
+  grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
+    '...'
+  else
+    tee
+  fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
+  ```
+
+---
+
+## Concurrency
+
 - Never let concurrent work escape the foreground command tree; avoid background jobs so failures and signals propagate predictably.
 
   ```bash
@@ -226,5 +230,5 @@
     exec -- process-file "$1"
   fi
 
-  find . -type f -print0 | RECUR=1 xargs --null --no-run-if-empty --max-procs=0 -I % -- "$0" %
+  find . -type f -print0 | xargs --null --no-run-if-empty --max-procs=0 -I {} -- env RECUR=1 "$0" {}
   ```
