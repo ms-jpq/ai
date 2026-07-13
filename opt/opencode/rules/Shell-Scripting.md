@@ -2,7 +2,7 @@
 
 ## Defaults
 
-- Prelude for bash scripts:
+- Start bash scripts with the strict prelude.
 
   ```bash
   #!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
@@ -10,17 +10,7 @@
   set -o pipefail
   ```
 
-  - The redundant `-o pipefail` is here for shellcheck analysis.
-
-- Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`).
-
-- Use `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
-
-- Build long pipeline commands from arrays.
-
-  ```bash
-  "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
-  ```
+- Keep the redundant `set -o pipefail`; shellcheck sees it.
 
 - `shopt -u failglob` after the prelude when globs may legitimately match nothing.
 
@@ -28,9 +18,9 @@
 
 ---
 
-## Failure Semantics
+## Input State
 
-- Use `case` to narrow the input state space; the catch-all (`*`) exits with `set -x; exit 2`.
+- Use `case` to enumerate accepted input states; the catch-all (`*`) exits with `set -x; exit 2`.
 
   ```bash
   case "$MODE" in
@@ -44,29 +34,37 @@
   esac
   ```
 
+- `shift -- <count>` after consuming positional args.
+
+---
+
+## Failure Semantics
+
 - Prefer explicit error checks to traps; functions invoked from conditionals and traps complicate `set -e`.
 
 - Do not suppress unexpected failures with `|| true`. Let the command fail or handle the failure explicitly.
 
-  - Let it fail:
+  ```bash
+  OUTPUT="$(command)"
+  ```
 
-    ```bash
-    OUTPUT="$(command)"
-    ```
+  ```bash
+  if OUTPUT="$(command)"; then
+    # ...
+  else
+    # ...
+  fi
+  ```
 
-  - Handle it:
-
-    ```bash
-    if OUTPUT="$(command)"; then
-      # ...
-    else
-      # ...
-    fi
-    ```
+- `|| true` is only allowed for commands with a known nonzero success condition, such as `read -d ''` reaching heredoc EOF.
 
 ---
 
 ## Command Construction
+
+- Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`).
+
+- Use `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
 - Use arrays for long, conditional, or repeated command invocations.
 
@@ -77,6 +75,12 @@
   fi
   CURL+=(-- "$URL")
   "${CURL[@]}"
+  ```
+
+- Build long pipeline commands from arrays.
+
+  ```bash
+  "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
   ```
 
 - `exec --` when no code follows.
@@ -90,8 +94,6 @@
   exec -- "$BASE/tool.sh" "$@"
   ```
 
-- `shift -- <count>` after consuming positional args.
-
 - `command -v --` or `hash --` to check command existence.
 
 - `set -a` / `set +a` to scope exports when sourcing an env file.
@@ -100,30 +102,25 @@
 
 ## Data Flow
 
-- Use NUL delimiters for path streams: `find ... -print0 | xargs --null ...`
+### Records and Newlines
 
-- Use `printf -- '%s' ...` for single-line output.
+- Bash data flow is line-oriented by default; choose record boundaries deliberately.
 
-  - `printf -v VAR -- '<fmt>' args` to assign formatted output without a subshell.
+- Use newline-delimited records only when record values cannot contain newlines.
 
-  - Heredocs for multi-line statements with interpolations:
+  - Use NUL delimiters where ever possible.
 
     ```bash
-    tee <<- EOF
-    $VARIABLE_1
-    ... $VARIABLE_2
-    EOF >&2
+    find . -type f -print0 | xargs --null -- command
     ```
 
-- Feed data through redirects instead of `echo` or `printf` pipelines.
+- Capture line records with `readarray -t`; avoid word splitting and subshell loops.
 
-  - `jq <<< "$JSON"` over `echo "$JSON" | jq`
+  ```bash
+  readarray -t -- LINES < "$FILE"
+  ```
 
-  - `cmd < "$FILE"` or `$(< "$FILE")` over `cat "$FILE" | cmd`
-
-- Capture multiline output with `readarray -t`; avoid word splitting and subshell loops.
-
-  - Feed from `< <(printf -- '%s' "$VAR")` over `<<< "$VAR"` when newline safety matters.
+  - Feed from `< <(printf -- '%s' "$VAR")` instead of `<<< "$VAR"` when a synthetic trailing newline would change the data.
 
 - Do not place fallible commands inside process substitutions consumed by `readarray`; their exit status does not propagate.
 
@@ -132,7 +129,28 @@
   readarray -t -- ARRAY < <(printf -- '%s' "$OUTPUT")
   ```
 
-- Use `"${ARRAY[*]}"` to intentionally collapse an array to one string, even if it currently has one element.
+### Redirects and Strings
+
+- Feed data through redirects instead of `echo` or `printf` pipelines.
+
+  - `jq <<< "$JSON"` over `echo "$JSON" | jq`
+
+  - `cmd < "$FILE"` or `$(< "$FILE")` over `cat "$FILE" | cmd`
+
+- Use `printf -- '%s' ...` for exact single-line output.
+
+- `printf -v VAR -- '<fmt>' args` assigns formatted output without a subshell.
+
+- Use heredocs for multi-line output.
+
+  ```bash
+  tee <<- EOF
+  $VARIABLE_1
+  ... $VARIABLE_2
+  EOF >&2
+  ```
+
+- Use `"${ARRAY[*]}"` when the callee expects one string, even if the array currently has one element.
 
   ```bash
   ARGS=(--flag "$VALUE")
@@ -161,9 +179,7 @@
 
 - Pass trivial `sed`, `jq`, and `awk` programs directly as command arguments.
 
-- Embed short, non-trivial programs with heredocs.
-
-- Keep substantial or reusable programs in standalone `.sed`, `.jq`, or `.awk` executables.
+- Embed short, non-trivial programs with heredocs, especially for jq and awk.
 
   ```bash
   read -r -d '' -- JQ <<- 'JQ' || true
@@ -175,11 +191,13 @@
 
   - `|| true` is allowed here because `read -d ''` returns nonzero at heredoc EOF.
 
+- Keep substantial or reusable programs in standalone `.sed`, `.jq`, or `.awk` executables.
+
 ---
 
 ## Process Control
 
-- Pipe through conditional blocks — `if`/`case`/`while` can appear mid-pipeline:
+- Pipe through conditional blocks; `if`, `case`, and `while` can appear mid-pipeline.
 
   ```bash
   grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
