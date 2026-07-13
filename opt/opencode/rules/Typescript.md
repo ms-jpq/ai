@@ -32,23 +32,26 @@ paths:
 
   - End generator bodies with an explicit `return`.
 
-- Accept one destructured parameters object when a function requires multiple arguments. Inline its type unless shared.
+  ```typescript
+  const chunks = function* <T>(items: readonly T[], size: number): IteratorObject<readonly T[]> {
+    for (let index = 0; index < items.length; index += size) {
+      yield items.slice(index, index + size)
+    }
+    return
+  }
+  ```
+
+- After the primary operand, pass arguments through one destructured parameters object. Inline its type unless shared.
 
   ```typescript
-  const read = ({ path, limit = 100 }: { path: string; limit?: number }) => {}
+  const read = (path: string, { limit = 100 }: { limit?: number }) => {}
   ```
 
 ---
 
 ## Types
 
-- Parse or narrow unknown input at the boundary, then write downstream code against the narrowed type.
-
-  ```typescript
-  const input: Record<string, unknown> = JSON.parse(text)
-  const value = input.count
-  const count = typeof value === "number" ? value : 0
-  ```
+- Narrow unknown input at the boundary with control flow, not casts.
 
 - Use `satisfies` to validate a shape without widening inferred literal types.
 
@@ -62,8 +65,6 @@ paths:
   const META: unique symbol = Symbol("meta")
   type Decorated = Base & { [META]: Meta }
   ```
-
-- Use control-flow narrowing instead of casts.
 
 ---
 
@@ -86,10 +87,6 @@ paths:
 
 - Use `??` immediately after optional access when a local default is intended. Reserve `||` for boolean short-circuiting.
 
-  ```typescript
-  const limit = options.limit ?? 100
-  ```
-
 ---
 
 ## Transforms
@@ -99,14 +96,24 @@ paths:
 - Use `Object.entries()`, `Object.fromEntries()`, `Object.groupBy()`, and `Map.groupBy()` for object-shaped transforms.
 
   ```typescript
-  const names = items.filter((item) => item.enabled).map((item) => item.name)
+  const byKind = Map.groupBy(
+    items.filter((item) => item.enabled).map((item) => ({ kind: item.kind, name: item.name })),
+    (item) => item.kind,
+  )
   ```
 
 ---
 
 ## State
 
-- Use IIFEs `(() => {})()` to scope or eliminate mutable state.
+- Use IIFEs `(() => {})()` for small conversions that need lexical encapsulation and an inline expression result.
+
+  ```typescript
+  const label = (() => {
+    const trimmed = value.trim()
+    return trimmed === "" ? "untitled" : trimmed
+  })()
+  ```
 
 - Model stateful objects with closures instead of classes:
 
@@ -124,6 +131,21 @@ paths:
   ```
 
 - Model resources as factory-returned `AsyncDisposable` records; capture state in the closure and teardown in `[Symbol.asyncDispose]`.
+
+  ```typescript
+  import { open } from "node:fs/promises"
+
+  const readableFile = async (path: string): Promise<AsyncDisposable & { read: () => Promise<string> }> => {
+    const file = await open(path, "r")
+
+    return {
+      read: () => file.readFile({ encoding: "utf8" }),
+      [Symbol.asyncDispose]: async () => {
+        await file.close()
+      },
+    }
+  }
+  ```
 
 ---
 
