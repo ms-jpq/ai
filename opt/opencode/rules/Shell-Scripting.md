@@ -12,11 +12,15 @@
 
   - The redundant `-o pipefail` is here for shellcheck analysis.
 
-- Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`). `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
+- Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`).
 
-```bash
-"${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
-```
+  - Use `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
+
+- Build long pipeline commands from arrays.
+
+  ```bash
+  "${CMD[@]}" | "${JQ[@]}" "$JQ_SCRIPT" | awk -v key="$KEY" "$AWK" | column -t | sed -E -e '...'
+  ```
 
 - `shopt -u failglob` after the prelude when globs may legitimately match nothing.
 
@@ -128,7 +132,12 @@
   readarray -t -- ARRAY < <(printf -- '%s' "$OUTPUT")
   ```
 
-- Use `"${ARRAY[*]}"` to stringify single element arrays.
+- Use `"${ARRAY[*]}"` when intentionally collapsing an array to one string, even if it currently has one element.
+
+  ```bash
+  ARGS=(--flag "$VALUE")
+  printf -v COMMAND -- '%q ' "${ARGS[*]}"
+  ```
 
 ---
 
@@ -163,6 +172,8 @@
 
   jq --raw-output0 "$JQ" < 'example.json'
   ```
+
+  - The `|| true` exception is only for `read -d ''` reaching EOF while filling a variable from a heredoc.
 
 ---
 
