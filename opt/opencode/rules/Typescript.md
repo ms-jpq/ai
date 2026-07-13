@@ -28,14 +28,51 @@ paths:
 
 - Prefer `const foo = () => {}` to `function foo() {}`.
 
-- Define generators with `const foo = function*() {}`. Use `IteratorObject<T>` for synchronous generators and `AsyncIteratorObject<T>` for asynchronous generators.
+- Define generators with `const foo = function*() {}` and compose iterator pipelines without materializing arrays.
+
+  - Use `IteratorObject<T>` for synchronous generators and `AsyncIteratorObject<T>` for asynchronous generators.
+
+  - Enter array pipelines with `.values()`.
+
+  - Use iterator helpers instead of spreading into arrays.
+
+  - Call `.toArray()` only at a leaf that requires random access or multiple passes.
 
   - End generator bodies with an explicit `return`.
 
   ```typescript
-  const chunks = function* <T>(items: readonly T[], size: number): IteratorObject<readonly T[]> {
-    for (let index = 0; index < items.length; index += size) {
-      yield items.slice(index, index + size)
+  const chunks = function* <T>(items: Iterable<T>, { size }: { size: number }): IteratorObject<readonly T[]> {
+    let chunk: T[] = []
+    for (const item of items) {
+      chunk.push(item)
+      if (chunk.length === size) {
+        yield chunk
+        chunk = []
+      }
+    }
+    if (chunk.length > 0) {
+      yield chunk
+    }
+    return
+  }
+
+  const batches = chunks(
+    items
+      .values()
+      .filter((item) => item.enabled)
+      .map((item) => item.name),
+    { size: 100 },
+  ).toArray()
+  ```
+
+- Collect async iterables with `Array.fromAsync()`.
+
+- Compose generator pipelines directly and delegate inner iterables with `yield*`.
+
+  ```typescript
+  const flatten = function* <T>(groups: Iterable<Iterable<T>>): IteratorObject<T> {
+    for (const group of groups) {
+      yield* group
     }
     return
   }
@@ -133,39 +170,21 @@ paths:
 - Model resources as factory-returned `AsyncDisposable` records; capture state in the closure and teardown in `[Symbol.asyncDispose]`.
 
   ```typescript
-  import { open } from "node:fs/promises"
+  import { mkdtemp, rm } from "node:fs/promises"
+  import { tmpdir } from "node:os"
+  import { join } from "node:path"
 
-  const readableFile = async (path: string): Promise<AsyncDisposable & { read: () => Promise<string> }> => {
-    const file = await open(path, "r")
+  const temporaryDirectory = async (): Promise<AsyncDisposable & { path: string }> => {
+    const path = await mkdtemp(join(tmpdir(), "work-"))
 
     return {
-      read: () => file.readFile({ encoding: "utf8" }),
+      path,
       [Symbol.asyncDispose]: async () => {
-        await file.close()
+        await rm(path, { recursive: true, force: true })
       },
     }
   }
   ```
-
----
-
-## Modern Builtins
-
-- Use `using` / `await using` with `Symbol.dispose` / `Symbol.asyncDispose` instead of `try`/`finally` for cleanup.
-
-- Collect async iterables with `Array.fromAsync()`.
-
-- Use iterator helpers (`.map()`, `.filter()`, `.toArray()`) instead of spreading into arrays.
-
-  - Enter iterator pipelines from arrays with `.values()`.
-
-  - Compose generator pipelines directly: `f(g(h(xs.values())))`. Delegate inner iterables with `yield*`.
-
-  - Call `.toArray()` only at a leaf that requires random access or multiple passes; use iterator helpers for scalar folds.
-
-- Use `Set` methods: `.union()`, `.intersection()`, `.difference()`, `.symmetricDifference()`, `.isSubsetOf()`.
-
-- Use `Promise.withResolvers()` instead of wrapping a constructor manually.
 
 ---
 
@@ -184,5 +203,3 @@ paths:
 - Await stream completion with `finished(stream)` from `node:stream/promises`.
 
 - Convert an event to a promise with `once(emitter, event)` from `node:events`.
-
-- Convert an async iterable to a stream with `Readable.from(asyncIterable)`.
