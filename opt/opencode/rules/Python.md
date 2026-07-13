@@ -1,6 +1,8 @@
 ---
 paths:
   - "*.py"
+  - "*.pyi"
+  - "*.pyw"
 ---
 
 # Python

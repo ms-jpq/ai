@@ -1,7 +1,14 @@
 ---
 paths:
+  - "*.spec.*"
   - "*.test.*"
+  - "*_spec.*"
   - "*_test.*"
+  - "*_tests.*"
+  - "*Test.*"
+  - "*Tests.*"
+  - "test_*.*"
+  - "tests_*.*"
 ---
 
 # Testing

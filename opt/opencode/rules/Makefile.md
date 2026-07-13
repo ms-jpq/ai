@@ -1,8 +1,9 @@
 ---
 paths:
+  - "*.mk"
   - "GNUmakefile"
   - "Makefile"
-  - "*.mk"
+  - "makefile"
 ---
 
 # Makefile

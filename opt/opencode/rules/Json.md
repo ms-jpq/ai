@@ -1,6 +1,7 @@
 ---
 paths:
   - "*.json"
+  - "*.json5"
   - "*.jsonc"
 ---
 

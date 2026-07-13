@@ -1,8 +1,33 @@
-# Apply Patch CLI
+# Apply Patch
 
-- Use `apply_patch` with a quoted heredoc containing one complete V4A patch.
+**Edit via patch semantics, do not edit via overwrite**.
+
+**Read before patch**.
+
+---
+
+## Command
+
+- Use `apply_patch` command with a quoted heredoc containing one complete V4A patch.
 
 - Do not construct patches with `printf`, `echo`, or generated shell pipelines.
+
+```bash
+apply_patch <<'PATCH'
+*** Begin Patch
+*** Update File: dogs.txt
+@@
+ lil is a dog.
+-She likes slow walks.
++She likes slow walks and fast exits.
+
+*** Add File: notes.txt
+Optimization happened. Nobody improved.
+
+*** Delete File: no-dogs.txt
+*** End Patch
+PATCH
+```
 
 ---
 
@@ -26,21 +51,12 @@
 
 - Do not indent patch markers. Do not put shell prompts inside the patch.
 
-## Command
+---
 
-```bash
-apply_patch <<'PATCH'
-*** Begin Patch
-*** Update File: dogs.txt
-@@
- lil is a dog.
--She likes slow walks.
-+She likes slow walks and fast exits.
+## Verify and Retry
 
-*** Add File: notes.txt
-Optimization happened. Nobody improved.
+- Re-read the edited file.
 
-*** Delete File: no-dogs.txt
-*** End Patch
-PATCH
-```
+- On failure, read the error, inspect the target, and retry the hunk.
+
+- Learn `apply_patch` by small failed attempts; do not overwrite files.
