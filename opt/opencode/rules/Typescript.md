@@ -35,7 +35,7 @@ paths:
 - Accept one destructured parameters object when a function requires multiple arguments. Inline its type unless shared.
 
   ```typescript
-  const fetch = ({ url, timeout = 30, retries = 3 }: { url: string; timeout?: number; retries?: number }) => {}
+  const read = ({ path, limit = 100 }: { path: string; limit?: number }) => {}
   ```
 
 ---
@@ -44,7 +44,17 @@ paths:
 
 - Parse or narrow unknown input at the boundary, then write downstream code against the narrowed type.
 
+  ```typescript
+  const input: Record<string, unknown> = JSON.parse(text)
+  const value = input.count
+  const count = typeof value === "number" ? value : 0
+  ```
+
 - Use `satisfies` to validate a shape without widening inferred literal types.
+
+  ```typescript
+  const status = { kind: "ready", retryable: false } satisfies Status
+  ```
 
 - Attach metadata to domain types with `unique symbol` keys.
 
@@ -53,7 +63,7 @@ paths:
   type Decorated = Base & { [META]: Meta }
   ```
 
-- Use control-flow narrowing instead of casts. Reserve `as` for `as const`.
+- Use control-flow narrowing instead of casts.
 
 ---
 
@@ -62,13 +72,23 @@ paths:
 - Destructure records and tuples before using their values.
 
   ```typescript
-  const { id, count } = record
-  const [mode, value] = entry
+  const {
+    id,
+    tags: [firstTag, ...restTags],
+  } = item
   ```
 
 - Use indexed access only for optional or nil-tolerant lookup.
 
+  ```typescript
+  const item = items.get(id)
+  ```
+
 - Use `??` immediately after optional access when a local default is intended. Reserve `||` for boolean short-circuiting.
+
+  ```typescript
+  const limit = options.limit ?? 100
+  ```
 
 ---
 
@@ -77,6 +97,10 @@ paths:
 - Chain collection transforms instead of mutating an accumulator.
 
 - Use `Object.entries()`, `Object.fromEntries()`, `Object.groupBy()`, and `Map.groupBy()` for object-shaped transforms.
+
+  ```typescript
+  const names = items.filter((item) => item.enabled).map((item) => item.name)
+  ```
 
 ---
 
