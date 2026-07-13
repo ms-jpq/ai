@@ -28,46 +28,19 @@ paths:
 
 - Prefer `const foo = () => {}` to `function foo() {}`.
 
-- Define generators with `const foo = function*() {}` and compose iterator pipelines without materializing arrays.
+- After the primary operand, pass arguments through one destructured parameters object. Inline its type unless shared.
+
+  ```typescript
+  const read = (path: string, { limit = 100 }: { limit?: number }) => {}
+  ```
+
+- Define generators with `const foo = function*() {}`.
 
   - Use `IteratorObject<T>` for synchronous generators and `AsyncIteratorObject<T>` for asynchronous generators.
 
-  - Enter array pipelines with `.values()`.
-
-  - Use iterator helpers instead of spreading into arrays.
-
-  - Call `.toArray()` only at a leaf that requires random access or multiple passes.
+  - Compose generator pipelines directly and delegate inner iterables with `yield*`.
 
   - End generator bodies with an explicit `return`.
-
-  ```typescript
-  const chunks = function* <T>(items: Iterable<T>, { size }: { size: number }): IteratorObject<readonly T[]> {
-    let chunk: T[] = []
-    for (const item of items) {
-      chunk.push(item)
-      if (chunk.length === size) {
-        yield chunk
-        chunk = []
-      }
-    }
-    if (chunk.length > 0) {
-      yield chunk
-    }
-    return
-  }
-
-  const batches = chunks(
-    items
-      .values()
-      .filter((item) => item.enabled)
-      .map((item) => item.name),
-    { size: 100 },
-  ).toArray()
-  ```
-
-- Collect async iterables with `Array.fromAsync()`.
-
-- Compose generator pipelines directly and delegate inner iterables with `yield*`.
 
   ```typescript
   const flatten = function* <T>(groups: Iterable<Iterable<T>>): IteratorObject<T> {
@@ -76,12 +49,6 @@ paths:
     }
     return
   }
-  ```
-
-- After the primary operand, pass arguments through one destructured parameters object. Inline its type unless shared.
-
-  ```typescript
-  const read = (path: string, { limit = 100 }: { limit?: number }) => {}
   ```
 
 ---
@@ -93,7 +60,10 @@ paths:
 - Use `satisfies` to validate a shape without widening inferred literal types.
 
   ```typescript
-  const status = { kind: "ready", retryable: false } satisfies Status
+  const status = {
+    kind: "ready",
+    retryable: false,
+  } satisfies { kind: "ready" | "blocked"; retryable: boolean }
   ```
 
 - Attach metadata to domain types with `unique symbol` keys.
@@ -124,6 +94,10 @@ paths:
 
 - Use `??` immediately after optional access when a local default is intended. Reserve `||` for boolean short-circuiting.
 
+  ```typescript
+  const limit = options.limit ?? 100
+  ```
+
 ---
 
 ## Transforms
@@ -137,6 +111,22 @@ paths:
     items.filter((item) => item.enabled).map((item) => ({ kind: item.kind, name: item.name })),
     (item) => item.kind,
   )
+  ```
+
+- Use iterator helpers instead of spreading into arrays.
+
+  - Enter array pipelines with `.values()`.
+
+  - Call `.toArray()` only at a leaf that requires random access or multiple passes.
+
+  - Collect async iterables with `Array.fromAsync()`.
+
+  ```typescript
+  const names = items
+    .values()
+    .filter((item) => item.enabled)
+    .map((item) => item.name)
+    .toArray()
   ```
 
 ---
@@ -188,18 +178,47 @@ paths:
 
 ---
 
-## Node Standard Library
+## NodeJS
 
 - Prefer asynchronous APIs when synchronous and asynchronous variants both exist.
 
 - Make `switch` exhaustive with `default: fail(value satisfies never)`; import `fail` from `node:assert/strict`.
 
+  ```typescript
+  switch (state) {
+    case "ready":
+      return start()
+    case "done":
+      return stop()
+    default:
+      return fail(state satisfies never)
+  }
+  ```
+
 - Use `node:*` imports instead of globals: `import { env, exit } from "node:process"`.
 
-- Use `ok()` from `node:assert/strict` instead of `if`/`throw`.
+- Use `ok()` from `node:assert/strict` instead of `if`/`throw` in tests.
 
 - Convert a stream to a string with `text(stream)` from `node:stream/consumers`.
 
 - Await stream completion with `finished(stream)` from `node:stream/promises`.
 
-- Convert an event to a promise with `once(emitter, event)` from `node:events`.
+  ```typescript
+  const body = await text(input)
+  await finished(output)
+  ```
+
+- Convert events to promises with `once(emitter, event, { signal })`; abort sibling listeners in `finally`.
+
+  ```typescript
+  import { once } from "node:events"
+
+  const controller = new AbortController()
+  const options = { signal: controller.signal }
+
+  try {
+    await Promise.race([once(process, "SIGTERM", options), once(process, "SIGINT", options)])
+  } finally {
+    controller.abort()
+  }
+  ```

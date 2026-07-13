@@ -132,6 +132,20 @@ paths:
 
 ---
 
+## Concurrency
+
+- Use structured concurrency: never let tasks escape their owner scope.
+
+  ```python
+  async with TaskGroup() as tasks:
+      left = tasks.create_task(read_left())
+      right = tasks.create_task(read_right())
+
+  return left.result(), right.result()
+  ```
+
+---
+
 ## Effects
 
 - Use `@contextmanager` to extract repeated setup, teardown, timing, logging.
