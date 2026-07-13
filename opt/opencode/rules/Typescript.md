@@ -18,16 +18,7 @@ paths:
 
 - Prefer `const` to `let`. Replace reassignment with conditional expressions, destructuring, `.entries()`, or intermediate constants.
 
-- Destructure values instead of repeatedly accessing indexes.
-
-  ```typescript
-  const [key, value] = entry
-  const [, year, month] = match
-  ```
-
 - Use `undefined` consistently; do not use `null`.
-
-- Use `??` for nullish coalescing. Reserve `||` for boolean short-circuiting.
 
 - Use `import type` for type-only imports.
 
@@ -51,6 +42,8 @@ paths:
 
 ## Types
 
+- Parse or narrow unknown input at the boundary, then write downstream code against the narrowed type.
+
 - Use `satisfies` to validate a shape without widening inferred literal types.
 
 - Attach metadata to domain types with `unique symbol` keys.
@@ -61,6 +54,29 @@ paths:
   ```
 
 - Use control-flow narrowing instead of casts. Reserve `as` for `as const`.
+
+---
+
+## Data Access
+
+- Destructure records and tuples before using their values.
+
+  ```typescript
+  const { id, count } = record
+  const [mode, value] = entry
+  ```
+
+- Use indexed access only for optional or nil-tolerant lookup.
+
+- Use `??` immediately after optional access when a local default is intended. Reserve `||` for boolean short-circuiting.
+
+---
+
+## Transforms
+
+- Chain collection transforms instead of mutating an accumulator.
+
+- Use `Object.entries()`, `Object.fromEntries()`, `Object.groupBy()`, and `Map.groupBy()` for object-shaped transforms.
 
 ---
 
@@ -102,8 +118,6 @@ paths:
   - Call `.toArray()` only at a leaf that requires random access or multiple passes; use iterator helpers for scalar folds.
 
 - Use `Set` methods: `.union()`, `.intersection()`, `.difference()`, `.symmetricDifference()`, `.isSubsetOf()`.
-
-- Use `Object.groupBy()` / `Map.groupBy()` instead of a manual reduction.
 
 - Use `Promise.withResolvers()` instead of wrapping a constructor manually.
 

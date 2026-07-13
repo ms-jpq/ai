@@ -34,7 +34,6 @@ paths:
 
   ```python
   def fetch(url, *, timeout=30, retries=3): ...
-  def render(template, *, context, strict=False): ...
   ```
 
 - Use generators instead of closures with `nonlocal` for incremental stateful iteration.
@@ -43,7 +42,7 @@ paths:
 
 ## Control Flow
 
-- Use `match`/`case` instead of `isinstance` chains or nested `if`/`elif` branches on type or shape.
+- Use `match`/`case` to prove the incoming shape and reject unexpected data.
 
 - Use `:=` when a value is both assigned and tested.
 
@@ -59,15 +58,41 @@ paths:
 
 ---
 
-## Data Modeling
+## Data Access
 
-- Use `@dataclass(frozen=True)` for immutable data types.
+- After parsing, reading, decoding, or transforming, bind the expected shape before using it.
 
-- Model JSON object shapes with `TypedDict` and typed field access.
+  ```python
+  match record:
+      case {"id": str(id), "count": int(count)}:
+          ...
+      case _:
+          raise TypeError(record)
+  ```
 
-- Use `.get()` for optional keys in untrusted mappings. Use bracket access for required keys represented in the type.
+- Read typed records through destructuring or typed field access.
+
+- Use bracket access for required keys represented in the type.
+
+- Use `.get()` only for optional or nil-tolerant lookup.
+
+---
+
+## Transforms
+
+- Chain collection transforms instead of mutating an accumulator.
+
+- Use comprehensions, generator expressions, `map()`, `filter()`, and `dict`/`list` constructors for local transforms.
 
 - Use `dict.setdefault()` instead of check-then-insert.
+
+---
+
+## Data Modeling
+
+- Use `@dataclass(slots=True, frozen=True)` for immutable data types.
+
+- Model JSON object shapes with `TypedDict` and typed field access.
 
 ---
 

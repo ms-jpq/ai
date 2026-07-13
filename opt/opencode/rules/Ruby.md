@@ -46,7 +46,7 @@ paths:
 
 ## Control Flow
 
-- Use pattern matching to prove the incoming shape and reject unexpected data; add `else` only for a better error or cleanup path.
+- Use pattern matching to prove the incoming shape and reject unexpected data.
 
   ```ruby
   case [mode, value]
@@ -56,6 +56,8 @@ paths:
     value.succ
   end
   ```
+
+- Add `else` only for a better error or cleanup path.
 
 - Use `Kernel.then` for small conversions that need lexical encapsulation and an inline expression result.
 
@@ -69,7 +71,7 @@ paths:
 
 ---
 
-## Data Access And Transform
+## Data Access
 
 - After parsing, reading, decoding, or transforming, use `=>` to bind the expected shape or fail immediately.
 
@@ -80,12 +82,16 @@ paths:
 - Read hash records by destructuring them into locals.
 
   ```ruby
-  item => {id: String => id, count: Integer => count}
+  record => {id: String => id, count: Integer => count}
   ```
 
-- Use `fetch` and `fetch_values` for dynamic hash keys.
+- Use `fetch` and `fetch_values` for required hash keys.
 
-- Avoid `[]` for required keys; missing values should fail at the access site.
+- Reserve `[]` for optional or nil-tolerant lookup.
+
+---
+
+## Transforms
 
 - Chain collection transforms instead of mutating an accumulator.
 
