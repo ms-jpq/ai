@@ -195,7 +195,7 @@
 
 ---
 
-## Process Control
+## Process Control and Concurrency
 
 - Pipe through conditional blocks; `if`, `case`, and `while` can appear mid-pipeline.
 
@@ -207,7 +207,7 @@
   fi | xargs --no-run-if-empty --null -I % --max-procs=0 -- tree -- %
   ```
 
-- Use a context-named environment flag (`RECUR`, `LOCKED`, `UNDER`) when a script re-enters itself.
+- Use a context-named environment flag `RECUR` when a script re-enters itself.
 
   ```bash
   FILE="$1"
@@ -217,4 +217,14 @@
   fi
 
   RECUR=1 flock "$FILE" "$0" "$@"
+  ```
+
+- Never let concurrent work escape the foreground command tree; avoid background jobs so failures and signals propagate predictably.
+
+  ```bash
+  if [[ -v RECUR ]]; then
+    exec -- process-file "$1"
+  fi
+
+  find . -type f -print0 | RECUR=1 xargs --null --no-run-if-empty --max-procs=0 -I % -- "$0" %
   ```

@@ -34,7 +34,7 @@ paths:
   const read = (path: string, { limit = 100 }: { limit?: number }) => {}
   ```
 
-- Define generators with `const foo = function*() {}`.
+- Use generators to encapsulate incremental iteration state; define them with `const foo = function*() {}`.
 
   - Use `IteratorObject<T>` for synchronous generators and `AsyncIteratorObject<T>` for asynchronous generators.
 
@@ -173,6 +173,25 @@ paths:
         await rm(path, { recursive: true, force: true })
       },
     }
+  }
+  ```
+
+---
+
+## Concurrency
+
+- Use structured concurrency: never let async work escape its owner scope.
+
+- Start sibling work together, await it together, and thread through shared `AbortSignal`s.
+
+  ```typescript
+  const controller = new AbortController()
+  const options = { signal: controller.signal }
+
+  try {
+    const [left, right] = await Promise.all([readLeft(options), readRight(options)])
+  } finally {
+    controller.abort()
   }
   ```
 
