@@ -40,13 +40,13 @@
 
 ## Failure Semantics
 
-- Prefer explicit error checks to traps; functions invoked from conditionals and traps complicate `set -e`.
-
 - Do not suppress unexpected failures with `|| true`. Let the command fail or handle the failure explicitly.
 
   ```bash
-  OUTPUT="$(command)"
+  OUTPUT="$(command || true)"
   ```
+
+- Use explicit error checks to traps; functions invoked from conditionals and traps complicate `set -e`.
 
   ```bash
   if OUTPUT="$(command)"; then
