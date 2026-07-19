@@ -7,42 +7,154 @@ description: Defragment a workspace's instructions.
 
 ## Scope
 
-- Treat the workspace's instruction corpus as the default operand: rules, hooks and hook implementations, skills, agent prompts, prompt templates, profiles, configuration, and instructional prose. Accept an explicit instruction file, directory, or topic for a narrower pass.
+- Default to the workspace's instruction corpus.
 
-- Exclude runtime state, dependencies, source artifacts, generated output, and code unrelated to instructions unless the user explicitly includes it.
+  - Include rules.
+
+  - Include hooks and hook implementations.
+
+  - Include skills.
+
+  - Include prompts and templates.
+
+  - Include profiles and configuration.
+
+  - Include instructional prose.
+
+- Accept a narrower operand.
+
+  - Accept an instruction file.
+
+  - Accept an instruction directory.
+
+  - Accept an instruction topic.
+
+- Exclude unrelated material by default.
+
+  - Exclude runtime state.
+
+  - Exclude dependencies.
+
+  - Exclude source artifacts.
+
+  - Exclude generated output.
+
+  - Exclude code unrelated to instructions.
 
 ## Scan
 
-- Inventory each instruction's current region, audience, function, core terms, and inbound and outbound references.
+- Inventory each instruction.
 
-- Identify fragmented instruction clusters, exact duplicates, duplicate indexes, broken or redundant references, and alias candidates: different terms that may name the same concept.
+  - Record its region.
 
-- Keep alias candidates separate from decisions. Similar wording does not establish equivalent meaning.
+  - Record its audience.
 
-- Treat non-identical content as distinct. Do not infer which version is correct, current, or more important.
+  - Record its function.
+
+  - Record its core terms.
+
+  - Record its inbound references.
+
+  - Record its outbound references.
+
+- Identify defects.
+
+  - Identify fragmented clusters.
+
+  - Identify exact duplicates.
+
+  - Identify duplicate indexes.
+
+  - Identify broken references.
+
+  - Identify redundant references.
+
+- Identify alias candidates.
+
+  - Treat candidates as unresolved.
+
+  - Treat non-identical material as distinct.
+
+  - Do not infer authority from similarity.
 
 ## Defragment
 
-- Assign each instruction function one canonical contiguous region using the workspace's established instruction layout. Propose the target when no local convention decides it.
+- Place each instruction function in one canonical region.
 
-- Move one verified instruction cluster at a time. Know the destination and every affected reference before moving it.
+  - Use the established instruction layout.
 
-- Update Markdown links, instruction includes, hook registrations, configuration paths, and other resolved references to each moved instruction. Record the old-to-new path mapping.
+  - Propose a target when no local convention decides it.
 
-- Record one canonical copy for each set of exact duplicates. Remove a duplicate only with explicit authorization; replace it with a link or reference when the relationship matters.
+- Move one verified cluster at a time.
 
-- Preserve content and provenance. Do not rewrite, summarize, reconcile, discard, or reinterpret non-duplicate material.
+  - Resolve the destination before moving it.
+
+  - Resolve every affected reference before moving it.
+
+  - Record each old-to-new path mapping.
+
+- Repair references after each move.
+
+  - Update Markdown links.
+
+  - Update instruction includes.
+
+  - Update hook registrations.
+
+  - Update configuration paths.
+
+- Deduplicate exact copies.
+
+  - Record one canonical copy per set.
+
+  - Remove duplicates only with explicit authorization.
+
+  - Replace removed duplicates with links or references when needed.
+
+- Preserve non-duplicate material.
+
+  - Preserve content and provenance.
+
+  - Do not rewrite, summarize, reconcile, discard, or reinterpret it.
 
 ## Compact
 
-- Propose one canonical term for each confirmed alias set, with its occurrences and the reason the terms are equivalent.
+- Propose one canonical term per confirmed alias set.
 
-- Confirm the canonical vocabulary before replacing aliases. Do not collapse terms with distinct scope or meaning.
+  - List every occurrence.
 
-- Apply approved replacements consistently within the affected instruction cluster.
+  - State why the terms are equivalent.
+
+- Confirm the canonical vocabulary before replacing aliases.
+
+  - Do not collapse distinct scopes.
+
+  - Do not collapse distinct meanings.
+
+- Apply approved replacements consistently within the affected cluster.
 
 ## Verify
 
-- Verify that every retained instruction reference resolves, every moved instruction has no live references to its old path, aliases have one approved canonical term, and each removed duplicate has a canonical replacement.
+- Verify the result.
 
-- Report the operand, instruction regions, moves, deduplications, unchanged ambiguities, and any required follow-up.
+  - Verify every retained reference resolves.
+
+  - Verify no live reference targets an old path.
+
+  - Verify every alias set uses its approved canonical term.
+
+  - Verify every removed duplicate has a canonical replacement.
+
+- Report the result.
+
+  - Report the operand.
+
+  - Report instruction regions.
+
+  - Report moves.
+
+  - Report deduplications.
+
+  - Report unchanged ambiguities.
+
+  - Report required follow-up.

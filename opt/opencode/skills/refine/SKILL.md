@@ -35,6 +35,20 @@ description: Iteratively improve writing.
 
 - Remove hedges not required by uncertainty.
 
+# Hierarchy
+
+- Group related claims beneath a parent claim.
+
+  - Put the decision or action in the parent.
+
+  - Put reasons, conditions, steps, and outcomes in children.
+
+- Keep sibling bullets at the same level of abstraction.
+
+- Use nesting to show containment, dependency, sequence, or condition.
+
+- Do not indent for visual density alone.
+
 # Iterate
 
 - One question per turn.
