@@ -17,7 +17,7 @@ description: Test hypotheses through experiments and disposable tools.
 
 - Run the cheapest experiment that distinguishes the remaining hypotheses.
 
-- Write disposable tools when they make evidence observable or repeatable.
+- Write disposable tools in `.exp/` when they make evidence observable or repeatable.
 
 # Conclude
 
