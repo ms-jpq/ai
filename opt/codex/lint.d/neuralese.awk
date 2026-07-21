@@ -3,8 +3,9 @@
 BEGIN {
   PATTERNS[1] = "\342\200\224"  # em-dash
   PATTERNS[2] = "load[- ]bearing"
-  PATTERNS[3] = "genuine(ly)?"
+  PATTERNS[3] = "genuine(ly)?|truly"
   PATTERNS[4] = "meaningful(ly)?"
+  PATTERNS[5] = "that'?s the"
 }
 
 {
