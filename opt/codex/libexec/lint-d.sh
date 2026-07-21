@@ -5,4 +5,4 @@ set -o pipefail
 BASE="${0%/*}/.."
 MARKDOWN="$1"
 
-exec -- find "$BASE/lint.d" -type f -perm -u+x -exec '{}' "$MARKDOWN" ';'
+exec -- find -H "$BASE/lint.d" -type f -perm -u+x -exec '{}' "$MARKDOWN" ';'
