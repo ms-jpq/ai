@@ -15,7 +15,6 @@ BEGIN {
       print "> Slop Cop:"
       printf "> %s:%d\n", FILENAME, FNR
       printf "> %s\n", substr($0, RSTART, RLENGTH)
-      next
     }
   }
 }

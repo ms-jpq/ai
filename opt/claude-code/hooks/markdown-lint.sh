@@ -19,7 +19,8 @@ JQ
 Stop)
   TMP="$(mktemp)"
   jq -e --raw-output '.last_assistant_message' <<< "$JSON" > "$TMP"
-  CTX="$("$LINT" 2>&1 "$TMP" || true)"
+  OUT="$("$LINT" 2>&1 "$TMP" || true)"
+  CTX="${OUT//"$TMP"/last_assistant_message}"
   rm -fr -- "$TMP"
   ;;
 *)
