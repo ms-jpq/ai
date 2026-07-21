@@ -5,6 +5,22 @@ description: Defragment a workspace's instructions.
 
 # Defrag
 
+## Boundary
+
+- Defragment an instruction corpus.
+
+  - Organize instruction locations.
+
+  - Repair instruction references.
+
+  - Consolidate shared vocabulary.
+
+- Use `refine` for an individual instruction.
+
+  - Improve writing before or after compaction.
+
+  - Do not turn defragmentation into a general rewriting pass.
+
 ## Scope
 
 - Default to the workspace's instruction corpus.

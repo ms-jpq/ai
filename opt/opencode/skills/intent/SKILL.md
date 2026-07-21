@@ -1,6 +1,6 @@
 ---
 name: intent
-description: Develop and maintain a shared, revisable definition of what the user wants to accomplish.
+description: Make the implicit explicit. Write it down.
 ---
 
 Use @../systems-thinking/SKILL.md.
