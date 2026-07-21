@@ -1,15 +1,19 @@
 ---
 name: intent
-description: Make the implicit explicit. Write it down.
+description: Model the user's intent by making the implicit explicit. Write it down.
 ---
 
 # Intent
 
-## Write it down
+## Explicate
 
-- Treat the user's request and relevant history as specification and evidence.
+- Turn the relevant corpus into a model of the current direction.
 
-- Record the current direction.
+  - Include the user's request and conversation.
+
+  - Include notes and other written context.
+
+- Record the model.
 
   - Outcome.
 
@@ -21,11 +25,19 @@ description: Make the implicit explicit. Write it down.
 
   - Open questions.
 
-- Keep it independent of plans and implementation.
+  - Explicit direction.
 
-## Stress test
+  - Inferences.
 
-- Separate observation from inference.
+## Calibrate
+
+- Compare the model with available evidence.
+
+  - Relevant corpus.
+
+  - Plans and implementation.
+
+  - Constraints and observed results.
 
 - Make contradictions and uncertainty visible.
 
