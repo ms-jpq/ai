@@ -12,7 +12,7 @@ BEGIN {
   TEXT = tolower($0)
   for (INDEX in PATTERNS) {
     if (match(TEXT, PATTERNS[INDEX])) {
-      print "> Slop Guard found:"
+      print "> Slop Cop:"
       printf "> %s:%d\n", FILENAME, FNR
       printf "> %s\n", substr($0, RSTART, RLENGTH)
       next
