@@ -23,9 +23,7 @@ README files explain **what** and **why**.
 
 - Give every directory a `README.md`.
 
-- In each non-root `README.md`, include a navigation table linking to the directory's other `*.md` files.
-
-- Link every `*.md` page from a parent or sibling `README.md`; use relative paths.
+- Reference `*.md` page from a parent or sibling `README.md` with a relative inline-code path.
 
 ---
 
