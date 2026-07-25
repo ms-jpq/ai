@@ -3,7 +3,7 @@ name: refactor
 description: Iteratively simplify code, contracts, and data flow.
 ---
 
-Use @../../AGENTS.md#systems-thinking.
+Use @../systems-thinking/SKILL.md.
 
 ---
 
