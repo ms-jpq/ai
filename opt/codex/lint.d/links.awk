@@ -23,7 +23,7 @@ BEGIN {
     LABEL = LINK
     sub(/^\[/, "", LABEL)
     sub(/\]\([^)]+\)$/, "", LABEL)
-    if (LABEL ~ /^#[0-9]+$/ || LABEL ~ /^[[:upper:]][[:upper:][:digit:]]*-[0-9]+$/) {
+    if (LABEL ~ /^#?[0-9]{3,}$/ || LABEL ~ /^[[:upper:]][[:upper:][:digit:]]*-[0-9]+$/) {
       report("Use a descriptive link label instead of a ticket ID.")
     }
     TEXT = substr(TEXT, RSTART + RLENGTH)
