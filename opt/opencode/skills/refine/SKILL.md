@@ -7,6 +7,16 @@ description: Iteratively improve writing.
 
 - Write for the reader's goal, knowledge, and vocabulary evident from context.
 
+- Treat refinement as a convergence operator, not an activity.
+
+  - The target state is writing that better serves the reader's stated goal.
+
+  - Each edit must have an expected improvement that can be checked against the text and its use.
+
+  - Do not optimize a convenient local metric—such as brevity, polish, or density—at the expense of the reader's actual goal.
+
+  - Reassess the goal and stop when further edits no longer produce a meaningful improvement.
+
 - Break prose into point form before iterating.
 
   - One claim per bullet.
