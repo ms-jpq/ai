@@ -58,6 +58,7 @@ import {
 import { fail, ok } from "node:assert/strict"
 import { execFile } from "node:child_process"
 import { randomUUID } from "node:crypto"
+import { EOL } from "node:os"
 import { mkdir, open, readFile, rename, writeFile } from "node:fs/promises"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
@@ -381,7 +382,7 @@ const documentPart = ({ source, ...block }: BetaRequestDocumentBlock): MessagePa
                     fail(item.source satisfies never)
                 }
               })
-              .join("\n\n")
+              .join(EOL + EOL)
       return { type: "text", content, ...meta }
     }
     default:
@@ -555,7 +556,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         role,
         part: {
           type: "text",
-          content: block.content.map((item) => item.text).join("\n\n"),
+          content: block.content.map((item) => item.text).join(EOL + EOL),
           source: block.source,
           title: block.title,
         },
@@ -648,7 +649,10 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         role,
         part: {
           type: "text",
-          content: block.content.map((item) => item.text).join("\n\n"),
+          content: block.content
+            .filter((item) => item.type === "text")
+            .map((item) => item.text)
+            .join(EOL + EOL),
         },
       })
     case "fallback":
@@ -660,6 +664,9 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         },
       })
 
+    case "tool_addition":
+    case "tool_removal":
+      return undefined
     default:
       fail(block satisfies never)
   }
@@ -743,7 +750,7 @@ const textValue = (sequence: OtelMessageSequence): string | undefined => {
     .map((p) => p.content)
     .filter((c): c is string => typeof c === "string")
     .toArray()
-  return isNonEmpty(texts) ? texts.join("\n\n") : undefined
+  return isNonEmpty(texts) ? texts.join(EOL + EOL) : undefined
 }
 
 const chatLeaf = ({
