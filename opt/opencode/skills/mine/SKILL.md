@@ -6,12 +6,6 @@ disable-model-invocation: true
 
 # Discover
 
-- Find all source files relevant to the topic:
-
-  - Define the corpus boundary, then read every file within it.
-
-  - Include invocations.
-
 - What patterns appear?
 
   - Rank by prevalence.
