@@ -1,10 +1,6 @@
-#!/usr/bin/env -S -- awk -f
-
 BEGIN {
-  PATTERNS[1] = "load[- ]bearing"
-  PATTERNS[2] = "genuine(ly)?|truly"
-  PATTERNS[3] = "meaningful(ly)?"
-  PATTERNS[4] = "that'?s the"
+  PATTERNS[0] = ""
+  delete PATTERNS[0]
 }
 
 {
@@ -16,4 +12,9 @@ BEGIN {
       printf "> %s\n", substr($0, RSTART, RLENGTH)
     }
   }
+}
+
+function pattern(PATTERN)
+{
+  PATTERNS[++PATTERN_COUNT] = PATTERN
 }
