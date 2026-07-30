@@ -8,19 +8,19 @@ VAR="$ROOT/var"
 
 if [[ $PWD == "$HOME" ]]; then
   cd -- "$ROOT"
-  exec -- "$@"
+  exec -- "$0" "$@"
 fi
 
-OOM=()
 case "$OSTYPE" in
 linux*)
-  OOM+=(
+  OOM=(
     choom
     --adjust 1000
     --
   )
   ;;
 *)
+  OOM=()
   ;;
 esac
 
@@ -43,5 +43,7 @@ SANDBOX+=(
 )
 
 SHELL="$(command -v -- bash)"
-export -- SHELL PATH BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
+# shellcheck disable=SC2016
+export -- SHELL PATH BASH_ENV="$ROOT/opt/libexec/bash-env.sh" EDITOR='nvim -c "norm! G$l"'
+export -- VISUAL="$EDITOR"
 exec -- nice -n 19 -- "${OOM[@]}" "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
