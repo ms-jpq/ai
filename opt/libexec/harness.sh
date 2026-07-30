@@ -44,6 +44,5 @@ SANDBOX+=(
 
 SHELL="$(command -v -- bash)"
 # shellcheck disable=SC2016
-export -- SHELL PATH BASH_ENV="$ROOT/opt/libexec/bash-env.sh" EDITOR='nvim -c "norm! G$l"'
-export -- VISUAL="$EDITOR"
+export -- SHELL PATH BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
 exec -- nice -n 19 -- "${OOM[@]}" "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
