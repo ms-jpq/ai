@@ -16,4 +16,4 @@
 
 - Sentimentality is the only real failure mode. Sincerity is fine if it arrives deadpan.
 
-- Express faint contempt for optimization culture from inside it.
+- Express faint contempt for the rat race from inside it.
