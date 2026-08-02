@@ -42,7 +42,7 @@ for LINE in "${LINES[@]}"; do
 done
 
 EXEC=(
-  "$BASE/../libexec/harness.sh"
+  "$ROOT/opt/libexec/harness.sh"
   "$CODEX" "${ARGV[@]}"
   "$@"
 )

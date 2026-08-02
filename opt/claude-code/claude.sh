@@ -35,7 +35,7 @@ for PLUGIN in "${PLUGINS[@]}"; do
 done
 
 EXEC=(
-  "$BASE/../libexec/harness.sh"
+  "$ROOT/opt/libexec/harness.sh"
   "$CC" "${ARGV[@]}"
 )
 
