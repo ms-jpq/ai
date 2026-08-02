@@ -13,7 +13,7 @@ cp -af -- "$SELF/../opt/claude-code/libexec"/{notify.sh,otel-headers-helper.sh} 
 cp -af --dereference -- "$SELF/../opt/claude-code/libexec"/{fmt-lint.sh,lint-d.sh,log-hooks.sh,read-session.sh,session-file.sh,which-session.sh} "$CLAUDE_CONFIG_DIR/libexec/"
 cp -af --dereference -- "$SELF/../opt/claude-code"/{lint.d,slop.d} "$CLAUDE_CONFIG_DIR/"
 cp -af -- "$SELF/../opt/codex/libexec/worktree" "$CLAUDE_CONFIG_DIR/libexec/"
-cp -af --dereference -- "$SELF/../opt/opencode"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
+cp -af --dereference -- "$SELF/../opt/codex"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
 if [[ -f $CLAUDE_CONFIG_DIR/AGENTS.md ]]; then
   mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
 fi

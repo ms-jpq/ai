@@ -4,7 +4,7 @@
 .venv/
 node_modules/
 opt/claude-code/local-plugins/omnibus/.lsp.json
-opt/opencode/skills/.system/
+opt/codex/skills/.system/
 package-lock.json
 schema.graphql
 tsconfig.tsbuildinfo
