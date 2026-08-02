@@ -39,7 +39,6 @@ SANDBOX+=(
   --dir "$ROOT"
   --dir "$ROOT/opt/codex/profiles:rw"
   --dir "$VAR:rw"
-  --dir "$LIB/Application Support/opencode:rw"
 )
 
 SHELL="$(command -v -- bash)"
