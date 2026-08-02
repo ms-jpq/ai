@@ -1,0 +1,1 @@
+../../opt/codex/AGENTS.md
