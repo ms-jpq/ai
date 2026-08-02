@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/codex/hooks/yes.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [

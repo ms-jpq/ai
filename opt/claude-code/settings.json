@@ -49,6 +49,16 @@
         "matcher": "idle_prompt|permission_prompt"
       }
     ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/yes.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [
@@ -124,15 +134,6 @@
           }
         ],
         "matcher": "Bash"
-      },
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/approve-rw.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "Edit|Write"
       },
       {
         "hooks": [
