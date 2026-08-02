@@ -34,7 +34,6 @@ if CWD="$(~/.local/libexec/dnif.sh "$PWD" '.git' | tac | grep -E --max-count 1 -
   SANDBOX+=(--dir "$CWD:rw")
 fi
 
-LIB="$HOME/Library"
 SANDBOX+=(
   --dir "$ROOT"
   --dir "$ROOT/opt/codex/profiles:rw"
