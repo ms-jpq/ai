@@ -1,0 +1,1 @@
+../../codex/hooks/banned-tools.sh
