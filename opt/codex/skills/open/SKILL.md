@@ -1,7 +1,6 @@
 ---
 name: open
 description: Open the files, directories, and links relevant to the current context.
-disable-model-invocation: true
 ---
 
 Open what's currently in focus — not the entire session history.
