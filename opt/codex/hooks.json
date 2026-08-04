@@ -35,7 +35,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/codex/hooks/banned-tools.sh",
+            "command": "~/.local/opt/ai/opt/codex/hooks/tool-steer.sh",
             "type": "command"
           }
         ]
