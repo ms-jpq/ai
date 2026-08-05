@@ -16,13 +16,6 @@ JQ
 
   CTX="$(jq --raw-output0 "$JQ" <<< "$JSON" | sort -z --unique | xargs -r --null -I % --max-procs=1 -- "$LINT" % 2>&1 || true)"
   ;;
-Stop)
-  TMP="$(mktemp)"
-  jq -e --raw-output '.last_assistant_message' <<< "$JSON" > "$TMP"
-  OUT="$("$LINT" 2>&1 "$TMP" || true)"
-  CTX="${OUT//"$TMP"/last_assistant_message}"
-  rm -fr -- "$TMP"
-  ;;
 *)
   set -x
   exit 2
