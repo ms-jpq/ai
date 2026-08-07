@@ -3,11 +3,24 @@
 set -o pipefail
 
 FILE_PATH="$*"
+STAT=(stat --format='%d:%i:%y:%s' -- "$FILE_PATH")
 
-# shellcheck disable=SC2154,SC2094
-if FMT="$("$XDG_CONFIG_HOME/nvim/libexec/fmt.sh" "$FILE_PATH" < "$FILE_PATH")"; then
-  sponge -- "$FILE_PATH" <<< "$FMT"
-fi
+for TRY in 2 1 0; do
+  BEFORE="$("${STAT[@]}")"
+
+  # shellcheck disable=SC2154,SC2094
+  FMT="$("$XDG_CONFIG_HOME/nvim/libexec/fmt.sh" "$FILE_PATH" < "$FILE_PATH")"
+
+  AFTER="$("${STAT[@]}")"
+  if [[ $BEFORE == "$AFTER" ]]; then
+    sponge -- "$FILE_PATH" <<< "$FMT"
+    break
+  fi
+
+  if ! ((TRY)); then
+    sleep -- 1
+  fi
+done
 
 case "$FILE_PATH" in
 *.sh | *.bash)
