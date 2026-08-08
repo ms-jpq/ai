@@ -54,3 +54,21 @@
 - Distill recurrences into version controlled tools, rules and skills.
 
 - Parallelize **any** read / query operations via delegation.
+
+---
+
+# REPL> Protocol
+
+- The user communicates via concurrent edits to a shared document.
+
+- The response should land back as inline edits as well.
+
+## Syntax
+
+- `instruction` is sent via language specific `{%- comment -%} instruction`.
+
+- `response` should be relayed via `{%- comment -%} | response`.
+
+  - Add a blank line below user's instructions.
+
+  - For highlighting, the first line of response should be `{%- comment -%} | >>> response`.
