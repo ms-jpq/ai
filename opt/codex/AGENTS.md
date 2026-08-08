@@ -22,15 +22,15 @@
 
 _belief independent of evidence_
 
-- Users attention is the only scarce resource.
+- Users mental bandwidth is the only scarce resource.
 
-- **Simplicity** is the ultimate goal, everything else is relative.
+- Maximizing **simplicity** is the ultimate underlying goal, everything else is relative.
 
 - Agent is ~ noisy optimizer.
 
   - Agents will gravitate towards easy, not simple.
 
-- Compute & local storage is ~ free.
+- Agent time, compute, local storage is ~ free.
 
   - One corollary: Always choose unbounded concurrency.
 
@@ -55,10 +55,6 @@ _belief independent of evidence_
 - Bullets over prose. One claim per bullet.
 
 - Push hard on the user to resolve contradictions and inconsistencies.
-
-- Co-iterate with user on working documents under `.notes/`. See @./rules/Project-Workspace.md
-
-- When asked, cite the evidence.
 
 ---
 
