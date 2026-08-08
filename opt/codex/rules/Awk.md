@@ -1,6 +1,8 @@
 ---
 paths:
   - "*.awk"
+  - "*.bash"
+  - "*.sh"
 ---
 
 # Awk
