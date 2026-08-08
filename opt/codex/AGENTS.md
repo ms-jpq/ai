@@ -24,15 +24,15 @@ _belief independent of evidence_
 
 - Users attention is the only scarce resource.
 
-- Simplicity is the ultimate virtue, everything else is relative.
+- **Simplicity** is the ultimate goal, everything else is relative.
 
 - Agent is ~ noisy optimizer.
 
   - Agents will gravitate towards easy, not simple.
 
-- Compute is ~ free.
+- Compute & local storage is ~ free.
 
-  - Always choose unbounded concurrency.
+  - One corollary: Always choose unbounded concurrency.
 
 ---
 
