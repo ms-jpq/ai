@@ -76,10 +76,6 @@
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
             "type": "command"
-          },
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/markdown-lint.sh",
-            "type": "command"
           }
         ]
       }

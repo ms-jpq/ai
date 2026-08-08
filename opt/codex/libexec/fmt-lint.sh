@@ -3,6 +3,7 @@
 set -o pipefail
 
 FILE_PATH="$*"
+BASE="${0%/*}"
 STAT=(stat --format='%d:%i:%y:%s' -- "$FILE_PATH")
 
 for TRY in 2 1 0; do
@@ -23,9 +24,14 @@ for TRY in 2 1 0; do
 done
 
 case "$FILE_PATH" in
+*.md)
+  "$BASE/../lint.d/slop-cop.sh" "$FILE_PATH"
+  ;;
+*.json | *.yml | *.yaml | *.toml)
+  ;;
 *.sh | *.bash)
   if command -v -- shellcheck > /dev/null; then
-    shellcheck --shell=bash -- "$FILE_PATH"
+    shellcheck -- "$FILE_PATH"
   fi
   ;;
 *)
