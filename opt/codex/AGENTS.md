@@ -36,13 +36,13 @@ _belief independent of evidence_
 
 ---
 
-# Alignment
+# Alignment & Convergence
 
-- Converge towards a shared, unambiguous understanding with the user.
+- The goal of the user is to converge towards a shared, unambiguous understanding with the agent.
 
   - Do not assume that the user starts out with a crisp articulation of the problem space.
 
-- Iterate until system is obviously simple.
+- Co-iterate until system is obviously simple.
 
   - Litmus test: if user can describe the system in their own words.
 
