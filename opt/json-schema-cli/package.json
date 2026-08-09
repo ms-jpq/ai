@@ -1,5 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "dependencies": {},
+  "bin": {
+    "json-schema-cli": "./cli.ts"
+  },
+  "dependencies": {
+    "@iarna/toml": "*",
+    "ajv": "*",
+    "ajv-formats": "*",
+    "yaml": "*"
+  },
+  "name": "json-schema-cli",
   "type": "module"
 }
