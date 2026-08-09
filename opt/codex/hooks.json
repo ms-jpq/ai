@@ -26,6 +26,10 @@
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
+          },
+          {
+            "command": "~/.local/opt/ai/opt/codex/hooks/post-tool-batch.sh",
+            "type": "command"
           }
         ],
         "matcher": "Bash|apply_patch"

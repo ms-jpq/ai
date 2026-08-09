@@ -59,7 +59,7 @@ Stop | StopFailure)
 JQ
   jq -e --null-input --argjson success "$SUCC" --arg reason "$CTX" "$JQ"
   ;;
-UserPromptSubmit)
+PostToolUse | UserPromptSubmit)
   touch -- "$BATCH"
   CONTEXT="$(< "$BATCH")"
   rm -f -- "$BATCH"
@@ -67,12 +67,12 @@ UserPromptSubmit)
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   "hookSpecificOutput": {
-    "hookEventName": "UserPromptSubmit",
+    "hookEventName": $event,
     "additionalContext": $context,
   }
 }
 JQ
-  jq -e --null-input --arg context "$CONTEXT" "$JQ"
+  jq -e --null-input --arg event "$EVENT" --arg context "$CONTEXT" "$JQ"
   ;;
 *)
   set -x
