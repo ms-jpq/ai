@@ -1,1 +1,0 @@
-../../codex/libexec/fmt-lint.sh

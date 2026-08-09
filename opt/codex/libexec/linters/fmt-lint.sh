@@ -27,7 +27,7 @@ done
 
 case "$FILE_PATH" in
 *.md)
-  "$BASE/../lint.d/slop-cop.sh" "$FILE_PATH"
+  "$BASE/../../lint.d/slop-cop.sh" "$FILE_PATH"
   ;;
 *.json | *.yml | *.yaml | *.toml)
   ;;

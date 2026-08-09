@@ -44,7 +44,7 @@ Stop | StopFailure)
   done > "$TMP"
 
   SUCC=false
-  if CTX="$(xargs -r --null -I % --max-procs=0 -- ~/.local/libexec/flock.sh % "$BASE/libexec/fmt-lint.sh" % < "$TMP" 2>&1)"; then
+  if CTX="$(xargs -r --null -I % --max-procs=0 -- ~/.local/libexec/flock.sh % "$BASE/libexec/linters/fmt-lint.sh" % < "$TMP" 2>&1)"; then
     SUCC=true
   fi
 

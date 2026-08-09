@@ -1,0 +1,1 @@
+../../../codex/libexec/linters/lint-d.sh

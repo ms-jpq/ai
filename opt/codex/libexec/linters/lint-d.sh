@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-BASE="${0%/*}/.."
+BASE="${0%/*}/../.."
 MARKDOWN="$1"
 
 exec -- find -H "$BASE/lint.d" -type f -perm -u+x -exec '{}' "$MARKDOWN" ';'
