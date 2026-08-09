@@ -68,7 +68,8 @@ http://* | https://*)
 esac
 
 JSON="$TMP/data.json"
-yq --output-format=json --unwrapScalar=false '.' -- "$FILE_PATH" > "$JSON"
+# shellcheck disable=SC2016
+yq --output-format=json --unwrapScalar=false 'del(."$schema")' -- "$FILE_PATH" > "$JSON"
 
 STATUS=0
 if OUTPUT="$("$AJV" validate --spec=draft2020 --errors=text --all-errors -s "$SCHEMA_PATH" -d "$JSON" 2>&1)"; then
