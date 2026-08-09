@@ -43,6 +43,10 @@
   esac
   ```
 
+- Do not use `[[ -v NAME ]]`; Bash interprets its operand as a variable reference and evaluates array subscripts.
+
+  - Test an optional string with `[[ -n ${NAME:-} ]]`; unset and empty mean absent.
+
 - `shift -- <count>` after consuming positional args.
 
 ---
@@ -79,7 +83,7 @@
 
   ```bash
   CURL=(curl --fail --location)
-  if [[ -v GH_TOKEN ]]; then
+  if [[ -n ${GH_TOKEN:-} ]]; then
     CURL+=(--oauth2-bearer "$GH_TOKEN")
   fi
   CURL+=(-- "$URL")
@@ -210,7 +214,7 @@
 
   ```bash
   FILE="$1"
-  if [[ -v RECUR ]]; then
+  if [[ ${RECUR:-} == 1 ]]; then
     isort -- "$FILE"
     exec -- black -- "$FILE"
   fi
@@ -221,7 +225,7 @@
 - Pipe through conditional blocks; `if`, `case`, and `while` can appear mid-pipeline.
 
   ```bash
-  grep --recursive -e '...' --null | if [[ -v SSH_CONNECTION ]]; then
+  grep --recursive -e '...' --null | if [[ -n ${SSH_CONNECTION:-} ]]; then
     '...'
   else
     tee
@@ -235,7 +239,7 @@
 - Never let concurrent work escape the foreground command tree; avoid background jobs so failures and signals propagate predictably.
 
   ```bash
-  if [[ -v RECUR ]]; then
+  if [[ ${RECUR:-} == 1 ]]; then
     exec -- process-file "$1"
   fi
 
