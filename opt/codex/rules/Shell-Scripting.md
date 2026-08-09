@@ -12,6 +12,15 @@
 
 - Keep the redundant `set -o pipefail`; shellcheck sees it.
 
+- Declear mandatory variables at the entrypoint.
+
+  ```bash
+  set -o pipefail
+
+  : "${REQUIRED_INPUT?}"
+  : "${ANOTHER_REQUIRED_INPUT?}"
+  ```
+
 - `shopt -u failglob` after the prelude when globs may legitimately match nothing.
 
 - Do not use backslash line continuations.
