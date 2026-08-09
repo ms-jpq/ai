@@ -10,6 +10,8 @@ shift -- 1
 
 case "$ACTION" in
 launch)
+  : "${XDG_CONFIG_HOME?}"
+
   SESSION="$1"
   CWD="$2"
   CMD="$3"
@@ -42,7 +44,6 @@ launch)
   } > "$TMP"
   chmod +x -- "$TMP"
 
-  # shellcheck disable=2154
   exec -- "$XDG_CONFIG_HOME/tmux/libexec/switch-to.sh" "$SESSION" "$TMP" < /dev/null
   ;;
 *)

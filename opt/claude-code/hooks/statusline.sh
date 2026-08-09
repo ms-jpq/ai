@@ -4,6 +4,8 @@ set -o pipefail
 
 # https://code.claude.com/docs/en/statusline
 
+: "${CC_MODE?}"
+
 ######################################
 OSC8=$'\033]8;;'
 ST=$'\033'"\\"
@@ -23,7 +25,6 @@ YELLOW=$'\033[33m'
 ######################################
 ######################################
 
-# shellcheck disable=SC2154
 case "$CC_MODE" in
 agent)
   read -r -d '' -- JQ <<- 'JQ' || true

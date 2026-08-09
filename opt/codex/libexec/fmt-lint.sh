@@ -2,6 +2,8 @@
 
 set -o pipefail
 
+: "${XDG_CONFIG_HOME?}"
+
 FILE_PATH="$*"
 BASE="${0%/*}"
 STAT=(stat --format='%d:%i:%y:%s' -- "$FILE_PATH")
@@ -9,7 +11,7 @@ STAT=(stat --format='%d:%i:%y:%s' -- "$FILE_PATH")
 for TRY in 2 1 0; do
   BEFORE="$("${STAT[@]}")"
 
-  # shellcheck disable=SC2154,SC2094
+  # shellcheck disable=SC2094
   FMT="$("$XDG_CONFIG_HOME/nvim/libexec/fmt.sh" "$FILE_PATH" < "$FILE_PATH")"
 
   AFTER="$("${STAT[@]}")"

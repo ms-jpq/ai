@@ -2,7 +2,6 @@
 
 set -o pipefail
 
-# shellcheck disable=SC2154
 TOKEN="$(jq -e --raw-input --join-output '@base64' <<< ":")"
 
 tee <<- JSON

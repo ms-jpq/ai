@@ -2,7 +2,9 @@
 
 set -o pipefail
 
-# shellcheck disable=SC2154
+: "${GEMINI_MODEL?}"
+: "${GOOGLE_API_KEY?}"
+
 CURL=(
   curl.sh
   'deepmind'

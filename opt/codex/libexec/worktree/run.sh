@@ -42,9 +42,11 @@ o | open)
   exec -- ~/.local/bin/tmux-open "$WORKTREE"
   ;;
 e | edit)
+  : "${EDITOR?}"
+
   if (($# == 0)); then
     "$SELF/pool.sh" init
-    # shellcheck disable=SC2154,SC2086
+    # shellcheck disable=SC2086
     exec -- env -C "$ROOT_NOTES" -- $EDITOR -- .
   fi
 
@@ -68,7 +70,7 @@ EOF
   done
 
   if (($# == 1)); then
-    # shellcheck disable=SC2154,SC2086
+    # shellcheck disable=SC2086
     env -C "$ROOT_NOTES" -- $EDITOR -- "$BRIEF"
     "$SELF/commit-on-change.sh" "$BRIEF" edit
   fi

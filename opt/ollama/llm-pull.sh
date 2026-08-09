@@ -10,7 +10,8 @@ else
   exec -- open -- "$URI"
 fi
 
-# shellcheck disable=SC2154
+: "${OLLAMA_API_BASE?}"
+
 CURL=(
   curl.sh
   'ollama'

@@ -2,7 +2,8 @@
 
 set -o pipefail
 
-# shellcheck disable=SC2154
+: "${OLLAMA_API_BASE?}"
+
 CURL=(
   curl.sh
   'ollama'

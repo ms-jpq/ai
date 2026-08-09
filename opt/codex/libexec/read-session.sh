@@ -3,6 +3,7 @@
 set -o pipefail
 
 BASE="${0%/*}"
+declare -- SESSION_ID
 
 if ! SESSION_ID="$("$BASE/which-session.sh")"; then
   exit
@@ -23,5 +24,4 @@ fi
 
 RECUR=1 ~/.local/libexec/flock.sh "$MARKDOWN" "$0"
 
-# shellcheck disable=SC2154
 exec -- tmux new-window -a -c '#{pane_current_path}' -- nvim -M -c "norm! G" -c '/\V# >>>' -c 'norm! N' -c 'norm! zz' -- "$MARKDOWN"

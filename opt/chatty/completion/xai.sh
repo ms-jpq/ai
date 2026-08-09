@@ -2,7 +2,8 @@
 
 set -o pipefail
 
-# shellcheck disable=SC2154
+: "${XAI_API_KEY?}"
+
 CURL=(
   curl.sh
   'xai'

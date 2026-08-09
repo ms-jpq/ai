@@ -17,7 +17,8 @@ DISPATCH=(~/.local/libexec/notify/dispatch.sh --id "$ID")
 if [[ -v RECUR ]]; then
   jq . <<< "$JSON" >&2
 else
-  # shellcheck disable=2154
+  : "${XDG_CONFIG_HOME?}"
+
   "$XDG_CONFIG_HOME/tmux/libexec/taint-inactive.sh"
 
   if [[ -v TMUX_PANE ]]; then

@@ -2,7 +2,8 @@
 
 set -o pipefail
 
-# shellcheck disable=SC2154
+: "${OPENAI_API_KEY?}"
+
 CURL=(
   curl.sh
   'openai'
@@ -12,7 +13,6 @@ CURL=(
   --url "${OPENAI_BASE_URL:-"https://api.openai.com"}/v1/responses"
 )
 
-# shellcheck disable=SC2154
 if [[ -n ${LITELLM_API_KEY:-""} ]]; then
   CURL+=(--header "Authorization: Bearer $LITELLM_API_KEY")
 fi

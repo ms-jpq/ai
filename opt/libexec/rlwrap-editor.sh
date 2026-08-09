@@ -2,8 +2,9 @@
 
 set -o pipefail
 
+: "${EDITOR?}"
+
 FILE="$*"
 
-# shellcheck disable=2154
 "$EDITOR" "$FILE"
 exec -- awk -- '{printf("%s%s", $0, "\\ ")}' "$FILE"
