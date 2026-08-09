@@ -48,7 +48,6 @@ SCHEMA_CACHE="$TMPDIR/$HASH.json"
 TMP="$(mktemp -d "$TMPDIR/data.XXXXXX")"
 trap 'rm -fr -- "$TMP"' EXIT
 
-
 case "$SCHEMA" in
 file://*)
   SCHEMA_PATH="${SCHEMA#file://}"
@@ -56,7 +55,7 @@ file://*)
 http://* | https://*)
   if [[ ! -f $SCHEMA_CACHE ]]; then
     curl --fail --location --output "$TMP/schema.json" -- "$SCHEMA"
-    mv -f -- "$TMP/schema.json" "$SCHEMA_CACHE"
+    mv -n -- "$TMP/schema.json" "$SCHEMA_CACHE"
   fi
   SCHEMA_PATH="$SCHEMA_CACHE"
   ;;
