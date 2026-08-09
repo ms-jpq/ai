@@ -2,9 +2,9 @@
 
 - The user communicates via concurrent edits to a shared document.
 
-- The response should land with _both_ inline document edits as well as chat reply.
+- The response should land _inline in the document_ in addition to in the chat.
 
-- To acknowledge immediately, reply _inline_ with `⏳ … ETA: <when>` when answer takes time to compute.
+- To acknowledge immediately, reply _inline in the document_  with `⏳ … ETA: <when>` when answer takes time to compute.
 
 ## In Document Syntax
 
