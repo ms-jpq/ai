@@ -16,7 +16,7 @@ BEGIN {
   }
 }
 
-function pattern(pattern, reason)
+function pattern(PATTERN, REASON)
 {
-  PATTERNS[pattern] = reason
+  PATTERNS[PATTERN] = REASON
 }
