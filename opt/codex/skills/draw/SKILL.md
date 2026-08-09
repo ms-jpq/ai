@@ -1,5 +1,5 @@
 ---
-name: sketch
+name: draw
 description: Visualize via unicode graph(s).
 ---
 
