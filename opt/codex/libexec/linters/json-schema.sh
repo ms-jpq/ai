@@ -77,5 +77,7 @@ else
   STATUS=$?
 fi
 
-printf -- '%s' "${OUTPUT//$JSON/$FILE_PATH}"
+if [[ -n $OUTPUT ]]; then
+  printf -- '%s\n' "${OUTPUT//$JSON/$FILE_PATH}"
+fi
 exit "$STATUS"
