@@ -27,7 +27,7 @@ done
 
 case "$FILE_PATH" in
 *.md)
-  "$BASE/markdown/slop-cop.sh" "$FILE_PATH"
+  find -H "$BASE/markdown" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
   ;;
 *.json | *.yml | *.yaml | *.toml)
   ;;

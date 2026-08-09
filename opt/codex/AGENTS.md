@@ -28,7 +28,7 @@ _belief independent of evidence_
 
 - Agent is ~ noisy optimizer.
 
-  - Agents will gravitate towards easy, not simple.
+  - Agents will gravitate towards what is locally easy, and incidentally towards what is globally simple.
 
 - Agent time, compute, local storage is ~ free.
 
