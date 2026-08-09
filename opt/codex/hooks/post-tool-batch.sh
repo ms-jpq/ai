@@ -11,6 +11,7 @@ SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 BASE="${0%/*}/.."
 SESSIONS="$HOME/.local/opt/ai/var/sessions"
 POST_DIR="$SESSIONS/$SESSION_ID.fmt"
+BATCH="$SESSIONS/$SESSION_ID.post-tool-batch.txt"
 
 TMP="$(mktemp)"
 trap 'rm -fr -- "$TMP"' EXIT
@@ -44,8 +45,10 @@ Stop | StopFailure)
   done > "$TMP"
 
   SUCC=false
-  if CTX="$(xargs -r --null -I % --max-procs=0 -- ~/.local/libexec/flock.sh % "$BASE/libexec/linters/fmt-lint.sh" % < "$TMP" 2>&1)"; then
+  if CTX="$(xargs -r --null -I % --max-procs=0 -- ~/.local/libexec/flock.sh % "$BASE/libexec/linters/fmt-lint.sh" % < "$TMP" 2>&1 | tee -- "$BATCH")"; then
     SUCC=true
+  else
+    rm -fr -- "$BATCH"
   fi
 
   read -r -d '' -- JQ <<- 'JQ' || true
@@ -55,6 +58,21 @@ Stop | StopFailure)
 }
 JQ
   jq -e --null-input --argjson success "$SUCC" --arg reason "$CTX" "$JQ"
+  ;;
+UserPromptSubmit)
+  touch -- "$BATCH"
+  CONTEXT="$(< "$BATCH")"
+  rm -f -- "$BATCH"
+
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  "hookSpecificOutput": {
+    "hookEventName": "UserPromptSubmit",
+    "additionalContext": $context,
+  }
+}
+JQ
+  jq -e --null-input --arg context "$CONTEXT" "$JQ"
   ;;
 *)
   set -x

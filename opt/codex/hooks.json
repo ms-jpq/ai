@@ -52,7 +52,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/codex/hooks/run-post.sh",
+            "command": "~/.local/opt/ai/opt/codex/hooks/post-tool-batch.sh",
             "type": "command"
           }
         ],
@@ -112,7 +112,7 @@
             "type": "command"
           },
           {
-            "command": "~/.local/opt/ai/opt/codex/hooks/run-post.sh",
+            "command": "~/.local/opt/ai/opt/codex/hooks/post-tool-batch.sh",
             "type": "command"
           }
         ]
@@ -141,6 +141,10 @@
           },
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
+            "type": "command"
+          },
+          {
+            "command": "~/.local/opt/ai/opt/codex/hooks/post-tool-batch.sh",
             "type": "command"
           }
         ]
