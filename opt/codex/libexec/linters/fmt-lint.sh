@@ -36,6 +36,7 @@ case "$FILE_PATH" in
   if command -v -- shellcheck > /dev/null; then
     shellcheck -- "$FILE_PATH"
   fi
+  find -H "$BASE/shell" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
   ;;
 *)
   ;;

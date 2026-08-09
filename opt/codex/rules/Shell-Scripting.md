@@ -47,6 +47,8 @@
 
   - Test an optional string with `[[ -n ${NAME:-} ]]`; unset and empty mean absent.
 
+- Do not attach `continue`, `break`, or `exit` to a `[[ ... ]]` test with `&&` or `||`; use an `if` block.
+
 - `shift -- <count>` after consuming positional args.
 
 ---
