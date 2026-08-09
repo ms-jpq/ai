@@ -15,7 +15,7 @@ if ! [[ -f $MARKDOWN ]]; then
   exec -- tmux display-message -- '🐶'
 fi
 
-if [[ -v RECUR ]]; then
+if [[ ${RECUR:-} == 1 ]]; then
   if command -v -- prettier > /dev/null; then
     markdown-fmt --tabsize=2 --filename _.md < "$MARKDOWN" | sponge -- "$MARKDOWN"
   fi

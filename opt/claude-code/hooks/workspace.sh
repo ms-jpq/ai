@@ -48,6 +48,6 @@ declare -A -- MAP=(
   [StopFailure]=parked
 )
 
-if [[ -v MAP[$EVENT] ]]; then
+if [[ -n ${MAP["$EVENT"]:-} ]]; then
   "${WS[@]}" set-status "${CWD##*/}" "${MAP[$EVENT]}"
 fi

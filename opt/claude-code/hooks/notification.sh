@@ -34,7 +34,7 @@ Stop | StopFailure)
   ;;
 esac
 
-if [[ -v TMUX_PANE ]]; then
+if [[ -n ${TMUX_PANE:-} ]]; then
   LINE="$(tmux display-message -t "$TMUX_PANE" -p '#{pane_title}' | sed -E 's/^[⠀-⣿✱✳]+[[:space:]]*//')"
 else
   LINE="$(basename -- "${CLAUDE_PROJECT_DIR:="$PWD"}")"

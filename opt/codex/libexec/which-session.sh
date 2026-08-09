@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-if ! [[ -v TMUX ]]; then
+if [[ -z ${TMUX:-} ]]; then
   set -x
   exit 2
 fi

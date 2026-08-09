@@ -6,7 +6,7 @@ SELF="$(realpath -- "$0")"
 SELF="${SELF%/*}"
 
 ACTION="${1:-"list"}"
-if [[ ${1:-} == set-status ]] && ! [[ -v LOCKED ]]; then
+if [[ ${1:-} == set-status ]] && [[ ${LOCKED:-} != 1 ]]; then
   LOCKED=1 exec -- ~/.local/libexec/flock.sh "$0" "$0" "$@"
 fi
 if (($#)); then

@@ -9,7 +9,7 @@ CACHE="$TMP/$NAME.cache"
 
 mkdir -v -p -- "$TMP" >&2
 
-if ! [[ -v LOCKED ]] && command -v -- flock > /dev/null; then
+if [[ ${LOCKED:-} != 1 ]] && command -v -- flock > /dev/null; then
   LOCK="$TMP/$NAME.lock"
   LOCKED=1 exec -- flock "$LOCK" "$0" "$@"
 fi

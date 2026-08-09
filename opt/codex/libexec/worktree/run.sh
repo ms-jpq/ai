@@ -98,7 +98,7 @@ w | watch)
     MSG="$NOTES/.LAST_MESSAGE.md"
     if [[ -f $MSG ]]; then
       HR=(~/.local/libexec/hr.sh '#')
-      if [[ -v COLUMNS ]]; then
+      if [[ -n ${COLUMNS:-} ]]; then
         HR+=($((COLUMNS - 8)))
       fi
       {
@@ -110,7 +110,7 @@ w | watch)
     exit
   fi
 
-  if ! command -v -- watch > /dev/null || [[ -v WATCHING ]]; then
+  if ! command -v -- watch > /dev/null || [[ ${WATCHING:-} == 1 ]]; then
     "$SELF/pool.sh" list parked | "${FANOUT[@]}" watch
   else
     WATCHING=1 exec -- watch --color -- "$0" watch

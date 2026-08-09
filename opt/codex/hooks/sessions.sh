@@ -16,7 +16,7 @@ mkdir -p -- "$SESSIONS"
 
 case "$EVENT" in
 SessionStart)
-  if [[ -v TMUX_PANE ]]; then
+  if [[ -n ${TMUX_PANE:-} ]]; then
     tmux set-option -t "$TMUX_PANE" -p @agent_session "$SESSION_ID"
 
     tmux bind-key f run-shell -- "$HOME/.local/bin/hp ${LIBEXEC@Q}/read-session.sh"
@@ -24,7 +24,7 @@ SessionStart)
   exec -- find "$SESSIONS" -mindepth 1 -mtime +30 -delete
   ;;
 SessionEnd)
-  if [[ -v TMUX_PANE ]]; then
+  if [[ -n ${TMUX_PANE:-} ]]; then
     tmux set-option -t "$TMUX_PANE" -u -p @agent_session
   fi
   exit

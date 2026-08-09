@@ -14,21 +14,21 @@ JSON="$(tee)"
 ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
 DISPATCH=(~/.local/libexec/notify/dispatch.sh --id "$ID")
 
-if [[ -v RECUR ]]; then
+if [[ ${RECUR:-} == 1 ]]; then
   jq . <<< "$JSON" >&2
 else
   : "${XDG_CONFIG_HOME?}"
 
   "$XDG_CONFIG_HOME/tmux/libexec/taint-inactive.sh"
 
-  if [[ -v TMUX_PANE ]]; then
+  if [[ -n ${TMUX_PANE:-} ]]; then
     STATUS="$(tmux display-message -t "$TMUX_PANE" -p '#{session_active}#{window_active}')"
     if [[ $STATUS == 11 ]]; then
       exec -- "${DISPATCH[@]}" '' ''
     fi
   fi
 
-  if [[ -v SSH_CONNECTION ]]; then
+  if [[ -n ${SSH_CONNECTION:-} ]]; then
     if [[ -S $SOCK ]]; then
       exec -- socat - "UNIX-CONNECT:$SOCK" <<< "$JSON"
     fi

@@ -56,7 +56,7 @@ if [[ -t 0 ]]; then
   '>die')
     PREV="$CHAT_HISTORY"
     CHAT_HISTORY="$(nljson-ledger.sh "$NAME" '')"
-    if ! [[ -v CHAT_DIEHARD ]]; then
+    if [[ -z ${CHAT_DIEHARD:-} ]]; then
       sed -E -n -e '1p' -- "$PREV" > "$CHAT_HISTORY"
     fi
     REEXEC=1

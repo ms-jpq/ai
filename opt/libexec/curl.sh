@@ -15,7 +15,7 @@ CURL=(
 )
 
 TEE=(tee --)
-if [[ -v DEBUG ]]; then
+if [[ -n ${DEBUG:-} ]]; then
   CURL+=(--fail-with-body)
   TEE+=(/dev/stderr)
 fi
