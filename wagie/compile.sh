@@ -11,8 +11,7 @@ cp -af --dereference -- "$SELF/../opt/claude-code"/{bin,hooks,keybindings.json} 
 mkdir -v -p -- "$CLAUDE_CONFIG_DIR/libexec/linters"
 cp -af -- "$SELF/../opt/claude-code/libexec"/{notify.sh,otel-headers-helper.sh} "$CLAUDE_CONFIG_DIR/libexec/"
 cp -af --dereference -- "$SELF/../opt/claude-code/libexec"/{log-hooks.sh,read-session.sh,session-file.sh,which-session.sh} "$CLAUDE_CONFIG_DIR/libexec/"
-cp -af --dereference -- "$SELF/../opt/claude-code/libexec/linters"/{fmt-lint.sh,lint-d.sh} "$CLAUDE_CONFIG_DIR/libexec/linters/"
-cp -af --dereference -- "$SELF/../opt/claude-code"/{lint.d,slop.d} "$CLAUDE_CONFIG_DIR/"
+cp -af --dereference -- "$SELF/../opt/claude-code/libexec/linters/." "$CLAUDE_CONFIG_DIR/libexec/linters/"
 cp -af -- "$SELF/../opt/codex/libexec/worktree" "$CLAUDE_CONFIG_DIR/libexec/"
 cp -af --dereference -- "$SELF/../opt/codex"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
 if [[ -f $CLAUDE_CONFIG_DIR/AGENTS.md ]]; then
