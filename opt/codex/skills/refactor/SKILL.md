@@ -1,6 +1,6 @@
 ---
 name: refactor
-description: Iteratively simplify code, contracts, and data flow.
+description: Simplify code, contracts, and data flow through iterative refactoring.
 ---
 
 Use @../../skills/op-concern-decomposition/SKILL.md.
