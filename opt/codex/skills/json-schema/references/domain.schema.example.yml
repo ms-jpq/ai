@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=./domain.schema.yml
-# source of truth for ./domain.schema.yml
+# contract: source of truth for ./domain.schema.yml
 ---
 x-foo: docker-compose.yml style top level x-* are allowed
 
