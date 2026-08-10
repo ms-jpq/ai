@@ -5,7 +5,7 @@ description: Synthesize reusable concepts by discovering distinctions, defining 
 
 # Conceptual Synthesis
 
-## Observe
+## Evidence
 
 - Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or represented inconsistently.
 
@@ -27,16 +27,18 @@ description: Synthesize reusable concepts by discovering distinctions, defining 
 
 ## Test
 
+- Apply the candidate concept and name to collected uses, counterexamples, and neighboring concepts.
+
+## Induce
+
 - Reject a concept or name that is mere decoration, merges concepts, or loses a necessary distinction.
 
-- Test the concept against collected uses, counterexamples, and neighboring concepts.
-
-## Revise
+- Retain the concept provisionally when its distinctions survive the test.
 
 - Reuse confirmed concepts and terms across code, schemas, diagrams, documents, and conversation.
 
 - Keep unresolved aliases explicit rather than silently collapsing them.
 
-- Revise or retire a concept or name when later evidence changes its grounded distinction.
+- Update or retire a concept or name when later evidence changes its grounded distinction.
 
 The result is a ubiquitous language: precise concepts and names that remain aligned across each relevant representation of the domain.

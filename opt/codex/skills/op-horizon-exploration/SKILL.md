@@ -5,7 +5,7 @@ description: Expand and narrow possible approaches by varying assumptions, const
 
 # Horizon Exploration
 
-## Observe
+## Evidence
 
 - Select the goal, current model, and topology whose horizon will be explored.
 
@@ -29,11 +29,13 @@ description: Expand and narrow possible approaches by varying assumptions, const
 
 ## Test
 
+- Compare each surviving possibility with the baseline, stated goal, and required constraints.
+
+## Induce
+
 - Reject a possibility that relies on an unsupported premise, violates required constraints, or merely renames the current approach.
 
-- Compare surviving possibilities against the baseline and the stated goal.
-
-## Revise
+- Rank the remaining possibilities by their observed advantage and required conditions.
 
 - Feed surviving possibilities back into situation modeling, topology decomposition, and conceptual synthesis.
 

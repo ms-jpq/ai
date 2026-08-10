@@ -5,7 +5,7 @@ description: Make a decision situation explicit by modeling its outcome, constra
 
 # Situation Modeling
 
-## Observe
+## Evidence
 
 - Select one decision situation.
 
@@ -39,10 +39,12 @@ description: Make a decision situation explicit by modeling its outcome, constra
 
 - Compare the model with available evidence and plausible framings.
 
+## Induce
+
 - Make contradictions and uncertainty visible.
 
-## Revise
+- Retain the model provisionally only where the evidence supports it.
 
-- Revise the model as direction or evidence changes.
+- Update the model as direction or evidence changes.
 
 - Treat the model as sufficient for now, not final.

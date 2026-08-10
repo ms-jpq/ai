@@ -7,17 +7,15 @@ description: Converge on a non-trivial task by observing evidence, explaining it
 
 ## Loop
 
-- Converge through `observe → abduce → deduce → test → revise`.
+- Start from available evidence, then converge through `abduce → deduce → test → induce`.
 
-  - **Observe** available evidence.
+  - **Abduce** a possible explanation or configuration that accounts for the evidence.
 
-  - **Abduce** an explanation or possible configuration from the evidence.
+  - **Deduce** the observable consequences that would follow if the hypothesis were right.
 
-  - **Deduce** the consequences that would follow if it were right.
+  - **Test** those consequences through implementation, experiment, or feedback that could conflict with them.
 
-  - **Test** those consequences against implementation, experiments, and user feedback.
-
-  - **Revise** the model or next transformation from the result.
+  - **Induce** a provisional judgment from the result, then update the model, constraints, or next transformation.
 
 ## Operators
 

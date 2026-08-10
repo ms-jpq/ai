@@ -7,7 +7,7 @@ description: Model and decompose a system's concern topology to expose and reduc
 
 Keep the model in `.notes/`.
 
-## Observe
+## Evidence
 
 - Select the affected concern topology.
 
@@ -51,17 +51,17 @@ Keep the model in `.notes/`.
 
 ## Test
 
+- Verify every changed boundary and dependency.
+
+- Verify that the resulting execution order remains valid.
+
+## Induce
+
 - Compare the proposed topology with the current one.
 
   - Count concepts, boundaries, dependencies, exceptions, and remote reads.
 
   - Prefer the shape that leaves the next change locally understandable and verifiable.
-
-- Verify every changed boundary and dependency.
-
-- Verify that the resulting execution order remains valid.
-
-## Revise
 
 - Record retained dependencies and why they cannot be removed.
 
