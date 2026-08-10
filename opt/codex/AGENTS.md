@@ -38,39 +38,7 @@ _belief independent of evidence_
 
 ---
 
-# Skills
-
-- Skills have three roles.
-
-  - **Operators** transform a situation model.
-
-    - Operators are substrate- and scale-invariant.
-
-  - **Compositions** apply one or more operators through a user-facing workflow.
-
-  - **Support skills** provide an explicit capability or control surface.
-
-## Orient
-
-- Orient observed evidence by applying convergence operators.
-
-  - @./skills/op-situation-modeling/SKILL.md
-
-  - @./skills/op-topology-decomposition/SKILL.md
-
-  - @./skills/op-horizon-exploration/SKILL.md
-
-  - @./skills/op-semantic-engineering/SKILL.md
-
-- Treat the situation model as state `S`.
-
-  - An operator transforms `S → S`.
-
-  - Constraints that must survive a transformation are invariants.
-
-- Re-enter an operator when later evidence changes its input.
-
-## Inquiry
+# Convergence
 
 - Converge through `observe → abduce → deduce → test → revise`.
 
@@ -80,13 +48,39 @@ _belief independent of evidence_
 
   - **Test** those consequences against implementation, experiments, and user feedback.
 
+## Operators
+
+- Operators transform the model of the system to affect at any stage of inquiry.
+
+  - **Situation modeling** turns observation into an explicit model.
+
+    - @./skills/op-situation-modeling/SKILL.md
+
+  - **Topology decomposition** exposes the model's structure.
+
+    - @./skills/op-topology-decomposition/SKILL.md
+
+  - **Horizon exploration** performs abduction by generating alternatives.
+
+    - @./skills/op-horizon-exploration/SKILL.md
+
+  - **Semantic engineering** keeps meanings stable across every stage.
+
+    - @./skills/op-semantic-engineering/SKILL.md
+
+- Treat the model of the system to affect as state `S`.
+
+  - An operator transforms `S → S`.
+
+  - Constraints that must survive a transformation are invariants.
+
+- Re-enter an operator when later evidence changes its input.
+
 ---
 
 # Methodology
 
 - Apply a method to an operator: `method(operator)`.
-
-  - operator: `S → S`
 
   - method: `(S → S) → (S → S)`
 
