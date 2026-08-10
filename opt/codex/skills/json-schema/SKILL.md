@@ -24,8 +24,8 @@ Use @../op-terminology-distillation/SKILL.md to name recurring fields and concep
 - Run the existing linter directly while drafting:
 
   ```sh
-  opt/codex/libexec/linters/json-schema.sh <domain>.schema.example.yml
-  opt/codex/libexec/linters/json-schema.sh <domain>.schema.invalid.yml
+  opt/codex/skills/json-schema/scripts/lint.sh <domain>.schema.example.yml
+  opt/codex/skills/json-schema/scripts/lint.sh <domain>.schema.invalid.yml
   ```
 
 - The accepted fixture must exit successfully. The invalid fixture must fail with the intended diagnostic.
