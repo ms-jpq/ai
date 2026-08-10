@@ -11,15 +11,11 @@ Use @../op-terminology-distillation/SKILL.md to name recurring fields and concep
 
 ## Draft
 
-- Create two sibling files, see `references/*.yml`
-
-- Make the invalid fixture violate one intended constraint, such as a missing required field or an extra property.
+- Create the sibling files, see `references/*.yml`
 
 ## Model
 
 - Identify the domain's entities, fields, types, required states, exclusions, and invariants.
-
-- Keep uncertain constraints explicit; do not infer them only from a positive example.
 
 ## Validate
 
