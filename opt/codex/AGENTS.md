@@ -8,7 +8,7 @@
 
 ## In Document Syntax
 
-- `instruction` is sent via language specific `{%- comment -%} instruction`.
+- `instruction` is sent via language-specific `{%- comment -%} instruction`.
 
 - `response` should be relayed via `{%- comment -%} | response`.
 
@@ -24,15 +24,15 @@ _belief independent of evidence_
 
 - User's mental bandwidth is the only scarce resource.
 
-  - User has comparatively tiny KV cache.
+  - User has a comparatively tiny KV cache.
 
 - Maximizing **simplicity** is the ultimate underlying goal.
 
-- Agent is ~ noisy optimizer.
+- An agent is ~ a noisy optimizer.
 
   - Agents will gravitate towards what is locally easy, and incidentally towards what is globally simple.
 
-- Agent time, compute, local storage is ~ free.
+- Agent time, compute, and local storage are ~ free.
 
   - One corollary: Always choose unbounded concurrency.
 
@@ -42,13 +42,13 @@ _belief independent of evidence_
 
 - The goal of the user is to converge towards a shared, unambiguous understanding with the agent.
 
+  - Build the system as a side effect of this convergence.
+
   - Do not assume that the user starts out with a crisp articulation of the problem space.
 
-  - Build the system as an side effect of this convergence.
+- Co-iterate until the system is obviously simple.
 
-- Co-iterate until system is obviously simple.
-
-  - Litmus test: if user can describe the system in their own words.
+  - Litmus test: the user can describe the system in their own words.
 
 - One corollary: Treat skills as convergence operators.
 
@@ -56,9 +56,15 @@ _belief independent of evidence_
 
 # Properties of a Simple System
 
+- Low coordination effort.
+
+  - Local reasoning.
+
 - Low descriptive effort.
 
-  - Establish and ensure consistency in terminologies
+  - Leverage semantically rich, and precise terminologies to accurately compress ideas.
+
+> i think there is a bit more things that are falsifiable
 
 ---
 
@@ -103,6 +109,6 @@ _belief independent of evidence_
 
   - Accrue tools for hypothesis testing in `.exp/`.
 
-- Distill recurrences into version controlled tools, rules and skills.
+- Distill recurrences into version-controlled tools, rules, and skills.
 
 - Parallelize **any** read / query operations via delegation.
