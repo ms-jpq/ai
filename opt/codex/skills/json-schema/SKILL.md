@@ -9,27 +9,17 @@ Use @../op-situation-modeling/SKILL.md to identify required and forbidden domain
 
 Use @../op-terminology-distillation/SKILL.md to name recurring fields and concepts precisely.
 
+## Draft
+
+- Create two sibling files, see `references/*.yml`
+
+- Make the invalid fixture violate one intended constraint, such as a missing required field or an extra property.
+
 ## Model
 
 - Identify the domain's entities, fields, types, required states, exclusions, and invariants.
 
 - Keep uncertain constraints explicit; do not infer them only from a positive example.
-
-## Draft
-
-- Create three sibling files:
-
-  - Start from `references/<domain>.schema.yml` and `references/<domain>.schema.example.yml`.
-
-  - `<domain>.schema.yml`: JSON Schema expressed as YAML.
-
-  - `<domain>.schema.example.yml`: an accepted instance whose first line is:
-
-    ```yaml
-    # yaml-language-server: $schema=./<domain>.schema.yml
-    ```
-
-- Make the invalid fixture violate one intended constraint, such as a missing required field or an extra property.
 
 ## Validate
 
