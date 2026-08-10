@@ -49,6 +49,9 @@ TMP="$(mktemp -d "$TMPDIR/data.XXXXXX")"
 trap 'rm -fr -- "$TMP"' EXIT
 
 case "$SCHEMA" in
+https://json-schema.org/draft*/schema)
+  exec -- "$AJV" compile --spec=draft2020 -s "$FILE_PATH"
+  ;;
 file://*)
   SCHEMA_PATH="${SCHEMA#file://}"
   ;;

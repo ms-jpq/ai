@@ -13,6 +13,8 @@ Use @../op-terminology-distillation/SKILL.md to name recurring fields and concep
 
 - Create the sibling files, see `references/*.yml`
 
+- Take care to ensure the `# yaml-language-server: $schema=...` is updated.
+
 ## Model
 
 - Identify the domain's entities, fields, types, required states, exclusions, and invariants.
