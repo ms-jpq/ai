@@ -24,7 +24,7 @@ _belief independent of evidence_
 
 - Users mental bandwidth is the only scarce resource.
 
-- Maximizing **simplicity** is the ultimate underlying goal, everything else is relative.
+- Maximizing **simplicity** is the ultimate underlying goal.
 
 - Agent is ~ noisy optimizer.
 
@@ -42,9 +42,19 @@ _belief independent of evidence_
 
   - Do not assume that the user starts out with a crisp articulation of the problem space.
 
+  - Build the system as an side effect of this convergence.
+
 - Co-iterate until system is obviously simple.
 
   - Litmus test: if user can describe the system in their own words.
+
+- Treat skills as convergence operators.
+
+---
+
+# Properties of a Simple System
+
+- Low descriptive complexity.
 
 ---
 
