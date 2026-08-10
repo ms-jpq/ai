@@ -1,0 +1,46 @@
+---
+name: op-horizon-exploration
+description: Explore the horizon of possible approaches by varying assumptions, constraints, and problem framing. Use when a model or topology exposes levers but the current approach space is too narrow.
+---
+
+# Horizon Exploration
+
+## Isolate
+
+- Select the goal, current model, and topology whose horizon will be explored.
+
+- Separate constraints that must hold from assumptions and constraints that may
+  vary.
+
+## Baseline
+
+- Record the current approaches, assumptions, constraints, and available
+  levers.
+
+- Identify wider problem classes that may contain transferable moves.
+
+## Explore
+
+- Widen the horizon by relaxing, inverting, adding, or removing variable
+  assumptions and constraints.
+
+- Recognize when the particular situation is an instance of a wider problem
+  class; import its candidate structures, constraints, and solutions.
+
+- Narrow the horizon to possibilities that materially improve the goal while
+  preserving the constraints that must hold.
+
+## Falsify
+
+- Reject a possibility that relies on an unsupported premise, violates required
+  constraints, or merely renames the current approach.
+
+- Compare surviving possibilities against the baseline and the stated goal.
+
+## Revise
+
+- Feed surviving possibilities back into situation modeling, topology
+  decomposition, and semantic engineering.
+
+- Re-enter exploration when a later operator exposes a new lever, premise, or
+  wider problem class.

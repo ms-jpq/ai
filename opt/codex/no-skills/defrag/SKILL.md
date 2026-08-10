@@ -5,7 +5,7 @@ description: "Simplification: local reasoning. Method: collocation."
 
 Use @../../skills/op-topology-decomposition/SKILL.md to identify concerns, seams, and canonical regions.
 
-Use @../../skills/op-terminology-engineering/SKILL.md to consolidate vocabulary.
+Use @../../skills/op-semantic-engineering/SKILL.md to consolidate vocabulary.
 
 # Defrag
 

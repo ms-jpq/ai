@@ -56,9 +56,13 @@ _belief independent of evidence_
 
   - @./skills/op-topology-decomposition/SKILL.md
 
-  - @./skills/op-terminology-engineering/SKILL.md
+  - @./skills/op-horizon-exploration/SKILL.md
+
+  - @./skills/op-semantic-engineering/SKILL.md
 
 - Re-enter any operation when evidence from a later operation revises its input.
+
+---
 
 ## Methodology
 
