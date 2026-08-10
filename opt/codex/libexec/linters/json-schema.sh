@@ -31,7 +31,7 @@ esac
 
 if [[ -z $SCHEMA ]]; then
   # shellcheck disable=SC2016
-  SCHEMA="$(yq --no-colors --unwrapScalar '."$schema" // ""' -- "$FILE_PATH")"
+  SCHEMA="$(yq --yaml-fix-merge-anchor-to-spec --no-colors --unwrapScalar '."$schema" // ""' -- "$FILE_PATH")"
 fi
 
 if [[ -z $SCHEMA || $SCHEMA == none ]]; then
@@ -72,7 +72,7 @@ esac
 
 JSON="$TMP/data.json"
 # shellcheck disable=SC2016
-yq --output-format=json --unwrapScalar=false 'del(."$schema")' -- "$FILE_PATH" > "$JSON"
+yq --yaml-fix-merge-anchor-to-spec --output-format=json --unwrapScalar=false 'del(."$schema")' -- "$FILE_PATH" > "$JSON"
 
 STATUS=0
 if OUTPUT="$("$AJV" validate --spec=draft2020 --errors=text --all-errors -s "$SCHEMA_PATH" -d "$JSON" 2>&1)"; then

@@ -13,24 +13,52 @@ additionalProperties: false
 patternProperties:
   ^x-: {}
 
-# default to making all properties required.
+# default to making all properties required
 required:
   - dogs
+
+# yml anchors should be extracted into $defs
+$defs:
+  audit:
+    type: object
+    required:
+      - updated-at
+    properties:
+      updated-at:
+        type: string
+        pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
 
 properties:
   dogs:
     type: array
     items:
       type: object
-      additionalProperties: false
-      required:
-        - name
-        - breed
-      properties:
-        name:
-          type: string
-        breed:
-          enum:
-            - poodle-shaped
-            - schnauzer-shaped
-            - cat-shaped
+      allOf:
+        - $ref: "#/$defs/audit"
+        - type: object
+          required:
+            - name
+            - breed
+          properties:
+            name:
+              type: string
+            breed:
+              enum:
+                - wiener
+                - schnauzer
+                - pomeranian
+                - poodle-shaped
+      unevaluatedProperties: false
+  locations:
+    type: array
+    items:
+      type: object
+      allOf:
+        - $ref: "#/$defs/audit"
+        - type: object
+          required:
+            - home
+          properties:
+            home:
+              type: string
+      unevaluatedProperties: false

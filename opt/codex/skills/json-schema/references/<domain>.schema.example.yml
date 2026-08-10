@@ -3,7 +3,16 @@
 ---
 x-foo: docker-compose.yml style top level x-* are allowed
 
+# Use a YAML anchor to reuse a pattern; extract its schema to $defs.
+x-audit: &audit
+  updated-at: "2026-08-09T00:00:00Z"
+
 dogs:
-  - name: lil
+  - <<: *audit
+    name: lil
     # enum: wiener | schnauzer | pomeranian | poodle-shaped
     breed: poodle-shaped
+
+locations:
+  - <<: *audit
+    home: Henesys
