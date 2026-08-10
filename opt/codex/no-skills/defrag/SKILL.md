@@ -3,9 +3,7 @@ name: defrag
 description: "Simplification: local reasoning. Method: collocation."
 ---
 
-Use @../../skills/op-topology-modeling/SKILL.md to identify concerns and seams.
-
-Use @../../skills/op-topology-reshaping/SKILL.md to establish canonical regions.
+Use @../../skills/op-topology-decomposition/SKILL.md to identify concerns, seams, and canonical regions.
 
 Use @../../skills/op-terminology-engineering/SKILL.md to consolidate vocabulary.
 
