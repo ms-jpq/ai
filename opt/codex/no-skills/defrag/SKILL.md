@@ -3,11 +3,11 @@ name: defrag
 description: "Simplification: local reasoning. Method: collocation."
 ---
 
-Use @../../skills/op-concern-decomposition/SKILL.md to identify concerns and seams.
+Use @../../skills/op-topology-modeling/SKILL.md to identify concerns and seams.
 
-Use @../../skills/op-concern-collocation/SKILL.md to establish canonical regions.
+Use @../../skills/op-topology-reshaping/SKILL.md to establish canonical regions.
 
-Use @../../skills/op-terminology-distillation/SKILL.md to consolidate vocabulary.
+Use @../../skills/op-terminology-engineering/SKILL.md to consolidate vocabulary.
 
 # Defrag
 

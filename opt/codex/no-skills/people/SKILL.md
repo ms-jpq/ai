@@ -5,7 +5,7 @@ description: Apply systems thinking to people, relationships, organizations.
 
 Use @../../skills/op-situation-modeling/SKILL.md.
 
-Use @../../skills/op-concern-decomposition/SKILL.md.
+Use @../../skills/op-topology-modeling/SKILL.md.
 
 # People
 

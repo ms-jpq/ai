@@ -48,11 +48,11 @@ _belief independent of evidence_
 
   - @./skills/op-situation-modeling/SKILL.md
 
-  - @./skills/op-concern-decomposition/SKILL.md
+  - @./skills/op-topology-modeling/SKILL.md
 
-  - @./skills/op-concern-collocation/SKILL.md
+  - @./skills/op-topology-reshaping/SKILL.md
 
-  - @./skills/op-terminology-distillation/SKILL.md
+  - @./skills/op-terminology-engineering/SKILL.md
 
 - Re-enter any operation when evidence from a later operation revises its input.
 

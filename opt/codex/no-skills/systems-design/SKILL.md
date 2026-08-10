@@ -3,9 +3,9 @@ name: systems-design
 description: Design or refine software architecture.
 ---
 
-Use @../../skills/op-concern-decomposition/SKILL.md.
+Use @../../skills/op-topology-modeling/SKILL.md.
 
-Use @../../skills/op-concern-collocation/SKILL.md before choosing an architecture.
+Use @../../skills/op-topology-reshaping/SKILL.md before choosing an architecture.
 
 # Decompose
 
