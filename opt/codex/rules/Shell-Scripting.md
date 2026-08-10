@@ -12,7 +12,7 @@
 
 - Keep the redundant `set -o pipefail`; shellcheck sees it.
 
-- Declear mandatory variables at the entrypoint.
+- Declare mandatory variables at the entrypoint.
 
   ```bash
   set -o pipefail
