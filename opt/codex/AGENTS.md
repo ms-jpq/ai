@@ -73,7 +73,3 @@ _belief independent of evidence_
   - **Revise** the next invocation from the observed result.
 
 - Parallelize **any** read / query operations via delegation.
-
----
-
-> now lets do refine and refactor, 
