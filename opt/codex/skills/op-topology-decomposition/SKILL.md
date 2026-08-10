@@ -1,6 +1,6 @@
 ---
 name: op-topology-decomposition
-description: Decompose dependency topology by modeling concerns and then reshaping their boundaries, dependencies, and placement into independently understandable units.
+description: Model and decompose a system's concern topology to expose and reduce accidental dependencies. Use when boundaries, ordering, or placement resist local reasoning.
 ---
 
 # Topology Decomposition

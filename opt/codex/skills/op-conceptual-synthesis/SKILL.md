@@ -1,6 +1,6 @@
 ---
 name: op-conceptual-synthesis
-description: Synthesize concepts by discovering recurring distinctions, defining their boundaries, and coining shared terms across each relevant representation.
+description: Synthesize reusable concepts by discovering distinctions, defining their boundaries, and aligning their names across each relevant representation. Use when a recurring distinction lacks a stable name or meaning differs between representations.
 ---
 
 # Conceptual Synthesis

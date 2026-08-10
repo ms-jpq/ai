@@ -1,6 +1,6 @@
 ---
 name: op-horizon-exploration
-description: Explore the horizon of possible approaches by varying assumptions, constraints, and problem framing. Use when a model or topology exposes levers but the current approach space is too narrow.
+description: Expand and narrow possible approaches by varying assumptions, constraints, and framing. Use when the current model leaves promising alternatives unexplored.
 ---
 
 # Horizon Exploration

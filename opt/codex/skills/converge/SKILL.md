@@ -1,6 +1,6 @@
 ---
 name: converge
-description: Converge on a non-trivial task through observation, abduction, deduction, testing, and revision. Use when work needs a shared model, an explicit next transformation, or evidence-based course correction.
+description: Converge on a non-trivial task by observing evidence, explaining it, deriving consequences, testing them, and revising the system model. Use to choose, sequence, and revisit convergence operators.
 ---
 
 # Converge

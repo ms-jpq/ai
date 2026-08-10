@@ -1,6 +1,6 @@
 ---
 name: op-situation-modeling
-description: Model the decision situation by making goals, constraints, and evidence explicit.
+description: Make a decision situation explicit by modeling its outcome, constraints, authority, evidence, and invariants. Use when those inputs are unclear or conflict.
 ---
 
 # Situation Modeling
