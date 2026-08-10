@@ -1,7 +1,9 @@
 ---
 name: refine
-description: "Convergence operation: descriptive effort."
+description: Refine prose for the reader's goal and local context.
 ---
+
+Use @../op-terminology-distillation/SKILL.md when a recurring meaning needs a stable term.
 
 # Prepare
 

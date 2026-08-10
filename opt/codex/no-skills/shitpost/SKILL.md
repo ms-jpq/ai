@@ -1,6 +1,6 @@
 ---
 name: shitpost
-description: "-"
+description: Reset through deliberately unserious reflection.
 disable-model-invocation: true
 effort: max
 ---

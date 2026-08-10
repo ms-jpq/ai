@@ -1,13 +1,13 @@
 ---
-name: intent
-description: Model the user's intent by making the implicit explicit. Write it down.
+name: op-situation-modeling
+description: Model the decision situation by making goals, constraints, and evidence explicit.
 ---
 
-# Intent
+# Situation Modeling
 
 ## Explicate
 
-- Turn the relevant corpus into a model of the current direction.
+- Turn the relevant corpus into a model of the current decision situation.
 
   - Include the user's request and conversation.
 
@@ -17,9 +17,13 @@ description: Model the user's intent by making the implicit explicit. Write it d
 
   - Outcome.
 
-  - Strategy.
-
   - Constraints.
+
+  - Authority.
+
+  - Actors and their incentives.
+
+  - Boundary and interfaces.
 
   - Commitments.
 
@@ -28,6 +32,8 @@ description: Model the user's intent by making the implicit explicit. Write it d
   - Explicit direction.
 
   - Inferences.
+
+  - Revision triggers.
 
 ## Calibrate
 

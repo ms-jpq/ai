@@ -1,6 +1,6 @@
 ---
 name: draw
-description: Visualize via unicode graph(s).
+description: Visualize relationships with unicode graph(s).
 ---
 
 # Sketch

@@ -1,9 +1,9 @@
 ---
 name: open
-description: Open the files, directories, and links relevant to the current context.
+description: Open files, directories, and links relevant to the current context.
 ---
 
-Open what's currently in focus — not the entire session history.
+Open what is currently in focus, not the entire session history.
 
 - If arguments are provided, that is the set. Open exactly those.
 

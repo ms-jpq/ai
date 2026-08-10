@@ -3,7 +3,9 @@ name: refactor
 description: Iteratively simplify code, contracts, and data flow.
 ---
 
-Use @../systems-thinking/SKILL.md.
+Use @../../skills/op-concern-decomposition/SKILL.md.
+
+Use @../../skills/op-concern-collocation/SKILL.md.
 
 ---
 

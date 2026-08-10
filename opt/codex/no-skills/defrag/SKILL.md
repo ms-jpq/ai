@@ -1,7 +1,13 @@
 ---
 name: defrag
-description: "Convergence operation: local reasoning."
+description: "Simplification: local reasoning. Method: collocation."
 ---
+
+Use @../../skills/op-concern-decomposition/SKILL.md to identify concerns and seams.
+
+Use @../../skills/op-concern-collocation/SKILL.md to establish canonical regions.
+
+Use @../../skills/op-terminology-distillation/SKILL.md to consolidate vocabulary.
 
 # Defrag
 

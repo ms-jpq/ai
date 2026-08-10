@@ -1,6 +1,6 @@
 ---
 name: mine
-description: Research the workspace for a topic. Report patterns in the corpus.
+description: Research the workspace for a topic and report corpus patterns.
 disable-model-invocation: true
 ---
 

@@ -38,43 +38,23 @@ _belief independent of evidence_
 
 ---
 
-# Operating Method
+## Operator Basis
 
 - Treat skills as convergence operators.
 
-  - Each operation names a relation it simplifies.
-
   - Operators are substrate, and scale invariant.
 
-> | >>> ⏳ Redrawing the feedback map. ETA: now.
-> |
-> | `text
-| op-situation-modeling <-> op-concern-decomposition <-> op-concern-collocation
-|                                    |                       |
-| op-semantic-compression <-> op-terminology-formation <-┘
-| `
+- Apply this feedback loop to every non-trivial situation:
 
-> | >>> Yes. `terminology-distillation` unifies the two loose operations:
-> | identify a recurring meaning or relation, create or revise its term, then
-> | use that term to preserve meaning with less representational effort. It is
-> | continuous, not a one-time formation step.
+  - @./skills/op-situation-modeling/SKILL.md
 
-> | >>> `semantic-compression` should come out: it still sounds tied to a
-> | representation. Try `abstraction` for the substrate-invariant operation:
-> | retain the distinctions needed at a boundary while hiding irrelevant detail.
-> | Terminology distillation is its language-level method; modules, interfaces,
-> | diagrams, and groupings are other methods.
+  - @./skills/op-concern-decomposition/SKILL.md
 
-> like we should think about this step mabye 1 layer below, it should be something like the last step?
+  - @./skills/op-concern-collocation/SKILL.md
 
-> | >>> Yes. `abstraction` explains the effect but sits a layer above the
-> | concrete terminal operation. Try `situation-synthesis`: assemble the
-> | decomposed, collocated, and named concerns into one decision-ready situation
-> | model. That is the last step in this box; it hands a usable model to Decide.
+  - @./skills/op-terminology-distillation/SKILL.md
 
-> ok i am happy enough with this. lets match them up, and work our migration plan.
->
-> 
+- Re-enter any operation when evidence from a later operation revises its input.
 
 ## Methodology
 
