@@ -1,6 +1,6 @@
 ---
 name: open
-description: Open files, directories, and links relevant to the current context.
+description: Open focused files, directories, and links.
 ---
 
 Open what is currently in focus, not the entire session history.
