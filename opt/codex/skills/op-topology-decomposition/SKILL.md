@@ -47,6 +47,10 @@ Keep the model in `.notes/`.
 
 - Preserve the intended external contracts unless the topology model demonstrates that they are wrong.
 
+## Predict
+
+- State the expected effects on boundaries, dependencies, placement, and execution order.
+
 ## Falsify
 
 - Compare the proposed topology with the current one.

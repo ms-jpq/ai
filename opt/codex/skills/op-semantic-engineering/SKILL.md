@@ -21,6 +21,10 @@ description: Engineer shared semantics by aligning concepts, distinctions, relat
 
 - Align its definition, constraint, and short name across each relevant representation.
 
+## Predict
+
+- State how examples, counterexamples, and neighboring concepts should classify under the resulting semantics.
+
 ## Falsify
 
 - Reject a definition or name that is mere decoration, merges concepts, or loses a necessary distinction.

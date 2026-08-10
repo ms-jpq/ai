@@ -31,6 +31,10 @@ description: Model the decision situation by making goals, constraints, and evid
 
   - Explicit direction, inferences, and revision triggers.
 
+## Predict
+
+- State the observations that would distinguish the model from plausible alternatives.
+
 ## Falsify
 
 - Compare the model with available evidence and plausible framings.

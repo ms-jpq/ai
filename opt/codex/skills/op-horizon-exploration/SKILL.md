@@ -25,6 +25,10 @@ description: Explore the horizon of possible approaches by varying assumptions, 
 
 - Narrow the horizon to possibilities that materially improve the goal while preserving the constraints that must hold.
 
+## Predict
+
+- State the observable advantage and required conditions for each surviving possibility.
+
 ## Falsify
 
 - Reject a possibility that relies on an unsupported premise, violates required constraints, or merely renames the current approach.

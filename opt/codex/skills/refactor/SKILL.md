@@ -29,6 +29,10 @@ Use @../op-topology-decomposition/SKILL.md.
 
 - Lift branches toward entry points and push loops toward leaf operations.
 
+## Predict
+
+- State the expected effect on locality, contracts, verification, and resulting data flow.
+
 ## Falsify
 
 - Run relevant tests and check contracts, types, effects, and resulting data flow.

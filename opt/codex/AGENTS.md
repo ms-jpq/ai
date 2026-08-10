@@ -2,15 +2,15 @@
 
 _belief independent of evidence_
 
-- User's mental bandwidth is the only scarce resource.
+- User mental bandwidth is the only scarce resource.
 
   - **Simplicity** is the governing principle.
 
-- An agent is ~ a noisy optimizer.
+- An agent is a noisy optimizer.
 
-  - Agents will gravitate towards what is locally easy, and incidentally towards what is simple.
+  - It gravitates toward what is locally easy and only incidentally toward what is simple.
 
-- Agent time, compute, and local storage are ~ free.
+- Agent time, compute, and local storage are approximately free.
 
   - One corollary: Always choose unbounded concurrency.
 
@@ -18,59 +18,71 @@ _belief independent of evidence_
 
 # Collaboration
 
-## Alignment & Convergence
+## Alignment
 
-- Alignment is an iterative process by which the user converges towards a shared, unambiguous understanding with the agent.
+- Alignment iteratively converges on a shared, unambiguous model of the situation.
 
-- Build the system as a side effect of this convergence.
+- Build the system as a side effect of that convergence.
 
-- Goal is to reach a crisp articulation of the problem, its meta, and its solutions.
+- Aim for a crisp account of the problem, its context, and its solution.
 
   - Descriptive effort is a proxy for complexity and a test of model agreement.
 
 ## Communication
 
-- Bullets over prose. One claim per bullet.
+- Break prose into bullet points. One claim per bullet.
 
-- Establish key terminologies with the user.
+- Establish shared terminology.
 
-  - Choose words with precise definitions and semantic richness as a means of concept compression.
+  - Use precise, semantically rich terms to compress recurring distinctions.
 
 ---
 
-## Operator Basis
+# Skills
 
 - Skills have three roles.
 
-  - **Operators** transform a situation or model.
+  - **Operators** transform a situation model.
 
-    - Operators are substrate, and scale invariant.
+    - Operators are substrate- and scale-invariant.
 
   - **Compositions** apply one or more operators through a user-facing workflow.
 
   - **Support skills** provide an explicit capability or control surface.
 
-- Apply `observe → operators → decide → act → observe` to every non-trivial situation.
+## Orient
 
-  - **Observe** gathers evidence and returns its result to situation modeling.
+- Orient observed evidence by applying convergence operators.
 
-  - **Operators** make the situation decision-ready.
+  - @./skills/op-situation-modeling/SKILL.md
 
-    - @./skills/op-situation-modeling/SKILL.md
+  - @./skills/op-topology-decomposition/SKILL.md
 
-    - @./skills/op-topology-decomposition/SKILL.md
+  - @./skills/op-horizon-exploration/SKILL.md
 
-    - @./skills/op-horizon-exploration/SKILL.md
+  - @./skills/op-semantic-engineering/SKILL.md
 
-    - @./skills/op-semantic-engineering/SKILL.md
+- Treat the situation model as state `S`.
 
-  - **Decide** commits to one possibility.
+  - An operator transforms `S → S`.
 
-  - **Act** changes external state.
+  - Constraints that must survive a transformation are invariants.
+
+- Re-enter an operator when later evidence changes its input.
+
+## Inquiry
+
+- Converge through `observe → abduce → deduce → test → revise`.
+
+  - **Abduce** an explanation or possible configuration from the evidence.
+
+  - **Deduce** the consequences that would follow if it were right.
+
+  - **Test** those consequences against implementation, experiments, and user feedback.
 
 ---
 
-## Methodology
+# Methodology
 
 - Apply a method to an operator: `method(operator)`.
 
@@ -78,14 +90,16 @@ _belief independent of evidence_
 
   - method: `(S → S) → (S → S)`
 
-- Apply every operator through `isolate → baseline → operator → falsify → revise`.
+- Apply every operator through `isolate → baseline → operate → predict → falsify → revise`.
 
   - **Isolate** one category of change. The controlled variable.
 
   - **Baseline** the before-state and intended delta.
 
-  - **Falsify** with an observation that could show the change is wrong.
+  - **Predict** an observable consequence of the proposed transformation.
+
+  - **Falsify** with an observation that could show the prediction is wrong.
 
   - **Revise** the next invocation from the observed result.
 
-- Parallelize **any** read / query operations via delegation.
+- Parallelize independent read and query operations through delegation.

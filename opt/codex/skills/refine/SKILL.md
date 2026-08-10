@@ -37,6 +37,10 @@ Use @../op-semantic-engineering/SKILL.md when a recurring meaning needs a stable
 
   - Put reasons, conditions, steps, and outcomes in children.
 
+## Predict
+
+- State the reading, decision, or action the revised prose should make easier.
+
 ## Falsify
 
 - Test the revision against competing readings, factual constraints, and the reader's goal.
