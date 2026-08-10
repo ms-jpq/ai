@@ -11,7 +11,7 @@ if [[ ! -x $AJV ]]; then
   AJV="$(command -v -- ajv)"
 fi
 
-SCHEMA=""
+SCHEMA=''
 case "$FILE_PATH" in
 *.json)
   ;;

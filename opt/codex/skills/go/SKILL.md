@@ -1,6 +1,6 @@
 ---
 name: go
-description: Delegate bounded task(s).
+description: Delegate bounded task(s) only when explicitly invoked by the user.
 disable-model-invocation: true
 ---
 

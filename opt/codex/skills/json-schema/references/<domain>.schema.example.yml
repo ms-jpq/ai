@@ -1,0 +1,5 @@
+# yaml-language-server: $schema=./<domain>.schema.yml
+---
+x-foo: docker-compose.yml style top level x-* are allowed
+
+dog: lil
