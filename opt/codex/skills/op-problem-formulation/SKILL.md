@@ -31,11 +31,11 @@ description: Formulate a decision problem by making its outcome, constraints, au
 
 ## Deduce
 
-- State the observations that would distinguish the model from plausible alternatives.
+- State the observations that would distinguish the formulation from plausible alternatives.
 
 ## Test
 
-- Compare the model with evidence and plausible alternatives.
+- Compare the formulation with evidence and plausible alternatives.
 
 ## Induce
 
@@ -43,6 +43,6 @@ description: Formulate a decision problem by making its outcome, constraints, au
 
 - Retain only the claims the evidence supports.
 
-- Update the model as direction or evidence changes.
+- Update the formulation as direction or evidence changes.
 
 - Treat the model as sufficient for the decision, not final.

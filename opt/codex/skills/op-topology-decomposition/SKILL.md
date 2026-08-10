@@ -5,7 +5,7 @@ description: Model and decompose a system's concern topology to expose and reduc
 
 # Topology Decomposition
 
-Keep the model in `.notes/`.
+- Record the topology model in `.notes/`.
 
 ## Evidence
 
@@ -25,7 +25,7 @@ Keep the model in `.notes/`.
 
 - Identify cycles, hidden dependencies, and accidental distance between related concerns.
 
-- Derive an execution order by topologically sorting the graph.
+- Topologically sort the graph to derive an execution order.
 
   - Record cycles as unresolved ordering constraints; a cyclic graph has no complete topological order.
 

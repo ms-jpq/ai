@@ -15,9 +15,9 @@ description: Synthesize reusable concepts by defining distinctions and aligning 
 
 - Define the concept before naming it.
 
-  - State its members, exclusions, relations, and distinctions that must survive.
+  - State its scope, exclusions, relations, and distinctions that must survive.
 
-- Coin or revise a short term that carries the distinction.
+- Coin or revise a concise term that carries the distinction.
 
 - Align the term, definition, and constraint across each relevant representation.
 
@@ -31,7 +31,7 @@ description: Synthesize reusable concepts by defining distinctions and aligning 
 
 ## Induce
 
-- Reject a concept or name that decorates, merges concepts, or loses a necessary distinction.
+- Reject a candidate that decorates, merges concepts, or loses a necessary distinction.
 
 - Retain the concept provisionally when its distinctions survive the test.
 

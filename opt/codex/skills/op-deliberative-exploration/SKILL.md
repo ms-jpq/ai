@@ -11,7 +11,7 @@ description: Explore decision-relevant alternatives by varying assumptions, cons
 
 - Record the current framing: problem boundary, goal, assumptions, constraints, and abstraction level.
 
-- Separate fixed constraints from assumptions and constraints that may vary.
+- Separate invariants from assumptions and constraints that may vary.
 
 - Record the current approach and available levers.
 
@@ -19,27 +19,27 @@ description: Explore decision-relevant alternatives by varying assumptions, cons
 
 ## Abduce
 
-- Step back one level: treat the problem formulation, model, and topology as variables rather than givens.
+- Step back: treat the problem formulation, model, and topology as variables rather than givens.
 
-- Generate possibilities by relaxing, inverting, adding, or removing variable assumptions and constraints.
+- Generate alternatives by relaxing, inverting, adding, or removing variable assumptions and constraints.
 
 - Recognize when the situation is an instance of a wider problem class; import its candidate structures, constraints, and solutions.
 
-- Retain possibilities that improve the goal while preserving fixed constraints.
+- Retain alternatives that improve the goal while preserving invariants.
 
 ## Deduce
 
-- State each surviving possibility's observable advantage and required conditions.
+- State each surviving alternative's observable advantage and required conditions.
 
 ## Test
 
-- Compare each surviving possibility with the baseline, stated goal, and required constraints.
+- Compare each surviving alternative with the baseline, stated goal, and required constraints.
 
 ## Induce
 
-- Reject a possibility that relies on an unsupported premise, violates required constraints, or merely renames the current approach.
+- Reject an alternative that relies on an unsupported premise, violates required constraints, or merely renames the current approach.
 
-- Rank the remaining possibilities by their observed advantage and required conditions.
+- Rank the remaining alternatives by their observed advantage and required conditions.
 
 - Feed surviving possibilities back into problem formulation, topology decomposition, and conceptual synthesis.
 
