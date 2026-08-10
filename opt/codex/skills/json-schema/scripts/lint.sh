@@ -6,9 +6,13 @@ FILE_PATH="$1"
 BASE="${0%/*}"
 FILE_DIR="${FILE_PATH%/*}"
 
-AJV="$BASE/../../../../node_modules/.bin/ajv"
+AJV="$BASE/../../../../../node_modules/.bin/ajv"
 if [[ ! -x $AJV ]]; then
-  AJV="$(command -v -- ajv)"
+  if AJV="$(command -v -- ajv)"; then
+    :
+  else
+    exit
+  fi
 fi
 
 SCHEMA=''
