@@ -76,15 +76,4 @@ _belief independent of evidence_
 
 ---
 
-> then we shuold reframe the operators through the methods right?
-
-> | >>> Yes. The methods frame every operator, while the middle transformation
-> | remains operator-specific:
-> |
-> | - Situation modeling models.
-> | - Topology decomposition re-slices.
-> | - Terminology engineering grounds and aligns terms.
-> |
-> | We should reframe the three skill contracts around that common shape next.
-
-> yeah like do the skills famliy
+> now lets do refine and refactor, 

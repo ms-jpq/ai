@@ -9,24 +9,36 @@ Use @../op-topology-decomposition/SKILL.md.
 
 # Refactor
 
-- Ask: how can this code become simpler?
+## Isolate
 
-- Bound the domain as a set of contracts.
+- Select one concern, contract, control-flow or data-flow change per pass.
 
-- Follow data from entry points to exit points.
+## Baseline
+
+- Bound the domain as contracts and follow data from entry points to exit points.
+
+- Record the current tests, types, effects, and topology.
+
+## Refactor
 
 - Move or resize boundaries to de-complect responsibilities.
 
-- Preserve contracts by default.
-
-- Improve contracts when the change is locally verifiable.
+- Preserve contracts by default; improve them only when locally verifiable.
 
 - Divide the flow into stages with explicit contracts.
 
-- Lift branches toward entry points.
+- Lift branches toward entry points and push loops toward leaf operations.
 
-- Push loops toward leaf operations.
+## Falsify
 
-- Iterate until the data flow is laminar: direct, staged, and unsurprising.
+- Run relevant tests and check contracts, types, effects, and resulting data flow.
 
-- Surface a design or plan when changes require broader judgment, migration, or coordination.
+- Reject a refactor that leaves the next change less local or less verifiable.
+
+## Revise
+
+- Re-model the topology and apply the observed result to the next pass.
+
+- Stop when the flow is laminar: direct, staged, and unsurprising.
+
+- Surface a design or plan when evidence requires broader judgment, migration, or coordination.

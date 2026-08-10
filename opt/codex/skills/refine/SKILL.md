@@ -5,49 +5,31 @@ description: Refine prose for the reader's goal and local context.
 
 Use @../op-terminology-engineering/SKILL.md when a recurring meaning needs a stable term.
 
-# Prepare
+# Refine
 
-- Write for the reader's goal, knowledge, and vocabulary evident from context.
+## Isolate
 
-- Treat refinement as a convergence operator, not an activity.
+- Select one wording, claim, hierarchy defect, or reader goal per pass.
 
-  - The target state is writing that better serves the reader's stated goal.
+## Baseline
 
-  - Each edit must have an expected improvement that can be checked against the text and its use.
+- Record the current text, the reader's goal, knowledge, and vocabulary, and the intended improvement.
 
-  - Do not optimize a convenient local metric, such as brevity, polish, or density, at the expense of the reader's actual goal.
-
-  - Reassess the goal and stop when further edits no longer improve the text's use.
-
-- Break prose into point form before iterating.
+- Break prose into point form.
 
   - One claim per bullet.
 
-# Analyze
+## Refine
 
-- Replace vague words with precise ones.
+- Replace vague words with precise ones; remove words that do not change the claim.
 
-- Remove words that do not change the claim.
-
-- Group related claims.
-
-- Order claims by importance.
+- Group related claims and order them by importance.
 
 - Replace abstractions with observable actions, conditions, or outcomes.
 
-- Omit explanations already established by context.
+- Add missing domain context; omit explanation already established by context.
 
-- Add missing domain context required to interpret the claims.
-
-- Resolve wording that admits materially different interpretations.
-
-- Resolve claims that cannot simultaneously hold.
-
-- Remove absolutes not supported by evidence.
-
-- Remove hedges not required by uncertainty.
-
-# Hierarchy
+- Resolve materially different readings and claims that cannot simultaneously hold.
 
 - Group related claims beneath a parent claim.
 
@@ -55,16 +37,16 @@ Use @../op-terminology-engineering/SKILL.md when a recurring meaning needs a sta
 
   - Put reasons, conditions, steps, and outcomes in children.
 
-- Keep sibling bullets at the same level of abstraction.
+## Falsify
 
-- Use nesting to show containment, dependency, sequence, or condition.
+- Test the revision against competing readings, factual constraints, and the reader's goal.
 
-- Do not indent for visual density alone.
+- Remove absolutes not supported by evidence and hedges not required by uncertainty.
 
-# Iterate
+## Revise
 
-- One question per turn.
+- Re-read the prose in local context and apply the observed result to the next pass.
 
-- Propose options with tradeoffs.
+- Ask one question per turn when the reader must choose between tradeoffs.
 
-- `auto` argument: skip questions, pick the strongest option each turn, apply. Stop when further iteration is churn.
+- `auto` skips questions, chooses the strongest option each pass, and stops when further iteration is churn.
