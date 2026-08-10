@@ -1,6 +1,6 @@
 ---
 name: systems-thinking
-description: Apply the Systems Thinking workflow from AGENTS.md when a task may be misframed, under-specified, or tangled with adjacent concerns.
+description: "Convergence operation: disentanglement."
 ---
 
 # Systems Thinking

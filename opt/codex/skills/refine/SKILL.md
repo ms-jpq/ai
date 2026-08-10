@@ -1,6 +1,6 @@
 ---
 name: refine
-description: Iteratively improve writing.
+description: "Convergence operation: descriptive effort."
 ---
 
 # Prepare
@@ -13,9 +13,9 @@ description: Iteratively improve writing.
 
   - Each edit must have an expected improvement that can be checked against the text and its use.
 
-  - Do not optimize a convenient local metric—such as brevity, polish, or density—at the expense of the reader's actual goal.
+  - Do not optimize a convenient local metric, such as brevity, polish, or density, at the expense of the reader's actual goal.
 
-  - Reassess the goal and stop when further edits no longer produce a meaningful improvement.
+  - Reassess the goal and stop when further edits no longer improve the text's use.
 
 - Break prose into point form before iterating.
 
