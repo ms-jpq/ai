@@ -7,7 +7,7 @@ description: Model the decision situation by making goals, constraints, and evid
 
 ## Explicate
 
-- Turn the relevant corpus into a model of the current decision situation.
+- Build a model of the current decision situation from available evidence.
 
   - Include the user's request and conversation.
 
@@ -39,7 +39,7 @@ description: Model the decision situation by making goals, constraints, and evid
 
 - Compare the model with available evidence.
 
-  - Relevant corpus.
+  - Relevant evidence.
 
   - Plans and implementation.
 

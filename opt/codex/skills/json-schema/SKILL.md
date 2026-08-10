@@ -7,7 +7,7 @@ description: Draft and evolve example-first JSON Schema contracts.
 
 ## Draft
 
-- Create the sibling files, see `references/*.yml`
+- Create the sibling files, see `references/`
 
 - Take care to ensure the `# yaml-language-server: $schema=...` is updated.
 

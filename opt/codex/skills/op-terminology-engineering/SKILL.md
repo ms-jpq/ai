@@ -29,5 +29,4 @@ description: Engineer precise domain terminology that grounds recurring distinct
 
 - Revise or retire a term when later evidence changes its grounded distinction.
 
-The result is a ubiquitous language: precise names that remain aligned across
-every representation of the domain.
+The result is a ubiquitous language: precise names that remain aligned across every representation of the domain.
