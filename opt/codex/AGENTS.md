@@ -22,7 +22,9 @@
 
 _belief independent of evidence_
 
-- Users mental bandwidth is the only scarce resource.
+- User's mental bandwidth is the only scarce resource.
+
+  - User has comparatively tiny KV cache.
 
 - Maximizing **simplicity** is the ultimate underlying goal.
 
@@ -48,13 +50,15 @@ _belief independent of evidence_
 
   - Litmus test: if user can describe the system in their own words.
 
-- Treat skills as convergence operators.
+- One corollary: Treat skills as convergence operators.
 
 ---
 
 # Properties of a Simple System
 
-- Low descriptive complexity.
+- Low descriptive effort.
+
+  - Establish and ensure consistency in terminologies
 
 ---
 
