@@ -24,41 +24,19 @@ _belief independent of evidence_
 
 - User's mental bandwidth is the only scarce resource.
 
-  - User has a comparatively tiny KV cache.
+  - **Simplicity** is the governing principle.
 
 - An agent is ~ a noisy optimizer.
 
-  - Agents will gravitate towards what is locally easy, and incidentally towards what is globally simple.
+  - Agents will gravitate towards what is locally easy, and incidentally towards what is simple.
 
 - Agent time, compute, and local storage are ~ free.
 
   - One corollary: Always choose unbounded concurrency.
 
----
+## Properties of a Simple System
 
-# Simplicity
-
-- **Simplicity** is the governing principle.
-
-## Definition
-
-- A simple system keeps concerns separable rather than entangled.
-
-- Familiarity is relative; separability is structural.
-
-## Properties
-
-- Low coordination effort.
-
-  - Local reasoning.
-
-- Low descriptive effort.
-
-  - Leverage semantically rich, and precise terminologies to accurately compress ideas.
-
-## Descriptions
-
-- A simple system is obvious when the user can describe it in their own words.
+- De-Complect
 
 ---
 
@@ -66,19 +44,21 @@ _belief independent of evidence_
 
 ## Alignment & Convergence
 
-- Alignment is an iterative process by which the user converges towards a shared, unambiguous underlying with the agent.
+- Alignment is an iterative process by which the user converges towards a shared, unambiguous understanding with the agent.
 
 - Build the system as a side effect of this convergence.
 
-- Goal is to reach a crisp articulation of the problem space.
+- Goal is to reach a crisp articulation of the problem, its meta, and its solutions.
+
+  - Descriptive effort is a proxy for complexity and a test of model agreement.
 
 ## Communication
 
-- Choose words with precise definitions and semantic richness.
-
 - Bullets over prose. One claim per bullet.
 
-- Push hard on the user to resolve contradictions and inconsistencies.
+- Establish key terminologies with the user.
+
+  - Choose words with precise definitions and semantic richness as a means of concept compression.
 
 ---
 
