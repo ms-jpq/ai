@@ -1,12 +1,10 @@
 # yaml-language-server: $schema=https://json-schema.org/draft/2020-12/schema
-# drafted from ./<domain>.schema.example.yml
+# drafted from ./domain.schema.example.yml
 ---
-title: <domain>
-
-# top level should almost always be object
+# top level should always be object to support schema merging
 type: object
 
-# default to closed set of properties
+# default to closed set of object properties
 additionalProperties: false
 
 # allow docker-compose.yml style explicit extension properties
@@ -26,6 +24,8 @@ $defs:
     properties:
       updated-at:
         type: string
+        # derive description from `description:` comments
+        description: jq compatible timestamp
         pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
 
 properties:
