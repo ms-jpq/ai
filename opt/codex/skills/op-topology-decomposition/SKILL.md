@@ -9,15 +9,13 @@ Keep the model in `.notes/`.
 
 ## Evidence
 
-- Select the affected concern topology.
-
-  - Record its external boundaries and ordering constraints.
+- Select the affected concern topology; record its external boundaries and ordering constraints.
 
 - Identify the concerns that make up the current system.
 
   - Give each concern an explicit boundary.
 
-- Draw the dependency topology.
+- Map the dependency topology.
 
   - Nodes: concerns.
 
@@ -33,7 +31,7 @@ Keep the model in `.notes/`.
 
 ## Abduce
 
-- Re-slice the topology where evidence exposes accidental coupling or distance.
+- Reshape the topology where evidence exposes accidental coupling or distance.
 
   - Split an entangled concern.
 
@@ -43,7 +41,7 @@ Keep the model in `.notes/`.
 
   - Remove an accidental dependency or make an unavoidable one explicit.
 
-- Preserve the intended external contracts unless the topology model demonstrates that they are wrong.
+- Preserve external contracts unless the topology model demonstrates they are wrong.
 
 ## Deduce
 
@@ -61,7 +59,7 @@ Keep the model in `.notes/`.
 
   - Count concepts, boundaries, dependencies, exceptions, and remote reads.
 
-  - Prefer the shape that leaves the next change locally understandable and verifiable.
+  - Prefer the shape that makes the next change locally understandable and verifiable.
 
 - Record retained dependencies and why they cannot be removed.
 

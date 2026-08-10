@@ -1,23 +1,23 @@
 ---
 name: op-conceptual-synthesis
-description: Synthesize reusable concepts by discovering distinctions, defining their boundaries, and aligning their names across each relevant representation. Use when a recurring distinction lacks a stable name or meaning differs between representations.
+description: Synthesize reusable concepts by defining distinctions and aligning their names across each relevant representation. Use when a recurring distinction lacks a stable name or differs between representations.
 ---
 
 # Conceptual Synthesis
 
 ## Evidence
 
-- Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or represented inconsistently.
+- Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or inconsistent across representations.
 
 - Collect its uses, counterexamples, neighboring concepts, and representations.
 
 ## Abduce
 
-- Define the concept before choosing or revising its name.
+- Define the concept before naming it.
 
-  - State what belongs, what does not, its relations, and which distinctions must survive.
+  - State its members, exclusions, relations, and distinctions that must survive.
 
-- Coin or revise a short term that carries the grounded distinction.
+- Coin or revise a short term that carries the distinction.
 
 - Align the term, definition, and constraint across each relevant representation.
 
@@ -31,14 +31,14 @@ description: Synthesize reusable concepts by discovering distinctions, defining 
 
 ## Induce
 
-- Reject a concept or name that is mere decoration, merges concepts, or loses a necessary distinction.
+- Reject a concept or name that decorates, merges concepts, or loses a necessary distinction.
 
 - Retain the concept provisionally when its distinctions survive the test.
 
-- Reuse confirmed concepts and terms across code, schemas, diagrams, documents, and conversation.
+- Reuse retained concepts and terms across code, schemas, diagrams, documents, and conversation.
 
 - Keep unresolved aliases explicit rather than silently collapsing them.
 
 - Update or retire a concept or name when later evidence changes its grounded distinction.
 
-The result is a ubiquitous language: precise concepts and names that remain aligned across each relevant representation of the domain.
+- Result: a ubiquitous language of precise concepts and names aligned across each relevant representation.

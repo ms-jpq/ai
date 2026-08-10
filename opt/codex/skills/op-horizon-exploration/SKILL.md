@@ -7,25 +7,25 @@ description: Expand and narrow possible approaches by varying assumptions, const
 
 ## Evidence
 
-- Select the goal, current model, and topology whose horizon will be explored.
+- Select the goal, model, and topology to explore.
 
-- Separate constraints that must hold from assumptions and constraints that may vary.
+- Separate fixed constraints from assumptions and constraints that may vary.
 
-- Record the current approaches, assumptions, constraints, and available levers.
+- Record the current approach, assumptions, constraints, and available levers.
 
 - Identify wider problem classes that may contain transferable moves.
 
 ## Abduce
 
-- Widen the horizon by relaxing, inverting, adding, or removing variable assumptions and constraints.
+- Generate possibilities by relaxing, inverting, adding, or removing variable assumptions and constraints.
 
-- Recognize when the particular situation is an instance of a wider problem class; import its candidate structures, constraints, and solutions.
+- Recognize when the situation is an instance of a wider problem class; import its candidate structures, constraints, and solutions.
 
-- Narrow the horizon to possibilities that materially improve the goal while preserving the constraints that must hold.
+- Retain possibilities that improve the goal while preserving fixed constraints.
 
 ## Deduce
 
-- State the observable advantage and required conditions for each surviving possibility.
+- State each surviving possibility's observable advantage and required conditions.
 
 ## Test
 

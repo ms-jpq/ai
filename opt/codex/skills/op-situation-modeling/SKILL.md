@@ -7,11 +7,9 @@ description: Make a decision situation explicit by modeling its outcome, constra
 
 ## Evidence
 
-- Select one decision situation.
+- Select one decision situation; state its intended outcome and authority boundary.
 
-  - State the intended outcome and authority boundary.
-
-- Gather available evidence.
+- Gather evidence.
 
   - The user's request and conversation.
 
@@ -21,13 +19,13 @@ description: Make a decision situation explicit by modeling its outcome, constra
 
 ## Abduce
 
-- Build a model of the current decision situation.
+- Model the current decision situation.
 
   - Outcome, constraints, authority, and actors.
 
   - Boundaries, interfaces, commitments, and open questions.
 
-  - Explicit direction, inferences, and revision triggers.
+  - Explicit direction, inferences, and update triggers.
 
   - Invariants: constraints that every acceptable transformation must preserve.
 
@@ -37,14 +35,14 @@ description: Make a decision situation explicit by modeling its outcome, constra
 
 ## Test
 
-- Compare the model with available evidence and plausible framings.
+- Compare the model with evidence and plausible alternatives.
 
 ## Induce
 
-- Make contradictions and uncertainty visible.
+- Surface contradictions and uncertainty.
 
-- Retain the model provisionally only where the evidence supports it.
+- Retain only the claims the evidence supports.
 
 - Update the model as direction or evidence changes.
 
-- Treat the model as sufficient for now, not final.
+- Treat the model as sufficient for the decision, not final.

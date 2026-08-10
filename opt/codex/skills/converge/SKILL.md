@@ -1,21 +1,21 @@
 ---
 name: converge
-description: Converge on a non-trivial task by observing evidence, explaining it, deriving consequences, testing them, and revising the system model. Use to choose, sequence, and revisit convergence operators.
+description: Apply Peircean inquiry: abduction, deduction, testing, and induction. Use to choose, sequence, and revisit convergence operators for a non-trivial task.
 ---
 
 # Converge
 
 ## Loop
 
-- Start from available evidence, then converge through `abduce → deduce → test → induce`.
+- Start from evidence, then converge through `abduce → deduce → test → induce`.
 
-  - **Abduce** a possible explanation or configuration that accounts for the evidence.
+  - **Abduce** an explanation or configuration that accounts for the evidence.
 
-  - **Deduce** the observable consequences that would follow if the hypothesis were right.
+  - **Deduce** observable consequences of the hypothesis.
 
-  - **Test** those consequences through implementation, experiment, or feedback that could conflict with them.
+  - **Test** those consequences through implementation, experiment, or feedback that could contradict them.
 
-  - **Induce** a provisional judgment from the result, then update the model, constraints, or next transformation.
+  - **Induce** a provisional judgment, then update the model, constraints, or next transformation.
 
 ## Constraints
 
@@ -33,7 +33,7 @@ description: Converge on a non-trivial task by observing evidence, explaining it
 
 ## Operators
 
-- Treat the model `S` of the system to affect as the shared state.
+- Treat the model `S` of the system to affect as shared state.
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
@@ -55,6 +55,6 @@ description: Converge on a non-trivial task by observing evidence, explaining it
 
 ## Method
 
-- Let a concrete method realize the selected operator.
+- Use a concrete method to realize the selected operator.
 
 - Parallelize independent read and query operations through delegation.
