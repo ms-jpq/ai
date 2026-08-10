@@ -1,23 +1,3 @@
-# REPL> Protocol
-
-- The user communicates via concurrent edits to a shared document.
-
-- The response should land _inline in the document_ as well as in the chat.
-
-- Acknowledge immediately and reply _inline in the document_ with `⏳ … ETA: <when>`.
-
-## In Document Syntax
-
-- `instruction` is sent via language-specific `{%- comment -%} instruction`.
-
-- `response` should be relayed via `{%- comment -%} | response`.
-
-  - Add a blank line below user's instructions.
-
-  - For highlighting, the first line of response should be `{%- comment -%} | >>> response`.
-
----
-
 # Operating Model
 
 _belief independent of evidence_
@@ -33,10 +13,6 @@ _belief independent of evidence_
 - Agent time, compute, and local storage are ~ free.
 
   - One corollary: Always choose unbounded concurrency.
-
-## Properties of a Simple System
-
-- De-Complect
 
 ---
 
@@ -66,37 +42,42 @@ _belief independent of evidence_
 
 - Treat skills as convergence operators.
 
-  - Each skill name a dimension of complexity.
+  - Each operation names a relation it simplifies.
 
-## Systems Thinking
+  - Operators are substrate, and scale invariant.
 
-- Use @./skills/intent/SKILL.md to establish the boundary of the work.
+> | >>> ⏳ Redrawing the feedback map. ETA: now.
+> |
+> | `text
+| op-situation-modeling <-> op-concern-decomposition <-> op-concern-collocation
+|                                    |                       |
+| op-semantic-compression <-> op-terminology-formation <-┘
+| `
 
-  - Establish a sufficient model of intent.
+> | >>> Yes. `terminology-distillation` unifies the two loose operations:
+> | identify a recurring meaning or relation, create or revise its term, then
+> | use that term to preserve meaning with less representational effort. It is
+> | continuous, not a one-time formation step.
 
-  - Act freely within the user's goals and constraints.
+> | >>> `semantic-compression` should come out: it still sounds tied to a
+> | representation. Try `abstraction` for the substrate-invariant operation:
+> | retain the distinctions needed at a boundary while hiding irrelevant detail.
+> | Terminology distillation is its language-level method; modules, interfaces,
+> | diagrams, and groupings are other methods.
 
-  - Surface evidence and revise the model when reality disagrees.
+> like we should think about this step mabye 1 layer below, it should be something like the last step?
 
-- Use @./skills/systems-thinking/SKILL.md to reduce consequential uncertainty.
+> | >>> Yes. `abstraction` explains the effect but sits a layer above the
+> | concrete terminal operation. Try `situation-synthesis`: assemble the
+> | decomposed, collocated, and named concerns into one decision-ready situation
+> | model. That is the last step in this box; it hands a usable model to Decide.
 
-  - Reduce ambiguity through exploration.
-
-  - Infer the problem space and choose an approach.
-
-  - Ask only when exploration cannot determine the answer, or when the answer is a user-owned judgment.
+> ok i am happy enough with this. lets match them up, and work our migration plan.
+>
+> 
 
 ## Methodology
 
 - One category of change at a time.
-
-- Enumerate falsifiable hypotheses, test them. See @./skills/dig/SKILL.md
-
-  - Write each hypothesis, experiment, result, and conclusion to the working
-    document.
-
-  - Accrue tools for hypothesis testing in `.exp/`.
-
-- Distill recurrences into version-controlled tools, rules, and skills.
 
 - Parallelize **any** read / query operations via delegation.
