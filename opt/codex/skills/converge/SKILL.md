@@ -37,9 +37,9 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-  1. **Situation modeling** makes the current decision situation explicit.
+  1. **Problem formulation** makes the current decision problem explicit.
 
-     - @../op-situation-modeling/SKILL.md
+     - @../op-problem-formulation/SKILL.md
 
   2. **Topology decomposition** exposes and reshapes the model's structure.
 

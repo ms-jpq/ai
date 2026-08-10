@@ -1,6 +1,6 @@
 ---
 name: op-horizon-exploration
-description: Expand and narrow possible approaches by varying assumptions, constraints, and framing. Use when the current model leaves promising alternatives unexplored.
+description: Expand and narrow possible approaches by varying assumptions, constraints, framing, and abstraction level. Use when the current model leaves promising alternatives unexplored.
 ---
 
 # Horizon Exploration
@@ -9,13 +9,17 @@ description: Expand and narrow possible approaches by varying assumptions, const
 
 - Select the goal, model, and topology to explore.
 
+- Record the current framing: problem boundary, goal, assumptions, constraints, and abstraction level.
+
 - Separate fixed constraints from assumptions and constraints that may vary.
 
-- Record the current approach, assumptions, constraints, and available levers.
+- Record the current approach and available levers.
 
 - Identify wider problem classes that may contain transferable moves.
 
 ## Abduce
+
+- Step back one level: treat the problem formulation, model, and topology as variables rather than givens.
 
 - Generate possibilities by relaxing, inverting, adding, or removing variable assumptions and constraints.
 
@@ -37,6 +41,6 @@ description: Expand and narrow possible approaches by varying assumptions, const
 
 - Rank the remaining possibilities by their observed advantage and required conditions.
 
-- Feed surviving possibilities back into situation modeling, topology decomposition, and conceptual synthesis.
+- Feed surviving possibilities back into problem formulation, topology decomposition, and conceptual synthesis.
 
 - Re-enter exploration when a later operator exposes a new lever, premise, or wider problem class.

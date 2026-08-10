@@ -3,7 +3,7 @@ name: people
 description: Apply systems thinking to people, relationships, organizations.
 ---
 
-Use @../../skills/op-situation-modeling/SKILL.md.
+Use @../../skills/op-problem-formulation/SKILL.md.
 
 Use @../../skills/op-topology-decomposition/SKILL.md.
 
