@@ -1,39 +1,34 @@
 #!/usr/bin/env -S -- node
 
 import { ok } from "node:assert/strict"
-import { readFile } from "node:fs/promises"
-import { extname, resolve } from "node:path"
+import { execFile as execFile_ } from "node:child_process"
+import { resolve } from "node:path"
 import { argv, exit } from "node:process"
 import { fileURLToPath, pathToFileURL } from "node:url"
+import { promisify } from "node:util"
 
 import Ajv2020 from "ajv/dist/2020.js"
-import { parseDocument } from "yaml"
 
 type Schema = Record<string, unknown>
+
+const encoding = "utf8"
+const execFile = promisify(execFile_)
 
 const object = (value: unknown): Schema => {
   ok(typeof value === "object" && value !== null && !Array.isArray(value))
   return value
 }
 
-const parse = (source: string, path: string): unknown => {
-  switch (extname(path)) {
-    case ".json":
-      return JSON.parse(source)
-    case ".yaml":
-    case ".yml": {
-      const document = parseDocument(source)
-      if (document.errors.length > 0) {
-        throw document.errors[0]
-      }
-      return document.toJS()
-    }
-    default:
-      throw new Error(`unsupported schema format: ${path}`)
-  }
+const parse = async (path: string): Promise<unknown> => {
+  const { stdout } = await execFile(
+    "yq",
+    ["--yaml-fix-merge-anchor-to-spec", "--output-format=json", "--unwrapScalar=false", ".", "--", path],
+    { encoding },
+  )
+  return JSON.parse(stdout)
 }
 
-const read = async (path: string): Promise<Schema> => object(parse(await readFile(path, "utf8"), path))
+const read = async (path: string): Promise<Schema> => object(await parse(path))
 
 const loader = (): ((uri: string) => Promise<Schema>) => {
   const schemas = new Map<string, Schema>()
@@ -62,7 +57,7 @@ const validate = async (schemaPath: string, dataPath: string | undefined): Promi
     return 0
   }
 
-  const valid = validator(parse(await readFile(dataPath, "utf8"), dataPath))
+  const valid = validator(await parse(dataPath))
   if (valid) {
     process.stdout.write(`${dataPath} valid\n`)
     return 0
