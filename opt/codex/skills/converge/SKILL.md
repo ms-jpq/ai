@@ -17,6 +17,20 @@ description: Converge on a non-trivial task by observing evidence, explaining it
 
   - **Induce** a provisional judgment from the result, then update the model, constraints, or next transformation.
 
+## Constraints
+
+- Formulate the problem before abduction.
+
+- Generate competing hypotheses before selecting one.
+
+- Design each test to distinguish the hypothesis from its alternatives.
+
+- Treat a failed test as evidence against the hypothesis, its auxiliary assumptions, or the test mechanism until the fault is localized.
+
+- Do not treat induction as proof; retain, reject, rank, or update a hypothesis provisionally.
+
+- When external testing is weak, check coherence among relevant cases, principles, constraints, and the wider model.
+
 ## Operators
 
 - Treat the model `S` of the system to affect as the shared state.
