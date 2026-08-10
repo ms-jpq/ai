@@ -1,4 +1,9 @@
-description: Expand and narrow possible approaches by varying assumptions, constraints, framing, and abstraction level. Use when the current model leaves promising alternatives unexplored.
+---
+name: op-deliberative-exploration
+description: Explore decision-relevant alternatives by varying assumptions, constraints, framing, and abstraction level. Use when the current model leaves promising alternatives unexplored.
+---
+
+# Deliberative Exploration
 
 ## Evidence
 
@@ -9,6 +14,8 @@ description: Expand and narrow possible approaches by varying assumptions, const
 - Separate fixed constraints from assumptions and constraints that may vary.
 
 - Record the current approach and available levers.
+
+- Identify wider problem classes that may contain transferable moves.
 
 ## Abduce
 
@@ -35,3 +42,5 @@ description: Expand and narrow possible approaches by varying assumptions, const
 - Rank the remaining possibilities by their observed advantage and required conditions.
 
 - Feed surviving possibilities back into problem formulation, topology decomposition, and conceptual synthesis.
+
+- Re-enter exploration when a later operator exposes a new lever, premise, or wider problem class.

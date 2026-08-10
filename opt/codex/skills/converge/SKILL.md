@@ -5,6 +5,8 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
 # Converge
 
+observation: Philosophy is unusually good at transforming representations.
+
 ## Loop
 
 - Start from evidence, then converge through `abduce → deduce → test → induce`.
@@ -45,9 +47,9 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
      - @../op-topology-decomposition/SKILL.md
 
-  3. **Horizon exploration** generates alternatives by varying assumptions, constraints, and framing.
+  3. **Deliberative exploration** generates decision-relevant alternatives by varying assumptions, constraints, and framing.
 
-     - @../op-horizon-exploration/SKILL.md
+     - @../op-deliberative-exploration/SKILL.md
 
   4. **Conceptual synthesis** turns useful distinctions into reusable concepts.
 
