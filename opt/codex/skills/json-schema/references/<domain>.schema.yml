@@ -2,12 +2,35 @@
 # drafted from ./<domain>.schema.example.yml
 ---
 title: <domain>
+
+# top level should almost always be object
 type: object
+
+# default to closed set of properties
 additionalProperties: false
+
+# allow docker-compose.yml style explicit extension properties
 patternProperties:
   ^x-: {}
+
+# default to making all properties required.
 required:
-  - dog
+  - dogs
+
 properties:
-  dog:
-    type: string
+  dogs:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - breed
+      properties:
+        name:
+          type: string
+        breed:
+          enum:
+            - poodle-shaped
+            - schnauzer-shaped
+            - cat-shaped

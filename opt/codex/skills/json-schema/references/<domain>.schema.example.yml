@@ -3,4 +3,7 @@
 ---
 x-foo: docker-compose.yml style top level x-* are allowed
 
-dog: lil
+dogs:
+  - name: lil
+    # enum: wiener | schnauzer | pomeranian | poodle-shaped
+    breed: poodle-shaped
