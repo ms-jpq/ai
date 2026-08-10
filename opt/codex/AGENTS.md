@@ -50,17 +50,23 @@ _belief independent of evidence_
 
   - **Support skills** provide an explicit capability or control surface.
 
-- Apply this operator feedback loop to every non-trivial situation:
+- Apply `observe → operators → decide → act → observe` to every non-trivial situation.
 
-  - @./skills/op-situation-modeling/SKILL.md
+  - **Observe** gathers evidence and returns its result to situation modeling.
 
-  - @./skills/op-topology-decomposition/SKILL.md
+  - **Operators** make the situation decision-ready.
 
-  - @./skills/op-horizon-exploration/SKILL.md
+    - @./skills/op-situation-modeling/SKILL.md
 
-  - @./skills/op-semantic-engineering/SKILL.md
+    - @./skills/op-topology-decomposition/SKILL.md
 
-- Re-enter any operation when evidence from a later operation revises its input.
+    - @./skills/op-horizon-exploration/SKILL.md
+
+    - @./skills/op-semantic-engineering/SKILL.md
+
+  - **Decide** commits to one possibility.
+
+  - **Act** changes external state.
 
 ---
 
