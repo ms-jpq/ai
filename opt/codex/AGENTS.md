@@ -66,6 +66,8 @@ _belief independent of evidence_
 
 - Treat skills as convergence operators.
 
+  - Each skill name a dimension of complexity.
+
 ## Systems Thinking
 
 - Use @./skills/intent/SKILL.md to establish the boundary of the work.

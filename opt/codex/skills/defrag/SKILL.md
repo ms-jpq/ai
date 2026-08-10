@@ -1,6 +1,6 @@
 ---
 name: defrag
-description: Defragment a workspace's instructions.
+description: "Convergence operation: local reasoning."
 ---
 
 # Defrag
