@@ -40,11 +40,17 @@ _belief independent of evidence_
 
 ## Operator Basis
 
-- Treat skills as convergence operators.
+- Skills have three roles.
 
-  - Operators are substrate, and scale invariant.
+  - **Operators** transform a situation or model.
 
-- Apply this feedback loop to every non-trivial situation:
+    - Operators are substrate, and scale invariant.
+
+  - **Compositions** apply one or more operators through a user-facing workflow.
+
+  - **Support skills** provide an explicit capability or control surface.
+
+- Apply this operator feedback loop to every non-trivial situation:
 
   - @./skills/op-situation-modeling/SKILL.md
 

@@ -1,6 +1,6 @@
 ---
 name: op-terminology-engineering
-description: Engineer precise domain terminology that grounds recurring distinctions in short, shared names across every representation.
+description: Engineer precise domain terminology that grounds recurring distinctions in short, shared names across each relevant representation.
 ---
 
 # Terminology Engineering
@@ -35,4 +35,4 @@ description: Engineer precise domain terminology that grounds recurring distinct
 
 - Revise or retire a term when later evidence changes its grounded distinction.
 
-The result is a ubiquitous language: precise names that remain aligned across every representation of the domain.
+The result is a ubiquitous language: precise names that remain aligned across each relevant representation of the domain.
