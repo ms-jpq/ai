@@ -37,6 +37,6 @@ description: Explore the horizon of possible approaches by varying assumptions, 
 
 ## Revise
 
-- Feed surviving possibilities back into situation modeling, topology decomposition, and semantic engineering.
+- Feed surviving possibilities back into situation modeling, topology decomposition, and conceptual synthesis.
 
 - Re-enter exploration when a later operator exposes a new lever, premise, or wider problem class.

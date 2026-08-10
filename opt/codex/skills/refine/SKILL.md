@@ -3,7 +3,7 @@ name: refine
 description: Refine prose for the reader's goal and local context.
 ---
 
-Use @../op-semantic-engineering/SKILL.md when a recurring meaning needs a stable term.
+Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
 
 # Refine
 

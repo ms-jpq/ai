@@ -58,11 +58,11 @@ _belief independent of evidence_
 
      - @./skills/op-horizon-exploration/SKILL.md
 
-  4. **Semantic engineering** keeps meanings stable across every stage.
+  4. **Conceptual synthesis** turns useful distinctions into reusable concepts.
 
-     - @./skills/op-semantic-engineering/SKILL.md
+     - @./skills/op-conceptual-synthesis/SKILL.md
 
-- A method implements an operator on a particular substrate.
+- A method realizes an operator through a concrete procedure.
 
 - Invoke a method through `isolate → baseline → operate → predict → falsify → revise`.
 
