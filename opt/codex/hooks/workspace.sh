@@ -13,7 +13,9 @@ WS=(env -C "$CWD" -- "$LIBEXEC/pool.sh")
 
 case "$EVENT" in
 SessionStart)
-  exec -- "${WS[@]}" init > /dev/null
+  if ! "${WS[@]}" init > /dev/null; then
+    exit
+  fi
   ;;
 *)
   ;;
