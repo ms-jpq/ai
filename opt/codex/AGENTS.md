@@ -32,41 +32,7 @@ _belief independent of evidence_
 
 # Convergence
 
-- Converge through `observe → abduce → deduce → test → revise`.
-
-  - **Abduce** an explanation or possible configuration from the evidence.
-
-  - **Deduce** the consequences that would follow if it were right.
-
-  - **Test** those consequences against implementation, experiments, and user feedback.
-
-## Operators
-
-- Operators name high-level transformations of the model `S` of the system to affect: `O : S → S`.
-
-- Apply and re-enter these operators in order as evidence warrants:
-
-  1. **Situation modeling** turns observation into an explicit model.
-
-     - @./skills/op-situation-modeling/SKILL.md
-
-  2. **Topology decomposition** exposes the model's structure.
-
-     - @./skills/op-topology-decomposition/SKILL.md
-
-  3. **Horizon exploration** performs abduction by generating alternatives.
-
-     - @./skills/op-horizon-exploration/SKILL.md
-
-  4. **Conceptual synthesis** turns useful distinctions into reusable concepts.
-
-     - @./skills/op-conceptual-synthesis/SKILL.md
-
-- A method realizes an operator through a concrete procedure.
-
-- Invoke every method through the convergence loop.
-
-- Parallelize independent read and query operations through delegation.
+- Apply @./skills/converge/SKILL.md to every non-trivial situation.
 
 ---
 
