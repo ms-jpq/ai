@@ -7,13 +7,11 @@ description: Decompose dependency topology by modeling concerns and then reshapi
 
 Keep the model in `.notes/`.
 
-## Isolate
+## Observe
 
 - Select the affected concern topology.
 
   - Record its external boundaries and ordering constraints.
-
-## Baseline
 
 - Identify the concerns that make up the current system.
 
@@ -33,7 +31,7 @@ Keep the model in `.notes/`.
 
   - Record cycles as unresolved ordering constraints; a cyclic graph has no complete topological order.
 
-## Decompose
+## Abduce
 
 - Re-slice the topology where evidence exposes accidental coupling or distance.
 
@@ -47,11 +45,11 @@ Keep the model in `.notes/`.
 
 - Preserve the intended external contracts unless the topology model demonstrates that they are wrong.
 
-## Predict
+## Deduce
 
 - State the expected effects on boundaries, dependencies, placement, and execution order.
 
-## Falsify
+## Test
 
 - Compare the proposed topology with the current one.
 

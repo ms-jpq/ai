@@ -5,13 +5,11 @@ description: Model the decision situation by making goals, constraints, and evid
 
 # Situation Modeling
 
-## Isolate
+## Observe
 
 - Select one decision situation.
 
   - State the intended outcome and authority boundary.
-
-## Baseline
 
 - Gather available evidence.
 
@@ -21,7 +19,7 @@ description: Model the decision situation by making goals, constraints, and evid
 
   - Existing plans, implementation, constraints, and results.
 
-## Model
+## Abduce
 
 - Build a model of the current decision situation.
 
@@ -33,11 +31,11 @@ description: Model the decision situation by making goals, constraints, and evid
 
   - Invariants: constraints that every acceptable transformation must preserve.
 
-## Predict
+## Deduce
 
 - State the observations that would distinguish the model from plausible alternatives.
 
-## Falsify
+## Test
 
 - Compare the model with available evidence and plausible framings.
 

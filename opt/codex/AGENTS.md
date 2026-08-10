@@ -64,17 +64,7 @@ _belief independent of evidence_
 
 - A method realizes an operator through a concrete procedure.
 
-- Invoke a method through `isolate → baseline → operate → predict → falsify → revise`.
-
-  - **Isolate** one category of change. The controlled variable.
-
-  - **Baseline** the before-state and intended delta.
-
-  - **Predict** an observable consequence of the proposed transformation.
-
-  - **Falsify** with an observation that could show the prediction is wrong.
-
-  - **Revise** the next invocation from the observed result.
+- Invoke every method through the convergence loop.
 
 - Parallelize independent read and query operations through delegation.
 

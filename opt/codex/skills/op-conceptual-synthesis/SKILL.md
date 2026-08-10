@@ -5,15 +5,13 @@ description: Synthesize concepts by discovering recurring distinctions, defining
 
 # Conceptual Synthesis
 
-## Isolate
+## Observe
 
 - Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or represented inconsistently.
 
-## Baseline
-
 - Collect its uses, counterexamples, neighboring concepts, and representations.
 
-## Synthesize
+## Abduce
 
 - Define the concept before choosing or revising its name.
 
@@ -23,11 +21,11 @@ description: Synthesize concepts by discovering recurring distinctions, defining
 
 - Align the term, definition, and constraint across each relevant representation.
 
-## Predict
+## Deduce
 
 - State how examples, counterexamples, and neighboring concepts should classify under the synthesized concept.
 
-## Falsify
+## Test
 
 - Reject a concept or name that is mere decoration, merges concepts, or loses a necessary distinction.
 

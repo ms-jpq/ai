@@ -5,19 +5,17 @@ description: Explore the horizon of possible approaches by varying assumptions, 
 
 # Horizon Exploration
 
-## Isolate
+## Observe
 
 - Select the goal, current model, and topology whose horizon will be explored.
 
 - Separate constraints that must hold from assumptions and constraints that may vary.
 
-## Baseline
-
 - Record the current approaches, assumptions, constraints, and available levers.
 
 - Identify wider problem classes that may contain transferable moves.
 
-## Explore
+## Abduce
 
 - Widen the horizon by relaxing, inverting, adding, or removing variable assumptions and constraints.
 
@@ -25,11 +23,11 @@ description: Explore the horizon of possible approaches by varying assumptions, 
 
 - Narrow the horizon to possibilities that materially improve the goal while preserving the constraints that must hold.
 
-## Predict
+## Deduce
 
 - State the observable advantage and required conditions for each surviving possibility.
 
-## Falsify
+## Test
 
 - Reject a possibility that relies on an unsupported premise, violates required constraints, or merely renames the current approach.
 
