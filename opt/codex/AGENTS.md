@@ -28,14 +28,6 @@ _belief independent of evidence_
 
   - Descriptive effort is a proxy for complexity and a test of model agreement.
 
-## Communication
-
-- Break prose into bullet points. One claim per bullet.
-
-- Establish shared terminology.
-
-  - Use precise, semantically rich terms to compress recurring distinctions.
-
 ---
 
 # Convergence
@@ -50,41 +42,29 @@ _belief independent of evidence_
 
 ## Operators
 
-- Operators transform the model of the system to affect at any stage of inquiry.
+- Operators name high-level transformations of the model `S` of the system to affect: `O : S → S`.
 
-  - **Situation modeling** turns observation into an explicit model.
+- Apply and re-enter these operators in order as evidence warrants:
 
-    - @./skills/op-situation-modeling/SKILL.md
+  1. **Situation modeling** turns observation into an explicit model.
 
-  - **Topology decomposition** exposes the model's structure.
+     - @./skills/op-situation-modeling/SKILL.md
 
-    - @./skills/op-topology-decomposition/SKILL.md
+  2. **Topology decomposition** exposes the model's structure.
 
-  - **Horizon exploration** performs abduction by generating alternatives.
+     - @./skills/op-topology-decomposition/SKILL.md
 
-    - @./skills/op-horizon-exploration/SKILL.md
+  3. **Horizon exploration** performs abduction by generating alternatives.
 
-  - **Semantic engineering** keeps meanings stable across every stage.
+     - @./skills/op-horizon-exploration/SKILL.md
 
-    - @./skills/op-semantic-engineering/SKILL.md
+  4. **Semantic engineering** keeps meanings stable across every stage.
 
-- Treat the model of the system to affect as state `S`.
+     - @./skills/op-semantic-engineering/SKILL.md
 
-  - An operator transforms `S → S`.
+- A method implements an operator on a particular substrate.
 
-  - Constraints that must survive a transformation are invariants.
-
-- Re-enter an operator when later evidence changes its input.
-
----
-
-# Methodology
-
-- Apply a method to an operator: `method(operator)`.
-
-  - method: `(S → S) → (S → S)`
-
-- Apply every operator through `isolate → baseline → operate → predict → falsify → revise`.
+- Invoke a method through `isolate → baseline → operate → predict → falsify → revise`.
 
   - **Isolate** one category of change. The controlled variable.
 
@@ -97,3 +77,9 @@ _belief independent of evidence_
   - **Revise** the next invocation from the observed result.
 
 - Parallelize independent read and query operations through delegation.
+
+---
+
+## Communication
+
+- Break prose into bullet points. One claim per bullet.

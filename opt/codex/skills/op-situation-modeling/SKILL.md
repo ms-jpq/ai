@@ -31,6 +31,8 @@ description: Model the decision situation by making goals, constraints, and evid
 
   - Explicit direction, inferences, and revision triggers.
 
+  - Invariants: constraints that every acceptable transformation must preserve.
+
 ## Predict
 
 - State the observations that would distinguish the model from plausible alternatives.
