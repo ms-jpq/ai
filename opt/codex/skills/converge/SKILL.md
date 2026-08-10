@@ -5,7 +5,13 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
 # Converge
 
-observation: Philosophy is unusually good at transforming representations.
+## Borrowing from Philosophy
+
+- Philosophy is unusually good at transforming representations.
+
+- Borrow terms and methods when they make a distinction more precise, testable, or reusable.
+
+- A borrowed term must change an operator, method, or test.
 
 ## Loop
 
