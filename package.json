@@ -5,7 +5,7 @@
     "@opentelemetry/exporter-trace-otlp-proto": "*",
     "@opentelemetry/sdk-trace-base": "*",
     "@opentelemetry/semantic-conventions": "*",
-    "ajv-cli": "*",
+    "ajv": "*",
     "langfuse-cli": "*",
     "prettier": "*"
   },
