@@ -48,9 +48,7 @@ _belief independent of evidence_
 
   - @./skills/op-situation-modeling/SKILL.md
 
-  - @./skills/op-topology-modeling/SKILL.md
-
-  - @./skills/op-topology-reshaping/SKILL.md
+  - @./skills/op-topology-decomposition/SKILL.md
 
   - @./skills/op-terminology-engineering/SKILL.md
 
@@ -58,6 +56,35 @@ _belief independent of evidence_
 
 ## Methodology
 
-- One category of change at a time.
+- Apply a method to an operator: `method(operator)`.
+
+  - operator: `S → S`
+
+  - method: `(S → S) → (S → S)`
+
+- Apply every operator through `isolate → baseline → operator → falsify → revise`.
+
+  - **Isolate** one category of change. The controlled variable.
+
+  - **Baseline** the before-state and intended delta.
+
+  - **Falsify** with an observation that could show the change is wrong.
+
+  - **Revise** the next invocation from the observed result.
 
 - Parallelize **any** read / query operations via delegation.
+
+---
+
+> then we shuold reframe the operators through the methods right?
+
+> | >>> Yes. The methods frame every operator, while the middle transformation
+> | remains operator-specific:
+> |
+> | - Situation modeling models.
+> | - Topology decomposition re-slices.
+> | - Terminology engineering grounds and aligns terms.
+> |
+> | We should reframe the three skill contracts around that common shape next.
+
+> yeah like do the skills famliy

@@ -5,23 +5,29 @@ description: Engineer precise domain terminology that grounds recurring distinct
 
 # Terminology Engineering
 
-## Detect
+## Isolate
 
 - Identify a recurring meaning, relation, or distinction that currently needs a long or unstable description.
 
+## Baseline
+
 - Collect its uses, counterexamples, and neighboring terms.
 
-## Ground
+## Engineer
 
 - Define the distinction before choosing its name.
 
   - State what belongs, what does not, and which distinctions must survive.
 
-  - Reject a name that is mere decoration or merges concepts to shorten prose.
-
 - Choose or revise a short term that preserves the grounded distinction.
 
-## Align
+## Falsify
+
+- Reject a name that is mere decoration or merges concepts to shorten prose.
+
+- Test the term against collected uses, counterexamples, and neighboring terms.
+
+## Revise
 
 - Reuse each confirmed term across code, schemas, diagrams, documents, and conversation.
 

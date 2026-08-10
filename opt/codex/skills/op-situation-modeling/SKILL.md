@@ -5,52 +5,40 @@ description: Model the decision situation by making goals, constraints, and evid
 
 # Situation Modeling
 
-## Explicate
+## Isolate
 
-- Build a model of the current decision situation from available evidence.
+- Select one decision situation.
 
-  - Include the user's request and conversation.
+  - State the intended outcome and authority boundary.
 
-  - Include notes and other written context.
+## Baseline
 
-- Record the model.
+- Gather available evidence.
 
-  - Outcome.
+  - The user's request and conversation.
 
-  - Constraints.
+  - Notes, observed state, and other relevant artifacts.
 
-  - Authority.
+  - Existing plans, implementation, constraints, and results.
 
-  - Actors and their incentives.
+## Model
 
-  - Boundary and interfaces.
+- Build a model of the current decision situation.
 
-  - Commitments.
+  - Outcome, constraints, authority, and actors.
 
-  - Open questions.
+  - Boundaries, interfaces, commitments, and open questions.
 
-  - Explicit direction.
+  - Explicit direction, inferences, and revision triggers.
 
-  - Inferences.
+## Falsify
 
-  - Revision triggers.
-
-## Calibrate
-
-- Compare the model with available evidence.
-
-  - Relevant evidence.
-
-  - Plans and implementation.
-
-  - Constraints and observed results.
+- Compare the model with available evidence and plausible framings.
 
 - Make contradictions and uncertainty visible.
 
-- Compare plausible framings.
+## Revise
 
-## Iterate
-
-- Revise the model as direction changes.
+- Revise the model as direction or evidence changes.
 
 - Treat the model as sufficient for now, not final.
