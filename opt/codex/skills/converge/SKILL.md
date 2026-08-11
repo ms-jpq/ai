@@ -15,7 +15,7 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-  1. **Problem formulation** frames the problem itself, and clarifies the motivation.
+  1. **Problem formulation** frame the problem itself, and clarify the motivation.
 
      - @../op-problem-formulation/SKILL.md
 
