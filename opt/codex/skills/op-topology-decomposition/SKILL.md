@@ -67,7 +67,7 @@ _Devise an explanation for observations._
 
 - Decomposition may temporarily increase complexity.
 
-  - For deeply entangled subgraphs, temporarily aggregate elements that share any concern, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
+  - For deeply entangled subgraphs, temporarily aggregate elements that share any concern across hierarchy levels, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
 
 ## Deduction
 
