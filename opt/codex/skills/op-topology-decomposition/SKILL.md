@@ -13,64 +13,60 @@ description: Simplify flow across boundaries.
 
 ## Observation
 
-- Select the affected concern topology; record its external boundaries and ordering constraints.
+- Select the system and topology affected by the decision.
 
-- Identify the concerns that make up the current system.
+  - Record its external boundary and ordering constraints.
 
-  - Give each concern an explicit boundary.
+- Establish a basis of named elements.
 
-- Map the dependency topology.
+  - Define each element's boundary.
 
-  - Nodes: concerns.
+  - Record its placement and required context.
 
-  - Directed edges: dependencies.
+- Map each flow’s direction and dependency.
 
-  - Placement: where each concern and its required context currently lives.
+- Identify hidden flows, cycles, and accidental distance.
 
-- Identify cycles, hidden dependencies, and accidental distance between related concerns.
+- Topologically sort the flow graph to derive an execution order.
 
-- Topologically sort the graph to derive an execution order.
-
-  - Record cycles as unresolved ordering constraints; a cyclic graph has no complete topological order.
+  - Record each cycle as an unresolved ordering constraint.
 
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Reshape the topology where evidence exposes accidental coupling or distance.
+- Reshape the topology where evidence exposes accidental coupling, distance, or unnecessary flow.
 
-  - Split an entangled concern.
+  - Split an entangled element.
 
-  - Merge concerns that cannot be independently understood or verified.
+  - Merge elements that cannot be independently understood or verified.
 
-  - Move or collocate the parts required for one local decision.
+  - Move or collocate what one local decision requires.
 
-  - Remove an accidental dependency or make an unavoidable one explicit.
+  - Remove an accidental flow or make a necessary one explicit.
 
-  - Reorder work from the dependency graph.
+  - Reorder work from the flow graph.
 
-  - Integrate systems by merging their topologies and making their shared seams explicit.
+  - Integrate systems by merging their topologies and exposing shared flows.
 
-- Preserve external contracts unless the topology model demonstrates they are wrong.
-
-- Treat refactoring, modularization, and architecture as applications of this operation.
+- Preserve external boundaries unless the topology model demonstrates they are wrong.
 
 ## Deduction
 
 _Derive consequences of the explanation._
 
-- State the expected effects on boundaries, dependencies, placement, and execution order.
+- State the expected effects on boundaries, flows, placement, and execution order.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Verify changed boundaries, dependencies, and the resulting execution order.
+- Verify changed boundaries, flows, and the resulting execution order.
 
 - Compare the proposed topology with the current one.
 
-  - Count concepts, boundaries, dependencies, exceptions, and remote reads.
+  - Count elements, boundaries, flows, exceptions, and remote reads.
 
   - Prefer the shape that makes the next change locally understandable and verifiable.
 
-- Record retained dependencies and update the topology when evidence contradicts a node, edge, boundary, or placement.
+- Retain only necessary flows; revise the topology when evidence contradicts an element, flow, boundary, or placement.
