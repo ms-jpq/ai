@@ -21,7 +21,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
    - @../op-decision-basis-modeling/SKILL.md
 
-2. **Topology decomposition** find and reshape the boundaries of the systems.
+2. **Topology decomposition** simplifies flow across boundaries.
 
    - @../op-topology-decomposition/SKILL.md
 
@@ -41,7 +41,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 ## Application
 
-- Apply the selected operator to a concrete operand: prose, decision space, function, module or organization.
+- Apply the selected operator to a concrete operand: prose, decision space, control-flow, module or organization.
 
 - Maintain an internal dialectic.
 
