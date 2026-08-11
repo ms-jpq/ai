@@ -46,3 +46,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 - Maintain an internal dialectic.
 
 - Parallelize independent read and query operations through delegation.
+
+---
+
+Notes: unresolved: modeling projection

@@ -39,6 +39,10 @@ description: Redefine the option space.
 
   - Retain alternatives that improve the outcome while preserving invariants.
 
+- Reframe, prioritize, and assess risk by revising the basis rather than treating its current shape as given.
+
+- State a policy or specification when an acceptable outcome must remain stable across later decisions.
+
 ## Deduction
 
 - State the observations that would distinguish the formulation from plausible alternatives.

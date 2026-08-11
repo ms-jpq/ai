@@ -41,7 +41,13 @@ description: Simplify flow across boundaries.
 
   - Remove an accidental dependency or make an unavoidable one explicit.
 
+  - Reorder work from the dependency graph.
+
+  - Integrate systems by merging their topologies and making their shared seams explicit.
+
 - Preserve external contracts unless the topology model demonstrates they are wrong.
+
+- Treat refactoring, modularization, and architecture as applications of this operation.
 
 ## Deduction
 

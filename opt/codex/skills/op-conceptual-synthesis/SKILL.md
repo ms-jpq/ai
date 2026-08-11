@@ -17,9 +17,13 @@ description: Semantically compress ideas.
 
   - State its scope, exclusions, relations, and distinctions that must survive.
 
+- Generalize, classify, or abstract when a recurring distinction needs a reusable form.
+
 - Coin or revise a concise term that carries the distinction.
 
 - Align the term, definition, and constraint across each relevant representation.
+
+- Derive a view of a model that preserves its necessary distinctions while hiding irrelevant detail.
 
 ## Deduction
 
@@ -36,6 +40,8 @@ description: Semantically compress ideas.
 - Reuse retained concepts and terms across code, schemas, diagrams, documents, and conversation.
 
 - Keep unresolved aliases explicit rather than silently collapsing them.
+
+- Normalize equivalent representations when their variation carries no distinction.
 
 - Update or retire a concept or name when later evidence changes its grounded distinction.
 
