@@ -11,7 +11,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 ## Operators
 
-- An operator _basis_ is the smallest set of irreducible transformations sufficient to compose every in-scope change.
+- An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every in-scope change.
 
 - Apply and re-enter these basis transformations in order as evidence warrants:
 
