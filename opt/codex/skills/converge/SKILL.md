@@ -17,15 +17,15 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-1. **Decision-basis modeling** redefines the option space.
+1. **Decision-basis modeling:** Redefine the option space.
 
    - @../op-decision-basis-modeling/SKILL.md
 
-2. **Topology decomposition** simplifies flow across boundaries.
+2. **Topology decomposition:** Simplify flow across boundaries.
 
    - @../op-topology-decomposition/SKILL.md
 
-3. **Conceptual synthesis** gives consistent names that semantically compress ideas.
+3. **Conceptual synthesis:** Give consistent names that semantically compress ideas.
 
    - @../op-conceptual-synthesis/SKILL.md
 
