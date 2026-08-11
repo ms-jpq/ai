@@ -1,6 +1,6 @@
 ---
 name: op-topology-decomposition
-description: Model and decompose a system's concern topology to expose and reduce accidental dependencies. Use when boundaries, ordering, or placement resist local reasoning.
+description: Simplify flow across boundaries.
 ---
 
 # Topology Decomposition

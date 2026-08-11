@@ -1,6 +1,6 @@
 ---
 name: op-decision-basis-modeling
-description: Model and revise a decision basis by making its outcome, constraints, authority, evidence, and invariants explicit. Use when those inputs are unclear, conflict, or change.
+description: Redefine the option space.
 ---
 
 # Decision-Basis Modeling
