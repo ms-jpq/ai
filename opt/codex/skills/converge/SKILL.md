@@ -45,6 +45,6 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 ## Application
 
-- Use a concrete method to realize the selected operator.
+- Apply the selected operator to a concrete operand: prose, decision space, function, module, organization, or system.
 
 - Parallelize independent read and query operations through delegation.
