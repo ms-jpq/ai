@@ -5,43 +5,43 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
 # Converge
 
-- Philosophy and mathematics have formalized ways to transform ideas.
+- This skill formalizes transformations of ideas as operators over `S`.
 
 ## Operators
 
-- Treat the system model `S` as shared state.
+- The system model `S` is shared state.
 
-  - Apply scale- and operand-invariant operations: `S₁ → S₂`.
+- Apply scale- and operand-invariant operations: the same transformation applies to a sentence, function, module, system, or organization: `S₁ → S₂`.
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-  1. **Problem formulation** makes the current decision problem explicit.
+  1. **Problem formulation**: frames the problem itself, and clarifies the motivation.
 
      - @../op-problem-formulation/SKILL.md
 
-  2. **Topology decomposition** exposes and reshapes the model's structure.
+  2. **Topology decomposition**: find and reshape the boundaries of the systems.
 
      - @../op-topology-decomposition/SKILL.md
 
-  3. **Deliberative exploration** generates decision-relevant alternatives by varying assumptions, constraints, and framing.
+  3. **Deliberative exploration**: generate alternatives by varying the assumptions, constraints, and framing.
 
      - @../op-deliberative-exploration/SKILL.md
 
-  4. **Conceptual synthesis** turns useful distinctions into reusable concepts.
+  4. **Conceptual synthesis**: give consistent names to useful ideas; semantic compression.
 
      - @../op-conceptual-synthesis/SKILL.md
 
 ## Loop
 
-- Start from evidence, then converge through `abduce → deduce → test → induce`.
+- Each convergence operation carries the cycle of Abduction, Deduction, Induction.
 
-  - **Abduce** an explanation or configuration that accounts for the evidence.
+  - **Abduction**: Inventing explanation given unexpected observations.
 
-  - **Deduce** observable consequences of the hypothesis.
+  - **Deduction**: Deriving predictions given exploration.
 
-  - **Test** those consequences through implementation, experiment, or feedback that could contradict them.
+  - **Induction** Judging the explanation given prediction outcomes.
 
-  - **Induce** a provisional judgment, then update the model, constraints, or next transformation.
+  - Outcomes that contradict predictions loop back to Abduction.
 
 ## Method
 
