@@ -37,13 +37,13 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- State how examples, counterexamples, and neighboring concepts should classify under the synthesized concept.
+- Predict how examples, counterexamples, and neighboring concepts should classify under the synthesized concept.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply the candidate concept and name to collected uses, counterexamples, and neighboring concepts.
+- Test the predicted classifications against collected uses, counterexamples, and neighboring concepts.
 
 - Retain a concept only when it preserves a necessary distinction without decorating or merging concepts.
 
