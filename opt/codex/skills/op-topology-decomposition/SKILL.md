@@ -7,21 +7,27 @@ description: Simplify flow across boundaries.
 
 ## Artifact
 
-- A basis of named elements, each defined by an explicit boundary.
+- A covering set of concerns sufficient to achieve the system concern.
+
+- A basis of named elements, each defined by a primary concern and explicit boundary.
 
 - Explicit flows between elements form the topology.
 
 ## Observation
 
-- Select the system and topology affected by the decision.
+- Select the affected system.
+
+  - State the system concern.
 
   - Record its external boundary and ordering constraints.
 
-- Identify covering set of elements in the affected system.
+- Identify its current concerns and elements.
 
-  - Record each element's current boundary, placement, and required context.
+  - Associate each element with its current concerns.
 
-- Map each flow’s direction and dependency between candidate.
+  - Record each element's boundary, placement, and required context.
+
+- Map each flow's direction and dependency.
 
 - Topologically sort the flow graph to derive an execution order.
 
@@ -31,21 +37,27 @@ description: Simplify flow across boundaries.
 
 _Devise an explanation for observations._
 
-- Hypothesize how current boundaries and flows produce the observed coupling, unnecessary traversal, or unresolved ordering constraint.
+- Treat external boundaries as fixed unless evidence invalidates them.
+
+- Diagnose what prevents the current concern set from achieving the system concern.
+
+  - A concern is missing, redundant, or assigned to the wrong element.
+
+  - A boundary or flow obstructs local reasoning or required order.
+
+- Hypothesize a covering set of concerns and a topology that achieves the system concern.
 
 - Explore candidate topology changes, including:
 
-  - Replace the topology with a distinct known pattern when it yields a simpler basis of elements and flows.
+  - Replace the topology with a distinct known pattern.
 
   - Merge elements that cannot be independently understood or verified.
 
-  - Split an entangled element.
+  - Split an element that holds independent concerns.
 
   - Enclose a system as an element within a larger topology.
 
-  - Apply any other change that yields a simpler basis of elements and flows.
-
-- Treat external boundaries as fixed unless evidence invalidates them.
+  - Apply any other change that yields a simpler basis of concerns, elements, and flows.
 
 ## Deduction
 
@@ -53,18 +65,24 @@ _Derive consequences of the explanation._
 
 - Derive observable consequences of the proposed topology:
 
-  - Each changed element can be understood from its boundary and required flows.
+  - Its concerns achieve the system concern.
+
+  - Each changed element has one primary concern and can be understood from its boundary and required flows.
+
+  - Its flow graph yields the required execution order or exposes an unresolved ordering constraint.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test those consequences against the changed boundaries, flows, and execution order.
+- Test whether the proposed concern set achieves the system concern.
+
+- Test changed boundaries, flows, and execution order.
 
 - Compare the proposed topology with the current one.
 
-  - Count elements, boundaries, flows, exceptions, and remote reads.
+  - Count concerns, elements, boundaries, flows, exceptions, and remote reads.
 
   - Prefer the shape that makes the next change locally understandable and verifiable.
 
-- Retain only necessary flows; revise the topology when evidence contradicts an element, flow, boundary, or placement.
+- Retain only necessary concerns, elements, and flows; revise the topology when evidence contradicts the model.
