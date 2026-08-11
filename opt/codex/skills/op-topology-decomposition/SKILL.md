@@ -17,11 +17,9 @@ description: Simplify flow across boundaries.
 
   - Record its external boundary and ordering constraints.
 
-- Establish a basis of named elements.
+- Identify candidate elements in the affected system.
 
-  - Define each element's boundary.
-
-  - Record its placement and required context.
+  - Record each candidate’s current boundary, placement, and required context.
 
 - Map each flow’s direction and dependency.
 
