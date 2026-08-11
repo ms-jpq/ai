@@ -13,6 +13,8 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every in-scope change.
 
+  - Counterfactuals update this basis.
+
 - Apply and re-enter these basis transformations in order as evidence warrants:
 
   1. **Problem formulation** frame the problem itself, and clarify the motivation.
