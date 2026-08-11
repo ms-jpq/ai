@@ -20,13 +20,13 @@ _belief independent of evidence_
 
 ## Alignment
 
-- Alignment iteratively converges on a shared, unambiguous model of the situation.
+- Dialectically converges on a shared, unambiguous model of the system.
 
 - Build the system as a side effect of that convergence.
 
-- Aim for a crisp account of the problem, its context, and its solution.
+- Build a crisp articulation of the problem and its solution.
 
-  - Descriptive effort is a proxy for complexity and a test of model agreement.
+  - Descriptive effort is a proxy for system complexity and a validation of shared understanding.
 
 ---
 
