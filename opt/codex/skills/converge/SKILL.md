@@ -47,6 +47,6 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - Apply the selected operator to a concrete operand: prose, decision space, function, module, organization, or system.
 
-- Maintain an internal dialectic: challenge each proposed transformation with a serious alternative before acting.
+- Maintain an internal dialectic.
 
 - Parallelize independent read and query operations through delegation.
