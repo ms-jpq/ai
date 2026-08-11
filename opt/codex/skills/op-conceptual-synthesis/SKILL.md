@@ -25,6 +25,8 @@ _Devise an explanation for observations._
 
   - State its scope, exclusions, relations, and distinctions that must survive.
 
+- Search the domain and adjacent disciplines for existing concepts, terms, and models that may subsume the distinction.
+
 - Generalize, classify, or abstract when a recurring distinction needs a reusable form.
 
 - Coin or revise a concise term that carries the distinction.
