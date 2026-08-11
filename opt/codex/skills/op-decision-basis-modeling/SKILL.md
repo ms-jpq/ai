@@ -7,17 +7,21 @@ description: Redefine the option space.
 
 ## Artifact
 
-- A contextually closed decision basis.
+- A decision space for one decision.
 
-  - It includes every relation that can change viable options and excludes everything that cannot.
+  - The choice, intended outcome, authority, and invariants.
+
+  - Viable options and the conditions that admit or rule out each one.
+
+  - The evidence, assumptions, and uncertainties that distinguish those options.
 
 ## Observation
 
-- Select one decision; state its intended outcome and authority boundary.
+- Select one decision; state its choice, intended outcome, authority, and invariants.
 
-- Record its current basis: reasons, assumptions, constraints, authority, invariants, and evidence.
+- Identify its current options and the conditions that admit or rule out each one.
 
-- Gather relevant evidence.
+- Gather the evidence, assumptions, and uncertainties that can change which options are viable.
 
   - The user's request and conversation.
 
@@ -29,15 +33,13 @@ description: Redefine the option space.
 
 _Devise an explanation for observations._
 
-- Model the current decision basis.
+- Construct or revise the decision space.
 
-  - Outcome, constraints, authority, and actors.
+  - Make the choice, options, admission conditions, and authority explicit.
 
-  - Boundaries, interfaces, commitments, and open questions.
+  - Record the evidence, assumptions, constraints, invariants, and open questions that distinguish options.
 
-  - Explicit direction, inferences, and update triggers.
-
-  - Invariants: constraints that every acceptable transformation must preserve.
+  - State the update triggers that would change the decision space.
 
 - Generate decision-relevant alternatives by varying assumptions, constraints, framing, and abstraction level.
 
@@ -45,9 +47,7 @@ _Devise an explanation for observations._
 
   - Recognize wider problem classes and import candidate structures, constraints, and solutions.
 
-  - Retain alternatives that improve the outcome while preserving invariants.
-
-- Reframe, prioritize, and assess risk by revising the basis rather than treating its current shape as given.
+  - Include alternatives that improve the outcome while preserving invariants.
 
 - State a policy or specification when an acceptable outcome must remain stable across later decisions.
 
@@ -55,14 +55,14 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- State the observations that would distinguish the formulation from plausible alternatives.
+- Derive the expected outcome of each viable option and the observations that distinguish it from plausible alternatives.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Compare the decision basis with evidence and plausible alternatives; surface contradictions and uncertainty.
+- Test the expected outcomes against evidence and plausible alternatives; surface contradictions and uncertainty.
 
-- Retain only the claims the evidence supports; update the basis as direction or evidence changes.
+- Retain only evidence-supported options and conditions; update the decision space when direction or evidence changes.
 
-- Treat the model as sufficient for the decision, not final.
+- Treat the decision space as contextually closed only when no omitted relation can change viable options.
