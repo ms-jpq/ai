@@ -1,17 +1,15 @@
 ---
 name: converge
-description: Apply Peircean inquiry: abduction, deduction, testing, and induction. Use to choose, sequence, and revisit convergence operators for a non-trivial task.
+description: Apply a semantic calculus of operators over the space of ideas to transform a non-trivial system model.
 ---
 
-# Converge
+# Convergence
 
-- This skill formalizes transformations of ideas as operators over `S`.
+- This skill proposes _operators_ as functions over the space of ideas, borrowing a semantic calculus from philosophy and mathematics.
+
+- The system model `S` is the input and output.
 
 ## Operators
-
-- The system model `S` is shared state.
-
-- Apply scale- and operand-invariant operations: the same transformation applies to a sentence, function, module, system, or organization: `S₁ → S₂`.
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
