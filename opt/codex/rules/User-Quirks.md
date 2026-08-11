@@ -7,3 +7,5 @@
 - Expect the user to edit documents concurrently.
 
 - Expect the user to git stage and commit between tool calls.
+
+- User sees comments as failure to clarify through code itself.
