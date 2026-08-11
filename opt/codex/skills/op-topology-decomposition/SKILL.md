@@ -7,9 +7,7 @@ description: Simplify flow across boundaries.
 
 ## Artifact
 
-- The system concern.
-
-  - A covering set of concerns sufficient to achieve the system concern.
+- The system concern and a covering concern set sufficient to achieve it.
 
 - A nested basis of named elements, each defined by a primary concern and explicit boundary.
 
@@ -17,27 +15,23 @@ description: Simplify flow across boundaries.
 
 - Containment and explicit flows between elements form the topology.
 
-  - Note explicit cycles and their sources.
+  - Note each cycle, its source, and whether it is a precedence constraint, iteration, or feedback loop.
 
 ## Observation
 
-- Select the affected system.
-
-  - State the system concern.
-
-  - Record its external boundary and ordering constraints.
+- Select the affected system; state its concern, external boundary, and ordering constraints.
 
 - Identify its current concerns, elements, and containment hierarchy.
 
-  - Associate each element with its current concerns.
+  - Map concerns to their current elements.
 
   - Record each element's boundary, containment, placement, and required context.
 
 - Map each flow's direction and dependency.
 
-- Enclose each retained cycle as an explicit iterative element, then derive execution order from the resulting flow graph.
+- Enclose each retained iterative process or feedback loop as an explicit element, then derive execution order from the resulting flow graph.
 
-  - Record each unresolved cycle as a candidate topology change.
+  - Record each cycle that prevents a required order as a candidate topology change.
 
 ## Abduction
 
@@ -53,17 +47,15 @@ _Devise an explanation for observations._
 
   - Move an element upward, downward, or laterally in the hierarchy to give its primary concern the right scope.
 
-  - Merge elements that cannot be independently understood or verified.
-
-  - Merge elements that share the same concerns.
+  - Merge elements that share concerns or cannot be independently understood or verified.
 
   - Split an element that holds independent concerns.
 
   - Enclose a system as an element within a larger topology.
 
-  - Resolve an ordering constraint by changing the elements or flows that create it
+  - Resolve a cycle when it prevents a required order by changing the elements or flows that create it.
 
-    - Retain a cycle only in explicitly iterative systems.
+    - Retain other cycles only as explicit iterations or feedback loops.
 
   - Apply any other change that yields a simpler basis of concerns, elements, containment, and flows.
 
@@ -85,15 +77,13 @@ _Derive consequences of the explanation._
 
   - Each changed element has one primary concern, a justified place in the containment hierarchy, and explicit cross-cutting concerns.
 
-  - Its acyclic flow graph yields the required execution order; each retained cycle is an explicit iterative element.
+  - Its acyclic flow graph yields the required execution order; each retained cycle is an explicit iteration or feedback element.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the derived consequences against the affected system.
-
-- Compare the proposed topology with the current one.
+- Test the derived consequences by comparing the proposed topology with the current one.
 
   - Count concerns, concern-to-element mappings, elements, containment relations, boundaries, flows, exceptions, and remote reads.
 
