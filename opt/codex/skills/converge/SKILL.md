@@ -11,7 +11,9 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 ## Operators
 
-- Apply and re-enter these transformations in order as evidence warrants:
+- An operator _basis_ is the smallest set of irreducible transformations sufficient to compose every in-scope change.
+
+- Apply and re-enter these basis transformations in order as evidence warrants:
 
   1. **Problem formulation** frame the problem itself, and clarify the motivation.
 
@@ -21,7 +23,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
      - @../op-topology-decomposition/SKILL.md
 
-  3. **Deliberative exploration** generate alternatives by varying the assumptions, constraints, and framing.
+  3. **Deliberative exploration** expand the option space.
 
      - @../op-deliberative-exploration/SKILL.md
 
@@ -29,17 +31,15 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
      - @../op-conceptual-synthesis/SKILL.md
 
-## Loop
+## Inquiry
 
 - Each convergence operation carries `abduction → deduction → induction → abduction`.
 
-- **Abduction** Forming explanation from unexpected observation.
+- **Abduction** Devise an explanation for observations.
 
-- **Deduction** Deriving prediction given explanation.
+- **Deduction** Derive consequences of the explanation.
 
-- **Induction** Judging explanation given prediction outcome.
-
-- Outcome that contradict prediction circle back to Abduction.
+- **Induction** Test those consequences and provisionally retain or revise the explanation.
 
 ## Method
 
