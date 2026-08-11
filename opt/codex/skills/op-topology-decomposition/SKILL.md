@@ -33,7 +33,7 @@ _Devise an explanation for observations._
 
 - Hypothesize how current boundaries and flows produce the observed coupling, unnecessary traversal, or unresolved ordering constraint.
 
-- Propose a revised or replacement topology:
+- Explore candidate topology changes, including:
 
   - Replace the topology with a distinct known pattern when it yields a simpler basis of elements and flows.
 
@@ -41,7 +41,9 @@ _Devise an explanation for observations._
 
   - Split an entangled element.
 
-  - Integrate systems by merging their topologies and exposing shared flows.
+  - Enclose a system as an element within a larger topology.
+
+  - Apply any other change that yields a simpler basis of elements and flows.
 
 - Treat external boundaries as fixed unless evidence invalidates them.
 
