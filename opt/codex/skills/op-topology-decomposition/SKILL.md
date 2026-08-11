@@ -17,13 +17,11 @@ description: Simplify flow across boundaries.
 
   - Record its external boundary and ordering constraints.
 
-- Identify candidate elements in the affected system.
+- Identify covering set of elements in the affected system.
 
-  - Record each candidate’s current boundary, placement, and required context.
+  - Record each element's current boundary, placement, and required context.
 
-- Map each flow’s direction and dependency.
-
-- Identify hidden flows, cycles, and accidental distance.
+- Map each flow’s direction and dependency between candidate.
 
 - Topologically sort the flow graph to derive an execution order.
 
@@ -33,19 +31,17 @@ description: Simplify flow across boundaries.
 
 _Devise an explanation for observations._
 
-- Hypothesize how current boundaries and flows produce the observed coupling, distance, or ordering failure.
+- Hypothesize how current boundaries and flows produce the observed coupling, unnecessary traversal, or unresolved ordering constraint.
 
-- Propose a revised topology:
+- Propose a revised or replacement topology:
 
-  - Split an entangled element.
+  - Replace the topology with a distinct known pattern when it yields a simpler basis of elements and flows.
 
   - Merge elements that cannot be independently understood or verified.
 
-  - Move or collocate what one local decision requires.
-
   - Remove an accidental flow or make a necessary one explicit.
 
-  - Reorder work from the flow graph.
+  - Split an entangled element.
 
   - Integrate systems by merging their topologies and exposing shared flows.
 
@@ -55,15 +51,15 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict changes to boundaries, flows, placement, and execution order.
+- Derive observable consequences of the proposed topology:
 
-- Predict that each changed element can be understood from its boundary and required flows.
+  - Each changed element can be understood from its boundary and required flows.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the predicted boundaries, flows, and execution order.
+- Test those consequences against the changed boundaries, flows, and execution order.
 
 - Compare the proposed topology with the current one.
 
