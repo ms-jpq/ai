@@ -7,35 +7,11 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
 - Philosophy and mathematics have formalized ways to transform ideas.
 
-## Loop
-
-- Start from evidence, then converge through `abduce → deduce → test → induce`.
-
-  - **Abduce** an explanation or configuration that accounts for the evidence.
-
-  - **Deduce** observable consequences of the hypothesis.
-
-  - **Test** those consequences through implementation, experiment, or feedback that could contradict them.
-
-  - **Induce** a provisional judgment, then update the model, constraints, or next transformation.
-
-## Constraints
-
-- Formulate the problem before abduction.
-
-- Generate competing hypotheses before selecting one.
-
-- Design each test to distinguish the hypothesis from its alternatives.
-
-- Treat a failed test as evidence against the hypothesis, its auxiliary assumptions, or the test mechanism until the fault is localized.
-
-- Do not treat induction as proof; retain, reject, rank, or update a hypothesis provisionally.
-
-- When external testing is weak, check coherence among relevant cases, principles, constraints, and the wider model.
-
 ## Operators
 
-- Treat the model `S` of the system to affect as shared state.
+- Treat the system model `S` as shared state.
+
+  - Apply scale- and operand-invariant operations: `S₁ → S₂`.
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
@@ -54,6 +30,18 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
   4. **Conceptual synthesis** turns useful distinctions into reusable concepts.
 
      - @../op-conceptual-synthesis/SKILL.md
+
+## Loop
+
+- Start from evidence, then converge through `abduce → deduce → test → induce`.
+
+  - **Abduce** an explanation or configuration that accounts for the evidence.
+
+  - **Deduce** observable consequences of the hypothesis.
+
+  - **Test** those consequences through implementation, experiment, or feedback that could contradict them.
+
+  - **Induce** a provisional judgment, then update the model, constraints, or next transformation.
 
 ## Method
 
