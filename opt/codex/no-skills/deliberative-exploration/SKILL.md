@@ -1,9 +1,11 @@
 ---
-name: op-deliberative-exploration
-description: Explore decision-relevant alternatives by varying assumptions, constraints, framing, and abstraction level. Use when the current model leaves promising alternatives unexplored.
+name: deliberative-exploration
+description: Archived: deliberative exploration is now an abduction method of decision-basis modeling.
 ---
 
 # Deliberative Exploration
+
+- This former operator is now the abduction method in `../../skills/op-decision-basis-modeling/SKILL.md`.
 
 ## Observation
 

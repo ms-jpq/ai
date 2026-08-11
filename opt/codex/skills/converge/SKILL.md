@@ -13,23 +13,19 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every transformation in the space of ideas.
 
-- Counterfactuals update this basis.
+- Counterfactuals test and update these candidates.
 
-- Apply and re-enter these candidate basis transformations in order as evidence warrants:
+- Apply and re-enter these transformations in order as evidence warrants:
 
-1. **Problem formulation** frame the problem itself, and clarify the motivation.
+1. **Decision-basis modeling** turns implicit, incomplete, or stale grounds into an explicit decision model that evidence can revise.
 
-   - @../op-problem-formulation/SKILL.md
+   - @../op-decision-basis-modeling/SKILL.md
 
 2. **Topology decomposition** find and reshape the boundaries of the systems.
 
    - @../op-topology-decomposition/SKILL.md
 
-3. **Deliberative exploration** expand the option space.
-
-   - @../op-deliberative-exploration/SKILL.md
-
-4. **Conceptual synthesis** give consistent names to semantcally compress ideas.
+3. **Conceptual synthesis** gives consistent names that semantically compress ideas.
 
    - @../op-conceptual-synthesis/SKILL.md
 
@@ -45,7 +41,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 ## Application
 
-- Apply the selected operator to a concrete operand: prose, decision space, function, module, organization, or system.
+- Apply the selected operator to a concrete operand: prose, decision space, function, module or organization.
 
 - Maintain an internal dialectic.
 
