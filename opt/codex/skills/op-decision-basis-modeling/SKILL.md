@@ -7,21 +7,21 @@ description: Redefine the option space.
 
 ## Artifact
 
-- A decision space for one decision.
+- A decision basis.
 
-  - The choice, intended outcome, authority, and invariants.
+  - Decision points, intended outcomes, and authority boundaries.
 
-  - Viable options and the conditions that admit or rule out each one.
+  - Relevant actors, their decision rights, commitments, and plausible motivations.
 
-  - The evidence, assumptions, and uncertainties that distinguish those options.
+  - Assumed conditions, external commitments, evidence, and uncertainty.
 
 ## Observation
 
-- Select one decision; state its choice, intended outcome, authority, and invariants.
+- Select the affected decision system; state its decision points, intended outcomes, and authority boundaries.
 
-- Identify its current options and the conditions that admit or rule out each one.
+- Identify the relevant actors, their decision rights, commitments, and plausible motivations.
 
-- Gather the evidence, assumptions, and uncertainties that can change which options are viable.
+- Gather the assumed conditions, external commitments, evidence, and uncertainty from which options can be derived.
 
   - The user's request and conversation.
 
@@ -33,21 +33,21 @@ description: Redefine the option space.
 
 _Devise an explanation for observations._
 
-- Construct or revise the decision space.
+- Construct or revise the decision basis.
 
-  - Make the choice, options, admission conditions, and authority explicit.
+  - Make decision points, outcomes, actors, and authority boundaries explicit.
 
-  - Record the evidence, assumptions, constraints, invariants, and open questions that distinguish options.
+  - Distinguish revisable assumptions from external commitments.
 
-  - State the update triggers that would change the decision space.
+  - State the evidence, uncertainty, and update triggers that would change the basis.
 
-- Generate decision-relevant alternatives by varying assumptions, constraints, framing, and abstraction level.
+- Derive decision-relevant alternatives by varying assumptions, framing, and abstraction level.
 
   - Treat the current model and topology as variables rather than givens.
 
-  - Recognize wider problem classes and import candidate structures, constraints, and solutions.
+  - Recognize wider problem classes and import candidate structures, conditions, and solutions.
 
-  - Include alternatives that improve the outcome while preserving invariants.
+  - Include alternatives that improve the outcome while honoring external commitments.
 
 - State a policy or specification when an acceptable outcome must remain stable across later decisions.
 
@@ -55,7 +55,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive the expected outcome of each viable option and the observations that distinguish it from plausible alternatives.
+- Derive viable options, their expected outcomes, and the observations that distinguish them from plausible alternatives.
 
 ## Induction
 
@@ -63,6 +63,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the expected outcomes against evidence and plausible alternatives; surface contradictions and uncertainty.
 
-- Retain only evidence-supported options and conditions; update the decision space when direction or evidence changes.
+- Retain only evidence-supported basis inputs; update the basis when direction or evidence changes.
 
-- Treat the decision space as contextually closed only when no omitted relation can change viable options.
+- Treat the basis as contextually closed only when no omitted input can change viable options.
