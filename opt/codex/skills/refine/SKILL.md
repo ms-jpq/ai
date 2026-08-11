@@ -7,11 +7,9 @@ Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable
 
 # Refine
 
-## Isolate
+## Observation
 
 - Select one wording, claim, hierarchy defect, or reader goal per pass.
-
-## Baseline
 
 - Record the current text, the reader's goal, knowledge, and vocabulary, and the intended improvement.
 
@@ -19,7 +17,9 @@ Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable
 
   - One claim per bullet.
 
-## Refine
+## Abduction
+
+_Devise a refinement hypothesis for the reader and local context._
 
 - Replace vague words with precise ones; remove words that do not change the claim.
 
@@ -37,17 +37,19 @@ Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable
 
   - Put reasons, conditions, steps, and outcomes in children.
 
-## Predict
+## Deduction
+
+_Derive consequences of the refinement hypothesis._
 
 - State the reading, decision, or action the revised prose should make easier.
 
-## Falsify
+## Induction
+
+_Test that consequence and provisionally retain or revise the refinement._
 
 - Test the revision against competing readings, factual constraints, and the reader's goal.
 
 - Remove absolutes not supported by evidence and hedges not required by uncertainty.
-
-## Revise
 
 - Re-read the prose in local context and apply the observed result to the next pass.
 
