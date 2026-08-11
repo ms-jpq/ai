@@ -15,27 +15,27 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
   - Counterfactuals update this basis.
 
-- Apply and re-enter these basis transformations in order as evidence warrants:
+- Apply and re-enter these candidate basis transformations in order as evidence warrants:
 
-  1. **Problem formulation** frame the problem itself, and clarify the motivation.
+1. **Problem formulation** frame the problem itself, and clarify the motivation.
 
-     - @../op-problem-formulation/SKILL.md
+   - @../op-problem-formulation/SKILL.md
 
-  2. **Topology decomposition** find and reshape the boundaries of the systems.
+2. **Topology decomposition** find and reshape the boundaries of the systems.
 
-     - @../op-topology-decomposition/SKILL.md
+   - @../op-topology-decomposition/SKILL.md
 
-  3. **Deliberative exploration** expand the option space.
+3. **Deliberative exploration** expand the option space.
 
-     - @../op-deliberative-exploration/SKILL.md
+   - @../op-deliberative-exploration/SKILL.md
 
-  4. **Conceptual synthesis** give consistent names to semantcally compress ideas.
+4. **Conceptual synthesis** give consistent names to semantcally compress ideas.
 
-     - @../op-conceptual-synthesis/SKILL.md
+   - @../op-conceptual-synthesis/SKILL.md
 
 ## Inquiry
 
-- Each convergence operation carries `abduction → deduction → induction → abduction`.
+- Each convergence operator carries `abduction → deduction → induction → abduction`.
 
 - **Abduction** Devise an explanation for observations.
 
@@ -43,7 +43,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - **Induction** Test those consequences and provisionally retain or revise the explanation.
 
-## Method
+## Application
 
 - Use a concrete method to realize the selected operator.
 
