@@ -49,13 +49,13 @@ _Devise an explanation for observations._
 
   - Replace the topology with a distinct known pattern.
 
+  - Move an element upward, downward, or laterally in the hierarchy to give its primary concern the right scope.
+
   - Merge elements that cannot be independently understood or verified.
 
   - Merge elements that share the same concerns.
 
   - Split an element that holds independent concerns.
-
-  - Move an element beneath a boundary that contains its primary concern.
 
   - Enclose a system as an element within a larger topology.
 
