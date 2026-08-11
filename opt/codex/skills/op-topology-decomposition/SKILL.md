@@ -9,13 +9,15 @@ description: Simplify flow across boundaries.
 
 - The system concern.
 
-- A covering hierarchy of concerns sufficient to achieve the system concern.
+  - A covering set of concerns sufficient to achieve the system concern.
 
 - A nested basis of named elements, each defined by a primary concern and explicit boundary.
 
+- An explicit many-to-many mapping between concerns and elements.
+
 - Containment and explicit flows between elements form the topology.
 
-  - Explicit source of cycles.
+  - Note explicit cycles and their sources.
 
 ## Observation
 
@@ -25,7 +27,7 @@ description: Simplify flow across boundaries.
 
   - Record its external boundary and ordering constraints.
 
-- Identify its current hierarchy of concerns and elements.
+- Identify its current concerns, elements, and containment hierarchy.
 
   - Associate each element with its current concerns.
 
@@ -33,9 +35,9 @@ description: Simplify flow across boundaries.
 
 - Map each flow's direction and dependency.
 
-- Topologically sort the flow graph to derive an execution order.
+- Enclose each retained cycle as an explicit iterative element, then derive execution order from the resulting flow graph.
 
-  - Record each cycle as an unresolved ordering constraint.
+  - Record each unresolved cycle as a candidate topology change.
 
 ## Abduction
 
@@ -43,7 +45,7 @@ _Devise an explanation for observations._
 
 - Treat external boundaries as fixed unless evidence invalidates them.
 
-- Identify the gap between the current concern hierarchy and the system concern, then hypothesize a covering hierarchy that closes it.
+- Identify the gap between the current concern set and the system concern, then hypothesize a covering set that closes it.
 
 - Explore candidate topology changes, including:
 
@@ -63,7 +65,7 @@ _Devise an explanation for observations._
 
     - Retain a cycle only in explicitly iterative systems.
 
-  - Apply any other change that yields a simpler hierarchy of concerns, elements, containment, and flows.
+  - Apply any other change that yields a simpler basis of concerns, elements, containment, and flows.
 
 ### Heuristic
 
@@ -79,11 +81,11 @@ _Derive consequences of the explanation._
 
 - Derive observable consequences of the proposed topology:
 
-  - Its concern hierarchy achieves the system concern.
+  - Its concern set achieves the system concern.
 
-  - Each changed element has one primary concern, a justified place in the hierarchy, and can be understood from its boundary and required flows.
+  - Each changed element has one primary concern, a justified place in the containment hierarchy, and explicit cross-cutting concerns.
 
-  - Its flow graph yields the required execution order or exposes an unresolved ordering constraint.
+  - Its acyclic flow graph yields the required execution order; each retained cycle is an explicit iterative element.
 
 ## Induction
 
@@ -93,8 +95,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Compare the proposed topology with the current one.
 
-  - Count concerns, elements, containment relations, boundaries, flows, exceptions, and remote reads.
+  - Count concerns, concern-to-element mappings, elements, containment relations, boundaries, flows, exceptions, and remote reads.
 
   - Prefer the shape that makes the next change locally understandable and verifiable.
 
-- Retain only necessary concerns, elements, containment relations, and flows; revise the topology when evidence contradicts the model.
+- Retain only necessary concerns, mappings, elements, containment relations, and flows; revise the topology when evidence contradicts the model.
