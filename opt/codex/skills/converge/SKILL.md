@@ -11,9 +11,9 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 ## Operators
 
-- An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every in-scope change.
+- An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every transformation in the space of ideas.
 
-  - Counterfactuals update this basis.
+- Counterfactuals update this basis.
 
 - Apply and re-enter these candidate basis transformations in order as evidence warrants:
 
@@ -46,5 +46,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 ## Application
 
 - Apply the selected operator to a concrete operand: prose, decision space, function, module, organization, or system.
+
+- Maintain an internal dialectic: challenge each proposed transformation with a serious alternative before acting.
 
 - Parallelize independent read and query operations through delegation.
