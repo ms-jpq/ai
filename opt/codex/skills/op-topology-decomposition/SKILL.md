@@ -15,8 +15,6 @@ description: Simplify flow across boundaries.
 
 - Containment and explicit flows between elements form the topology.
 
-> apply to rest of this skill
-
 ## Observation
 
 - Select the affected system.
@@ -58,6 +56,10 @@ _Devise an explanation for observations._
   - Split an element that holds independent concerns.
 
   - Enclose a system as an element within a larger topology.
+
+  - Resolve an ordering constraint by changing the elements or flows that create it
+
+    - Retain a cycle only in explicitly iterative systems.
 
   - Apply any other change that yields a simpler hierarchy of concerns, elements, containment, and flows.
 
