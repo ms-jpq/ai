@@ -5,7 +5,7 @@ description: Explore decision-relevant alternatives by varying assumptions, cons
 
 # Deliberative Exploration
 
-## Evidence
+## Observation
 
 - Select the goal, model, and topology to explore.
 
@@ -17,7 +17,7 @@ description: Explore decision-relevant alternatives by varying assumptions, cons
 
 - Identify wider problem classes that may contain transferable moves.
 
-## Abduce
+## Abduction
 
 - Step back: treat the problem formulation, model, and topology as variables rather than givens.
 
@@ -27,15 +27,13 @@ description: Explore decision-relevant alternatives by varying assumptions, cons
 
 - Retain alternatives that improve the goal while preserving invariants.
 
-## Deduce
+## Deduction
 
 - State each surviving alternative's observable advantage and required conditions.
 
-## Test
+## Induction
 
 - Compare each surviving alternative with the baseline, stated goal, and required constraints.
-
-## Induce
 
 - Reject an alternative that relies on an unsupported premise, violates required constraints, or merely renames the current approach.
 

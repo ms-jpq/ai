@@ -5,7 +5,7 @@ description: Formulate a decision problem by making its outcome, constraints, au
 
 # Problem Formulation
 
-## Evidence
+## Observation
 
 - Select one decision problem; state its intended outcome and authority boundary.
 
@@ -17,7 +17,7 @@ description: Formulate a decision problem by making its outcome, constraints, au
 
   - Existing plans, implementation, constraints, and results.
 
-## Abduce
+## Abduction
 
 - Formulate the current decision problem.
 
@@ -29,15 +29,13 @@ description: Formulate a decision problem by making its outcome, constraints, au
 
   - Invariants: constraints that every acceptable transformation must preserve.
 
-## Deduce
+## Deduction
 
 - State the observations that would distinguish the formulation from plausible alternatives.
 
-## Test
+## Induction
 
 - Compare the formulation with evidence and plausible alternatives.
-
-## Induce
 
 - Surface contradictions and uncertainty.
 

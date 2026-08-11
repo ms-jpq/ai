@@ -7,7 +7,7 @@ description: Model and decompose a system's concern topology to expose and reduc
 
 - Record the topology model in `.notes/`.
 
-## Evidence
+## Observation
 
 - Select the affected concern topology; record its external boundaries and ordering constraints.
 
@@ -29,7 +29,7 @@ description: Model and decompose a system's concern topology to expose and reduc
 
   - Record cycles as unresolved ordering constraints; a cyclic graph has no complete topological order.
 
-## Abduce
+## Abduction
 
 - Reshape the topology where evidence exposes accidental coupling or distance.
 
@@ -43,17 +43,15 @@ description: Model and decompose a system's concern topology to expose and reduc
 
 - Preserve external contracts unless the topology model demonstrates they are wrong.
 
-## Deduce
+## Deduction
 
 - State the expected effects on boundaries, dependencies, placement, and execution order.
 
-## Test
+## Induction
 
 - Verify every changed boundary and dependency.
 
 - Verify that the resulting execution order remains valid.
-
-## Induce
 
 - Compare the proposed topology with the current one.
 

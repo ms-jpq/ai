@@ -5,13 +5,13 @@ description: Synthesize reusable concepts by defining distinctions and aligning 
 
 # Conceptual Synthesis
 
-## Evidence
+## Observation
 
 - Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or inconsistent across representations.
 
 - Collect its uses, counterexamples, neighboring concepts, and representations.
 
-## Abduce
+## Abduction
 
 - Define the concept before naming it.
 
@@ -21,15 +21,13 @@ description: Synthesize reusable concepts by defining distinctions and aligning 
 
 - Align the term, definition, and constraint across each relevant representation.
 
-## Deduce
+## Deduction
 
 - State how examples, counterexamples, and neighboring concepts should classify under the synthesized concept.
 
-## Test
+## Induction
 
 - Apply the candidate concept and name to collected uses, counterexamples, and neighboring concepts.
-
-## Induce
 
 - Reject a candidate that decorates, merges concepts, or loses a necessary distinction.
 
