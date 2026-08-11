@@ -15,6 +15,9 @@ BEGIN {
   if ($0 ~ /\]\][[:space:]]*(\|\||&&)[[:space:]]*(continue|break|exit)([[:space:];]|$)/) {
     report("Do not short-circuit from a [[ ... ]] test; use an if block.")
   }
+  if ($0 ~ /^[[:space:]]*(function[[:space:]]+|[[:alpha:]_][[:alnum:]_]*[[:space:]]*\(\)[[:space:]]*\{)/) {
+    report("Do not declare shell functions; split reusable behavior into an array or a script.")
+  }
 }
 
 END {
