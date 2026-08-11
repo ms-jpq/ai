@@ -38,7 +38,7 @@ _belief independent of evidence_
 
 # Observations on Simplicity
 
-- A rigorously correct is simpler than accidentally correct.
+- A rigorously correct is simpler than incidentally correct.
 
 ---
 
