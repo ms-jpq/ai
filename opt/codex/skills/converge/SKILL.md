@@ -5,7 +5,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 # Convergence
 
-- This skill proposes _operators_ as functions over the space of ideas, borrowing a semantic calculus from philosophy and mathematics.
+- This skill proposes _operators_ as functions over the space of ideas, borrowing faculties from philosophy and mathematics.
 
 - The system model `S` is the input and output.
 
