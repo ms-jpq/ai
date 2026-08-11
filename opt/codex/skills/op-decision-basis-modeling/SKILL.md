@@ -5,6 +5,12 @@ description: Redefine the option space.
 
 # Decision-Basis Modeling
 
+## Artifact
+
+- A contextually closed decision basis.
+
+  - It includes every relation that can change viable options and excludes everything that cannot.
+
 ## Observation
 
 - Select one decision; state its intended outcome and authority boundary.
@@ -20,6 +26,8 @@ description: Redefine the option space.
   - Existing plans, implementation, constraints, and results.
 
 ## Abduction
+
+_Devise an explanation for observations._
 
 - Model the current decision basis.
 
@@ -45,16 +53,16 @@ description: Redefine the option space.
 
 ## Deduction
 
+_Derive consequences of the explanation._
+
 - State the observations that would distinguish the formulation from plausible alternatives.
 
 ## Induction
 
-- Compare the decision basis with evidence and plausible alternatives.
+_Test those consequences and provisionally retain or revise the explanation._
 
-- Surface contradictions and uncertainty.
+- Compare the decision basis with evidence and plausible alternatives; surface contradictions and uncertainty.
 
-- Retain only the claims the evidence supports.
-
-- Update the decision basis as direction or evidence changes.
+- Retain only the claims the evidence supports; update the basis as direction or evidence changes.
 
 - Treat the model as sufficient for the decision, not final.

@@ -1,9 +1,15 @@
 ---
 name: op-conceptual-synthesis
-description: Semantically compress ideas.
+description: Give consistent names that semantically compress ideas.
 ---
 
 # Conceptual Synthesis
+
+## Artifact
+
+- An established lexicon.
+
+  - Names for non-overlapping concepts.
 
 ## Observation
 
@@ -12,6 +18,8 @@ description: Semantically compress ideas.
 - Collect its uses, counterexamples, neighboring concepts, and representations.
 
 ## Abduction
+
+_Devise an explanation for observations._
 
 - Define the concept before naming it.
 
@@ -27,22 +35,18 @@ description: Semantically compress ideas.
 
 ## Deduction
 
+_Derive consequences of the explanation._
+
 - State how examples, counterexamples, and neighboring concepts should classify under the synthesized concept.
 
 ## Induction
 
+_Test those consequences and provisionally retain or revise the explanation._
+
 - Apply the candidate concept and name to collected uses, counterexamples, and neighboring concepts.
 
-- Reject a candidate that decorates, merges concepts, or loses a necessary distinction.
+- Retain a concept only when it preserves a necessary distinction without decorating or merging concepts.
 
-- Retain the concept provisionally when its distinctions survive the test.
+- Reuse retained concepts and terms across each relevant representation.
 
-- Reuse retained concepts and terms across code, schemas, diagrams, documents, and conversation.
-
-- Keep unresolved aliases explicit rather than silently collapsing them.
-
-- Normalize equivalent representations when their variation carries no distinction.
-
-- Update or retire a concept or name when later evidence changes its grounded distinction.
-
-- Result: a ubiquitous language of precise concepts and names aligned across each relevant representation.
+- Keep unresolved aliases explicit, normalize meaningless variation, and update or retire a concept when evidence changes its grounded distinction.

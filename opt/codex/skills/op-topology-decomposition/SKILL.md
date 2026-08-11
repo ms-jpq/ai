@@ -5,7 +5,9 @@ description: Simplify flow across boundaries.
 
 # Topology Decomposition
 
-- Record the topology model in `.notes/`.
+## Artifact
+
+- A relational basis whose components can be reasoned about locally.
 
 ## Observation
 
@@ -31,6 +33,8 @@ description: Simplify flow across boundaries.
 
 ## Abduction
 
+_Devise an explanation for observations._
+
 - Reshape the topology where evidence exposes accidental coupling or distance.
 
   - Split an entangled concern.
@@ -51,13 +55,15 @@ description: Simplify flow across boundaries.
 
 ## Deduction
 
+_Derive consequences of the explanation._
+
 - State the expected effects on boundaries, dependencies, placement, and execution order.
 
 ## Induction
 
-- Verify every changed boundary and dependency.
+_Test those consequences and provisionally retain or revise the explanation._
 
-- Verify that the resulting execution order remains valid.
+- Verify changed boundaries, dependencies, and the resulting execution order.
 
 - Compare the proposed topology with the current one.
 
@@ -65,6 +71,4 @@ description: Simplify flow across boundaries.
 
   - Prefer the shape that makes the next change locally understandable and verifiable.
 
-- Record retained dependencies and why they cannot be removed.
-
-- Update the topology whenever later evidence contradicts a node, edge, boundary, or placement.
+- Record retained dependencies and update the topology when evidence contradicts a node, edge, boundary, or placement.
