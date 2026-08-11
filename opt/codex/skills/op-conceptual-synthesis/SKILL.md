@@ -43,7 +43,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the predicted classifications against collected uses, counterexamples, and neighboring concepts.
+- Test the derived consequences against collected uses, counterexamples, and neighboring concepts.
 
 - Retain a concept only when it preserves a necessary distinction without decorating or merging concepts.
 

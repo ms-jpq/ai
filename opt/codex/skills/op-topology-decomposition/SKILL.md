@@ -83,9 +83,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test whether the proposed concern set achieves the system concern.
-
-- Test changed boundaries, flows, and execution order.
+- Test the derived consequences against the affected system.
 
 - Compare the proposed topology with the current one.
 
