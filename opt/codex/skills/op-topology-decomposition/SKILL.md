@@ -43,10 +43,6 @@ _Devise an explanation for observations._
 
 - Diagnose what prevents the current concern set from achieving the system concern.
 
-  - A concern is missing, redundant, or assigned to the wrong element.
-
-  - A boundary or flow obstructs local reasoning or required order.
-
 - Hypothesize a covering set of concerns and a topology that achieves the system concern.
 
 - Explore candidate topology changes, including:
@@ -60,6 +56,8 @@ _Devise an explanation for observations._
   - Enclose a system as an element within a larger topology.
 
   - Apply any other change that yields a simpler basis of concerns, elements, and flows.
+
+### Heuristic
 
 ## Deduction
 
