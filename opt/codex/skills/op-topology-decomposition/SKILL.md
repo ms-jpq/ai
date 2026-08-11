@@ -7,6 +7,8 @@ description: Simplify flow across boundaries.
 
 ## Artifact
 
+- The system concern.
+
 - A covering set of concerns sufficient to achieve the system concern.
 
 - A basis of named elements, each defined by a primary concern and explicit boundary.
