@@ -7,8 +7,6 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - This skill proposes _operators_ as functions over the space of ideas, borrowing faculties from philosophy and mathematics.
 
-- The system model `S` is the input and output.
-
 ## Operators
 
 - An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every transformation in the space of ideas.
