@@ -61,7 +61,7 @@ _Devise an explanation for observations._
 
 ### Heuristic
 
-- Candidates for local reasonability is a strong signal for emergent concerns.
+- Candidates for local reasoning are a strong signal of emergent concerns.
 
 - Decomposition may temporarily increase complexity.
 
