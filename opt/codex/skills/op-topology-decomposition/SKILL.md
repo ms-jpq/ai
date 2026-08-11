@@ -15,6 +15,8 @@ description: Simplify flow across boundaries.
 
 - Containment and explicit flows between elements form the topology.
 
+  - Explicit source of cycles.
+
 ## Observation
 
 - Select the affected system.
