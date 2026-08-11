@@ -33,7 +33,9 @@ description: Simplify flow across boundaries.
 
 _Devise an explanation for observations._
 
-- Reshape the topology where evidence exposes accidental coupling, distance, or unnecessary flow.
+- Hypothesize how current boundaries and flows produce the observed coupling, distance, or ordering failure.
+
+- Propose a revised topology:
 
   - Split an entangled element.
 
@@ -47,19 +49,21 @@ _Devise an explanation for observations._
 
   - Integrate systems by merging their topologies and exposing shared flows.
 
-- Preserve external boundaries unless the topology model demonstrates they are wrong.
+- Treat external boundaries as fixed unless evidence invalidates them.
 
 ## Deduction
 
 _Derive consequences of the explanation._
 
-- State the expected effects on boundaries, flows, placement, and execution order.
+- Predict changes to boundaries, flows, placement, and execution order.
+
+- Predict that each changed element can be understood from its boundary and required flows.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Verify changed boundaries, flows, and the resulting execution order.
+- Test the predicted boundaries, flows, and execution order.
 
 - Compare the proposed topology with the current one.
 
