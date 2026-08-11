@@ -61,9 +61,11 @@ _Devise an explanation for observations._
 
 ### Heuristic
 
-Axiom: Decomposition may temporarily increase complexity.
+- Candidates for local reasonability is a strong signal for emergent concerns.
 
-- For deeply entangled subgraphs, temporarily aggregate elements that share any concern, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition. Then decompose the aggregate along that partition.
+- Decomposition may temporarily increase complexity.
+
+  - For deeply entangled subgraphs, temporarily aggregate elements that share any concern, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
 
 ## Deduction
 
