@@ -17,7 +17,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-1. **Decision-basis modeling** turns implicit, incomplete, or stale grounds into an explicit decision model that evidence can revise.
+1. **Decision-basis modeling** redefines the option space.
 
    - @../op-decision-basis-modeling/SKILL.md
 
