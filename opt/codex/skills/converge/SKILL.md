@@ -15,33 +15,33 @@ description: Apply Peircean inquiry: abduction, deduction, testing, and inductio
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-  1. **Problem formulation**: frames the problem itself, and clarifies the motivation.
+  1. **Problem formulation** frames the problem itself, and clarifies the motivation.
 
      - @../op-problem-formulation/SKILL.md
 
-  2. **Topology decomposition**: find and reshape the boundaries of the systems.
+  2. **Topology decomposition** find and reshape the boundaries of the systems.
 
      - @../op-topology-decomposition/SKILL.md
 
-  3. **Deliberative exploration**: generate alternatives by varying the assumptions, constraints, and framing.
+  3. **Deliberative exploration** generate alternatives by varying the assumptions, constraints, and framing.
 
      - @../op-deliberative-exploration/SKILL.md
 
-  4. **Conceptual synthesis**: give consistent names to useful ideas; semantic compression.
+  4. **Conceptual synthesis** give consistent names to semantcally compress ideas.
 
      - @../op-conceptual-synthesis/SKILL.md
 
 ## Loop
 
-- Each convergence operation carries the cycle of Abduction, Deduction, Induction.
+- Each convergence operation carries `abduction → deduction → induction → abduction`.
 
-  - **Abduction**: Inventing explanation given unexpected observations.
+- **Abduction** Forming explanation from unexpected observation.
 
-  - **Deduction**: Deriving predictions given exploration.
+- **Deduction** Deriving prediction given explanation.
 
-  - **Induction** Judging the explanation given prediction outcomes.
+- **Induction** Judging explanation given prediction outcome.
 
-  - Outcomes that contradict predictions loop back to Abduction.
+- Outcome that contradict prediction circle back to Abduction.
 
 ## Method
 
