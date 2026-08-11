@@ -9,17 +9,19 @@ Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable
 
 ## Observation
 
-- Select one wording, claim, hierarchy defect, or reader goal per pass.
+- Select one reader-facing defect per pass.
 
-- Record the current text, the reader's goal, knowledge, and vocabulary, and the intended improvement.
-
-- Break prose into point form.
-
-  - One claim per bullet.
+- Record the current text, the reader's goal, knowledge, and vocabulary.
 
 ## Abduction
 
 _Devise a refinement hypothesis for the reader and local context._
+
+- Devise a revision that makes the intended reading, decision, or action easier.
+
+- Break prose into point form.
+
+  - One claim per bullet.
 
 - Replace vague words with precise ones; remove words that do not change the claim.
 
@@ -29,7 +31,7 @@ _Devise a refinement hypothesis for the reader and local context._
 
 - Add missing domain context; omit explanation already established by context.
 
-- Resolve materially different readings and claims that cannot simultaneously hold.
+- Resolve incompatible readings or claims.
 
 - Group related claims beneath a parent claim.
 
@@ -41,17 +43,19 @@ _Devise a refinement hypothesis for the reader and local context._
 
 _Derive consequences of the refinement hypothesis._
 
-- State the reading, decision, or action the revised prose should make easier.
+- Predict the reading, decision, or action the revision should make easier.
 
 ## Induction
 
 _Test that consequence and provisionally retain or revise the refinement._
 
-- Test the revision against competing readings, factual constraints, and the reader's goal.
+- Test the predicted outcome against competing readings, factual constraints, and the reader's goal.
 
 - Remove absolutes not supported by evidence and hedges not required by uncertainty.
 
-- Re-read the prose in local context and apply the observed result to the next pass.
+- Retain or revise the hypothesis, then re-read the prose in local context.
+
+## Application
 
 - Ask one question per turn when the reader must choose between tradeoffs.
 

@@ -11,9 +11,9 @@ Use @../op-topology-decomposition/SKILL.md.
 
 ## Observation
 
-- Select one concern, contract, control-flow or data-flow change per pass.
+- Select one affected concern, contract, control flow, or data flow per pass.
 
-- Bound the domain as contracts and follow data from entry points to exit points.
+- Identify the affected entry points, exits, and governing contracts.
 
 - Record the current tests, types, effects, and topology.
 
@@ -21,30 +21,34 @@ Use @../op-topology-decomposition/SKILL.md.
 
 _Devise a structural explanation and refactoring hypothesis._
 
-- Move or resize boundaries to de-complect responsibilities.
+- Hypothesize a topology change that explains the observed complexity and improves locality.
 
-- Preserve contracts by default; improve them only when locally verifiable.
+- Explore candidate changes, including:
 
-- Divide the flow into stages with explicit contracts.
+  - Move or resize boundaries to de-complect responsibilities.
 
-- Lift branches toward entry points and push loops toward leaf operations.
+  - Divide the flow into stages with explicit contracts.
+
+  - Lift branches toward entry points and push loops toward leaf operations.
 
 ## Deduction
 
 _Derive consequences of the refactoring hypothesis._
 
-- State the expected effect on locality, contracts, verification, and resulting data flow.
+- Derive observable consequences:
+
+  - Affected contracts remain valid or have a locally verifiable delta.
+
+  - Changed flows become more local and stages more explicit.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the hypothesis._
 
-- Run relevant tests and check contracts, types, effects, and resulting data flow.
+- Test the derived consequences with relevant tests, types, contract checks, and effect checks.
 
 - Reject a refactor that leaves the next change less local or less verifiable.
 
-- Re-model the topology and apply the observed result to the next pass.
+- Use the observed result to retain, revise, or re-model the topology for the next pass.
 
-- Stop when the flow is laminar: direct, staged, and unsurprising.
-
-- Surface a design or plan when evidence requires broader judgment, migration, or coordination.
+- Surface a design or plan when broader judgment, migration, or coordination is required.
