@@ -39,8 +39,6 @@ _Devise an explanation for observations._
 
   - Merge elements that cannot be independently understood or verified.
 
-  - Remove an accidental flow or make a necessary one explicit.
-
   - Split an entangled element.
 
   - Integrate systems by merging their topologies and exposing shared flows.
