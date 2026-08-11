@@ -7,7 +7,9 @@ description: Simplify flow across boundaries.
 
 ## Artifact
 
-- A relational basis whose components can be reasoned about locally.
+- A basis of named components and their relations that forms the system topology.
+
+  - Each component can be reasoned about locally.
 
 ## Observation
 
