@@ -36,6 +36,12 @@ _belief independent of evidence_
 
 ---
 
+# Observations on Simplicity
+
+- A rigorously correct is simpler than accidentally correct.
+
+---
+
 ## Communication
 
 - Break prose into bullet points. One claim per bullet.
