@@ -51,6 +51,8 @@ _Devise an explanation for observations._
 
   - Merge elements that cannot be independently understood or verified.
 
+  - Merge elements that share the same concerns.
+
   - Split an element that holds independent concerns.
 
   - Enclose a system as an element within a larger topology.
@@ -58,6 +60,10 @@ _Devise an explanation for observations._
   - Apply any other change that yields a simpler basis of concerns, elements, and flows.
 
 ### Heuristic
+
+Axiom: Decomposition may temporarily increase complexity.
+
+- For deeply entangled subgraphs, temporarily aggregate elements that share any concern, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition. Then decompose the aggregate along that partition.
 
 ## Deduction
 
