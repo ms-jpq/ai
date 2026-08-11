@@ -7,9 +7,9 @@ description: Simplify flow across boundaries.
 
 ## Artifact
 
-- A basis of named components defined by their boundary contracts.
+- A basis of named elements, each defined by an explicit boundary.
 
-- The flow between this set of components forms the topology.
+- Explicit flows between elements form the topology.
 
 ## Observation
 
