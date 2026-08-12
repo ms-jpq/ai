@@ -54,6 +54,13 @@ const schemaKey = (value: unknown): string | undefined => {
   return typeof declaration === "string" ? declaration : undefined
 }
 
+const document = (path: string, value: unknown): Schema => ({ ...schema(value), $id: pathToFileURL(path).href })
+
+const readSchema = async (path: string): Promise<Schema> => {
+  const source = await readFile(path, encoding)
+  return document(path, parseSource(path, source))
+}
+
 const loader = (): ((uri: string) => Promise<Schema>) => {
   const schemas = new Map<string, Schema>()
 
@@ -64,8 +71,7 @@ const loader = (): ((uri: string) => Promise<Schema>) => {
       return existing
     }
 
-    const source = await readFile(path, encoding)
-    const loaded = { ...schema(parseSource(path, source)), $id: pathToFileURL(path).href }
+    const loaded = await readSchema(path)
     schemas.set(path, loaded)
     return loaded
   }
@@ -81,22 +87,15 @@ const validate = async (path: string, { source }: { source: string }): Promise<v
 
   const ajv = new Ajv2020({ allErrors: true, loadSchema: loader() })
   if (schemaDeclaration.startsWith("https://json-schema.org/draft/")) {
-    await ajv.compileAsync({ ...schema(data), $id: pathToFileURL(path).href })
+    await ajv.compileAsync(document(path, data))
     return
   }
 
   const schemaPath = resolve(dirname(path), schemaDeclaration)
-  const schemaSource = await readFile(schemaPath, encoding)
-  const validator = await ajv.compileAsync({
-    ...schema(parseSource(schemaPath, schemaSource)),
-    $id: pathToFileURL(schemaPath).href,
-  })
-  const valid = validator(data)
-  if (valid) {
-    return
+  const validator = await ajv.compileAsync(await readSchema(schemaPath))
+  if (!validator(data)) {
+    throw new Error(ajv.errorsText(validator.errors))
   }
-
-  throw new Error(ajv.errorsText(validator.errors))
 }
 
 const main = async (): Promise<number> => {
