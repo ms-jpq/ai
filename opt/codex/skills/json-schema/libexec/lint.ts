@@ -1,37 +1,39 @@
 #!/usr/bin/env -S -- node
 
 import { ok } from "node:assert/strict"
-import { execFile as execFile_ } from "node:child_process"
 import { readFile } from "node:fs/promises"
 import { EOL } from "node:os"
-import { dirname, resolve } from "node:path"
-import { argv, exit, stderr } from "node:process"
+import { dirname, extname, resolve } from "node:path"
+import process, { argv, stderr } from "node:process"
 import { fileURLToPath, pathToFileURL } from "node:url"
-import { promisify } from "node:util"
 
 import { Ajv2020 } from "ajv/dist/2020.js"
+import { parse } from "yaml"
 
 type Schema = Record<string, unknown>
 
 const encoding = "utf8"
-const execFile = promisify(execFile_)
 
-const parse = async (path: string): Promise<unknown> => {
-  const { stdout } = await execFile(
-    "yq",
-    ["--yaml-fix-merge-anchor-to-spec", "--output-format=json", "--unwrapScalar=false", ".", "--", path],
-    { encoding },
-  )
-  return JSON.parse(stdout)
+const parseSource = (path: string, source: string): unknown => {
+  switch (extname(path)) {
+    case ".json":
+      return JSON.parse(source)
+    case ".yaml":
+    case ".yml":
+      return parse(source, { merge: true })
+    default:
+      return {}
+  }
 }
 
 const schema = (value: unknown): Schema => {
-  ok(typeof value === "object" && value !== null && !Array.isArray(value))
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    ok(false)
+  }
   return Object.fromEntries(Object.entries(value))
 }
 
-const modeline = async (path: string): Promise<string | undefined> => {
-  const source = await readFile(path, encoding)
+const modeline = (source: string): string | undefined => {
   const [first = ""] = source.split(EOL, 1)
   const lsp = /^\s*(?:#|\/\/)?\s*(?:yaml|json)-language-server:\s*\$schema=(\S+)\s*$/.exec(first)
   const taplo = /^\s*#:schema\s+(\S+)\s*$/.exec(first)
@@ -52,8 +54,6 @@ const schemaKey = (value: unknown): string | undefined => {
   return typeof declaration === "string" ? declaration : undefined
 }
 
-const read = async (path: string): Promise<Schema> => schema(await parse(path))
-
 const loader = (): ((uri: string) => Promise<Schema>) => {
   const schemas = new Map<string, Schema>()
 
@@ -64,35 +64,39 @@ const loader = (): ((uri: string) => Promise<Schema>) => {
       return existing
     }
 
-    const schema = { ...(await read(path)), $id: pathToFileURL(path).href }
-    schemas.set(path, schema)
-    return schema
+    const source = await readFile(path, encoding)
+    const loaded = { ...schema(parseSource(path, source)), $id: pathToFileURL(path).href }
+    schemas.set(path, loaded)
+    return loaded
   }
 }
 
-const validate = async (dataPath: string): Promise<number> => {
-  const path = resolve(dataPath)
-  const [data, declaration] = await Promise.all([parse(path), modeline(path)])
+const validate = async (path: string, { source }: { source: string }): Promise<void> => {
+  const data = parseSource(path, source)
+  const declaration = modeline(source)
   const schemaDeclaration = declaration ?? schemaKey(data)
   if (schemaDeclaration === undefined) {
-    return 0
+    return
   }
 
   const ajv = new Ajv2020({ allErrors: true, loadSchema: loader() })
   if (schemaDeclaration.startsWith("https://json-schema.org/draft/")) {
     await ajv.compileAsync({ ...schema(data), $id: pathToFileURL(path).href })
-    return 0
+    return
   }
 
   const schemaPath = resolve(dirname(path), schemaDeclaration)
-  const validator = await ajv.compileAsync({ ...(await read(schemaPath)), $id: pathToFileURL(schemaPath).href })
+  const schemaSource = await readFile(schemaPath, encoding)
+  const validator = await ajv.compileAsync({
+    ...schema(parseSource(schemaPath, schemaSource)),
+    $id: pathToFileURL(schemaPath).href,
+  })
   const valid = validator(data)
   if (valid) {
-    return 0
+    return
   }
 
-  stderr.write(`${dataPath} invalid${EOL}${ajv.errorsText(validator.errors)}${EOL}`)
-  return 1
+  throw new Error(ajv.errorsText(validator.errors))
 }
 
 const main = async (): Promise<number> => {
@@ -100,12 +104,15 @@ const main = async (): Promise<number> => {
   ok(dataPath !== undefined)
 
   try {
-    return await validate(dataPath)
+    const path = resolve(dataPath)
+    const source = await readFile(path, encoding)
+    await validate(path, { source })
+    return 0
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error)
-    stderr.write(`${dataPath} invalid${EOL}${message}${EOL}`)
+    stderr.write(`Invalid: ${dataPath}${EOL}${message}${EOL}`)
     return 1
   }
 }
 
-exit(await main())
+process.exitCode = await main()
