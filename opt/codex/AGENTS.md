@@ -34,7 +34,7 @@ _belief independent of evidence_
 
 - Carefully read @./skills/converge/SKILL.md
 
-- Apply it when surprise, a lack of clarity, or recurring failure exposes a model gap.
+- Apply it when either the user or agent experiences surprise, a lack of clarity, a failure, or a bug.
 
 ---
 
