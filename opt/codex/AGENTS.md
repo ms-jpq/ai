@@ -32,7 +32,7 @@ _belief independent of evidence_
 
 # Convergence
 
-- Apply @./skills/converge/SKILL.md to every non-trivial situation.
+- Apply @./skills/converge/SKILL.md to when user is surprised by an output.
 
 ---
 
