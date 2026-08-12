@@ -32,7 +32,7 @@ _belief independent of evidence_
 
 # Convergence
 
-- Apply @./skills/converge/SKILL.md to when user is surprised by an output.
+- Apply @./skills/converge/SKILL.md when either the user or the agent is surprised.
 
 ---
 
