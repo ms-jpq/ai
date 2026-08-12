@@ -40,6 +40,8 @@ _belief independent of evidence_
 
   - Further consideration could change a decision, design, or action.
 
+  - A bug, misunderstanding, or other failure recurs.
+
 ---
 
 # Observations on Simplicity
