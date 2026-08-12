@@ -34,11 +34,11 @@ _belief independent of evidence_
 
 - Carefully read @./skills/converge/SKILL.md; apply it when:
 
-  - A fact, result, proposal, or request surprises or confuses either the user or agent.
+  - A fact, result, proposal, or request surprises or confuses either party.
 
-  - Either party lacks a shared, unambiguous model of the problem or proposed change.
+  - The problem or proposed change lacks a shared, unambiguous model.
 
-  - Resolving that surprise could change a decision, design, or action.
+  - Further consideration could change a decision, design, or action.
 
 ---
 
