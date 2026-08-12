@@ -32,7 +32,7 @@ _belief independent of evidence_
 
 # Convergence
 
-- Carefully read @./skills/converge/SKILL.md; apply it when:
+- Carefully read @./skills/converge/SKILL.md ; apply it when:
 
   - A fact, result, proposal, or request surprises or confuses either party.
 
