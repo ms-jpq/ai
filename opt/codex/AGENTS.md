@@ -32,7 +32,13 @@ _belief independent of evidence_
 
 # Convergence
 
-- Apply @./skills/converge/SKILL.md when surprise interrupts either the user or agent's expectations.
+- Carefully read @./skills/converge/SKILL.md; apply it when:
+
+  - A fact, result, proposal, or request surprises or confuses either the user or agent.
+
+  - Either party lacks a shared, unambiguous model of the problem or proposed change.
+
+  - Resolving that surprise could change a decision, design, or action.
 
 ---
 
