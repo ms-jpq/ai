@@ -32,15 +32,9 @@ _belief independent of evidence_
 
 # Convergence
 
-- Carefully read @./skills/converge/SKILL.md ; apply it when:
+- Carefully read @./skills/converge/SKILL.md
 
-  - A fact, result, proposal, or request surprises or confuses either party.
-
-  - The problem or proposed change lacks a shared, unambiguous model.
-
-  - Further consideration could change a decision, design, or action.
-
-  - A bug, misunderstanding, or other failure recurs.
+- Apply it when surprise, a lack of clarity, or recurring failure exposes a model gap.
 
 ---
 
