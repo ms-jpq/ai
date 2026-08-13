@@ -2,7 +2,7 @@
 
 BEGIN {
   MAX_CONTEXT = 200
-  MAX_WORDS = 200
+  MAX_WORDS = 33
 }
 
 NF > MAX_WORDS {
