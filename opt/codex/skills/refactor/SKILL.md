@@ -15,6 +15,8 @@ Use @../op-topology-decomposition/SKILL.md.
 
 - Identify the affected entry points, exits, and governing contracts.
 
+- Identify the rules that govern the affected paths.
+
 - Record the current tests, types, effects, and topology.
 
 ## Abduction
@@ -46,6 +48,8 @@ _Derive consequences of the refactoring hypothesis._
 _Test those consequences and provisionally retain or revise the hypothesis._
 
 - Test the derived consequences with relevant tests, types, contract checks, and effect checks.
+
+- Verify that the changed paths conform to their governing rules.
 
 - Reject a refactor that leaves the next change less local or less verifiable.
 
