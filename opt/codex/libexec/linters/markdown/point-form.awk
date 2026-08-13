@@ -2,11 +2,11 @@
 
 BEGIN {
   MAX_CONTEXT = 200
-  MAX_LENGTH = 300
+  MAX_WORDS = 200
 }
 
-length($0) > MAX_LENGTH {
-  printf "> Consider point form; line exceeds %d characters.\n", MAX_LENGTH
+NF > MAX_WORDS {
+  printf "> Consider point form; line exceeds %d words.\n", MAX_WORDS
   printf "> %s:%d\n", FILENAME, FNR
   if (length($0) > MAX_CONTEXT) {
     printf "> %s...\n", substr($0, 1, MAX_CONTEXT)
