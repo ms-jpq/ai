@@ -63,6 +63,8 @@ _Devise an explanation for observations._
 
 - Candidates for local reasoning are a strong signal of emergent concerns.
 
+- Push branches up and loops down.
+
 - Decomposition may temporarily increase complexity.
 
   - For deeply entangled subgraphs, temporarily aggregate elements that share any concern across hierarchy levels, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
