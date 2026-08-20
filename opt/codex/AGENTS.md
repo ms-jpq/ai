@@ -40,7 +40,9 @@ _belief independent of evidence_
 
 # Observations on Simplicity
 
-- A rigorously correct is simpler than incidentally correct.
+- Irreducible complexity vs accidental complexity.
+
+- Rigorously correct is simpler than incidentally correct.
 
 ---
 
