@@ -1,3 +1,3 @@
 # Planning
 
-**Do not use plan mode.**
+**Do not use Plan Mode.** Maintain system designs under `.notes/design/<topic>.md`.
