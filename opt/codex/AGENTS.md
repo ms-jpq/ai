@@ -49,3 +49,5 @@ _belief independent of evidence_
 ## Communication
 
 - Break prose into bullet points. One claim per bullet.
+
+- Keep accumulated working context out of human-readable artifacts.
