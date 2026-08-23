@@ -46,7 +46,7 @@ _belief independent of evidence_
 
 ---
 
-## Communication
+# Communication
 
 - Break prose into bullet points. One claim per bullet.
 
