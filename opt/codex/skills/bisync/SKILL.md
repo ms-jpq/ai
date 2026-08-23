@@ -3,19 +3,17 @@ name: bisync
 description: Reconcile two system representations while preserving authorized changes and explicit conflicts.
 ---
 
-Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
-
-Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatible terms.
-
 # Bisync
 
 `bisync <src> <dst>` reconciles two representations of one system.
 
 - Typical operands are a system description and the system itself.
 
-- `src` and `dst` are peers during diagnosis.
+- Do not treat either representation as authoritative until evidence, authority, and intent establish the reconciliation direction.
 
-- Authority, evidence, and intent determine which representation changes.
+Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
+
+Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatible terms.
 
 ## Observation
 
