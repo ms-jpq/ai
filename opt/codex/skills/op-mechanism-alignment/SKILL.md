@@ -23,7 +23,7 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 ## Observation
 
-- Take the framed concerns, their rankings, and their evidence as the operand.
+- Take the framed concerns, priorities, and evidence as the operand.
 
 - Record mechanisms already intended, operating, or proposed.
 
@@ -61,7 +61,7 @@ _Derive consequences of the explanation._
 
 - Predict that every salient concern is covered or remains an explicit gap.
 
-- Predict what evidence would require the mechanism, its mapping, or its concern rank to change.
+- Predict what evidence would require the mechanism, its mapping, or its concern priority to change.
 
 ## Induction
 
@@ -77,4 +77,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retain the smallest mechanism basis that preserves required coverage.
 
-- Revise the mechanism, mapping, or concern rank when evaluation exposes a gap.
+- Revise the mechanism, mapping, or concern priority when evaluation exposes a gap.

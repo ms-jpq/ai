@@ -1,6 +1,6 @@
 ---
 name: op-problem-framing
-description: Classify a system's obstructing problems and rank their concerns.
+description: Classify a system's obstructing problems and prioritize their concerns.
 ---
 
 # Problem Framing
@@ -9,11 +9,11 @@ description: Classify a system's obstructing problems and rank their concerns.
 
 - A working, covering hierarchy of named problems that explains resistance to the system concern.
 
-- An enumeration of concerns implied by each problem, ranked by salience.
+- An enumeration of concerns implied by each problem, prioritized by salience.
 
-  - The classification supplies candidate concerns; the frame ranks them for the system.
+  - The classification supplies candidate concerns; the frame prioritizes them for the system.
 
-  - Every enumerated concern remains in the ranking; later evaluation may revise its salience.
+  - Every enumerated concern remains in scope; later evaluation may revise its priority.
 
 ## Observation
 
@@ -41,9 +41,9 @@ _Devise an explanation for observations._
 
   - Separate independent, coupled, and nested problems.
 
-- Enumerate and rank the concerns implied by each problem.
+- Enumerate and prioritize the concerns implied by each problem.
 
-  - State why each concern matters here and why it has its rank.
+  - State why each concern matters here and why it has its priority.
 
   - Report a boundary conflict to Purpose Formation.
 
@@ -53,23 +53,23 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive observations that distinguish competing problem hierarchies and rankings.
+- Derive observations that distinguish competing problem hierarchies and priorities.
 
 - Predict how resolving each problem would advance the system concern.
 
 - Predict which salient concerns require structural embodiment and which do not.
 
-- Predict which omissions, relations, or rankings would make the frame inadequate.
+- Predict which omissions, relations, or priorities would make the frame inadequate.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the hierarchy and rankings against observed resistance and alternatives.
+- Test the hierarchy and priorities against observed resistance and alternatives.
 
 - Retain concerns only when they cover a resistance or could change its response or consequences.
 
-- Revise a problem, its relation, or its concern rank when later evaluation exposes a gap.
+- Revise a problem, its relation, or its concern priority when later evaluation exposes a gap.
 
 ## Classic Problems
 
