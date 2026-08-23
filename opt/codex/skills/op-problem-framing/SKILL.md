@@ -81,6 +81,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Revise the problem hierarchy or rank when later evaluation exposes a gap.
 
-## Classical Problems
+## Classic Problems
 
 - Read [Classic Problems](references/Classic-Problems.md) when classifying a situation's problems.
