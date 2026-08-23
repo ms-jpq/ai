@@ -51,4 +51,6 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 ---
 
-Notes: unresolved: modeling projection
+Notes:
+
+- Elegance can be quantified by having a minimal basis for problems, concerns, and mechanisms.
