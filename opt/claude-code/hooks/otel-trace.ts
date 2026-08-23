@@ -78,7 +78,32 @@ type TranscriptMeta = Readonly<{
   debugExpr: string
 }>
 
-type MessageBlock = string | BetaContentBlock | BetaContentBlockParam
+type BrowserStateBlock = Readonly<{
+  type: "browser_state"
+  tabs: readonly Readonly<{ tab_id: string; title: string; url: string; active?: boolean }>[]
+  state_changes?: readonly unknown[] | null
+}>
+
+type ToolChangeBlock = Readonly<{
+  type: "tool_addition" | "tool_removal"
+  tool: unknown
+}>
+
+type MidConversationSystemBlock = Readonly<{
+  type: "mid_conv_system"
+  content: readonly Readonly<{ text: string }>[]
+}>
+
+type MessageBlock =
+  | string
+  | BetaContentBlock
+  | BetaContentBlockParam
+  | ToolChangeBlock
+  | MidConversationSystemBlock
+
+type ToolResultContent =
+  | Extract<Exclude<MessageBlock, string>, { type: "tool_result" | "mcp_tool_result" }>["content"]
+  | readonly BrowserStateBlock[]
 
 const META: unique symbol = Symbol("transcript-meta")
 type TranscriptMessage = Readonly<
@@ -511,6 +536,36 @@ const serverToolResponse = (content: ServerToolResultContent) => {
   }
 }
 
+const toolResultValue = (content: ToolResultContent): unknown => {
+  if (content === undefined || typeof content === "string") {
+    return content
+  }
+
+  return collapseSingleton(
+    content.map((item) => {
+      switch (item.type) {
+        case "text":
+          return item.text
+        case "image":
+          return imageValue(item)
+        case "document":
+          return documentValue(item)
+        case "search_result":
+          return { source: item.source, title: item.title }
+        case "tool_reference":
+          return item.tool_name
+        case "browser_state":
+          return {
+            tabs: item.tabs,
+            ...(item.state_changes ? { state_changes: item.state_changes } : {}),
+          }
+        default:
+          fail(item satisfies never)
+      }
+    }),
+  )
+}
+
 const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefined => {
   if (typeof block === "string") {
     return extractChat({ role, part: { type: "text", content: block } })
@@ -604,33 +659,9 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
       })
     case "tool_result":
     case "mcp_tool_result": {
-      const value = (() => {
-        const { content } = block
-        if (content === undefined || typeof content === "string") {
-          return content
-        }
-        return collapseSingleton(
-          content.map((item) => {
-            switch (item.type) {
-              case "text":
-                return item.text
-              case "image":
-                return imageValue(item)
-              case "document":
-                return documentValue(item)
-              case "search_result":
-                return { source: item.source, title: item.title }
-              case "tool_reference":
-                return item.tool_name
-              default:
-                fail(item satisfies never)
-            }
-          }),
-        )
-      })()
       return extractToolResult({
         correlationId: block.tool_use_id,
-        value,
+        value: toolResultValue(block.content),
         error: block.is_error ? "_OTHER" : undefined,
       })
     }
@@ -644,6 +675,12 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         toolType: "extension",
         value: { file_id: block.file_id },
       } satisfies ExtractedBlock
+    case "tool_addition":
+    case "tool_removal":
+      return extractChat({
+        role,
+        part: { type: "text", content: `[${block.type}]` },
+      })
     case "mid_conv_system":
       return extractChat({
         role,
