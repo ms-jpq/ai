@@ -13,19 +13,21 @@ Use @../op-conceptual-synthesis/SKILL.md to give parts, contracts, and flows con
 
 ## Observation
 
-- Select one affected concern, contract, control flow, or data flow per pass.
+- Select one refactoring problem and its required behavioral preservation or intended delta.
 
-- Identify the affected entry points, exits, and governing contracts.
+- Identify the affected entry points, exits, and contracts.
 
-- Identify the rules that govern the affected paths.
+- Establish a passing baseline with existing tests or new characterization tests.
 
-- Record the current tests, types, effects, and topology.
+  - Cover a normal case, a boundary case, and relevant failure behavior.
 
 ## Abduction
 
 _Devise a structural explanation and refactoring hypothesis._
 
-- Hypothesize a topology change that explains the observed complexity and improves locality.
+- Propose a structural change that resolves the framed concern while preserving the baseline.
+
+- State every intended behavioral or contract delta explicitly.
 
 - Explore candidate changes, including:
 
@@ -39,22 +41,22 @@ _Devise a structural explanation and refactoring hypothesis._
 
 _Derive consequences of the refactoring hypothesis._
 
-- Derive observable consequences:
+- Derive executable claims:
 
-  - Affected contracts remain valid or have a locally verifiable delta.
+  - Characterization tests remain valid except at each stated delta.
 
-  - Changed flows become more local and stages more explicit.
+  - Each stated delta has a test that distinguishes it from a regression.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the hypothesis._
 
-- Test the derived consequences with relevant tests, types, contract checks, and effect checks.
+- Add or update the tests derived above.
 
-- Verify that the changed paths conform to their governing rules.
+- Run the affected tests, types, contract checks, and effect checks.
 
-- Reject a refactor that leaves the next change less local or less verifiable.
+- Reject a refactor when a preserved behavior changes or a stated delta lacks a discriminating test.
 
-- Use the observed result to retain, revise, or re-model the topology for the next pass.
+- Retain the refactor only when the tests pass and the next change is more local or verifiable.
 
 - Surface a design or plan when broader judgment, migration, or coordination is required.
