@@ -1,25 +1,21 @@
 ---
 name: op-problem-framing
-description: Provisionally classify a situation's problems to enumerate and rank its concerns.
+description: Provisionally classify a system's problems to enumerate and rank its concerns.
 ---
 
 # Problem Framing
 
 ## Artifact
 
-- The system concern that the frame must achieve.
-
 - A working, covering hierarchy of classified problems sufficient to achieve the system concern.
 
 - An enumeration of concerns implied by each classified problem, ranked by salience.
 
-  - The classification supplies candidate concerns; the frame ranks them for this situation.
+  - The classification supplies candidate concerns; the frame ranks them for the system.
 
   - Every enumerated concern remains in the ranking; later evaluation may revise its salience.
 
 ## Observation
-
-- Describe the encountered system, its concern, and its external boundary without proposing a response.
 
 - Record its resistance: surprise, conflict, uncertainty, failure, or unmet intention.
 
@@ -31,7 +27,7 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
 - Record current concerns and their candidate relations to the problems.
 
-- Record existing terms, boundaries, and commitments that shape the situation.
+- Use the established system concern, boundary, authority, and commitments.
 
 - Keep problems distinct until evidence establishes their relation.
 
@@ -75,7 +71,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the problem hierarchy and rankings against the situation and alternatives.
+- Test the problem hierarchy and rankings against the system and alternatives.
 
 - Retain concerns only when they cover a resistance or could change its response or consequences.
 
