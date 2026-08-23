@@ -15,11 +15,11 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-0. **Purpose Formation:** Form and revise the system concern that guides the remaining operators.
+0. **Purpose Formation:** Form and revise the system purpose that guides the remaining operators.
 
    - @../op-purpose-formation/SKILL.md
 
-1. **Problem Framing:** Classify a system's obstructing problems and rank their concerns.
+1. **Problem Framing:** Classify a system's obstructing problems and prioritize their concerns.
 
    - @../op-problem-framing/SKILL.md
 
@@ -35,7 +35,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
    - @../op-mechanism-alignment/SKILL.md
 
-_Quantify elegance by the smallest problem, concern, and mechanism bases that preserve the required effects._
+_Quantify elegance by the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose._
 
 ## Inquiry
 
