@@ -7,29 +7,19 @@ description: Iteratively reshape concern boundaries.
 
 ## Artifact
 
-- A nested basis of named elements, each defined by a primary concern and explicit boundary.
+- A named element hierarchy with explicit boundaries and flows.
 
 - An explicit mapping from framed concerns to elements.
-
-- Containment and explicit flows between elements form the topology.
 
   - Note each cycle, its source, and whether it is a precedence constraint, iteration, or feedback loop.
 
 ## Observation
 
-- Select the affected system; state its external boundary and ordering constraints.
+- Record the affected system's elements, boundaries, containment, flows, and ordering constraints.
 
-- Identify its current elements and containment hierarchy.
+- Map framed concerns to their current elements.
 
-  - Map framed concerns to their current elements.
-
-  - Record each element's boundary, containment, placement, and required context.
-
-- Map each flow's direction and dependency.
-
-- Enclose each retained iterative process or feedback loop as an explicit element, then derive execution order from the resulting flow graph.
-
-  - Record each cycle that prevents a required order as a candidate topology change.
+- Record each cycle that prevents a required order as a candidate topology change.
 
 ## Abduction
 
@@ -59,8 +49,6 @@ _Devise an explanation for observations._
 
 ### Heuristic
 
-- Candidates for local reasoning are a strong signal of emergent concerns.
-
 - Push branches up and loops down.
 
 - Recomposition may temporarily increase complexity.
@@ -75,7 +63,7 @@ _Derive consequences of the explanation._
 
   - Each framed concern has an explicit structural embodiment or a reason it needs none.
 
-  - Each changed element has one primary concern, a justified place in the containment hierarchy, and explicit cross-cutting concerns.
+  - Each changed element has a justified boundary and place in the containment hierarchy.
 
   - Its acyclic flow graph yields the required execution order; each retained cycle is an explicit iteration or feedback element.
 
@@ -85,7 +73,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the derived consequences by comparing the proposed topology with the current one.
 
-  - Count concerns, concern-to-element mappings, elements, containment relations, boundaries, flows, exceptions, and remote reads.
+  - Count mappings, elements, containment relations, boundaries, flows, exceptions, and remote reads.
 
   - Prefer the shape that makes the next change locally understandable and verifiable.
 
