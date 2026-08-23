@@ -8,6 +8,7 @@
 |   `-- ...
 |-- .notes/
 |   |-- design/
+|   |-- plans/
 |   |-- research/
 |   |-- tasks/
 |   |-- worktrees/
