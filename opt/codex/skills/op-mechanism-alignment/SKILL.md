@@ -15,8 +15,6 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 - An explicit concern-to-mechanism mapping.
 
-  - Each mapping states expected effects, assumptions, and revision triggers.
-
   - Shared mappings state the causal path that covers their concerns.
 
 - An explicit gap for each salient concern without an understood mechanism.
