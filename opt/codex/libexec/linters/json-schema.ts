@@ -7,7 +7,9 @@ import { dirname, extname, resolve } from "node:path"
 import process, { argv, stderr } from "node:process"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
+import { fullFormats } from "ajv-formats/dist/formats.js"
 import { Ajv2020 } from "ajv/dist/2020.js"
+import { Ajv } from "ajv/dist/ajv.js"
 import { parse } from "yaml"
 
 type Schema = Record<string, unknown>
@@ -54,27 +56,65 @@ const schemaKey = (value: unknown): string | undefined => {
   return typeof declaration === "string" ? declaration : undefined
 }
 
-const document = (path: string, value: unknown): Schema => ({ ...schema(value), $id: pathToFileURL(path).href })
+const document = (uri: string, value: unknown): Schema => ({ ...schema(value), $id: uri })
 
-const readSchema = async (path: string): Promise<Schema> => {
-  const source = await readFile(path, encoding)
-  return document(path, parseSource(path, source))
+const schemaUri = (uri: string): string => {
+  const location = new URL(uri)
+  location.hash = ""
+  return location.href
+}
+
+const readSchema = async (uri: string): Promise<Schema> => {
+  const location = new URL(uri)
+  location.hash = ""
+
+  switch (location.protocol) {
+    case "file:": {
+      const path = fileURLToPath(location)
+      const source = await readFile(path, encoding)
+      return document(location.href, parseSource(path, source))
+    }
+    case "http:":
+    case "https:": {
+      const response = await fetch(location)
+      if (!response.ok) {
+        throw new Error(`Unable to fetch schema: ${location.href} (${response.status} ${response.statusText})`)
+      }
+
+      const source = await response.text()
+      const resolved = new URL(response.url)
+      resolved.hash = ""
+      return document(resolved.href, parseSource(resolved.pathname, source))
+    }
+    default:
+      throw new Error(`Unsupported schema URI: ${location.href}`)
+  }
 }
 
 const loader = (): ((uri: string) => Promise<Schema>) => {
-  const schemas = new Map<string, Schema>()
+  const schemas = new Map<string, Promise<Schema>>()
 
   return async (uri: string): Promise<Schema> => {
-    const path = fileURLToPath(uri)
-    const existing = schemas.get(path)
+    const location = schemaUri(uri)
+    const existing = schemas.get(location)
     if (existing !== undefined) {
       return existing
     }
 
-    const loaded = await readSchema(path)
-    schemas.set(path, loaded)
+    const loaded = readSchema(location)
+    schemas.set(location, loaded)
     return loaded
   }
+}
+
+const newValidator = (schemaDeclaration: string, loadSchema: (uri: string) => Promise<Schema>): Ajv | Ajv2020 => {
+  const ajv = schemaDeclaration.includes("draft-07")
+    ? new Ajv({ allErrors: true, loadSchema, strict: false })
+    : new Ajv2020({ allErrors: true, loadSchema, strict: false })
+  for (const [name, format] of Object.entries(fullFormats)) {
+    ajv.addFormat(name, format)
+  }
+  return ajv
 }
 
 const validate = async (path: string, { source }: { source: string }): Promise<void> => {
@@ -85,18 +125,21 @@ const validate = async (path: string, { source }: { source: string }): Promise<v
     return
   }
 
-  const ajv = new Ajv2020({ allErrors: true, loadSchema: loader() })
-  if (schemaDeclaration.startsWith("https://json-schema.org/draft/")) {
-    await ajv.compileAsync(document(path, data))
+  const loadSchema = loader()
+  if (/^https?:\/\/json-schema\.org\/draft\//.test(schemaDeclaration)) {
+    const ajv = newValidator(schemaDeclaration, loadSchema)
+    await ajv.compileAsync(document(pathToFileURL(path).href, data))
     return
   }
 
-  if (schemaDeclaration.startsWith("https://")) {
-    return
-  }
+  const location =
+    schemaDeclaration.startsWith("http://") || schemaDeclaration.startsWith("https://")
+      ? schemaDeclaration
+      : pathToFileURL(resolve(dirname(path), schemaDeclaration)).href
 
-  const schemaPath = resolve(dirname(path), schemaDeclaration)
-  const validator = await ajv.compileAsync(await readSchema(schemaPath))
+  const loaded = await loadSchema(location)
+  const ajv = newValidator(schemaKey(loaded) ?? "", loadSchema)
+  const validator = await ajv.compileAsync(loaded)
   if (!validator(data)) {
     throw new Error(ajv.errorsText(validator.errors))
   }
