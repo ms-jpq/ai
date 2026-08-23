@@ -5,7 +5,9 @@ description: A semantics-preserving maintenance pass.
 
 # Defrag
 
-Use @../op-problem-framing/SKILL.md to frame the corpus's fragmentation problems and rank their concerns.
+Use @../op-purpose-formation/SKILL.md to establish the corpus's purpose and preservation boundary.
+
+Use @../op-problem-framing/SKILL.md to frame the corpus's fragmentation problems and prioritize their concerns.
 
 Use @../op-conceptual-synthesis/SKILL.md to consolidate vocabulary.
 
