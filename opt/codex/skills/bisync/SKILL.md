@@ -23,7 +23,7 @@ Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatib
 
 - Read each representation before changing either one.
 
-- Map corresponding claims, elements, relations, and constraints.
+- Map corresponding claims, parts, relations, and constraints.
 
 - Classify every difference:
 

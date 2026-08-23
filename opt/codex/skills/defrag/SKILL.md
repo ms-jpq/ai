@@ -1,17 +1,19 @@
 ---
 name: defrag
-description: Collocate a fragmented corpus so its concerns, dependencies, and vocabulary can be reasoned about locally.
+description: Collocate a fragmented corpus without changing its design.
 ---
 
 # Defrag
 
-Use @../op-topology-recomposition/SKILL.md to identify concerns, seams, and canonical regions.
+_A semantics-preserving maintenance pass._
+
+Use @../op-problem-framing/SKILL.md to frame the corpus's fragmentation problems and rank their concerns.
 
 Use @../op-conceptual-synthesis/SKILL.md to consolidate vocabulary.
 
 Use @../refine/SKILL.md for local rewriting after the topology is settled.
 
-Use @../refactor/SKILL.md for local changes after the topology is settled.
+Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, contracts, or flows.
 
 ## Observation
 
@@ -25,9 +27,11 @@ Use @../refactor/SKILL.md for local changes after the topology is settled.
 
 ## Abduction
 
-_Devise a topology change that improves locality without changing meaning._
+_Devise a collocation that improves locality without changing the design._
 
-- Assign each concern to one canonical region.
+- Do not reassign responsibilities, change contracts, or alter control or data flow.
+
+- Assign each framed concern to one canonical region.
 
 - Move one verified cluster at a time.
 
@@ -59,6 +63,8 @@ _Test those consequences and provisionally retain or revise the topology._
 
 - Verify the predicted regions, dependencies, and vocabulary after each cluster.
 
-- Use `refine` for individual prose and `refactor` for individual code only after their location and role are settled.
+- Use `refine` for individual prose only after its location and role are settled.
+
+- Escalate structural changes to `refactor`.
 
 - Report moves, deduplications, unchanged ambiguities, and required follow-up.
