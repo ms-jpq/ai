@@ -73,4 +73,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ## Classical Problems
 
-- Read [Classic Problems](references/Classic-Problems.d) when classifying a situation's problems.
+- Read [Classic Problems](references/Classic-Problems.md) when classifying a situation's problems.
