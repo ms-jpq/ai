@@ -2,14 +2,56 @@
 
 _Recurring exemplars, not a complete basis._
 
-## Understanding
-
-## Decision
+## Allocation
 
 ## Change
 
+## Classification
+
+## Commitment
+
+## Communication
+
+## Configuration
+
+## Control
+
 ## Coordination
 
-## Verification
+## Decision
+
+## Design
+
+## Diagnosis
+
+## Evaluation
+
+## Explanation
+
+## Governance
+
+## Interpretation
+
+## Learning
+
+## Monitoring
+
+## Negotiation
+
+## Optimization
+
+## Planning
+
+## Prediction
+
+## Reconciliation
 
 ## Recovery
+
+## Scheduling
+
+## Search
+
+## Understanding
+
+## Verification
