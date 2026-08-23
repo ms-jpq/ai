@@ -15,7 +15,7 @@ Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable
 
 ## Abduction
 
-_Devise a refinement hypothesis for the reader and local context._
+_Devise an explanation for observations._
 
 - Devise a revision that makes the intended reading, decision, or action easier.
 
@@ -41,13 +41,13 @@ _Devise a refinement hypothesis for the reader and local context._
 
 ## Deduction
 
-_Derive consequences of the refinement hypothesis._
+_Derive consequences of the explanation._
 
 - Predict the reading, decision, or action the revision should make easier.
 
 ## Induction
 
-_Test that consequence and provisionally retain or revise the refinement._
+_Test those consequences and provisionally retain or revise the explanation._
 
 - Test the predicted outcome against competing readings, factual constraints, and the reader's goal.
 

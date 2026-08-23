@@ -27,7 +27,7 @@ Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, 
 
 ## Abduction
 
-_Devise a collocation that improves locality without changing the design._
+_Devise an explanation for observations._
 
 - Do not reassign responsibilities, change contracts, or alter control or data flow.
 
@@ -49,7 +49,7 @@ _Devise a collocation that improves locality without changing the design._
 
 ## Deduction
 
-_Derive consequences of the defragmentation hypothesis._
+_Derive consequences of the explanation._
 
 - Predict that each retained concern has one canonical region.
 
@@ -59,7 +59,7 @@ _Derive consequences of the defragmentation hypothesis._
 
 ## Induction
 
-_Test those consequences and provisionally retain or revise the topology._
+_Test those consequences and provisionally retain or revise the explanation._
 
 - Verify the predicted regions, dependencies, and vocabulary after each cluster.
 

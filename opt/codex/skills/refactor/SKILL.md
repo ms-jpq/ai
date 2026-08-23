@@ -23,7 +23,7 @@ Use @../op-conceptual-synthesis/SKILL.md to give parts, contracts, and flows con
 
 ## Abduction
 
-_Devise a structural explanation and refactoring hypothesis._
+_Devise an explanation for observations._
 
 - Propose a structural change that resolves the framed concern while preserving the baseline.
 
@@ -39,7 +39,7 @@ _Devise a structural explanation and refactoring hypothesis._
 
 ## Deduction
 
-_Derive consequences of the refactoring hypothesis._
+_Derive consequences of the explanation._
 
 - Derive executable claims:
 
@@ -49,7 +49,7 @@ _Derive consequences of the refactoring hypothesis._
 
 ## Induction
 
-_Test those consequences and provisionally retain or revise the hypothesis._
+_Test those consequences and provisionally retain or revise the explanation._
 
 - Add or update the tests derived above.
 

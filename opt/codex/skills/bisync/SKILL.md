@@ -37,7 +37,7 @@ Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatib
 
 ## Abduction
 
-_Devise an explanation and reconciliation direction for each difference._
+_Devise an explanation for observations._
 
 - Classify its change provenance:
 
@@ -65,7 +65,19 @@ _Devise an explanation and reconciliation direction for each difference._
 
 ## Deduction
 
-_Derive consequences of the reconciliation hypothesis._
+_Derive consequences of the explanation._
+
+> this reads a bit slop
+
+> | >>> Yes. “Reconciliation hypothesis” adds nothing. Use: _Derive the state implied by each disposition._
+
+> we should just use the ADI the same from the source, which is the op-\* uses
+
+> | >>> Applied verbatim to all three stages.
+
+> do that pass everywhere
+
+> | >>> Applied to every existing ADI cycle.
 
 - Derive the expected correspondence after each disposition.
 
@@ -75,7 +87,7 @@ _Derive consequences of the reconciliation hypothesis._
 
 ## Induction
 
-_Test those consequences and provisionally retain or revise the reconciliation._
+_Test those consequences and provisionally retain or revise the explanation._
 
 - Apply only the proposed, authorized changes.
 

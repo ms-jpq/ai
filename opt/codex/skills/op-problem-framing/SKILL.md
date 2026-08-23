@@ -37,7 +37,7 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
 ## Abduction
 
-_Devise an explanation for the problematic situation._
+_Devise an explanation for observations._
 
 - Propose a working problem hierarchy that explains the observed resistances.
 
