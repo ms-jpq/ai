@@ -71,8 +71,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Revise the classification, mapping, or rank when later evaluation exposes a gap.
 
-## Reading
+## Classical Problems
 
-- Read [foundations.md](references/foundations.md) when grounding a frame or extending its concern catalog.
-
-- Read [concerns.md](references/concerns.md) when revising problem classes or concern rankings.
+- Read [Classic Problems](references/Classic-Problems.d) when classifying a situation's problems.
