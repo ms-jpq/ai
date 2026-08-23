@@ -7,7 +7,9 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
 ## Artifact
 
-- A working classification of the situation's problems.
+- The system concern that the frame must achieve.
+
+- A working, covering hierarchy of classified problems sufficient to achieve the system concern.
 
 - An enumeration of concerns implied by each classified problem, ranked by salience.
 
@@ -15,11 +17,9 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
   - Every enumerated concern remains in the ranking; later evaluation may revise its salience.
 
-- A covering hierarchy of classified problems and their implied concerns.
-
 ## Observation
 
-- Describe the encountered situation without proposing a response.
+- Describe the encountered system, its concern, and its external boundary without proposing a response.
 
 - Record its resistance: surprise, conflict, uncertainty, failure, or unmet intention.
 
@@ -29,7 +29,7 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
   - Record its unknowns and competing interpretations.
 
-- Record candidate relations among the problems and their concerns.
+- Record current concerns and their candidate relations to the problems.
 
 - Record existing terms, boundaries, and commitments that shape the situation.
 
@@ -39,13 +39,13 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
 _Devise an explanation for the problematic situation._
 
-- Abduce a working classification that explains the observed resistances.
+- Propose a working problem hierarchy that explains the observed resistances.
 
 - Select, name, and order the problems that the frame must address.
 
   - Separate independent, coupled, and nested problems.
 
-- Hypothesize a covering hierarchy of classified problems and their implied concerns.
+- Identify the gap between the current problem hierarchy and the system concern, then hypothesize a covering hierarchy that closes it.
 
 - Enumerate and rank the concerns implied by each classified problem.
 
@@ -61,9 +61,11 @@ _Devise an explanation for the problematic situation._
 
 _Derive consequences of the explanation._
 
-- Derive observations that distinguish competing classifications, hierarchies, and rankings.
+- Derive observations that distinguish competing problem hierarchies and rankings.
 
 - Predict how the hierarchy covers each observed resistance.
+
+- Predict that the hierarchy achieves the system concern.
 
 - Predict which salient concerns require structural embodiment and which do not.
 
@@ -73,11 +75,11 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the classification, hierarchy, and rankings against the situation and alternatives.
+- Test the problem hierarchy and rankings against the situation and alternatives.
 
 - Retain concerns only when they cover a resistance or could change its response or consequences.
 
-- Revise the classification, hierarchy, or rank when later evaluation exposes a gap.
+- Revise the problem hierarchy or rank when later evaluation exposes a gap.
 
 ## Classical Problems
 
