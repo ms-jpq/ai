@@ -1,9 +1,0 @@
-# yaml-language-server: $schema=./domain.schema.yml
-# contract: source of truth for ./domain.schema.yml
-# extends: ../domain.schema.yml
----
-adoptions:
-  # reuse: x-audit
-  - updated-at: "2026-08-09T00:00:00Z"
-    dog-name: lil
-    adopter: me

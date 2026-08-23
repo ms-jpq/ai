@@ -91,6 +91,10 @@ const validate = async (path: string, { source }: { source: string }): Promise<v
     return
   }
 
+  if (schemaDeclaration.startsWith("https://")) {
+    return
+  }
+
   const schemaPath = resolve(dirname(path), schemaDeclaration)
   const validator = await ajv.compileAsync(await readSchema(schemaPath))
   if (!validator(data)) {

@@ -1,11 +1,9 @@
 ---
 name: defrag
-description: Collocate a fragmented corpus without changing its design.
+description: A semantics-preserving maintenance pass.
 ---
 
 # Defrag
-
-_A semantics-preserving maintenance pass._
 
 Use @../op-problem-framing/SKILL.md to frame the corpus's fragmentation problems and rank their concerns.
 

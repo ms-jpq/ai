@@ -30,7 +30,7 @@ case "$FILE_PATH" in
   find -H "$BASE/markdown" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
   ;;
 *.json | *.yml | *.yaml | *.toml)
-  "$BASE/../../skills/json-schema/scripts/lint.sh" "$FILE_PATH"
+  "$BASE/json-schema.ts" "$FILE_PATH"
   ;;
 *.sh | *.bash)
   if command -v -- shellcheck > /dev/null; then
