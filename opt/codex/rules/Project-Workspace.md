@@ -10,7 +10,6 @@
 |   |-- design/
 |   |-- plans/
 |   |-- research/
-|   |-- tasks/
 |   |-- worktrees/
 |   `-- <topic>/
 |-- .worktrees/
@@ -45,3 +44,11 @@
 - `.notes/@root/` → `<root>/.notes/`: root notes.
 
 - `.notes/@peers/` → `<root>/.notes/worktrees/`: sibling worktree notes.
+
+---
+
+## Worktree Records
+
+- `.notes/worktrees/<name>/LIVE_CONTEXT.md` is the worker's durable brief.
+
+- `.worktrees/<name>/` is the worker's ephemeral code checkout.

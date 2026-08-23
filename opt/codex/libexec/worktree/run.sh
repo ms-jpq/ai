@@ -58,20 +58,14 @@ e | edit)
 EOF
       exit 2
     fi
-    BRIEF="$ROOT_NOTES/tasks/$NAME.md"
     WORKTREE="$("$SELF/pool.sh" add "$NAME")"
-    DST="$WORKTREE/.notes/LIVE_CONTEXT.md"
-    if [[ -f $BRIEF && ! -L $BRIEF ]]; then
-      mv -- "$BRIEF" "$DST"
-    fi
-
-    touch -- "$DST"
-    ln -v -sTnfr -- "$DST" "$BRIEF"
+    BRIEF="$WORKTREE/.notes/LIVE_CONTEXT.md"
+    touch -- "$BRIEF"
   done
 
   if (($# == 1)); then
     # shellcheck disable=SC2086
-    env -C "$ROOT_NOTES" -- $EDITOR -- "$BRIEF"
+    env -C "$WORKTREE" -- $EDITOR -- .notes/LIVE_CONTEXT.md
     "$SELF/commit-on-change.sh" "$BRIEF" edit
   fi
   ;;
