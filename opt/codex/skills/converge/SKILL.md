@@ -15,15 +15,15 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-1. **Problem framing:** Provisionally classify a situation's problems to enumerate and rank its concerns.
+1. **Problem Framing:** Provisionally classify a situation's problems to enumerate and rank its concerns.
 
    - @../op-problem-framing/SKILL.md
 
-2. **Topology recomposition:** Iteratively resolve structural problems in a concern hierarchy.
+2. **Topology Recomposition:** Iteratively resolve structural problems in a concern hierarchy.
 
    - @../op-topology-recomposition/SKILL.md
 
-3. **Conceptual synthesis:** Give consistent names that semantically compress ideas.
+3. **Conceptual Synthesis:** Give consistent names that semantically compress ideas.
 
    - @../op-conceptual-synthesis/SKILL.md
 
