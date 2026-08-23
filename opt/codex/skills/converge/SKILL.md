@@ -19,7 +19,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
    - @../op-purpose-formation/SKILL.md
 
-1. **Problem Framing:** Provisionally classify a system's problems to enumerate and rank its concerns.
+1. **Problem Framing:** Classify a system's obstructing problems and rank their concerns.
 
    - @../op-problem-framing/SKILL.md
 

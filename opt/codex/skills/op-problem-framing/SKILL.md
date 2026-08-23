@@ -1,6 +1,6 @@
 ---
 name: op-problem-framing
-description: Provisionally classify a system's problems to enumerate and rank its concerns.
+description: Classify a system's obstructing problems and rank their concerns.
 ---
 
 # Problem Framing
