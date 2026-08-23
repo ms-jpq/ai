@@ -1,6 +1,6 @@
 ---
 name: op-topology-recomposition
-description: Iteratively reshape concern boundaries.
+description: Iteratively resolve structural problems in a concern hierarchy.
 ---
 
 # Topology Recomposition

@@ -19,7 +19,7 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
    - @../op-problem-framing/SKILL.md
 
-2. **Topology recomposition:** Iteratively reshape concern boundaries.
+2. **Topology recomposition:** Iteratively resolve structural problems in a concern hierarchy.
 
    - @../op-topology-recomposition/SKILL.md
 
