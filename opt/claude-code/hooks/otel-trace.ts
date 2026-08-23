@@ -94,12 +94,7 @@ type MidConversationSystemBlock = Readonly<{
   content: readonly Readonly<{ text: string }>[]
 }>
 
-type MessageBlock =
-  | string
-  | BetaContentBlock
-  | BetaContentBlockParam
-  | ToolChangeBlock
-  | MidConversationSystemBlock
+type MessageBlock = string | BetaContentBlock | BetaContentBlockParam | ToolChangeBlock | MidConversationSystemBlock
 
 type ToolResultContent =
   | Extract<Exclude<MessageBlock, string>, { type: "tool_result" | "mcp_tool_result" }>["content"]
@@ -536,34 +531,36 @@ const serverToolResponse = (content: ServerToolResultContent) => {
   }
 }
 
+type ToolResultItem = Exclude<ToolResultContent, string | undefined>[number]
+
+const toolResultItemValue = (item: ToolResultItem): unknown => {
+  switch (item.type) {
+    case "text":
+      return item.text
+    case "image":
+      return imageValue(item)
+    case "document":
+      return documentValue(item)
+    case "search_result":
+      return { source: item.source, title: item.title }
+    case "tool_reference":
+      return item.tool_name
+    case "browser_state":
+      return {
+        tabs: item.tabs,
+        ...(item.state_changes ? { state_changes: item.state_changes } : {}),
+      }
+    default:
+      fail(item satisfies never)
+  }
+}
+
 const toolResultValue = (content: ToolResultContent): unknown => {
   if (content === undefined || typeof content === "string") {
     return content
   }
 
-  return collapseSingleton(
-    content.map((item) => {
-      switch (item.type) {
-        case "text":
-          return item.text
-        case "image":
-          return imageValue(item)
-        case "document":
-          return documentValue(item)
-        case "search_result":
-          return { source: item.source, title: item.title }
-        case "tool_reference":
-          return item.tool_name
-        case "browser_state":
-          return {
-            tabs: item.tabs,
-            ...(item.state_changes ? { state_changes: item.state_changes } : {}),
-          }
-        default:
-          fail(item satisfies never)
-      }
-    }),
-  )
+  return collapseSingleton(content.map((item) => toolResultItemValue(item)))
 }
 
 const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefined => {
