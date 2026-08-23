@@ -1,6 +1,6 @@
 ---
 name: op-purpose-formation
-description: Form and revise the system concern that guides the remaining operators.
+description: Form and revise the system purpose that guides the remaining operators.
 ---
 
 # Purpose Formation
@@ -9,11 +9,11 @@ description: Form and revise the system concern that guides the remaining operat
 
 - An encountered system and its external boundary.
 
-- A system concern that states the intended effect of the system.
+- A system purpose that states the intended effect of the system.
 
   - Success conditions define how its achievement can be recognized.
 
-- The authority, commitments, and affected parties that constrain revision of the concern.
+- The authority, commitments, and affected parties that constrain revision of the purpose.
 
 - Explicit purpose conflicts, exclusions, and unresolved questions.
 
@@ -31,7 +31,7 @@ description: Form and revise the system concern that guides the remaining operat
 
 _Devise an explanation for observations._
 
-- Propose a system concern that explains why the system should change or be preserved.
+- Propose a system purpose that explains why the system should change or be preserved.
 
 - State its intended effect, success conditions, and external boundary.
 
@@ -43,7 +43,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive observations that would show the system concern is achieved or contradicted.
+- Derive observations that would show the system purpose is achieved or contradicted.
 
 - Predict which problems become relevant under the proposed concern.
 
@@ -53,8 +53,8 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the concern against the encountered system, authority, commitments, and affected parties.
+- Test the purpose against the encountered system, authority, commitments, and affected parties.
 
-- Retain the concern only when it has an authorized purpose and observable success conditions.
+- Retain the purpose only when it has authorization and observable success conditions.
 
-- Revise the concern, boundary, or authority when evaluation exposes a conflict or gap.
+- Revise the purpose, boundary, or authority when evaluation exposes a conflict or gap.

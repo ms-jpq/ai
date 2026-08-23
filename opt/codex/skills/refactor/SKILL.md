@@ -5,11 +5,15 @@ description: Simplify code, contracts, and data flow through iterative refactori
 
 # Refactor
 
-Use @../op-problem-framing/SKILL.md to frame the refactoring problems and rank their concerns.
+Use @../op-purpose-formation/SKILL.md to establish the preservation boundary and intended delta.
+
+Use @../op-problem-framing/SKILL.md to frame the refactoring problems and prioritize their concerns.
 
 Use @../op-topology-recomposition/SKILL.md to resolve the structural concerns in code.
 
 Use @../op-conceptual-synthesis/SKILL.md to give parts, contracts, and flows consistent names.
+
+Use @../op-mechanism-alignment/SKILL.md to preserve or revise the mechanisms that cover salient concerns.
 
 ## Observation
 
