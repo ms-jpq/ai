@@ -649,10 +649,7 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         role,
         part: {
           type: "text",
-          content: block.content
-            .filter((item) => item.type === "text")
-            .map((item) => item.text)
-            .join(EOL + EOL),
+          content: block.content.map((item) => item.text).join(EOL + EOL),
         },
       })
     case "fallback":
@@ -663,10 +660,6 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
           content: `[fallback: ${block.from.model} → ${block.to.model}]`,
         },
       })
-
-    case "tool_addition":
-    case "tool_removal":
-      return undefined
     default:
       fail(block satisfies never)
   }
