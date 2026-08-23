@@ -27,6 +27,10 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
    - @../op-conceptual-synthesis/SKILL.md
 
+4. **Mechanism Alignment:** Cultivate a minimal basis of mechanisms that covers salient concerns.
+
+   - @../op-mechanism-alignment/SKILL.md
+
 ## Inquiry
 
 - Each convergence operator carries `abduction → deduction → induction → abduction`.
