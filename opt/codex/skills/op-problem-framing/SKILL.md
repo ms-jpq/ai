@@ -7,9 +7,9 @@ description: Provisionally classify a system's problems to enumerate and rank it
 
 ## Artifact
 
-- A working, covering hierarchy of classified problems sufficient to achieve the system concern.
+- A working, covering hierarchy of named problems that explains resistance to the system concern.
 
-- An enumeration of concerns implied by each classified problem, ranked by salience.
+- An enumeration of concerns implied by each problem, ranked by salience.
 
   - The classification supplies candidate concerns; the frame ranks them for the system.
 
@@ -17,7 +17,9 @@ description: Provisionally classify a system's problems to enumerate and rank it
 
 ## Observation
 
-- Record its resistance: surprise, conflict, uncertainty, failure, or unmet intention.
+- Take the system concern, boundary, authority, and commitments from Purpose Formation as inputs.
+
+- Record observed resistance: surprise, conflict, uncertainty, failure, or unmet intention.
 
 - List candidate problems without forcing them into one class.
 
@@ -27,29 +29,23 @@ description: Provisionally classify a system's problems to enumerate and rank it
 
 - Record current concerns and their candidate relations to the problems.
 
-- Use the established system concern, boundary, authority, and commitments.
-
 - Keep problems distinct until evidence establishes their relation.
 
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Propose a working problem hierarchy that explains the observed resistances.
+- Propose a working hierarchy that explains observed resistance to the system concern.
 
-- Select, name, and order the problems that the frame must address.
+- Name and order the problems the frame must address.
 
   - Separate independent, coupled, and nested problems.
 
-- Identify the gap between the current problem hierarchy and the system concern, then hypothesize a covering hierarchy that closes it.
-
-- Enumerate and rank the concerns implied by each classified problem.
+- Enumerate and rank the concerns implied by each problem.
 
   - State why each concern matters here and why it has its rank.
 
-  - Apply definitions, causes, consequences, alternatives, and exceptions.
-
-  - State the frame's included boundary and explicit exclusions.
+  - Report a boundary conflict to Purpose Formation.
 
   - Do not introduce a concern without a plausible effect on a response or its consequences.
 
@@ -59,24 +55,22 @@ _Derive consequences of the explanation._
 
 - Derive observations that distinguish competing problem hierarchies and rankings.
 
-- Predict how the hierarchy covers each observed resistance.
-
-- Predict that the hierarchy achieves the system concern.
+- Predict how resolving each problem would advance the system concern.
 
 - Predict which salient concerns require structural embodiment and which do not.
 
-- Predict which omissions, boundaries, hierarchies, or rankings would make the frame inadequate.
+- Predict which omissions, relations, or rankings would make the frame inadequate.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the problem hierarchy and rankings against the system and alternatives.
+- Test the hierarchy and rankings against observed resistance and alternatives.
 
 - Retain concerns only when they cover a resistance or could change its response or consequences.
 
-- Revise the problem hierarchy or rank when later evaluation exposes a gap.
+- Revise a problem, its relation, or its concern rank when later evaluation exposes a gap.
 
 ## Classic Problems
 
-- Read `references/Classic-Problems.md` when classifying a situation's problems.
+- Read `references/Classic-Problems.md` when classifying a system's problems.
