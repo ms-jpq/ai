@@ -31,6 +31,8 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
    - @../op-mechanism-alignment/SKILL.md
 
+_Quantify elegance by the smallest problem, concern, and mechanism bases that preserve the required effects._
+
 ## Inquiry
 
 - Each convergence operator carries `abduction → deduction → induction → abduction`.
@@ -48,9 +50,3 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 - Maintain an internal dialectic.
 
 - Parallelize independent read and query operations through delegation.
-
----
-
-Notes:
-
-- Elegance can be quantified by having a minimal basis for problems, concerns, and mechanisms.
