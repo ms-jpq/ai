@@ -15,6 +15,10 @@ import { parse } from "yaml"
 type Schema = Record<string, unknown>
 
 const encoding = "utf8"
+const schemaUri = {
+  remote: /^https?:\/\//,
+  meta: /^https?:\/\/json-schema\.org\/draft\//,
+}
 
 const parseSource = (path: string, source: string): unknown => {
   switch (extname(path)) {
@@ -56,9 +60,9 @@ const schemaKey = (value: unknown): string | undefined => {
   return typeof declaration === "string" ? declaration : undefined
 }
 
-const document = (uri: string, value: unknown): Schema => ({ ...schema(value), $id: uri })
+const schemaDocument = (uri: string, value: unknown): Schema => ({ ...schema(value), $id: uri })
 
-const schemaUri = (uri: string): string => {
+const canonicalUri = (uri: string): string => {
   const location = new URL(uri)
   location.hash = ""
   return location.href
@@ -72,7 +76,7 @@ const readSchema = async (uri: string): Promise<Schema> => {
     case "file:": {
       const path = fileURLToPath(location)
       const source = await readFile(path, encoding)
-      return document(location.href, parseSource(path, source))
+      return schemaDocument(location.href, parseSource(path, source))
     }
     case "http:":
     case "https:": {
@@ -84,7 +88,7 @@ const readSchema = async (uri: string): Promise<Schema> => {
       const source = await response.text()
       const resolved = new URL(response.url)
       resolved.hash = ""
-      return document(resolved.href, parseSource(resolved.pathname, source))
+      return schemaDocument(resolved.href, parseSource(resolved.pathname, source))
     }
     default:
       throw new Error(`Unsupported schema URI: ${location.href}`)
@@ -95,19 +99,22 @@ const loader = (): ((uri: string) => Promise<Schema>) => {
   const schemas = new Map<string, Promise<Schema>>()
 
   return async (uri: string): Promise<Schema> => {
-    const location = schemaUri(uri)
-    const existing = schemas.get(location)
+    const key = canonicalUri(uri)
+    const existing = schemas.get(key)
     if (existing !== undefined) {
       return existing
     }
 
-    const loaded = readSchema(location)
-    schemas.set(location, loaded)
+    const loaded = readSchema(key)
+    schemas.set(key, loaded)
     return loaded
   }
 }
 
-const newValidator = (schemaDeclaration: string, loadSchema: (uri: string) => Promise<Schema>): Ajv | Ajv2020 => {
+const schemaLocation = (path: string, declaration: string): string =>
+  schemaUri.remote.test(declaration) ? declaration : pathToFileURL(resolve(dirname(path), declaration)).href
+
+const ajvFor = (schemaDeclaration: string, loadSchema: (uri: string) => Promise<Schema>): Ajv | Ajv2020 => {
   const ajv = schemaDeclaration.includes("draft-07")
     ? new Ajv({ allErrors: true, loadSchema, strict: false })
     : new Ajv2020({ allErrors: true, loadSchema, strict: false })
@@ -126,20 +133,16 @@ const validate = async (path: string, { source }: { source: string }): Promise<v
   }
 
   const loadSchema = loader()
-  if (/^https?:\/\/json-schema\.org\/draft\//.test(schemaDeclaration)) {
-    const ajv = newValidator(schemaDeclaration, loadSchema)
-    await ajv.compileAsync(document(pathToFileURL(path).href, data))
+  const isSchema = schemaUri.meta.test(schemaDeclaration)
+  const loaded = isSchema
+    ? schemaDocument(pathToFileURL(path).href, data)
+    : await loadSchema(schemaLocation(path, schemaDeclaration))
+  const ajv = ajvFor(schemaKey(loaded) ?? "", loadSchema)
+  const validator = await ajv.compileAsync(loaded)
+  if (isSchema) {
     return
   }
 
-  const location =
-    schemaDeclaration.startsWith("http://") || schemaDeclaration.startsWith("https://")
-      ? schemaDeclaration
-      : pathToFileURL(resolve(dirname(path), schemaDeclaration)).href
-
-  const loaded = await loadSchema(location)
-  const ajv = newValidator(schemaKey(loaded) ?? "", loadSchema)
-  const validator = await ajv.compileAsync(loaded)
   if (!validator(data)) {
     throw new Error(ajv.errorsText(validator.errors))
   }
