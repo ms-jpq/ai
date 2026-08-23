@@ -7,7 +7,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 ## Artifact
 
-- A working, covering hierarchy of named problems that explains resistance to the system concern.
+- A working, covering hierarchy of named problems that explains resistance to the system purpose.
 
 - An enumeration of concerns implied by each problem, prioritized by salience.
 
@@ -17,7 +17,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 ## Observation
 
-- Take the system concern, boundary, authority, and commitments from Purpose Formation as inputs.
+- Take the system purpose, boundary, authority, and commitments from Purpose Formation as inputs.
 
 - Record observed resistance: surprise, conflict, uncertainty, failure, or unmet intention.
 
@@ -35,7 +35,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 _Devise an explanation for observations._
 
-- Propose a working hierarchy that explains observed resistance to the system concern.
+- Propose a working hierarchy that explains observed resistance to the system purpose.
 
 - Name and order the problems the frame must address.
 
@@ -55,7 +55,7 @@ _Derive consequences of the explanation._
 
 - Derive observations that distinguish competing problem hierarchies and priorities.
 
-- Predict how resolving each problem would advance the system concern.
+- Predict how resolving each problem would advance the system purpose.
 
 - Predict which salient concerns require structural embodiment and which do not.
 
