@@ -11,13 +11,19 @@ description: Reconcile two system representations while preserving authorized ch
 
 - Establish the reconciliation direction from authority, evidence, and intent.
 
+Use @../op-purpose-formation/SKILL.md when the system purpose or reconciliation boundary is unclear.
+
 Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
 
 Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatible terms.
 
+Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient concern without mechanism coverage.
+
 ## Observation
 
 - Delimit the shared system and the relevant scope of both representations.
+
+- Take its system purpose, boundary, authority, and commitments as reconciliation constraints.
 
 - Read each representation before changing either one.
 
@@ -34,6 +40,8 @@ Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatib
   - Their correspondence is unknown.
 
 - Record the authority, evidence, and intent available for each difference.
+
+- Prioritize differences that could obstruct the system purpose or mechanism coverage.
 
 ## Abduction
 
@@ -69,6 +77,8 @@ _Derive consequences of the explanation._
 
 - Derive the expected correspondence after each disposition.
 
+- Derive whether each disposition preserves the system purpose and required mechanism coverage.
+
 - Identify the claims that must change, remain divergent, or remain unresolved under each disposition.
 
 ## Induction
@@ -77,7 +87,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Apply only the proposed, authorized changes.
 
-- Re-read both representations and verify changed claims against the system's observable behavior and constraints.
+- Re-read both representations and verify changed claims against the system's purpose, behavior, and constraints.
 
 - Retain a disposition only when the resulting correspondence matches its prediction.
 
