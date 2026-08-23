@@ -9,9 +9,9 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
 - A working classification of the situation's problems.
 
-- An enumeration of concerns, ranked by salience.
+- A concern mapping from each classified problem to an enumeration of concerns ranked by salience.
 
-  - The classification motivates the ranking.
+  - State why each concern belongs to its classified problem.
 
   - Every enumerated concern remains in the ranking; later evaluation may revise its salience.
 
@@ -43,7 +43,9 @@ _Devise an explanation for the problematic situation._
 
   - Match a problem to a candidate class only when it imports useful concerns.
 
-- Enumerate and rank the concerns for each selected problem.
+- Map each classified problem to its concerns, ranked by salience.
+
+  - State why each concern belongs and why it has its rank.
 
   - Apply definitions, causes, consequences, alternatives, and exceptions.
 
@@ -55,21 +57,21 @@ _Devise an explanation for the problematic situation._
 
 _Derive consequences of the explanation._
 
-- Derive observations that would distinguish the frame from plausible alternatives.
+- Derive observations that distinguish competing classifications, mappings, and rankings.
 
-- Predict how each selected problem and concern accounts for the observed resistance.
+- Predict how each problem-to-concern mapping accounts for the observed resistance.
 
-- Predict which omissions, boundaries, or problem relations would make the frame inadequate.
+- Predict which omissions, boundaries, mappings, or relations would make the frame inadequate.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the frame against the situation, new evidence, and competing frames.
+- Test the classification, mappings, and rankings against the situation and alternatives.
 
-- Retain only problems and concerns that explain a resistance or could change its response or consequences.
+- Retain mappings only when their concerns could change a response or its consequences.
 
-- Revise the frame when evidence exposes a missing problem, false relation, unsuitable class, or boundary error.
+- Revise the classification, mapping, or rank when later evaluation exposes a gap.
 
 ## Decision-Basis Method
 
