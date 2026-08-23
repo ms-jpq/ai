@@ -1,17 +1,15 @@
 ---
-name: op-topology-decomposition
+name: op-topology-recomposition
 description: Iteratively reshape concern boundaries.
 ---
 
-# Topology Decomposition
+# Topology Recomposition
 
 ## Artifact
 
-- The system concern and a covering concern set sufficient to achieve it.
-
 - A nested basis of named elements, each defined by a primary concern and explicit boundary.
 
-- An explicit many-to-many mapping between concerns and elements.
+- An explicit mapping from framed concerns to elements.
 
 - Containment and explicit flows between elements form the topology.
 
@@ -19,11 +17,11 @@ description: Iteratively reshape concern boundaries.
 
 ## Observation
 
-- Select the affected system; state its concern, external boundary, and ordering constraints.
+- Select the affected system; state its external boundary and ordering constraints.
 
-- Identify its current concerns, elements, and containment hierarchy.
+- Identify its current elements and containment hierarchy.
 
-  - Map concerns to their current elements.
+  - Map framed concerns to their current elements.
 
   - Record each element's boundary, containment, placement, and required context.
 
@@ -39,7 +37,7 @@ _Devise an explanation for observations._
 
 - Treat external boundaries as fixed unless evidence invalidates them.
 
-- Identify the gap between the current concern set and the system concern, then hypothesize a covering set that closes it.
+- Diagnose how the current element mapping fails to embody the framed concern hierarchy locally.
 
 - Explore candidate topology changes, including:
 
@@ -57,7 +55,7 @@ _Devise an explanation for observations._
 
     - Retain other cycles only as explicit iterations or feedback loops.
 
-  - Apply any other change that yields a simpler basis of concerns, elements, containment, and flows.
+  - Apply any other change that simplifies elements, containment, or flows without losing framed concerns.
 
 ### Heuristic
 
@@ -65,7 +63,7 @@ _Devise an explanation for observations._
 
 - Push branches up and loops down.
 
-- Decomposition may temporarily increase complexity.
+- Recomposition may temporarily increase complexity.
 
   - For deeply entangled subgraphs, temporarily aggregate elements that share any concern across hierarchy levels, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
 
@@ -75,7 +73,7 @@ _Derive consequences of the explanation._
 
 - Derive observable consequences of the proposed topology:
 
-  - Its concern set achieves the system concern.
+  - Each framed concern has an explicit structural embodiment or a reason it needs none.
 
   - Each changed element has one primary concern, a justified place in the containment hierarchy, and explicit cross-cutting concerns.
 
@@ -91,4 +89,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Prefer the shape that makes the next change locally understandable and verifiable.
 
-- Retain only necessary concerns, mappings, elements, containment relations, and flows; revise the topology when evidence contradicts the model.
+- Retain only necessary mappings, elements, containment relations, and flows; revise the topology when evidence contradicts the model.

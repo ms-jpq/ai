@@ -19,9 +19,9 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
    - @../op-problem-framing/SKILL.md
 
-2. **Topology decomposition:** Iteratively reshape concern boundaries.
+2. **Topology recomposition:** Iteratively reshape concern boundaries.
 
-   - @../op-topology-decomposition/SKILL.md
+   - @../op-topology-recomposition/SKILL.md
 
 3. **Conceptual synthesis:** Give consistent names that semantically compress ideas.
 

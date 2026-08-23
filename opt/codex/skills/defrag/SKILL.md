@@ -3,7 +3,7 @@ name: defrag
 description: Collocate a fragmented corpus so its concerns, dependencies, and vocabulary can be reasoned about locally.
 ---
 
-Use @../op-topology-decomposition/SKILL.md to identify concerns, seams, and canonical regions.
+Use @../op-topology-recomposition/SKILL.md to identify concerns, seams, and canonical regions.
 
 Use @../op-conceptual-synthesis/SKILL.md to consolidate vocabulary.
 

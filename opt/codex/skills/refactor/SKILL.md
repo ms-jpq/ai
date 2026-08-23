@@ -3,7 +3,7 @@ name: refactor
 description: Simplify code, contracts, and data flow through iterative refactoring.
 ---
 
-Use @../op-topology-decomposition/SKILL.md.
+Use @../op-topology-recomposition/SKILL.md.
 
 ---
 

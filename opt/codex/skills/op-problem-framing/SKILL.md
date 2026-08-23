@@ -15,6 +15,8 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
   - Every enumerated concern remains in the ranking; later evaluation may revise its salience.
 
+- A covering hierarchy of classified problems and their implied concerns.
+
 ## Observation
 
 - Describe the encountered situation without proposing a response.
@@ -26,6 +28,8 @@ description: Provisionally classify a situation's problems to enumerate and rank
   - State the observation or evidence that makes each candidate a problem.
 
   - Record its unknowns and competing interpretations.
+
+- Record candidate relations among the problems and their concerns.
 
 - Record existing terms, boundaries, and commitments that shape the situation.
 
@@ -41,6 +45,8 @@ _Devise an explanation for the problematic situation._
 
   - Separate independent, coupled, and nested problems.
 
+- Hypothesize a covering hierarchy of classified problems and their implied concerns.
+
 - Enumerate and rank the concerns implied by each classified problem.
 
   - State why each concern matters here and why it has its rank.
@@ -55,21 +61,23 @@ _Devise an explanation for the problematic situation._
 
 _Derive consequences of the explanation._
 
-- Derive observations that distinguish competing classifications, mappings, and rankings.
+- Derive observations that distinguish competing classifications, hierarchies, and rankings.
 
-- Predict how each problem-to-concern mapping accounts for the observed resistance.
+- Predict how the hierarchy covers each observed resistance.
 
-- Predict which omissions, boundaries, mappings, or relations would make the frame inadequate.
+- Predict which salient concerns require structural embodiment and which do not.
+
+- Predict which omissions, boundaries, hierarchies, or rankings would make the frame inadequate.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the classification, mappings, and rankings against the situation and alternatives.
+- Test the classification, hierarchy, and rankings against the situation and alternatives.
 
-- Retain mappings only when their concerns could change a response or its consequences.
+- Retain concerns only when they cover a resistance or could change its response or consequences.
 
-- Revise the classification, mapping, or rank when later evaluation exposes a gap.
+- Revise the classification, hierarchy, or rank when later evaluation exposes a gap.
 
 ## Classical Problems
 
