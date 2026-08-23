@@ -1,7 +1,9 @@
+#:schema https://json.schemastore.org/pyproject.json
+
 [project]
 dependencies = ["gay"]
 name         = "ai"
 version      = "0"
 
 [project.optional-dependencies]
-dev = ["mypy", "types-PyYAML", "black", "isort"]
+dev = ["mypy", "PyYAML", "types-PyYAML", "black", "isort"]

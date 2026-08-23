@@ -86,7 +86,7 @@ if ! [[ -d $SENTINELS ]]; then
     fi
 
     CONTENT="$(awk "$AWK" < "$RULE")"
-    CONTEXT+=("Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"$CONTENT")
+    CONTEXT+=("Contents of $RULE (project instructions):"$'\n\n'"$CONTENT")
   done
 
   if ((${#PATH_CONTEXT[@]})); then
@@ -135,7 +135,7 @@ if [[ $EVENT == PostToolUse ]]; then
     fi
 
     CONTENT="$(awk "$AWK" < "$RULE")"
-    CONTEXT+=("Contents of $RULE (project instructions, checked into the codebase):"$'\n\n'"$CONTENT")
+    CONTEXT+=("Contents of $RULE (project instructions):"$'\n\n'"$CONTENT")
   done
 fi
 
