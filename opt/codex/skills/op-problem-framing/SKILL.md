@@ -1,25 +1,19 @@
 ---
 name: op-problem-framing
-description: Select and order the conditions that can change a response to a problematic situation.
+description: Provisionally classify a situation's problems to enumerate and rank its concerns.
 ---
 
 # Problem Framing
 
 ## Artifact
 
-- A problem frame.
+- A working classification of the situation's problems.
 
-> see like we should define the problem frame as 2 parts right, classification into different known problems and the set of concerns that are made salient.
->
-> | >>> Yes. A problem frame is a provisional problem-classification and the concern signature it makes salient.
+- A standing concern set and its salient subset.
 
-- A provisional classification of the situation's problems into known problem classes.
+  - The classification makes the subset especially relevant.
 
-- A concern signature: the concerns made salient by that classification.
-
-- The encountered situation, observed resistances, boundaries, and exclusions.
-
-- Evidence, uncertainty, and revision triggers.
+  - Other concerns remain standing without being emphasized.
 
 ## Observation
 
@@ -41,7 +35,7 @@ description: Select and order the conditions that can change a response to a pro
 
 _Devise an explanation for the problematic situation._
 
-- Hypothesize a problem frame that explains the observed resistances.
+- Abduce a working classification that explains the observed resistances.
 
 - Select, name, and order the problems that the frame must address.
 
@@ -49,7 +43,7 @@ _Devise an explanation for the problematic situation._
 
   - Match a problem to a candidate class only when it imports useful concerns.
 
-- Generate a concern signature for each selected problem.
+- Generate a standing concern set and identify the salient subset for each selected problem.
 
   - Apply definitions, causes, consequences, alternatives, and exceptions.
 
@@ -84,3 +78,5 @@ _Test those consequences and provisionally retain or revise the explanation._
 ## Reading
 
 - Read [foundations.md](references/foundations.md) when grounding a frame or extending its concern catalog.
+
+- Read [concerns.md](references/concerns.md) when revising problem classes or concern sets.

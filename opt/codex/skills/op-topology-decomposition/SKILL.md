@@ -1,6 +1,6 @@
 ---
 name: op-topology-decomposition
-description: Simplify flow across boundaries.
+description: Iteratively reshape concern boundaries.
 ---
 
 # Topology Decomposition

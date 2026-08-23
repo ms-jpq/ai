@@ -15,11 +15,11 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
-1. **Decision-basis modeling:** Redefine the option space.
+1. **Problem framing:** Provisionally classify a situation's problems to enumerate and rank its concerns.
 
-   - @../op-decision-basis-modeling/SKILL.md
+   - @../op-problem-framing/SKILL.md
 
-2. **Topology decomposition:** Simplify flow across boundaries.
+2. **Topology decomposition:** Iteratively reshape concern boundaries.
 
    - @../op-topology-decomposition/SKILL.md
 
