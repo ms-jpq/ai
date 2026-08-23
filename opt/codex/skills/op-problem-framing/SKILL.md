@@ -9,11 +9,11 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
 - A working classification of the situation's problems.
 
-- A standing concern set and its salient subset.
+- An enumeration of concerns, ranked by salience.
 
-  - The classification makes the subset especially relevant.
+  - The classification motivates the ranking.
 
-  - Other concerns remain standing without being emphasized.
+  - Lower-ranked concerns remain available for re-entry.
 
 ## Observation
 
@@ -43,7 +43,7 @@ _Devise an explanation for the problematic situation._
 
   - Match a problem to a candidate class only when it imports useful concerns.
 
-- Generate a standing concern set and identify the salient subset for each selected problem.
+- Enumerate and rank the concerns for each selected problem.
 
   - Apply definitions, causes, consequences, alternatives, and exceptions.
 
@@ -79,4 +79,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Read [foundations.md](references/foundations.md) when grounding a frame or extending its concern catalog.
 
-- Read [concerns.md](references/concerns.md) when revising problem classes or concern sets.
+- Read [concerns.md](references/concerns.md) when revising problem classes or concern rankings.
