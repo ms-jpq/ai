@@ -3,9 +3,9 @@ name: refine
 description: Refine prose for the reader's goal and local context.
 ---
 
-Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
-
 # Refine
+
+Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
 
 ## Observation
 
@@ -58,5 +58,3 @@ _Test that consequence and provisionally retain or revise the refinement._
 ## Application
 
 - Ask one question per turn when the reader must choose between tradeoffs.
-
-- `auto` skips questions, chooses the strongest option each pass, and stops when further iteration is churn.

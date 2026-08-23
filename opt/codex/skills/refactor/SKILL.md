@@ -3,11 +3,13 @@ name: refactor
 description: Simplify code, contracts, and data flow through iterative refactoring.
 ---
 
-Use @../op-topology-recomposition/SKILL.md.
-
----
-
 # Refactor
+
+Use @../op-problem-framing/SKILL.md to frame the refactoring problems and rank their concerns.
+
+Use @../op-topology-recomposition/SKILL.md to resolve the structural concerns in code.
+
+Use @../op-conceptual-synthesis/SKILL.md to give parts, contracts, and flows consistent names.
 
 ## Observation
 
