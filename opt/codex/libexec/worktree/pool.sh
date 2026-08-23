@@ -44,9 +44,9 @@ add)
   WORKTREE="$WORKTREES/$NAME"
   SELFNOTES="$WORKTREE/.notes"
 
-  "$0" init
+  "$0" init >&2
 
-  "$SELF/orphan.sh" "$NOTESTREE/$NAME" "\$notes\$$NAME"
+  "$SELF/orphan.sh" "$NOTESTREE/$NAME" "\$notes\$$NAME" >&2
 
   if ! [[ -e "$WORKTREE/.git" ]]; then
     git -C "$ROOT" worktree add --quiet -- "$WORKTREE"
@@ -57,7 +57,7 @@ add)
 
   "$0" set-status "$NAME" running
 
-  "$SELF/commit-on-change.sh" "$NOTESTREE/$NAME" add
+  "$SELF/commit-on-change.sh" "$NOTESTREE/$NAME" add >&2
 
   printf -- '%s' "$WORKTREE"
   ;;

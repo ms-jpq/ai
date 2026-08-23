@@ -19,7 +19,7 @@ if [[ -d $DIR ]] && find "$DIR" -mindepth 1 -print -quit | grep --quiet -e .; th
   mv -- "$DIR" "$STASH"
   "${ORPHAN[@]}"
   mv -- "$STASH"/* "$DIR/"
-  rmdir -- "$STASH"
+  rm -fr -- "$STASH"
 else
   "${ORPHAN[@]}"
 fi
