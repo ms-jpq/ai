@@ -3,15 +3,15 @@ name: defrag
 description: Collocate a fragmented corpus so its concerns, dependencies, and vocabulary can be reasoned about locally.
 ---
 
+# Defrag
+
 Use @../op-topology-recomposition/SKILL.md to identify concerns, seams, and canonical regions.
 
 Use @../op-conceptual-synthesis/SKILL.md to consolidate vocabulary.
 
 Use @../refine/SKILL.md for local rewriting after the topology is settled.
 
-Use @../refactor/SKILL.md for local code changes after the topology is settled.
-
-# Defrag
+Use @../refactor/SKILL.md for local changes after the topology is settled.
 
 ## Observation
 
