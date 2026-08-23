@@ -1,192 +1,94 @@
 # Classic Problems
 
-_Recurring exemplars, not a complete basis._
+_Candidate families and exemplars, not a complete basis._
 
-> lets fuse now
+## Inquiry
 
-## Risky Rollout
+### Understanding
 
-- Intended exposure
+- Object of understanding
 
-- Blast radius
+- Key distinctions
 
-- Preconditions
+- Relations or mechanism
 
-- Monitoring signals
+- Examples and counterexamples
 
-- Rollback path
+- Remaining unknowns
 
-- Release authority
+### Search
 
-## Scaling
+- Target sought
 
-- Demand forecast
+- Sources to examine
 
-- Current bottleneck
+- Query terms
 
-- Capacity headroom
+- Relevance criterion
 
-- Cost of capacity
+- Stopping rule
 
-- Failure modes
+### Interpretation
 
-- Operational complexity
+- Source context
 
-## Bottleneck Resolution
+- Intended meaning
 
-- Constraining resource
+- Ambiguous terms
 
-- Queue or delay
+- Plausible readings
 
-- Throughput target
+- Consequences of each reading
 
-- Upstream demand
+### Classification
 
-- Downstream effects
+- Membership rule
 
-- Intervention evidence
+- Distinguishing features
 
-## Review
+- Borderline cases
 
-- Review decision
+- Unknown categories
 
-- Reviewer prior knowledge
+- Cost of misclassification
 
-- Evidence quality
+### Explanation
 
-- Attention cost
+- Phenomenon to explain
 
-- Uncertainty surfaced
+- Proposed cause
 
-- Review authority
+- Causal chain
 
-## Drift
+- Scope conditions
 
-- Intended model
+- Contrary evidence
 
-- Observed state
+### Diagnosis
 
-- Difference provenance
+- Observed symptoms
 
-- Drift detection
+- Candidate causes
 
-- Correction authority
+- Causal mechanism
 
-- Cost of delay
+- Discriminating tests
 
-## Avoidance
+- Urgency of harm
 
-- Perceived difficulty
+### Prediction
 
-- Cost of delay
+- Event to forecast
 
-- Uncertainty or risk
+- Forecast horizon
 
-- Feasible first move
+- Relevant precedents
 
-- Reversibility
+- Assumptions
 
-- Commitment support
+- Uncertainty range
 
-## Triage
-
-- Work arrival rate
-
-- Urgency and impact
-
-- Priority rule
-
-- Available capacity
-
-- Age or deadline
-
-- Deferral option
-
-## Work Splitting
-
-- System goal
-
-- Independent concerns
-
-- Dependency boundaries
-
-- Work ownership
-
-- Integration points
-
-- Reviewable slice
-
-## Integration
-
-- Shared purpose
-
-- Interfaces and contracts
-
-- Semantic compatibility
-
-- Dependency order
-
-- Ownership boundaries
-
-- Failure boundaries
-
-## Migration
-
-- Source and target state
-
-- Meaning preserved
-
-- Compatibility window
-
-- Backfill and cutover
-
-- Loss or corruption risk
-
-- Rollback path
-
-## Deprecation
-
-- Capability retired
-
-- Dependent parties
-
-- Replacement path
-
-- Notice window
-
-- Migration support
-
-- Removal authority
-
-## Handoff
-
-- Responsibility boundary
-
-- Recipient context
-
-- Open decisions and risks
-
-- Authority transferred
-
-- Acceptance condition
-
-- Feedback path
-
-## Incident
-
-- Failure scope
-
-- Detection signal
-
-- Containment
-
-- Service restoration
-
-- Stakeholder communication
-
-- Recurrence prevention
-
-## Experiment
+### Experiment
 
 - Decision under uncertainty
 
@@ -200,201 +102,9 @@ _Recurring exemplars, not a complete basis._
 
 - Result interpretation
 
-## Escalation
+## Choice
 
-- Blocked decision
-
-- Required authority
-
-- Supporting evidence
-
-- Time and impact
-
-- Available options
-
-- Accountability
-
-## Audit
-
-- Claim or requirement
-
-- Scope and baseline
-
-- Evidence trail
-
-- Test or sample
-
-- Independence
-
-- Findings and remediation
-
-## Onboarding
-
-- Initial mental model
-
-- Target capability
-
-- Terms and instructions
-
-- Permissions
-
-- Feedback and support
-
-- Independent performance
-
-## Adaptation
-
-- Changed external condition
-
-- Invalidated assumption
-
-- Affected constraint
-
-- Response horizon
-
-- Decision authority
-
-- Monitoring signal
-
-## Debt
-
-- Shortcut provenance
-
-- Current carrying cost
-
-- Failure risk
-
-- Affected dependencies
-
-- Payoff for removal
-
-- Responsible owner
-
-## Translation
-
-- Source meaning
-
-- Target representation
-
-- Meaning preserved
-
-- Ambiguous terms
-
-- Equivalence evidence
-
-- Recipient context
-
-## Allocation
-
-- Eligible claims
-
-- Relative priority
-
-- Scarce resource
-
-- Fairness rule
-
-- Allocation authority
-
-- Appeal or correction
-
-## Change
-
-- Intended difference
-
-- Affected current state
-
-- Dependencies
-
-- Migration path
-
-- Reversibility
-
-- Success evidence
-
-## Classification
-
-- Membership rule
-
-- Distinguishing features
-
-- Borderline cases
-
-- Unknown categories
-
-- Cost of misclassification
-
-## Commitment
-
-- Committing authority
-
-- Parties bound
-
-- Obligations
-
-- Acceptance condition
-
-- Duration
-
-- Exit or breach terms
-
-## Communication
-
-- Audience's prior knowledge
-
-- Audience's interest
-
-- Intended meaning
-
-- Channel and timing
-
-- Attention cost
-
-- Feedback path
-
-## Configuration
-
-- Intended state
-
-- Actual state
-
-- Valid combinations
-
-- Scope of effect
-
-- Provenance
-
-- Drift detection
-
-## Control
-
-- Target state
-
-- Observed state
-
-- Feedback delay
-
-- Available intervention
-
-- Intervention authority
-
-- Stability
-
-## Coordination
-
-- Shared outcome
-
-- Actor ownership
-
-- Interdependencies
-
-- Handoffs
-
-- Sequencing
-
-- Shared status
-
-## Decision
+### Decision
 
 - Intended outcome
 
@@ -408,121 +118,35 @@ _Recurring exemplars, not a complete basis._
 
 - Reversibility
 
-## Design
+### Allocation
 
-- Intended use
+- Eligible claims
 
-- Affected parties
+- Relative priority
 
-- Required capabilities
+- Scarce resource
 
-- Constraints
+- Fairness rule
 
-- Trade-offs
+- Allocation authority
 
-- Fit evidence
+- Appeal or correction
 
-## Diagnosis
+### Triage
 
-- Observed symptoms
+- Work arrival rate
 
-- Candidate causes
+- Urgency and impact
 
-- Causal mechanism
+- Priority rule
 
-- Discriminating tests
+- Available capacity
 
-- Urgency of harm
+- Age or deadline
 
-## Evaluation
+- Deferral option
 
-- Success criteria
-
-- Comparison baseline
-
-- Measured outcomes
-
-- Material trade-offs
-
-- Decision threshold
-
-## Explanation
-
-- Phenomenon to explain
-
-- Proposed cause
-
-- Causal chain
-
-- Scope conditions
-
-- Contrary evidence
-
-## Governance
-
-- Legitimate purpose
-
-- Representation of affected parties
-
-- Decision rights
-
-- Rules and exceptions
-
-- Accountability
-
-- Enforcement
-
-## Interpretation
-
-- Source context
-
-- Intended meaning
-
-- Ambiguous terms
-
-- Plausible readings
-
-- Consequences of each reading
-
-## Learning
-
-- Target capability
-
-- Current misconception
-
-- Practice task
-
-- Corrective feedback
-
-- Retention and transfer
-
-## Monitoring
-
-- Condition to watch
-
-- Measured signal
-
-- Sampling interval
-
-- Alert threshold
-
-- Response owner
-
-## Negotiation
-
-- Each party's interests
-
-- Bargaining authority
-
-- Alternatives to agreement
-
-- Information asymmetry
-
-- Proposed exchange
-
-- Enforcement of agreement
-
-## Optimization
+### Optimization
 
 - Objective function
 
@@ -536,7 +160,7 @@ _Recurring exemplars, not a complete basis._
 
 - Trade-off frontier
 
-## Planning
+### Planning
 
 - Intended outcome
 
@@ -550,47 +174,7 @@ _Recurring exemplars, not a complete basis._
 
 - Contingencies
 
-## Prediction
-
-- Event to forecast
-
-- Forecast horizon
-
-- Relevant precedents
-
-- Assumptions
-
-- Uncertainty range
-
-## Reconciliation
-
-- Correspondence claims
-
-- Change provenance
-
-- Reconciliation authority
-
-- Authorized divergence
-
-- Conflict or loss risk
-
-- Validation of final state
-
-## Recovery
-
-- Failure scope
-
-- Containment
-
-- Recovery target
-
-- Data or capability loss
-
-- Restoration path
-
-- Prevention of recurrence
-
-## Scheduling
+### Scheduling
 
 - Work items
 
@@ -604,38 +188,424 @@ _Recurring exemplars, not a complete basis._
 
 - Slack or contingency
 
-## Search
+### Escalation
 
-- Target sought
+- Blocked decision
 
-- Sources to examine
+- Required authority
 
-- Query terms
+- Supporting evidence
 
-- Relevance criterion
+- Time and impact
 
-- Stopping rule
+- Available options
 
-## Understanding
+- Accountability
 
-- Object of understanding
+## Agreement
 
-- Key distinctions
+### Negotiation
 
-- Relations or mechanism
+- Each party's interests
 
-- Examples and counterexamples
+- Bargaining authority
 
-- Remaining unknowns
+- Alternatives to agreement
 
-## Verification
+- Information asymmetry
 
-- Claim to verify
+- Proposed exchange
 
-- Acceptance criterion
+- Enforcement of agreement
 
-- Test method
+### Commitment
 
-- Boundary and failure cases
+- Committing authority
 
-- Observed result
+- Parties bound
+
+- Obligations
+
+- Acceptance condition
+
+- Duration
+
+- Exit or breach terms
+
+### Governance
+
+- Legitimate purpose
+
+- Representation of affected parties
+
+- Decision rights
+
+- Rules and exceptions
+
+- Accountability
+
+- Enforcement
+
+## Change
+
+### Change
+
+- Intended difference
+
+- Affected current state
+
+- Dependencies
+
+- Migration path
+
+- Reversibility
+
+- Success evidence
+
+### Adaptation
+
+- Changed external condition
+
+- Invalidated assumption
+
+- Affected constraint
+
+- Response horizon
+
+- Decision authority
+
+- Monitoring signal
+
+### Design
+
+- Intended use
+
+- Affected parties
+
+- Required capabilities
+
+- Constraints
+
+- Trade-offs
+
+- Fit evidence
+
+### Debt
+
+- Shortcut provenance
+
+- Current carrying cost
+
+- Failure risk
+
+- Affected dependencies
+
+- Payoff for removal
+
+- Responsible owner
+
+### Deprecation
+
+- Capability retired
+
+- Dependent parties
+
+- Replacement path
+
+- Notice window
+
+- Migration support
+
+- Removal authority
+
+## Correspondence
+
+### Translation
+
+- Source meaning
+
+- Target representation
+
+- Meaning preserved
+
+- Ambiguous terms
+
+- Equivalence evidence
+
+- Recipient context
+
+### Migration
+
+- Source and target state
+
+- Meaning preserved
+
+- Compatibility window
+
+- Backfill and cutover
+
+- Loss or corruption risk
+
+- Rollback path
+
+### Reconciliation
+
+- Correspondence claims
+
+- Change provenance
+
+- Reconciliation authority
+
+- Authorized divergence
+
+- Conflict or loss risk
+
+- Validation of final state
+
+## Conformance
+
+### Configuration
+
+- Intended state
+
+- Actual state
+
+- Valid combinations
+
+- Scope of effect
+
+- Provenance
+
+- Drift detection
+
+### Drift
+
+- Intended model
+
+- Observed state
+
+- Difference provenance
+
+- Drift detection
+
+- Correction authority
+
+- Cost of delay
+
+## Capacity
+
+### Scaling
+
+- Demand forecast
+
+- Current bottleneck
+
+- Capacity headroom
+
+- Cost of capacity
+
+- Failure modes
+
+- Operational complexity
+
+### Bottleneck Resolution
+
+- Constraining resource
+
+- Queue or delay
+
+- Throughput target
+
+- Upstream demand
+
+- Downstream effects
+
+- Intervention evidence
+
+## Control
+
+### Control
+
+- Target state
+
+- Observed state
+
+- Feedback delay
+
+- Available intervention
+
+- Intervention authority
+
+- Stability
+
+### Monitoring
+
+- Condition to watch
+
+- Measured signal
+
+- Sampling interval
+
+- Alert threshold
+
+- Response owner
+
+### Risky Rollout
+
+- Intended exposure
+
+- Blast radius
+
+- Preconditions
+
+- Monitoring signals
+
+- Rollback path
+
+- Release authority
+
+## Recovery
+
+### Incident
+
+- Failure scope
+
+- Detection signal
+
+- Containment
+
+- Service restoration
+
+- Stakeholder communication
+
+- Recurrence prevention
+
+### Recovery
+
+- Failure scope
+
+- Containment
+
+- Recovery target
+
+- Data or capability loss
+
+- Restoration path
+
+- Prevention of recurrence
+
+## Capability
+
+### Learning
+
+- Target capability
+
+- Current misconception
+
+- Practice task
+
+- Corrective feedback
+
+- Retention and transfer
+
+### Onboarding
+
+- Initial mental model
+
+- Target capability
+
+- Terms and instructions
+
+- Permissions
+
+- Feedback and support
+
+- Independent performance
+
+### Avoidance
+
+- Perceived difficulty
+
+- Cost of delay
+
+- Uncertainty or risk
+
+- Feasible first move
+
+- Reversibility
+
+- Commitment support
+
+## Composition
+
+### Work Splitting
+
+- System goal
+
+- Independent concerns
+
+- Dependency boundaries
+
+- Work ownership
+
+- Integration points
+
+- Reviewable slice
+
+### Integration
+
+- Shared purpose
+
+- Interfaces and contracts
+
+- Semantic compatibility
+
+- Dependency order
+
+- Ownership boundaries
+
+- Failure boundaries
+
+## Collective Action
+
+### Coordination
+
+- Shared outcome
+
+- Actor ownership
+
+- Interdependencies
+
+- Handoffs
+
+- Sequencing
+
+- Shared status
+
+### Communication
+
+- Audience's prior knowledge
+
+- Audience's interest
+
+- Intended meaning
+
+- Channel and timing
+
+- Attention cost
+
+- Feedback path
+
+### Handoff
+
+- Responsibility boundary
+
+- Recipient context
+
+- Open decisions and risks
+
+- Authority transferred
+
+- Acceptance condition
+
+- Feedback path
