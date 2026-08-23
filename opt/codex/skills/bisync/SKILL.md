@@ -67,23 +67,9 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-> this reads a bit slop
-
-> | >>> Yes. “Reconciliation hypothesis” adds nothing. Use: _Derive the state implied by each disposition._
-
-> we should just use the ADI the same from the source, which is the op-\* uses
-
-> | >>> Applied verbatim to all three stages.
-
-> do that pass everywhere
-
-> | >>> Applied to every existing ADI cycle.
-
 - Derive the expected correspondence after each disposition.
 
-- Identify the claims, behavior, constraints, or decisions affected by each change.
-
-- Identify every difference expected to remain authorized or unresolved.
+- Identify the claims that must change, remain divergent, or remain unresolved under each disposition.
 
 ## Induction
 
