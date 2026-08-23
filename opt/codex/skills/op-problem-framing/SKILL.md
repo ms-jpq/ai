@@ -9,9 +9,9 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
 - A working classification of the situation's problems.
 
-- A concern mapping from each classified problem to an enumeration of concerns ranked by salience.
+- An enumeration of concerns implied by each classified problem, ranked by salience.
 
-  - State why each concern belongs to its classified problem.
+  - The classification supplies candidate concerns; the frame ranks them for this situation.
 
   - Every enumerated concern remains in the ranking; later evaluation may revise its salience.
 
@@ -41,11 +41,9 @@ _Devise an explanation for the problematic situation._
 
   - Separate independent, coupled, and nested problems.
 
-  - Match a problem to a candidate class only when it imports useful concerns.
+- Enumerate and rank the concerns implied by each classified problem.
 
-- Map each classified problem to its concerns, ranked by salience.
-
-  - State why each concern belongs and why it has its rank.
+  - State why each concern matters here and why it has its rank.
 
   - Apply definitions, causes, consequences, alternatives, and exceptions.
 
@@ -72,10 +70,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Retain mappings only when their concerns could change a response or its consequences.
 
 - Revise the classification, mapping, or rank when later evaluation exposes a gap.
-
-## Decision-Basis Method
-
-- For a live choice, read [decision-basis.md](references/decision-basis.md).
 
 ## Reading
 
