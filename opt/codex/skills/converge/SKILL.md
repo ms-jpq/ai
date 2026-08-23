@@ -15,6 +15,8 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
+0. **Purpose Formation:** Form and revise the system concern that guides the remaining operators.
+
 1. **Problem Framing:** Provisionally classify a situation's problems to enumerate and rank its concerns.
 
    - @../op-problem-framing/SKILL.md
