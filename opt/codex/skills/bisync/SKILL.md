@@ -7,9 +7,9 @@ description: Reconcile two system representations while preserving authorized ch
 
 `bisync <src> <dst>` reconciles two representations of one system.
 
-- Typical operands are a system description and the system itself.
+- Typical operands are a model and the system it represents.
 
-- Do not treat either representation as authoritative until evidence, authority, and intent establish the reconciliation direction.
+- Establish the reconciliation direction from authority, evidence, and intent.
 
 Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
 
@@ -17,7 +17,7 @@ Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatib
 
 ## Observation
 
-- Select the shared system and the relevant scope of both representations.
+- Delimit the shared system and the relevant scope of both representations.
 
 - Read each representation before changing either one.
 
@@ -33,9 +33,11 @@ Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatib
 
   - Their correspondence is unknown.
 
+- Record the authority, evidence, and intent available for each difference.
+
 ## Abduction
 
-_Devise an explanation for each difference._
+_Devise an explanation and reconciliation direction for each difference._
 
 - Classify its likely cause:
 
@@ -49,28 +51,38 @@ _Devise an explanation for each difference._
 
   - Unresolved conflict.
 
-- Propose the smallest authorized reconciliation.
+- Propose a disposition:
 
-- Preserve a conflict when available evidence does not establish a direction.
+  - Change `src` to match `dst`.
+
+  - Change `dst` to match `src`.
+
+  - Change both representations.
+
+  - Preserve an authorized difference.
+
+  - Defer an unresolved conflict.
+
+- State the authority, evidence, and intent that authorize the disposition.
 
 ## Deduction
 
 _Derive consequences of the reconciliation hypothesis._
 
-- Predict the resulting correspondence between the representations.
+- Derive the expected correspondence after each disposition.
 
-- Predict which differences remain authorized, unknown, or explicitly unresolved.
+- Identify the claims, behavior, constraints, or decisions affected by each change.
 
-- Predict the behavior, constraints, or decisions affected by each changed claim.
+- Identify every difference expected to remain authorized or unresolved.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the reconciliation._
 
-- Re-read both representations after every change.
+- Apply only the proposed, authorized changes.
 
-- Verify changed claims against the system's observable behavior and constraints.
+- Re-read both representations and verify changed claims against the system's observable behavior and constraints.
 
-- Retain only reconciliations supported by evidence and authority.
+- Retain a disposition only when the resulting correspondence matches its prediction.
 
 - Report changes by representation, preserved differences, and unresolved conflicts.
