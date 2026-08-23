@@ -39,29 +39,27 @@ Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatib
 
 _Devise an explanation and reconciliation direction for each difference._
 
-- Classify its likely cause:
+- Classify its change provenance:
 
-  - Stale representation.
+  - Only `src` changed from a common base.
 
-  - Unintended system drift.
+  - Only `dst` changed from a common base.
 
-  - Authorized difference.
+  - Both changed independently from a common base.
 
-  - Incomplete model.
+  - No common base is known.
 
-  - Unresolved conflict.
+- Name the reconciliation disposition:
 
-- Propose a disposition:
+  - `src ← dst`.
 
-  - Change `src` to match `dst`.
+  - `dst ← src`.
 
-  - Change `dst` to match `src`.
+  - `src`, `dst` → a shared state.
 
-  - Change both representations.
+  - Retain authorized divergence.
 
-  - Preserve an authorized difference.
-
-  - Defer an unresolved conflict.
+  - Defer.
 
 - State the authority, evidence, and intent that authorize the disposition.
 
