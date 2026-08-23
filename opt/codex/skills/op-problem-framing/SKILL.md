@@ -13,7 +13,7 @@ description: Provisionally classify a situation's problems to enumerate and rank
 
   - The classification motivates the ranking.
 
-  - Every enumerated concern remains in the ranking; later evidence may raise its salience.
+  - Every enumerated concern remains in the ranking; later evaluation may revise its salience.
 
 ## Observation
 
