@@ -1,4 +1,4 @@
-# Comments
+# Code Comments
 
 - Treat a comment as evidence that the code failed to clarify itself.
 
