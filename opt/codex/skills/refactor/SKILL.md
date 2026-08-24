@@ -5,7 +5,11 @@ description: Simplify code, contracts, and data flow through iterative refactori
 
 # Refactor
 
-Use @../op-purpose-formation/SKILL.md to establish the preservation boundary and intended delta.
+Use @../op-purpose-formation/SKILL.md to establish the refactor's:
+
+- Preservation boundary: behavior, contracts, constraints, and meaning that must remain unchanged.
+
+- Intended delta: behavior or contract changes authorized by the refactor.
 
 Use @../op-problem-framing/SKILL.md to frame the refactoring problems and prioritize their concerns.
 
@@ -17,7 +21,9 @@ Use @../op-mechanism-alignment/SKILL.md to preserve or revise the mechanisms tha
 
 ## Observation
 
-- Select one refactoring problem and its required behavioral preservation or intended delta.
+- Select one refactoring problem.
+
+- State its preservation boundary and intended delta.
 
 - Identify the affected entry points, exits, and contracts.
 
@@ -64,3 +70,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Retain the refactor only when the tests pass and the next change is more local or verifiable.
 
 - Surface a design or plan when broader judgment, migration, or coordination is required.
+
+## Iteration
+
+Re-invoke `refactor` until no further pass simplifies the affected system without violating its preservation boundary.
