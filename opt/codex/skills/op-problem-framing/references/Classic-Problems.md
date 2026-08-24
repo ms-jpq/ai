@@ -276,6 +276,20 @@ _Candidate families and exemplars, not a complete basis._
 
 - Monitoring signal
 
+### Evolution
+
+- Expected future variation
+
+- Extension seams
+
+- Stable contracts
+
+- Compatibility obligations
+
+- Cost of change
+
+- Migration and retirement path
+
 ### Design
 
 - Intended use
