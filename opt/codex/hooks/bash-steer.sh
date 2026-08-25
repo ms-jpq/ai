@@ -17,33 +17,27 @@ read -r -d '' -- JQ <<- 'JQ' || true
 }
 JQ
 
-DECISION=ask
+DECISION=deny
 case "$CMD_LINE" in
 'command -v '*)
   exit
   ;;
 'command '* | 'eval '* | 'exec '*)
-  DECISION=deny
   REASON='invoke the command directly, shell indirection is unnecessary'
   ;;
 'gosu '* | 'su '* | 'sudo '* | 'systemd-run '* | 'run0 '*)
-  DECISION=deny
   REASON='ask the user to escalate as needed'
   ;;
 'brew '* | 'apt '* | 'apt-get '* | 'winget '*)
-  DECISION=deny
   REASON='install locally, or ask the user to install system packages'
   ;;
 'npx '* | 'bunx '* | 'pnpm dlx '* | 'yarn dlx '* | 'uvx '* | 'pipx run '*)
-  DECISION=deny
   REASON='use locally installed tools, install as required'
   ;;
 'nohup '* | 'crontab '* | 'screen '* | 'zellij '*)
-  DECISION=deny
   REASON='use run_in_background for long-running work instead'
   ;;
 'gpg-agent '* | 'ssh-agent '*)
-  DECISION=deny
   REASON='rely on the users already-running auth agent'
   ;;
 'systemctl '* | 'launchctl '*)
