@@ -16,6 +16,8 @@ SENTINELS="$SESSIONS/$SESSION_ID.rules"
 COUNTER="$SESSIONS/$SESSION_ID.turn"
 RESET=(rm -fr -- "$SENTINELS" "$COUNTER")
 
+RESET_EVERY=36
+
 read -r -d '' -- AWK << 'AWK' || true
 NR == 1 && /^---$/ {
   in_front = 1
@@ -39,7 +41,6 @@ PostCompact)
   exit
   ;;
 Stop)
-  RESET_EVERY=16
 
   COUNT=0
   if [[ -f $COUNTER ]]; then
