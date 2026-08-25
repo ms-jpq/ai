@@ -1,0 +1,1 @@
+../../../codex/libexec/linters/readability.ts
