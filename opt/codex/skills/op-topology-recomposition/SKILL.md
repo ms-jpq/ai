@@ -49,11 +49,13 @@ _Devise an explanation for observations._
 
 ### Heuristic
 
-- Push branches up and loops down.
-
 - Recomposition may temporarily increase complexity.
 
   - For deeply entangled subgraphs, temporarily aggregate parts that share any concern across hierarchy levels, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
+
+- Build a singular central event loop for event-driven systems.
+
+- Push branches up and loops down.
 
 ## Deduction
 

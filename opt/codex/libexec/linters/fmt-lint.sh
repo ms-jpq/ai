@@ -27,7 +27,7 @@ done
 
 case "$FILE_PATH" in
 *.md)
-  find -H "$BASE/markdown" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
+  find -L "$BASE/markdown" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
   ;;
 *.json | *.yml | *.yaml | *.toml)
   "$BASE/json-schema.ts" "$FILE_PATH"
@@ -36,7 +36,7 @@ case "$FILE_PATH" in
   if command -v -- shellcheck > /dev/null; then
     shellcheck -- "$FILE_PATH"
   fi
-  find -H "$BASE/shell" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
+  find -L "$BASE/shell" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
   ;;
 *)
   ;;
