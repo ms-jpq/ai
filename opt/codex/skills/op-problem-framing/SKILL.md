@@ -27,6 +27,12 @@ description: Classify a system's obstructing problems and prioritize their conce
 
   - Record its unknowns and competing interpretations.
 
+- Seek prior art in the domain and adjacent disciplines.
+
+  - Record analogous problem frames, concern profiles, mechanisms, and material differences.
+
+  - Record when no relevant prior art was found.
+
 - Record current concerns and their candidate relations to the problems.
 
 - Keep problems distinct until evidence establishes their relation.
@@ -40,6 +46,8 @@ _Devise an explanation for observations._
 - Name and order the problems the frame must address.
 
   - Separate independent, coupled, and nested problems.
+
+- Treat prior art as a candidate frame, not a borrowed answer.
 
 - Enumerate and prioritize the concerns implied by each problem.
 
