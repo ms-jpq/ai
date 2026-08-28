@@ -40,7 +40,9 @@ _belief independent of evidence_
 
 # Observations on Simplicity
 
-- Irreducible complexity vs accidental complexity.
+- A simple system is an elegant system.
+
+  - Only irreducible complexity, not accidental complexity.
 
 - Rigorously correct is simpler than incidentally correct.
 

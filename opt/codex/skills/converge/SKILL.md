@@ -1,9 +1,11 @@
 ---
 name: converge
-description: Apply a semantic calculus of operators over the space of ideas to transform a non-trivial system model.
+description: Transform a non-trivial system model toward elegance through a semantic calculus of operators over ideas.
 ---
 
 # Convergence
+
+- The goal is elegance: the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose.
 
 - This skill proposes _operators_ as functions over the space of ideas, borrowing faculties from philosophy and mathematics.
 
@@ -34,8 +36,6 @@ description: Apply a semantic calculus of operators over the space of ideas to t
 4. **Mechanism Alignment:** Cultivate a minimal basis of mechanisms that covers salient concerns.
 
    - @../op-mechanism-alignment/SKILL.md
-
-_Quantify elegance by the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose._
 
 ## Inquiry
 
