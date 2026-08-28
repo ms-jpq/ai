@@ -40,7 +40,7 @@ _belief independent of evidence_
 
 # Observations on Simplicity
 
-- A simple system is an elegant system.
+- A simple system is an **elegant** system.
 
   - Only irreducible complexity, not accidental complexity.
 
