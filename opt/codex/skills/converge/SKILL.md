@@ -5,7 +5,7 @@ description: Transform a non-trivial system model toward elegance through a sema
 
 # Convergence
 
-- The goal is elegance: the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose.
+- The goal is **elegance**: the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose.
 
 - This skill proposes _operators_ as functions over the space of ideas, borrowing faculties from philosophy and mathematics.
 
