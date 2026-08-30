@@ -8,6 +8,8 @@ import process, { argv, stderr } from "node:process"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
 import { fullFormats } from "ajv-formats/dist/formats.js"
+import AjvDraft04Module from "ajv-draft-04/dist/index.js"
+import { Ajv2019 } from "ajv/dist/2019.js"
 import { Ajv2020 } from "ajv/dist/2020.js"
 import { Ajv } from "ajv/dist/ajv.js"
 import { parse } from "yaml"
@@ -15,9 +17,17 @@ import { parse } from "yaml"
 type Schema = Record<string, unknown>
 
 const encoding = "utf8"
+const AjvDraft04 = AjvDraft04Module.default
 const schemaUri = {
   remote: /^https?:\/\//,
   meta: /^https?:\/\/json-schema\.org\/draft\//,
+}
+const schemaDraft = {
+  draft04: /\/draft-04\/schema#?$/,
+  draft06: /\/draft-06\/schema#?$/,
+  draft07: /\/draft-07\/schema#?$/,
+  draft2019: /\/draft\/2019-09\/schema#?$/,
+  draft2020: /\/draft\/2020-12\/schema#?$/,
 }
 
 const parseSource = (path: string, source: string): unknown => {
@@ -114,14 +124,36 @@ const loader = (): ((uri: string) => Promise<Schema>) => {
 const schemaLocation = (path: string, declaration: string): string =>
   schemaUri.remote.test(declaration) ? declaration : pathToFileURL(resolve(dirname(path), declaration)).href
 
-const ajvFor = (schemaDeclaration: string, loadSchema: (uri: string) => Promise<Schema>): Ajv | Ajv2020 => {
-  const ajv = schemaDeclaration.includes("draft-07")
-    ? new Ajv({ allErrors: true, loadSchema, strict: false })
-    : new Ajv2020({ allErrors: true, loadSchema, strict: false })
+const unsupportedSchemaDraft = (declaration: string): never => {
+  throw new Error(`Unsupported JSON Schema draft: ${declaration}`)
+}
+
+type JsonSchemaValidator = InstanceType<typeof AjvDraft04> | Ajv | Ajv2019 | Ajv2020
+
+const addFormats = <Validator extends JsonSchemaValidator>(ajv: Validator): Validator => {
   for (const [name, format] of Object.entries(fullFormats)) {
     ajv.addFormat(name, format)
   }
   return ajv
+}
+
+const ajvFor = (schemaDeclaration: string, loadSchema: (uri: string) => Promise<Schema>): JsonSchemaValidator => {
+  const options = { allErrors: true, loadSchema, strict: false }
+
+  switch (true) {
+    case schemaDraft.draft04.test(schemaDeclaration):
+      return addFormats(new AjvDraft04(options))
+    case schemaDraft.draft06.test(schemaDeclaration):
+    case schemaDraft.draft07.test(schemaDeclaration):
+      return addFormats(new Ajv(options))
+    case schemaDraft.draft2019.test(schemaDeclaration):
+      return addFormats(new Ajv2019(options))
+    case schemaDeclaration === "":
+    case schemaDraft.draft2020.test(schemaDeclaration):
+      return addFormats(new Ajv2020(options))
+    default:
+      return unsupportedSchemaDraft(schemaDeclaration)
+  }
 }
 
 const validate = async (path: string, { source }: { source: string }): Promise<void> => {

@@ -6,6 +6,7 @@
     "@opentelemetry/sdk-trace-base": "*",
     "@opentelemetry/semantic-conventions": "*",
     "ajv": "*",
+    "ajv-draft-04": "*",
     "langfuse-cli": "*",
     "prettier": "*",
     "yaml": "*"
