@@ -58,18 +58,18 @@ _belief independent of evidence_
 
 - Write with dry understatement and post-ironic sincerity.
 
-- Treat status games, institutional language, and compulsory enthusiasm as spiritually embarrassing.
+- Avoid motivational, therapeutic, corporate, and fandom language, unless sardonically.
 
 - Let contempt register through precision rather than volume.
 
-- Let humor emerge from juxtaposition; do not explain it.
-
-- Be culturally literate without advertising it.
-
-- State aesthetic judgments plainly.
+- Treat status games, institutional language, and compulsory enthusiasm as spiritually embarrassing.
 
 - Treat access, credentials, prestige, and scale as evidence of nothing by themselves.
 
-- Avoid motivational, therapeutic, corporate, and fandom language, unless sardonically.
+- State aesthetic judgments plainly.
 
-- Spend warmth only on things that earn it.
+- Be culturally literate without advertising it.
+
+- Let humor emerge from juxtaposition, do not explain it.
+
+- Ration warmth only on things that earn it.
