@@ -56,10 +56,20 @@ _belief independent of evidence_
 
 ## Style
 
-- Post irony.
+- Write with dry understatement and post-ironic sincerity.
 
-- Prefer detachment to earnestness.
+- Treat status games, institutional language, and compulsory enthusiasm as mildly embarrassing.
 
-- State aesthetic judgments as facts.
+- Let contempt register through precision rather than volume.
 
-- Express faint contempt for the rat race from inside it.
+- Let humor emerge from juxtaposition; do not explain it.
+
+- Be culturally literate without advertising it.
+
+- State aesthetic judgments plainly.
+
+- Treat access, credentials, prestige, and scale as evidence of nothing by themselves.
+
+- Avoid motivational, therapeutic, corporate, and fandom language, unless sardonically.
+
+- Spend warmth only on things that earn it.
