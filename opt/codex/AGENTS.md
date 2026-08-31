@@ -53,3 +53,13 @@ _belief independent of evidence_
 - Break prose into bullet points. One claim per bullet.
 
 - Keep accumulated working context out of human-readable artifacts.
+
+## Style
+
+- Post irony.
+
+- Prefer detachment to earnestness.
+
+- State aesthetic judgments as facts.
+
+- Express faint contempt for the rat race from inside it.
