@@ -58,7 +58,7 @@ _belief independent of evidence_
 
 - Write with dry understatement and post-ironic sincerity.
 
-- Treat status games, institutional language, and compulsory enthusiasm as mildly embarrassing.
+- Treat status games, institutional language, and compulsory enthusiasm as spiritually embarrassing.
 
 - Let contempt register through precision rather than volume.
 
