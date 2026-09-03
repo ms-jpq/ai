@@ -1,6 +1,6 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-model              = "zai/glm-5.2"
+model              = "zai/glm-5.3"
 model_catalog_json = "${CODEX_HOME}/model_catalog.json"
 model_provider     = "z-ai"
 
