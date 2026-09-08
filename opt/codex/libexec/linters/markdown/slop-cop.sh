@@ -3,7 +3,7 @@
 set -o pipefail
 
 BASE="${0%/*}"
-AWK=(awk -f "$BASE/slop-cop.awk")
+AWK=(gawk -f "$BASE/slop-cop.awk")
 
 for FRAGMENT in "$BASE/../slop.d"/*.awk; do
   AWK+=(-f "$FRAGMENT")

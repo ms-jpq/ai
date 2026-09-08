@@ -2,11 +2,13 @@ BEGIN {
   # PATTERNS: regular expression -> optional reason
   FENCE = ""
   FENCE_LENGTH = 0
+  LINT_FENCED = 0
 }
 
 FNR == 1 {
   FENCE = ""
   FENCE_LENGTH = 0
+  LINT_FENCED = 0
 }
 
 fence($0) {
@@ -27,7 +29,7 @@ fence($0) {
   }
 }
 
-function fence(LINE, L_CONTENT, L_PATTERN, L_REMAINDER)
+function fence(LINE, L_CONTENT, L_LANGUAGE, L_PATTERN, L_REMAINDER)
 {
   L_CONTENT = LINE
   sub(/^ {0,3}/, "", L_CONTENT)
@@ -37,16 +39,20 @@ function fence(LINE, L_CONTENT, L_PATTERN, L_REMAINDER)
     }
     FENCE = substr(L_CONTENT, 1, 1)
     FENCE_LENGTH = RLENGTH
+    L_LANGUAGE = tolower(substr(L_CONTENT, RLENGTH + 1))
+    sub(/^[[:space:]]*/, "", L_LANGUAGE)
+    LINT_FENCED = L_LANGUAGE ~ /^(markdown|md|text|txt)([[:space:]]|$)/
     return 1
   }
   L_PATTERN = "^" FENCE FENCE FENCE "+"
   if (! match(L_CONTENT, L_PATTERN) || RLENGTH < FENCE_LENGTH) {
-    return 1
+    return ! LINT_FENCED
   }
   L_REMAINDER = substr(L_CONTENT, RLENGTH + 1)
   if (L_REMAINDER ~ /^[[:space:]]*$/) {
     FENCE = ""
     FENCE_LENGTH = 0
+    LINT_FENCED = 0
   }
   return 1
 }
