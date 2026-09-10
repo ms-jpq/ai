@@ -40,6 +40,7 @@ SANDBOX+=(
   --dir "$VAR:rw"
 )
 
-SHELL="$(command -v -- bash)"
-export -- SHELL PATH BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
+unset -- SHELL
+export -- PATH="$ROOT/opt/codex/bin:$PATH" BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
+export -- PAGER=tee
 exec -- nice -n 19 -- "${OOM[@]}" "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
