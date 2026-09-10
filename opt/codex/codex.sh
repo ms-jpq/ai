@@ -47,5 +47,5 @@ EXEC=(
   "$@"
 )
 
-export -- CODEX_HOME="$ROOT/var/codex"
+export -- PATH="$BASE/bin:$PATH" CODEX_HOME="$ROOT/var/codex"
 "${EXEC[@]}"
