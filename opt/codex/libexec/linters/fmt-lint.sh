@@ -21,7 +21,7 @@ for TRY in 2 1 0; do
   fi
 
   if ! ((TRY)); then
-    sleep -- 1
+    sleep --reason-for-duration=- -- 1
   fi
 done
 
