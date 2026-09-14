@@ -45,8 +45,6 @@ _Derive consequences of the explanation._
 
 - Predict which problems become relevant under the proposed purpose.
 
-- Predict which authority, commitment, or affected party could require revision.
-
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._

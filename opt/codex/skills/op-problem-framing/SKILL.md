@@ -35,17 +35,13 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 - Record current concerns and their candidate relations to the problems.
 
-- Keep problems distinct until evidence establishes their relation.
-
 ## Abduction
 
 _Devise an explanation for observations._
 
 - Propose a working hierarchy that explains observed resistance to the system purpose.
 
-- Name and order the problems the frame must address.
-
-  - Separate independent, coupled, and nested problems.
+- Distinguish independent, coupled, and nested problems.
 
 - Treat prior art as a candidate frame, not a borrowed answer.
 
@@ -54,8 +50,6 @@ _Devise an explanation for observations._
   - State why each concern matters here and why it has its priority.
 
   - Report a boundary conflict to Purpose Formation.
-
-  - Do not introduce a concern without a plausible effect on a response or its consequences.
 
 ## Deduction
 
@@ -66,8 +60,6 @@ _Derive consequences of the explanation._
 - Predict how resolving each problem would advance the system purpose.
 
 - Predict which salient concerns require structural embodiment and which do not.
-
-- Predict which omissions, relations, or priorities would make the frame inadequate.
 
 ## Induction
 

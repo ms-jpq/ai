@@ -35,7 +35,7 @@ _Devise an explanation for observations._
 
 - Treat external boundaries as fixed unless evidence invalidates them.
 
-- Diagnose how the current part mapping fails to embody the framed concern hierarchy locally.
+- Identify which boundaries or flows force a concern to be understood across several parts.
 
 - Explore candidate topology changes, including:
 
@@ -52,8 +52,6 @@ _Devise an explanation for observations._
   - Resolve a cycle when it prevents a required order by changing the parts or flows that create it.
 
     - Retain other cycles only as explicit iterations or feedback loops.
-
-  - Apply any other change that simplifies parts, containment, or flows without losing framed concerns.
 
 ### Heuristic
 

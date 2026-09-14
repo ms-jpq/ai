@@ -7,7 +7,7 @@ description: Give consistent names that semantically compress ideas.
 
 ## Artifact (Output)
 
-- An established lexicon.
+- A lexicon.
 
   - Names for non-overlapping concepts.
 
@@ -31,8 +31,6 @@ _Devise an explanation for observations._
 
 - Search the domain and adjacent disciplines for existing concepts, terms, and models that may subsume the distinction.
 
-- Generalize, classify, or abstract when a recurring distinction needs a reusable form.
-
 - Coin or revise a concise term that carries the distinction.
 
 - Propose a consistent mapping of the term, definition, and constraint across each relevant representation.
@@ -53,7 +51,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the derived consequences against collected uses, counterexamples, and neighboring concepts.
 
-- Retain a concept only when it preserves a necessary distinction without decorating or merging concepts.
+- Retain a concept only when it preserves a necessary distinction.
 
 - Reuse retained concepts and terms across each relevant representation.
 

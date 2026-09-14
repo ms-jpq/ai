@@ -39,11 +39,7 @@ _Devise an explanation for observations._
 
 - Propose one canonical region for each framed concern and explain how it reduces fragmentation.
 
-- Propose moves for one verified cluster at a time.
-
-  - Resolve the destination and affected references before moving it.
-
-  - Record each old-to-new path mapping.
+- Map each proposed move to its destination and affected references.
 
 - Propose deduplication of exact copies only.
 
@@ -72,7 +68,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Verify the predicted regions, dependencies, and vocabulary after each cluster.
 
 - Retain a change only when it reduces fragmentation without changing preserved meaning or behavior.
-
-- Use `refine` for individual prose only after its location and role are settled.
-
-- Escalate structural changes to `refactor`.

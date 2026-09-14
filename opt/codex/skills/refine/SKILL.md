@@ -31,13 +31,11 @@ _Devise an explanation for observations._
 
 - Replace vague words with precise ones. Remove words that do not change the claim.
 
-- Group related claims and order them by importance.
+- Order claims by importance.
 
 - Replace abstractions with observable actions, conditions, or outcomes.
 
 - Add missing domain context. Omit explanation already established by context.
-
-- Resolve incompatible readings or claims.
 
 - Group related claims beneath a parent claim.
 
@@ -61,7 +59,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Remove absolutes not supported by evidence and hedges not required by uncertainty.
 
-- Retain or revise the hypothesis, then re-read the prose in local context.
+- Re-read the revision in context and retain it only if the predicted reading holds.
 
 ## Application
 

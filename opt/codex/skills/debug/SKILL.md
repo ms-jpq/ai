@@ -13,7 +13,7 @@ Use the operator skill for every layer whose model requires revision.
 
 - A failure account with the expected outcome, observed outcome, evidence, and affected system.
 
-- A layered diagnosis of the failure.
+- A diagnosis identifying the earliest supported deficient layer and its downstream consequences.
 
   - Purpose Formation: the purpose, boundary, authority, or success conditions were deficient.
 
@@ -24,8 +24,6 @@ Use the operator skill for every layer whose model requires revision.
   - Conceptual Synthesis: ambiguous names or collapsed distinctions obscured the relevant meaning.
 
   - Mechanism Alignment: coverage, causal path, or assumptions were deficient.
-
-- The earliest supported deficient layer and its downstream consequences.
 
 - A corrective revision, its evidence, and the condition that would reopen the diagnosis.
 
@@ -61,7 +59,7 @@ _Derive consequences of the explanation._
 
 - Derive the conditions under which the correction prevents, detects, or contains the failure.
 
-- Derive changes to the deficient artifact and its dependent purpose, problem, topology, lexicon, or mechanism artifacts.
+- Derive changes to the deficient artifact and its dependents.
 
 - Predict evidence that would falsify the layer diagnosis.
 

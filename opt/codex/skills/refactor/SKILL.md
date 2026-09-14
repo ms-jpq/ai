@@ -47,9 +47,7 @@ Use @../active-review/SKILL.md throughout each pass to probe decisions and the a
 
 _Devise an explanation for observations._
 
-- Propose a structural change that resolves the framed concern while preserving the baseline.
-
-- Explain how the proposed structure removes the cause of the refactoring problem.
+- Propose a structural change and explain how it removes the cause of the refactoring problem.
 
 - Explore candidate changes, including:
 
@@ -82,8 +80,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Compare results with the derived expectations and reject unexplained differences.
 
 - Exercise a representative subsequent change to assess whether the new structure makes it more local or verifiable.
-
-- Surface a design or plan when broader judgment, migration, or coordination is required.
 
 ## Iteration
 

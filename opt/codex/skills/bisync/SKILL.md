@@ -9,8 +9,6 @@ description: Reconcile two system representations while preserving authorized ch
 
 - Typical operands are a model and the system it represents.
 
-- Establish the reconciliation direction from authority, evidence, and intent.
-
 Use @../op-purpose-formation/SKILL.md when the system purpose or reconciliation boundary is unclear.
 
 Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
@@ -32,8 +30,6 @@ Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient 
 - Delimit the shared system and the relevant scope of both representations.
 
 - Take its system purpose, boundary, authority, and commitments as reconciliation constraints.
-
-- Read each representation before changing either one.
 
 - Map corresponding claims, parts, relations, and constraints.
 
@@ -87,11 +83,9 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive which corresponding claims should agree after each disposition and how to check them.
+- Derive which claims should change, agree, remain divergent, or remain unresolved after each disposition, and how to check them.
 
 - Derive whether each disposition preserves the system purpose and required mechanism coverage.
-
-- Identify the claims that must change, remain divergent, or remain unresolved under each disposition.
 
 ## Induction
 

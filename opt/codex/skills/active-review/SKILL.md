@@ -23,8 +23,6 @@ Use @../op-problem-framing/SKILL.md to extend or revise the shared problem frame
 
 - When invoked independently, recover these inputs from the task and existing work.
 
-- Identify missing or conflicting inputs for review.
-
 - Inspect current decisions, changes, and supporting evidence.
 
 - Record which concerns the current work addresses and what remains unexplained.
@@ -38,8 +36,6 @@ _Devise an explanation for observations._
 - Prioritize uncovered and existing concerns by their consequences for the goal.
 
 - Map each concern needing attention to a question whose answer could change the work.
-
-  - Ground the question in a specific observation.
 
   - Leave room for the current decision to be justified.
 

@@ -35,11 +35,7 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 _Devise an explanation for observations._
 
-- Hypothesize how a mechanism can address each salient concern.
-
 - Explore candidate mechanisms by reusing, adapting, combining, or inventing them.
-
-- Compare concerns for a shared causal path that one mechanism could address.
 
 - Explain how each candidate would produce its intended effects under the proposed assumptions.
 
@@ -71,4 +67,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retain the smallest mechanism basis that preserves required coverage.
 
-- Revise the mechanism, mapping, or concern priority when evaluation exposes a gap.
+- Revisit the concern mapping or priorities when changing the mechanism does not resolve the gap.
