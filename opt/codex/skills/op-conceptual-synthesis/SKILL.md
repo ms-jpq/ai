@@ -13,6 +13,8 @@ description: Give consistent names that semantically compress ideas.
 
   - Definitions, scope, exclusions, and mappings to uses across relevant representations.
 
+  - Unresolved aliases and distinctions that proposed names or model views must preserve.
+
 ## Observation (Input)
 
 - Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or inconsistent across representations.
@@ -55,4 +57,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Reuse retained concepts and terms across each relevant representation.
 
-- Keep unresolved aliases explicit, normalize meaningless variation, and update or retire a concept when evidence changes its grounded distinction.
+- Normalize meaningless variation and update or retire a concept when evidence changes its grounded distinction.

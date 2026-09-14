@@ -13,7 +13,9 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 - An explicit mapping from framed concerns to parts.
 
-  - Note each cycle, its source, and whether it is a precedence constraint, iteration, or feedback loop.
+  - A justified boundary and placement for each part, with reasons for concerns needing no structural embodiment.
+
+- Explicit cycles, their sources, and their precedence, iteration, or feedback semantics.
 
 ## Observation (Input)
 
@@ -67,15 +69,11 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive observable consequences of the proposed topology:
+- Trace a representative change through the proposed parts to predict which boundaries and flows it must cross.
 
-  - Each framed concern has an explicit structural embodiment or a reason it needs none.
+- Derive an execution order from precedence dependencies and identify remaining conflicts.
 
-  - Each changed part has a justified boundary and place in the containment hierarchy.
-
-  - Its acyclic precedence graph yields the required execution order.
-
-  - Each retained cycle has explicit iteration or feedback semantics.
+- Derive how each retained cycle advances, terminates, or regulates its state under the proposed structure.
 
 ## Induction
 

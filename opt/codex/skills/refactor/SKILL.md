@@ -19,7 +19,19 @@ Use @../op-conceptual-synthesis/SKILL.md to give parts, contracts, and flows con
 
 Use @../op-mechanism-alignment/SKILL.md to preserve or revise the mechanisms that cover salient concerns.
 
-## Observation
+Use @../active-review/SKILL.md throughout each pass to probe decisions and the adequacy of their evidence.
+
+- Supply the refactor's goal, preservation boundary, intended delta, and current problem frame.
+
+## Artifact (Output)
+
+- A simpler affected system that preserves its stated boundary and realizes only the authorized delta.
+
+- Passing tests and checks that distinguish the intended delta from regressions.
+
+  - Evidence that subsequent changes are more local or verifiable.
+
+## Observation (Input)
 
 - Select one refactoring problem.
 
@@ -37,7 +49,7 @@ _Devise an explanation for observations._
 
 - Propose a structural change that resolves the framed concern while preserving the baseline.
 
-- State every intended behavioral or contract delta explicitly.
+- Explain how the proposed structure removes the cause of the refactoring problem.
 
 - Explore candidate changes, including:
 
@@ -51,23 +63,25 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive executable claims:
+- Derive expected results for affected entry points, including boundary and failure cases.
 
-  - Characterization tests remain valid except at each stated delta.
+- Identify which baseline assertions remain applicable and which authorized deltas require different expected results.
 
-  - Each stated delta has a test that distinguishes it from a regression.
+- Derive a test that distinguishes each authorized delta from an unintended behavior change.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
+- Implement the proposed structural change within the preservation boundary and intended delta.
+
 - Add or update the tests derived above.
 
 - Run the affected tests, types, contract checks, and effect checks.
 
-- Reject a refactor when a preserved behavior changes or a stated delta lacks a discriminating test.
+- Compare results with the derived expectations and reject unexplained differences.
 
-- Retain the refactor only when the tests pass and the next change is more local or verifiable.
+- Exercise a representative subsequent change to assess whether the new structure makes it more local or verifiable.
 
 - Surface a design or plan when broader judgment, migration, or coordination is required.
 

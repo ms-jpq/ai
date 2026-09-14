@@ -33,11 +33,9 @@ _Devise an explanation for observations._
 
 - Propose a system purpose that explains why the system should change or be preserved.
 
-- State its intended effect, success conditions, and external boundary.
+- Compare candidate purposes by how they account for declared and unmet intentions.
 
-- Identify conflicts among purposes, commitments, and affected parties.
-
-- Record explicit exclusions and unresolved questions.
+- Identify where each candidate conflicts with commitments, authority, or affected parties.
 
 ## Deduction
 

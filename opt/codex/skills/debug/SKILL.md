@@ -9,7 +9,7 @@ Use @../bisync/SKILL.md when the intended model and realized system may differ.
 
 Use the operator skill for every layer whose model requires revision.
 
-## Artifact
+## Artifact (Output)
 
 - A failure account with the expected outcome, observed outcome, evidence, and affected system.
 
@@ -21,13 +21,15 @@ Use the operator skill for every layer whose model requires revision.
 
   - Topology Recomposition: a concern lacked local structural embodiment.
 
+  - Conceptual Synthesis: ambiguous names or collapsed distinctions obscured the relevant meaning.
+
   - Mechanism Alignment: coverage, causal path, or assumptions were deficient.
 
 - The earliest supported deficient layer and its downstream consequences.
 
 - A corrective revision, its evidence, and the condition that would reopen the diagnosis.
 
-## Observation
+## Observation (Input)
 
 - Record the expected and observed outcomes, their difference, and the affected system.
 
@@ -35,7 +37,7 @@ Use the operator skill for every layer whose model requires revision.
 
 - Reconcile model and system differences before attributing the failure to either one.
 
-- Record the system purpose, framed problems, salient concerns, topology, and mechanisms in effect.
+- Record the system purpose, framed problems, salient concerns, topology, lexicon, and mechanisms in effect.
 
 ## Abduction
 
@@ -53,15 +55,13 @@ _Devise an explanation for observations._
 
 - Propose a correction at the earliest deficient layer.
 
-  - Derive downstream changes instead of patching only the observed symptom.
-
 ## Deduction
 
 _Derive consequences of the explanation._
 
 - Derive the conditions under which the correction prevents, detects, or contains the failure.
 
-- Predict which purpose, problem, topology, or mechanism artifact must change.
+- Derive changes to the deficient artifact and its dependent purpose, problem, topology, lexicon, or mechanism artifacts.
 
 - Predict evidence that would falsify the layer diagnosis.
 

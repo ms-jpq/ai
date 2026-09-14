@@ -19,7 +19,15 @@ Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatib
 
 Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient concern without mechanism coverage.
 
-## Observation
+## Artifact (Output)
+
+- Reconciled representations that preserve authorized changes and required correspondence.
+
+- Explicit authorized divergences and unresolved conflicts, with their evidence and disposition.
+
+  - Dispositions identify changes by representation and their supporting authority and intent.
+
+## Observation (Input)
 
 - Delimit the shared system and the relevant scope of both representations.
 
@@ -49,6 +57,8 @@ _Devise an explanation for observations._
 
 - Classify its change provenance:
 
+  - Neither changed from a common base.
+
   - Only `src` changed from a common base.
 
   - Only `dst` changed from a common base.
@@ -71,11 +81,13 @@ _Devise an explanation for observations._
 
 - State the authority, evidence, and intent that authorize the disposition.
 
+- Explain how the proposed disposition accounts for the difference without losing an authorized change.
+
 ## Deduction
 
 _Derive consequences of the explanation._
 
-- Derive the expected correspondence after each disposition.
+- Derive which corresponding claims should agree after each disposition and how to check them.
 
 - Derive whether each disposition preserves the system purpose and required mechanism coverage.
 
@@ -90,5 +102,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Re-read both representations and verify changed claims against the system's purpose, behavior, and constraints.
 
 - Retain a disposition only when the resulting correspondence matches its prediction.
-
-- Report changes by representation, preserved differences, and unresolved conflicts.

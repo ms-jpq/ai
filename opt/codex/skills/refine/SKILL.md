@@ -9,7 +9,11 @@ Use @../op-purpose-formation/SKILL.md when the reader's purpose or intended effe
 
 Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
 
-## Observation
+## Artifact (Output)
+
+- Revised prose that supports the reader's intended understanding, decision, or action while preserving necessary meaning and factual constraints.
+
+## Observation (Input)
 
 - Select one reader-facing defect per pass.
 
@@ -19,19 +23,19 @@ Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable
 
 _Devise an explanation for observations._
 
-- Devise a revision that makes the intended reading, decision, or action easier.
+- Explain how the current wording or structure causes the reader-facing defect, then propose a revision.
 
 - Break prose into point form.
 
   - One claim per bullet.
 
-- Replace vague words with precise ones; remove words that do not change the claim.
+- Replace vague words with precise ones. Remove words that do not change the claim.
 
 - Group related claims and order them by importance.
 
 - Replace abstractions with observable actions, conditions, or outcomes.
 
-- Add missing domain context; omit explanation already established by context.
+- Add missing domain context. Omit explanation already established by context.
 
 - Resolve incompatible readings or claims.
 
@@ -45,11 +49,13 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict the reading, decision, or action the revision should make easier.
+- Predict which interpretation, lookup, or decision should change for the reader and which claims must retain their meaning.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
+
+- Apply the proposed revision.
 
 - Test the predicted outcome against competing readings, factual constraints, and the reader's goal.
 

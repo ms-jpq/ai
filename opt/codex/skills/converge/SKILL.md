@@ -43,7 +43,7 @@ description: Transform a non-trivial system model toward elegance through a sema
 
 ## Application
 
-- Apply the selected operator to a concrete operand: prose, decision space, control-flow, module or organization.
+- Apply the selected operator to a concrete operand: prose, decision space, control-flow, module or organization, et al.
 
 - Maintain an internal dialectic.
 

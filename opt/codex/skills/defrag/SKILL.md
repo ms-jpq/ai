@@ -15,7 +15,15 @@ Use @../refine/SKILL.md for local rewriting after the topology is settled.
 
 Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, contracts, or flows.
 
-## Observation
+## Artifact (Output)
+
+- A collocated corpus with canonical regions, repaired references, and consolidated exact duplicates and confirmed aliases.
+
+- Preserved meaning, responsibilities, contracts, and flows, with unresolved ambiguities explicit.
+
+- Old-to-new path mappings, deduplications, and required follow-up.
+
+## Observation (Input)
 
 - Select a fragmented corpus or a narrower operand: code, prose, configuration, or instructions.
 
@@ -29,17 +37,15 @@ Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, 
 
 _Devise an explanation for observations._
 
-- Do not reassign responsibilities, change contracts, or alter control or data flow.
+- Propose one canonical region for each framed concern and explain how it reduces fragmentation.
 
-- Assign each framed concern to one canonical region.
-
-- Move one verified cluster at a time.
+- Propose moves for one verified cluster at a time.
 
   - Resolve the destination and affected references before moving it.
 
   - Record each old-to-new path mapping.
 
-- Deduplicate exact copies only.
+- Propose deduplication of exact copies only.
 
   - Preserve non-identical material and unresolved alias candidates.
 
@@ -51,20 +57,22 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict that each retained concern has one canonical region.
+- Derive which reads and edits become local under the proposed placement.
 
-- Predict that every retained dependency resolves and no live dependency targets an old path.
+- Derive reference updates from the proposed moves, including consumers that depend on the old paths.
 
-- Predict that each approved alias set uses one canonical term within the affected cluster.
+- Derive which uses must change under each proposed alias substitution and which distinct meanings must remain untouched.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
+- Apply the proposed moves, deduplications, and confirmed term changes one cluster at a time.
+
 - Verify the predicted regions, dependencies, and vocabulary after each cluster.
+
+- Retain a change only when it reduces fragmentation without changing preserved meaning or behavior.
 
 - Use `refine` for individual prose only after its location and role are settled.
 
 - Escalate structural changes to `refactor`.
-
-- Report moves, deduplications, unchanged ambiguities, and required follow-up.
