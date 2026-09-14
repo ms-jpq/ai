@@ -67,4 +67,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Verify the predicted regions, dependencies, and vocabulary after each cluster.
 
-- Retain a change only when it reduces fragmentation without changing preserved meaning or behavior.
+- Retain a change only when it reduces fragmentation without changing preserved meaning or behaviour.

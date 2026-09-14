@@ -19,7 +19,7 @@ description: Form and revise the system purpose that guides the remaining operat
 
 ## Observation (Input)
 
-- Describe the encountered system, its current behavior, and its external boundary.
+- Describe the encountered system, its current behaviour, and its external boundary.
 
 - Record declared intentions, existing commitments, and unmet intentions.
 

@@ -16,7 +16,7 @@ BEGIN {
     report("Do not short-circuit from a [[ ... ]] test; use an if block.")
   }
   if ($0 ~ /^[[:space:]]*(function[[:space:]]+|[[:alpha:]_][[:alnum:]_]*[[:space:]]*\(\)[[:space:]]*\{)/) {
-    report("Do not declare shell functions; split reusable behavior into an array or a script.")
+    report("Do not declare shell functions; split reusable behaviour into an array or a script.")
   }
 }
 

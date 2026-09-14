@@ -15,6 +15,6 @@ paths:
 
 ## Generics
 
-- Use type parameters for transforms whose behavior is independent of the domain type. Keep domain-specific behavior concrete.
+- Use type parameters for transforms whose behaviour is independent of the domain type. Keep domain-specific behaviour concrete.
 
 - Constrain a type parameter only by the operations the function performs. Compose small generic functions into the specialized workflow.

@@ -93,6 +93,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Apply only the proposed, authorized changes.
 
-- Re-read both representations and verify changed claims against the system's purpose, behavior, and constraints.
+- Re-read both representations and verify changed claims against the system's purpose, behaviour, and constraints.
 
 - Retain a disposition only when the resulting correspondence matches its prediction.

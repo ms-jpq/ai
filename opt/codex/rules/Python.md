@@ -118,7 +118,7 @@ paths:
 
 ---
 
-## Data Modeling
+## Data Modelling
 
 - Use `@dataclass(slots=True, frozen=True)` for immutable data types.
 

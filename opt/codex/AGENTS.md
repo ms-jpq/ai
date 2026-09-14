@@ -70,6 +70,6 @@ _belief independent of evidence_
 
 - Be culturally literate without advertising it.
 
-- Let humor emerge from juxtaposition, do not explain it.
+- Let humour emerge from juxtaposition, do not explain it.
 
 - Ration warmth only on things that earn it.

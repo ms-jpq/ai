@@ -19,7 +19,7 @@ description: Give consistent names that semantically compress ideas.
 
 - Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or inconsistent across representations.
 
-- Collect its uses, counterexamples, neighboring concepts, and representations.
+- Collect its uses, counterexamples, neighbouring concepts, and representations.
 
 ## Abduction
 
@@ -41,7 +41,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict how examples, counterexamples, and neighboring concepts should be classified in relation to the synthesized concept.
+- Predict how examples, counterexamples, and neighbouring concepts should be classified in relation to the synthesized concept.
 
 - Derive which meanings and distinctions must survive each proposed rename or model view.
 
@@ -49,7 +49,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the derived consequences against collected uses, counterexamples, and neighboring concepts.
+- Test the derived consequences against collected uses, counterexamples, and neighbouring concepts.
 
 - Retain a concept only when it preserves a necessary distinction.
 

@@ -1,61 +1,57 @@
 ---
 name: refactor
-description: Simplify code, contracts, and data flow through iterative refactoring.
+description: Discover and remove unnecessary complexity, implementing and testing simpler alternatives while preserving required behaviour and meaning.
 ---
 
 # Refactor
 
-Use @../op-purpose-formation/SKILL.md to establish the refactor's:
+Use @../active-review/SKILL.md throughout each pass to uncover concerns, challenge necessity, and test the justification for keeping or changing structure.
 
-- Preservation boundary: behavior, contracts, constraints, and meaning that must remain unchanged.
-
-- Intended delta: behavior or contract changes explicitly included in the request or subsequently agreed with the user.
-
-Use @../op-problem-framing/SKILL.md to frame the refactoring problems and prioritize their concerns.
-
-Use @../op-topology-recomposition/SKILL.md to resolve the structural concerns in code.
-
-Use @../op-conceptual-synthesis/SKILL.md to give parts, contracts, and flows consistent names.
-
-Use @../op-mechanism-alignment/SKILL.md to preserve or revise the mechanisms that cover salient concerns.
-
-Use @../active-review/SKILL.md throughout each pass to probe decisions and the adequacy of their evidence.
-
-- Supply the refactor's goal, preservation boundary, intended delta, and current problem frame.
+Use @../converge/SKILL.md when review exposes a model gap that needs an operator-level revision.
 
 ## Artifact (Output)
 
-- A simpler affected system that preserves its stated boundary and realizes only the authorized delta.
+- A simpler affected system, with changes implemented and required behaviour, contracts, constraints, and meaning preserved.
 
-- Passing tests and checks that distinguish the intended delta from regressions.
+- Passing tests and checks that distinguish agreed changes from regressions.
 
-  - Evidence that subsequent changes are more local or verifiable.
+- Evidence of reduced complexity or more local, verifiable subsequent changes.
 
 ## Observation (Input)
 
-- Select one refactoring problem.
+- Read the system purpose, current work, applicable rules, and observed friction.
 
-- State its preservation boundary and intended delta.
+- State the preservation boundary: behaviour, contracts, constraints, and meaning that must remain unchanged.
 
-- Identify the affected entry points, exits, and contracts.
+  - Separate these requirements from incidental structure. Record any behaviour or contract changes explicitly requested or subsequently agreed with the user.
+
+- Inspect entry points, dependencies, branches, repeated transformations, and exceptions for complexity whose necessity is unclear.
+
+- Identify the requirement each candidate serves and the consumers that depend on it. Select one supported simplification opportunity per pass.
 
 - Establish a passing baseline with existing tests or new characterization tests.
 
-  - Cover a normal case, a boundary case, and relevant failure behavior.
+  - Cover a normal case, a boundary case, and relevant failure behaviour.
+
+  - Distinguish assertions of required behaviour from assertions that merely mirror the current implementation.
 
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Propose a structural change and explain how it removes the cause of the refactoring problem.
+- Ask what could disappear while the requirements still hold.
 
-- Explore candidate changes, including:
+  - What assumption makes this mechanism, dependency, branch, or intermediate outcome necessary?
 
-  - Move or resize boundaries to de-complect responsibilities.
+  - Could one existing mechanism replace several special cases?
 
-  - Divide the flow into stages with explicit contracts.
+  - Would changing the organization eliminate the need for the workaround?
 
-  - Lift branches toward callers that own the decision and push loops toward operations that own the collection, when this reduces cross-boundary dependencies.
+  - Which names, boundaries, or transformations force unrelated concerns to be understood together?
+
+- Propose removal, consolidation, replacement, or restructuring, and explain why the simpler alternative still satisfies the requirements.
+
+- Keep retaining the current design as a candidate. Fewer lines alone do not establish lower complexity.
 
 ## Deduction
 
@@ -63,15 +59,17 @@ _Derive consequences of the explanation._
 
 - Derive expected results for affected entry points, including boundary and failure cases.
 
-- Identify which baseline assertions remain applicable and which authorized deltas require different expected results.
+- Identify which baseline assertions remain applicable and justify changed expectations from requirements, not from the proposed implementation.
 
-- Derive a test that distinguishes each authorized delta from an unintended behavior change.
+- Derive tests that would expose a missing responsibility or regression if the proposed removal or replacement were wrong.
+
+- Predict what dependencies, exceptions, coordination, or required context the alternative removes, and what complexity it introduces elsewhere.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Implement the proposed structural change within the preservation boundary and intended delta.
+- Implement and test the alternative within the preservation boundary and agreed changes. Keep the previous state recoverable for comparison.
 
 - Add or update the tests derived above.
 
@@ -79,10 +77,14 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Compare results with the derived expectations and reject unexplained differences.
 
+- Compare complexity across the affected system, including callers, configuration, instructions, and operational work. Reject reductions that merely relocate the burden.
+
 - Exercise a representative subsequent change to assess whether the new structure makes it more local or verifiable.
+
+- Retain demonstrated simplifications and remove superseded material. Ask the user only when progress requires an unresolved product choice or a change beyond the agreed scope.
 
 ## Iteration
 
-- Re-invoke `refactor` while review identifies further in-scope changes that could simplify the affected system without violating its preservation boundary.
+- Re-invoke `refactor` to search for further simplifications after each retained change, including new opportunities exposed by subtraction.
 
 - Stop after a pass identifies no further supported simplification. Report unresolved candidates and what prevents evaluating them.

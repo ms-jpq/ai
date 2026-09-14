@@ -115,7 +115,7 @@ paths:
 
 ---
 
-## Data Modeling
+## Data Modelling
 
 - Use plain `Hash` records with symbol keys as the default data representation.
 
