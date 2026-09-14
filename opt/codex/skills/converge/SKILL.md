@@ -1,11 +1,15 @@
 ---
 name: converge
-description: Transform a non-trivial system model toward elegance through a semantic calculus of operators over ideas.
+description: Iteratively develop and test a shared model of how a system should work, converging toward greater stability and clarity.
 ---
 
 # Convergence
 
+## Goals
+
 - The goal is **elegance**: the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose.
+
+- Iterate toward a stable, evidence-supported model: further passes should require progressively less revision unless inputs or evidence change.
 
 ## Operators
 
@@ -15,7 +19,7 @@ description: Transform a non-trivial system model toward elegance through a sema
 
   - Follow @./references/Operator-Protocol.md to declare inputs and outputs and use Peircean reasoning: abduction, deduction, and induction.
 
-- An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every transformation in the space of ideas.
+- Aim for a _basis_ of irreducible transformations with distinct primary effects that together span the space of ideas.
 
 - Counterfactuals test and update these candidates.
 
