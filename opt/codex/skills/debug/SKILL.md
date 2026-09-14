@@ -35,13 +35,15 @@ Use the operator skill for every layer whose model requires revision.
 
 - Map model and system differences without changing either representation. Preserve the evidence needed to reproduce or explain the failure.
 
-- Record the system purpose, framed problems, salient concerns, topology, lexicon, and mechanisms in effect.
+- Record the model assumptions and dependencies relevant to the observed failure.
 
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Trace the failure through each layer of the model.
+- Trace the failure through the implicated implementation and model dependencies.
+
+  - Inspect earlier model layers when evidence implicates them or the current explanation is insufficient.
 
   - Ask what would have made the failure impossible or detectable earlier.
 

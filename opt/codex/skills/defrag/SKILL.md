@@ -5,13 +5,13 @@ description: A semantics-preserving maintenance pass.
 
 # Defrag
 
-Use @../op-purpose-formation/SKILL.md to establish the corpus's purpose and preservation boundary.
+Use @../op-purpose-formation/SKILL.md when the corpus's purpose or preservation boundary is unclear.
 
-Use @../op-problem-framing/SKILL.md to frame the corpus's fragmentation problems and prioritize their concerns.
+Use @../op-problem-framing/SKILL.md when the fragmentation problem or its priorities are unclear.
 
-Use @../op-conceptual-synthesis/SKILL.md to consolidate vocabulary.
+Use @../op-conceptual-synthesis/SKILL.md when aliases or inconsistent terms need resolution.
 
-Use @../refine/SKILL.md for local rewriting after the topology is settled.
+Use @../refine/SKILL.md when local prose needs rewriting after placement is settled.
 
 Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, contracts, or flows.
 
