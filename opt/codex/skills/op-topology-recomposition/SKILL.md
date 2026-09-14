@@ -9,17 +9,23 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 - A named hierarchy of parts that resolves structural problems in the concern hierarchy.
 
+  - Explicit boundaries, containment relations, and flows.
+
 - An explicit mapping from framed concerns to parts.
 
   - Note each cycle, its source, and whether it is a precedence constraint, iteration, or feedback loop.
 
 ## Observation (Input)
 
+- Take the framed concerns, system purpose, and external boundary as inputs.
+
+- When invoked independently, state the concerns and constraints the topology must accommodate.
+
 - Record the affected system's parts, boundaries, containment, flows, and ordering constraints.
 
 - Map framed concerns to their current parts.
 
-- Record each cycle that prevents a required order as a candidate topology change.
+- Record each cycle, its source, and whether it prevents a required order or represents iteration or feedback.
 
 ## Abduction
 
@@ -67,7 +73,9 @@ _Derive consequences of the explanation._
 
   - Each changed part has a justified boundary and place in the containment hierarchy.
 
-  - Its acyclic flow graph yields the required execution order; each retained cycle is an explicit iteration or feedback process.
+  - Its acyclic precedence graph yields the required execution order.
+
+  - Each retained cycle has explicit iteration or feedback semantics.
 
 ## Induction
 
@@ -79,4 +87,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Prefer the shape that makes the next change locally understandable and verifiable.
 
-- Retain only necessary mappings, parts, containment relations, and flows; revise the topology when evidence contradicts the model.
+- Retain only necessary mappings, parts, containment relations, and flows.
+
+- Revise the topology when evidence contradicts the model.

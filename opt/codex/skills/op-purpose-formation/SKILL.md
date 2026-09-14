@@ -45,7 +45,7 @@ _Derive consequences of the explanation._
 
 - Derive observations that would show the system purpose is achieved or contradicted.
 
-- Predict which problems become relevant under the proposed concern.
+- Predict which problems become relevant under the proposed purpose.
 
 - Predict which authority, commitment, or affected party could require revision.
 

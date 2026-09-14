@@ -11,9 +11,9 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 - An enumeration of concerns implied by each problem, prioritized by salience.
 
-  - The classification supplies candidate concerns; the frame prioritizes them for the system.
+  - The classification supplies candidate concerns. The frame prioritizes them for the system.
 
-  - Every enumerated concern remains in scope; later evaluation may revise its priority.
+  - Every enumerated concern remains in scope. Later evaluation may revise its priority.
 
 ## Observation (Input)
 
