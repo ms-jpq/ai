@@ -9,7 +9,7 @@ description: Iteratively develop and test a shared model of how a system should 
 
 - The goal is **elegance**: the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose.
 
-- Iterate toward a stable, evidence-supported model: further passes should require progressively less revision unless inputs or evidence change.
+- Model the iteration after convergent functions: repeated application should stabilize the system despite variation between passes.
 
 ## Operators
 
