@@ -9,7 +9,7 @@ description: Give consistent names that semantically compress ideas.
 
 - A lexicon.
 
-  - Names for non-overlapping concepts.
+  - Names that preserve relevant distinctions between concepts.
 
   - Definitions, scope, exclusions, and mappings to uses across relevant representations.
 
