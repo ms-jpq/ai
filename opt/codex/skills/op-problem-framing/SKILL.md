@@ -67,7 +67,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the hierarchy and priorities against observed resistance and alternatives.
 
-- Retain concerns only when they cover a resistance or could change its response or consequences.
+- Retain concerns only when they account for observed resistance or could change the response to it or its consequences.
 
 - Revise a problem, its relation, or its concern priority when later evaluation exposes a gap.
 

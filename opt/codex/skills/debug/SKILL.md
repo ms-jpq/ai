@@ -73,4 +73,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retain the diagnosis only when the revised model explains the failure and its correction holds.
 
-- Reopen the diagnosis when later evidence contradicts it or recurrence appears.
+- Reopen the diagnosis when later evidence contradicts it or the failure recurs.

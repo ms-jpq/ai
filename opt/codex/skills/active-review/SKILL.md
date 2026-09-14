@@ -59,7 +59,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Check its answer against the resulting work and evidence.
 
-- Incorporate supported concern discoveries and priority changes into the shared problem frame.
+- Update the shared problem frame with newly supported concerns and priority changes.
 
 - Close the concern when justified, or refine the question when the gap remains.
 

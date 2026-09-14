@@ -63,7 +63,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test shared mechanisms across their mapped concerns, including cases where satisfying one could impair another.
 
-- Specialize, split, or replace it when evaluation exposes incompatible effects or preconditions.
+- Specialize, split, or replace a mechanism when evaluation exposes incompatible effects or preconditions.
 
 - Retain the smallest mechanism basis that preserves required coverage.
 

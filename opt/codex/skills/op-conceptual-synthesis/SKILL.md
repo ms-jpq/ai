@@ -41,7 +41,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict how examples, counterexamples, and neighboring concepts should classify under the synthesized concept.
+- Predict how examples, counterexamples, and neighboring concepts should be classified in relation to the synthesized concept.
 
 - Derive which meanings and distinctions must survive each proposed rename or model view.
 

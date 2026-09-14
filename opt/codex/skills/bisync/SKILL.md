@@ -33,7 +33,7 @@ Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient 
 
 - Map corresponding claims, parts, relations, and constraints.
 
-- Classify every difference:
+- Classify the correspondence:
 
   - Both agree.
 
@@ -51,7 +51,7 @@ Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient 
 
 _Devise an explanation for observations._
 
-- Classify its change provenance:
+- For each difference, identify which representation changed:
 
   - Neither changed from a common base.
 
