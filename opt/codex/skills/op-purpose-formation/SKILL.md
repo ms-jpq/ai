@@ -13,7 +13,7 @@ description: Form and revise the system purpose that guides the remaining operat
 
   - Success conditions define how its achievement can be recognized.
 
-- The authority, commitments, and affected parties that constrain revision of the purpose.
+- The commitments and affected parties that constrain revision of the purpose.
 
 - Explicit purpose conflicts, exclusions, and unresolved questions.
 
@@ -23,9 +23,9 @@ description: Form and revise the system purpose that guides the remaining operat
 
 - Record declared intentions, existing commitments, and unmet intentions.
 
-- Record who can authorize a purpose and who is affected by it.
+- Record who is affected by the purpose.
 
-- Keep competing purposes distinct until evidence or authority relates them.
+- Keep competing purposes distinct until their relationship is established.
 
 ## Abduction
 
@@ -35,7 +35,7 @@ _Devise an explanation for observations._
 
 - Compare candidate purposes by how they account for declared and unmet intentions.
 
-- Identify where each candidate conflicts with commitments, authority, or affected parties.
+- Identify where each candidate conflicts with commitments or affected parties' interests.
 
 ## Deduction
 
@@ -49,10 +49,14 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the purpose against the encountered system, authority, commitments, and affected parties.
+- Test the purpose against the encountered system, commitments, and affected parties' interests.
 
-- Retain the purpose only when it has authorization and observable success conditions.
+- Retain a candidate purpose only when it has observable success conditions and survives those tests.
 
-- Revise the proposed purpose or boundary when evaluation exposes a conflict or gap, within the established authority.
+- Revise the proposed purpose or boundary when evaluation exposes a conflict or gap.
 
-- Correct the recorded authority when evidence shows it was misidentified. Obtain authorization before expanding the permitted scope.
+## Agreement
+
+- Record whose intentions the proposed purpose reflects.
+
+- Record who accepts or disputes the proposed purpose and external boundary, and what remains unresolved.
