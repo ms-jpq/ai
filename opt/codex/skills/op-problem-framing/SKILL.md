@@ -70,7 +70,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Retain concerns only when they account for observed resistance or could change the response to it or its consequences.
 
 - Revise a problem, its relation, or its concern priority when later evaluation exposes a gap.
-
-## Classic Problems
-
-- Read `references/Classic-Problems.md` when classifying a system's problems.
