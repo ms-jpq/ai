@@ -7,11 +7,15 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 ## Artifact (Output)
 
-- A named hierarchy of parts that resolves structural problems in the concern hierarchy.
+- A decomposition of the desired outcome into intermediate outcomes and their dependencies.
+
+  - Explicit conditions for achieving or maintaining each outcome.
+
+- A named hierarchy of parts organized to achieve those outcomes and resolve structural problems in the concern hierarchy.
 
   - Explicit boundaries, containment relations, and flows.
 
-- An explicit mapping from framed concerns to parts.
+- An explicit mapping from framed concerns to outcomes and from outcomes to parts.
 
   - A justified boundary and placement for each part, with reasons for concerns needing no structural embodiment.
 
@@ -19,13 +23,13 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 ## Observation (Input)
 
-- Take the framed concerns, system purpose, and external boundary as inputs.
+- Take the framed concerns, system purpose, desired outcome, and external boundary as inputs.
 
 - When invoked independently, state the concerns and constraints the topology must accommodate.
 
 - Record the affected system's parts, boundaries, containment, flows, and ordering constraints.
 
-- Map framed concerns to their current parts.
+- Record which outcomes the current parts achieve and which concerns they address.
 
 - Record each cycle, its source, and whether it prevents a required order or represents iteration or feedback.
 
@@ -35,9 +39,15 @@ _Devise an explanation for observations._
 
 - Treat external boundaries as fixed unless evidence invalidates them.
 
+- Decompose the desired outcome into intermediate outcomes that together suffice to achieve it.
+
+  - Specify what must hold at each intermediate outcome before prescribing how to achieve it.
+
+  - Distinguish necessary dependencies from incidental sequencing.
+
 - Identify which boundaries or flows force a concern to be understood across several parts.
 
-- Explore candidate topology changes, including:
+- Organize parts around those outcomes by exploring topology changes, including:
 
   - Replace the topology with a distinct known pattern.
 
@@ -67,6 +77,8 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
+- Derive whether achieving the intermediate outcomes satisfies the desired outcome and each dependent outcome's prerequisites.
+
 - Trace a representative change through the proposed parts to predict which boundaries and flows it must cross.
 
 - Derive an execution order from precedence dependencies and identify remaining conflicts.
@@ -78,6 +90,8 @@ _Derive consequences of the explanation._
 _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the derived consequences by comparing the proposed topology with the current one.
+
+  - Check the intermediate outcomes and their combined sufficiency against representative cases and counterexamples.
 
   - Count mappings, parts, containment relations, boundaries, flows, exceptions, and remote reads.
 
