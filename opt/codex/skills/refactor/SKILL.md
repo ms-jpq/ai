@@ -9,7 +9,7 @@ Use @../op-purpose-formation/SKILL.md to establish the refactor's:
 
 - Preservation boundary: behavior, contracts, constraints, and meaning that must remain unchanged.
 
-- Intended delta: behavior or contract changes authorized by the refactor.
+- Intended delta: behavior or contract changes explicitly included in the request or subsequently agreed with the user.
 
 Use @../op-problem-framing/SKILL.md to frame the refactoring problems and prioritize their concerns.
 
@@ -55,7 +55,7 @@ _Devise an explanation for observations._
 
   - Divide the flow into stages with explicit contracts.
 
-  - Lift branches toward entry points and push loops toward leaf operations.
+  - Lift branches toward callers that own the decision and push loops toward operations that own the collection, when this reduces cross-boundary dependencies.
 
 ## Deduction
 
@@ -83,4 +83,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ## Iteration
 
-Re-invoke `refactor` until no further pass simplifies the affected system without violating its preservation boundary.
+- Re-invoke `refactor` while review identifies further in-scope changes that could simplify the affected system without violating its preservation boundary.
+
+- Stop after a pass identifies no further supported simplification. Report unresolved candidates and what prevents evaluating them.
