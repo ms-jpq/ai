@@ -5,7 +5,7 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 # Topology Recomposition
 
-## Artifact
+## Artifact (Output)
 
 - A named hierarchy of parts that resolves structural problems in the concern hierarchy.
 
@@ -13,7 +13,7 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
   - Note each cycle, its source, and whether it is a precedence constraint, iteration, or feedback loop.
 
-## Observation
+## Observation (Input)
 
 - Record the affected system's parts, boundaries, containment, flows, and ordering constraints.
 

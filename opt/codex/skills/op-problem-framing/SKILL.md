@@ -5,7 +5,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 # Problem Framing
 
-## Artifact
+## Artifact (Output)
 
 - A working, covering hierarchy of named problems that explains resistance to the system purpose.
 
@@ -15,7 +15,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
   - Every enumerated concern remains in scope; later evaluation may revise its priority.
 
-## Observation
+## Observation (Input)
 
 - Take the system purpose, boundary, authority, and commitments from Purpose Formation as inputs.
 

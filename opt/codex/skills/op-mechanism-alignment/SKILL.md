@@ -5,7 +5,7 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 # Mechanism Alignment
 
-## Artifact
+## Artifact (Output)
 
 - A minimal basis of named mechanisms that covers salient concerns.
 
@@ -19,7 +19,7 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 - An explicit gap for each salient concern without an understood mechanism.
 
-## Observation
+## Observation (Input)
 
 - Take the framed concerns, priorities, and evidence as the operand.
 

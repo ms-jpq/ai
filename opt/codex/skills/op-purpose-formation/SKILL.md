@@ -5,7 +5,7 @@ description: Form and revise the system purpose that guides the remaining operat
 
 # Purpose Formation
 
-## Artifact
+## Artifact (Output)
 
 - An encountered system and its external boundary.
 
@@ -17,7 +17,7 @@ description: Form and revise the system purpose that guides the remaining operat
 
 - Explicit purpose conflicts, exclusions, and unresolved questions.
 
-## Observation
+## Observation (Input)
 
 - Describe the encountered system, its current behavior, and its external boundary.
 

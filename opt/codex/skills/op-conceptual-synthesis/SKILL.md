@@ -5,13 +5,13 @@ description: Give consistent names that semantically compress ideas.
 
 # Conceptual Synthesis
 
-## Artifact
+## Artifact (Output)
 
 - An established lexicon.
 
   - Names for non-overlapping concepts.
 
-## Observation
+## Observation (Input)
 
 - Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or inconsistent across representations.
 
