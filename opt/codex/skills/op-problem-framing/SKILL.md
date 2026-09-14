@@ -13,7 +13,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
   - The classification supplies candidate concerns. The frame prioritizes them for the system.
 
-  - Every enumerated concern remains in scope. Later evaluation may revise its priority.
+  - Deprioritized concerns remain recorded. Later evaluation may revise their priority or exclude them when they are no longer relevant.
 
 ## Observation (Input)
 

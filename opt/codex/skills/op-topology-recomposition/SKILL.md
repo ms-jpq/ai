@@ -37,7 +37,7 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 _Devise an explanation for observations._
 
-- Treat external boundaries as fixed unless evidence invalidates them.
+- Treat external boundaries as fixed for the pass. Refer proposed changes to those boundaries to Purpose Formation.
 
 - Decompose the desired outcome into intermediate outcomes that together suffice to achieve it.
 
@@ -69,9 +69,9 @@ _Devise an explanation for observations._
 
   - For deeply entangled subgraphs, temporarily aggregate parts that share any concern across hierarchy levels, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
 
-- Build a single central event loop for event-driven systems.
+- Prefer a single event loop for events requiring shared ordering, unless independent ownership or progress requires separate loops.
 
-- Push branches up and loops down.
+- Push branches toward callers that own the decision and loops toward operations that own the collection, when this reduces cross-boundary dependencies.
 
 ## Deduction
 

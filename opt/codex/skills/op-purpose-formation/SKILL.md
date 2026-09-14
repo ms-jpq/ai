@@ -53,4 +53,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retain the purpose only when it has authorization and observable success conditions.
 
-- Revise the purpose, boundary, or authority when evaluation exposes a conflict or gap.
+- Revise the proposed purpose or boundary when evaluation exposes a conflict or gap, within the established authority.
+
+- Correct the recorded authority when evidence shows it was misidentified. Obtain authorization before expanding the permitted scope.

@@ -65,6 +65,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Specialize, split, or replace a mechanism when evaluation exposes incompatible effects or preconditions.
 
-- Retain the smallest mechanism basis that preserves required coverage.
+- Prefer the smallest tested mechanism basis that preserves required coverage.
+
+  - Remove a mechanism when testing confirms that its removal preserves required coverage under the stated assumptions.
 
 - Revisit the concern mapping or priorities when changing the mechanism does not resolve the gap.
