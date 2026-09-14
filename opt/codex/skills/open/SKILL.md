@@ -11,7 +11,7 @@ Open what is currently in focus, not the entire session history.
 
 - Otherwise, default to recently mentioned items from this turn's immediate context: files just edited, paths just read, URLs just discussed. Recency over completeness.
 
-- Cap at 3 even when the recent set is larger. If there are too many candidates, ask before opening.
+  - Infer at most three items.
 
 - Make each path absolute.
 

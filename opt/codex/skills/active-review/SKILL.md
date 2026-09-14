@@ -31,7 +31,7 @@ Use @../op-problem-framing/SKILL.md to extend or revise the shared problem frame
 
 _Devise an explanation for observations._
 
-- Examine gaps in the shared problem frame to uncover concerns the current work has missed.
+- Identify decisions whose justification or consequences remain unclear, and use them to uncover concerns the current work has missed.
 
 - Prioritize uncovered and existing concerns by their consequences for the goal.
 
@@ -61,9 +61,9 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Update the shared problem frame with newly supported concerns and priority changes.
 
-- Close the concern when justified, or refine the question when the gap remains.
+- Close the question when evidence resolves it, or refine it when the gap remains. The concern may remain relevant.
 
-- Direct questions requiring user preference or authority to the user.
+- Ask the user when resolving the question requires a choice or permission they have not supplied.
 
 ## Recurring Questions
 
