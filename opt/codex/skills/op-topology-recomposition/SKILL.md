@@ -93,9 +93,11 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Check the intermediate outcomes and their combined sufficiency against representative cases and counterexamples.
 
-  - Count mappings, parts, containment relations, boundaries, flows, exceptions, and remote reads.
+  - Trace the same representative change through both topologies, comparing required context, coordinated changes, and verification effort.
 
-  - Prefer the shape that makes the next change locally understandable and verifiable.
+  - Prefer the topology that makes the change easier to understand, carry out, and verify while preserving required outcomes.
+
+  - Fewer parts or flows alone do not establish an improvement.
 
 - Retain only necessary mappings, parts, containment relations, and flows.
 
