@@ -7,9 +7,13 @@ description: Transform a non-trivial system model toward elegance through a sema
 
 - The goal is **elegance**: the smallest problem, concern, and mechanism bases sufficient to achieve the system purpose.
 
-- This skill proposes _operators_ as functions over the space of ideas, borrowing faculties from philosophy and mathematics.
-
 ## Operators
+
+- An operator transforms explicit inputs into an explicit output: `operator(input) → output`.
+
+  - Compose operators by using one operator's output as input to another.
+
+  - Follow @./references/Operator-Protocol.md to declare inputs and outputs and use Peircean reasoning: abduction, deduction, and induction.
 
 - An operator _basis_ is the smallest set of irreducible transformations with non-overlapping primary effects, sufficient to compose every transformation in the space of ideas.
 
@@ -36,16 +40,6 @@ description: Transform a non-trivial system model toward elegance through a sema
 4. **Mechanism Alignment:** Cultivate a minimal basis of mechanisms that covers salient concerns.
 
    - @../op-mechanism-alignment/SKILL.md
-
-## Inquiry
-
-- Each convergence operator carries `abduction → deduction → induction → abduction`.
-
-- **Abduction** Devise an explanation for observations.
-
-- **Deduction** Derive consequences of the explanation.
-
-- **Induction** Test those consequences and provisionally retain or revise the explanation.
 
 ## Application
 
