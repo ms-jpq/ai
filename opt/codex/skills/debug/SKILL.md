@@ -1,11 +1,11 @@
 ---
 name: debug
-description: Trace a failure to its earliest deficient model layer and revise that layer.
+description: Trace a failure to an implementation discrepancy or its earliest deficient model layer, then test and apply a correction.
 ---
 
 # Debug
 
-Use @../bisync/SKILL.md when the intended model and realized system may differ.
+Use @../bisync/SKILL.md after diagnosis establishes which model or system differences require correction.
 
 Use the operator skill for every layer whose model requires revision.
 
@@ -13,9 +13,9 @@ Use the operator skill for every layer whose model requires revision.
 
 - A failure account with the expected outcome, observed outcome, evidence, and affected system.
 
-- A diagnosis identifying the earliest supported deficient layer and its downstream consequences.
+- A diagnosis identifying an implementation discrepancy or the earliest supported deficient model layer, with its downstream consequences.
 
-  - Purpose Formation: the purpose, boundary, authority, or success conditions were deficient.
+  - Purpose Formation: the purpose, boundary, agreement, or success conditions were deficient.
 
   - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritized.
 
@@ -33,7 +33,7 @@ Use the operator skill for every layer whose model requires revision.
 
 - Collect evidence from the system, its intended model, and relevant decisions.
 
-- Reconcile model and system differences before attributing the failure to either one.
+- Map model and system differences without changing either representation. Preserve the evidence needed to reproduce or explain the failure.
 
 - Record the system purpose, framed problems, salient concerns, topology, lexicon, and mechanisms in effect.
 
@@ -45,13 +45,15 @@ _Devise an explanation for observations._
 
   - Ask what would have made the failure impossible or detectable earlier.
 
-- Classify each supported deficiency by its earliest layer.
+  - Distinguish a deficient model from an implementation that fails to realize a sound model.
+
+- Classify each supported model deficiency by its earliest layer.
 
   - Permit several interacting deficiencies.
 
   - Keep an unsupported causal claim unresolved.
 
-- Propose a correction at the earliest deficient layer.
+- Propose a correction to the implementation discrepancy or earliest deficient model layer.
 
 ## Deduction
 
@@ -61,7 +63,7 @@ _Derive consequences of the explanation._
 
 - Derive changes to the deficient artifact and its dependents.
 
-- Predict evidence that would falsify the layer diagnosis.
+- Predict evidence that would falsify the diagnosis.
 
 ## Induction
 
@@ -69,8 +71,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the correction against the failure evidence and relevant counterexamples.
 
-- Update the deficient operator artifact and its dependent artifacts.
+- Correct the implementation or update the deficient operator artifact and its dependents, according to the diagnosis.
 
-- Retain the diagnosis only when the revised model explains the failure and its correction holds.
+- Retain the diagnosis only when it explains the failure and its correction holds.
 
 - Reopen the diagnosis when later evidence contradicts it or the failure recurs.
