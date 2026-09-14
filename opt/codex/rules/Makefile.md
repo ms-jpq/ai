@@ -12,7 +12,9 @@ paths:
 
 - Use GNU Make.
 
-- Write recipes as multiline Bash scripts under `.ONESHELL`; heredocs work. Apply @./Shell-Scripting.md to recipes.
+- Write recipes as multiline Bash scripts under `.ONESHELL`. Heredocs work.
+
+- Apply @./Shell-Scripting.md to recipes.
 
 - Standard prelude:
 

@@ -15,7 +15,7 @@ paths:
 
 ## Parallelism
 
-- Run all unit tests in parallel; keep each test independent.
+- Run all unit tests in parallel. Keep each test independent.
 
 - Shuffle test execution order.
 

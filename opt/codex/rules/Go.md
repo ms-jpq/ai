@@ -9,7 +9,9 @@ paths:
 
 - Model reusable work as small functions from one value to the next. Compose those functions instead of accumulating stateful helper objects.
 
-- Keep I/O, mutation, and concurrency at the edges; make the composed core take values and return values or errors.
+- Keep I/O, mutation, and concurrency at the edges.
+
+- Make the composed core take values and return values or errors.
 
 ## Generics
 

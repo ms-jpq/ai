@@ -40,7 +40,9 @@ paths:
   end
   ```
 
-- Use `Enumerator.new` as Ruby's generator form; keep incremental state inside the enumerator.
+- Use `Enumerator.new` as Ruby's generator form.
+
+- Keep incremental state inside the enumerator.
 
   ```ruby
   def product(*iterables, repeat: 1)

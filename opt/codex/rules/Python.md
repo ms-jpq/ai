@@ -159,7 +159,9 @@ paths:
           resource.close()
   ```
 
-- Use `getLogger()` instead of `print`; call it inline at each site.
+- Use `getLogger()` instead of `print`.
+
+- Call `getLogger()` inline at each site.
 
   ```python
   count: int

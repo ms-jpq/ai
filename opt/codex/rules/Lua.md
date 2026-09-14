@@ -13,7 +13,9 @@ paths:
 
 - Use `unpack()` for destructuring, including single-element extraction.
 
-- Prefer `pairs` to `ipairs`; use `ipairs` when iteration requires contiguous numeric order and hole termination.
+- Prefer `pairs` to `ipairs`.
+
+- Use `ipairs` when iteration requires contiguous numeric order and hole termination.
 
 - Use `[[...]]` raw strings for content containing backslashes or angle brackets.
 

@@ -10,7 +10,7 @@
   set -o pipefail
   ```
 
-- Keep the redundant `set -o pipefail`; shellcheck sees it.
+- Keep the redundant `set -o pipefail`. Shellcheck sees it.
 
 - Declare mandatory variables at the entrypoint.
 
@@ -29,7 +29,9 @@
 
 ## Input State
 
-- Use `case` to enumerate accepted input states; the catch-all (`*`) exits with `set -x; exit 2`.
+- Use `case` to enumerate accepted input states.
+
+  - The catch-all (`*`) enables tracing and exits with status 2.
 
   ```bash
   case "$MODE" in
@@ -43,11 +45,11 @@
   esac
   ```
 
-- Do not use `[[ -v NAME ]]`; Bash interprets its operand as a variable reference and evaluates array subscripts.
+- Do not use `[[ -v NAME ]]`. Bash interprets its operand as a variable reference and evaluates array subscripts.
 
-  - Test an optional string with `[[ -n ${NAME:-} ]]`; unset and empty mean absent.
+  - Test an optional string with `[[ -n ${NAME:-} ]]`. Unset and empty mean absent.
 
-- Do not attach `continue`, `break`, or `exit` to a `[[ ... ]]` test with `&&` or `||`; use an `if` block.
+- Do not attach `continue`, `break`, or `exit` to a `[[ ... ]]` test with `&&` or `||`. Use an `if` block.
 
 - `shift -- <count>` after consuming positional args.
 
@@ -61,7 +63,9 @@
   OUTPUT="$(command || true)"
   ```
 
-- Use explicit error checks to traps; functions invoked from conditionals and traps complicate `set -e`.
+- Use explicit error checks in traps.
+
+  - Functions invoked from conditionals and traps complicate `set -e`.
 
   ```bash
   if OUTPUT="$(command)"; then
@@ -119,7 +123,7 @@
 
 ### Records and Newlines
 
-- Bash data flow is line-oriented by default; choose record boundaries deliberately.
+- Bash data flow is line-oriented by default. Choose record boundaries deliberately.
 
 - Use newline-delimited records only when record values cannot contain newlines.
 
@@ -129,7 +133,7 @@
     find . -type f -print0 | xargs --null -- command
     ```
 
-- Capture line records with `readarray -t`; avoid word splitting and subshell loops.
+- Capture line records with `readarray -t`. Avoid word splitting and subshell loops.
 
   ```bash
   readarray -t -- LINES < "$FILE"
@@ -137,7 +141,7 @@
 
   - Feed from `< <(printf -- '%s' "$VAR")` instead of `<<< "$VAR"` when a synthetic trailing newline would change the data.
 
-- Do not place fallible commands inside process substitutions consumed by `readarray`; their exit status does not propagate.
+- Do not place fallible commands inside process substitutions consumed by `readarray`. Their exit status does not propagate.
 
   ```bash
   OUTPUT="$(command)"
@@ -224,7 +228,7 @@
   RECUR=1 flock "$FILE" "$0" "$@"
   ```
 
-- Pipe through conditional blocks; `if`, `case`, and `while` can appear mid-pipeline.
+- Pipe through conditional blocks. `if`, `case`, and `while` can appear mid-pipeline.
 
   ```bash
   grep --recursive -e '...' --null | if [[ -n ${SSH_CONNECTION:-} ]]; then
@@ -238,7 +242,9 @@
 
 ## Concurrency
 
-- Never let concurrent work escape the foreground command tree; avoid background jobs so failures and signals propagate predictably.
+- Never let concurrent work escape the foreground command tree.
+
+  - Avoid background jobs so failures and signals propagate predictably.
 
   ```bash
   if [[ ${RECUR:-} == 1 ]]; then

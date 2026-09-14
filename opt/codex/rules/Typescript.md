@@ -18,7 +18,7 @@ paths:
 
 - Prefer `const` to `let`. Replace reassignment with conditional expressions, destructuring, `.entries()`, or intermediate constants.
 
-- Use `undefined` consistently; do not use `null`.
+- Use `undefined` consistently. Do not use `null`.
 
 - Use `import type` for type-only imports.
 
@@ -34,7 +34,9 @@ paths:
   const read = (path: string, { limit = 100 }: { limit?: number }) => {}
   ```
 
-- Use generators to encapsulate incremental iteration state; define them with `const foo = function*() {}`.
+- Use generators to encapsulate incremental iteration state.
+
+  - Define them with `const foo = function*() {}`.
 
   - Use `IteratorObject<T>` for synchronous generators and `AsyncIteratorObject<T>` for asynchronous generators.
 
@@ -157,7 +159,9 @@ paths:
   }
   ```
 
-- Model resources as factory-returned `AsyncDisposable` records; capture state in the closure and teardown in `[Symbol.asyncDispose]`.
+- Model resources as factory-returned `AsyncDisposable` records.
+
+  - Capture state in the closure and teardown in `[Symbol.asyncDispose]`.
 
   ```typescript
   import { mkdtemp, rm } from "node:fs/promises"
@@ -201,7 +205,9 @@ paths:
 
 - Prefer asynchronous APIs when synchronous and asynchronous variants both exist.
 
-- Make `switch` exhaustive with `default: fail(value satisfies never)`; import `fail` from `node:assert/strict`.
+- Make `switch` exhaustive with `default: fail(value satisfies never)`.
+
+  - Import `fail` from `node:assert/strict`.
 
   ```typescript
   switch (state) {
@@ -227,7 +233,9 @@ paths:
   await finished(output)
   ```
 
-- Convert events to promises with `once(emitter, event, { signal })`; abort sibling listeners in `finally`.
+- Convert events to promises with `once(emitter, event, { signal })`.
+
+  - Abort sibling listeners in `finally`.
 
   ```typescript
   import { once } from "node:events"

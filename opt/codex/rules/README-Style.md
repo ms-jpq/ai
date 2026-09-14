@@ -9,7 +9,7 @@ README files explain **what** and **why**.
 
 ## Writing
 
-- Show before telling; place examples before explanations.
+- Show before telling. Place examples before explanations.
 
 - Prefer bullets to paragraphs.
 

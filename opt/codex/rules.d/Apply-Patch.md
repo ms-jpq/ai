@@ -59,4 +59,4 @@ PATCH
 
 - On failure, read the error, inspect the target, and retry the hunk.
 
-- Learn `apply_patch` by small failed attempts; do not overwrite files.
+- Learn `apply_patch` by small failed attempts. Do not overwrite files.

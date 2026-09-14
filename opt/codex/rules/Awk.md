@@ -23,4 +23,4 @@ paths:
 
 - Add a `BEGIN { }` section that initializes global variables.
 
-  - List array globals in a comment; do not fake-initialize arrays.
+  - List array globals in a comment. Do not fake-initialize arrays.
