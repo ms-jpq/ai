@@ -7,7 +7,7 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 Use @../active-review/SKILL.md throughout each pass to uncover concerns, challenge necessity, and test the justification for keeping or changing structure.
 
-Use @../converge/SKILL.md when review exposes a model gap that needs an operator-level revision.
+Use @../converge/SKILL.md when review requires revising the system purpose, problem frame, or design model.
 
 ## Artifact (Output)
 
@@ -43,7 +43,7 @@ _Devise an explanation for observations._
 
   - What assumption makes this mechanism, dependency, branch, or intermediate outcome necessary?
 
-  - Could one existing mechanism replace several special cases?
+  - Could a shared mechanism, existing or proposed, replace several special cases?
 
   - Would changing the organization eliminate the need for the workaround?
 
@@ -51,7 +51,7 @@ _Devise an explanation for observations._
 
 - Propose removal, consolidation, replacement, or restructuring, and explain why the simpler alternative still satisfies the requirements.
 
-- Keep retaining the current design as a candidate. Fewer lines alone do not establish lower complexity.
+- Consider leaving the current design unchanged. Fewer lines alone do not establish lower complexity.
 
 ## Deduction
 
@@ -73,18 +73,18 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Add or update the tests derived above.
 
-- Run the affected tests, types, contract checks, and effect checks.
+- Run the affected tests and applicable static and contract checks.
 
 - Compare results with the derived expectations and reject unexplained differences.
 
 - Compare complexity across the affected system, including callers, configuration, instructions, and operational work. Reject reductions that merely relocate the burden.
 
-- Exercise a representative subsequent change to assess whether the new structure makes it more local or verifiable.
+- When the claimed benefit is more local or verifiable subsequent changes, test that claim with a representative change.
 
 - Retain demonstrated simplifications and remove superseded material. Ask the user only when progress requires an unresolved product choice or a change beyond the agreed scope.
 
 ## Iteration
 
-- Re-invoke `refactor` to search for further simplifications after each retained change, including new opportunities exposed by subtraction.
+- Re-invoke `refactor` for another pass after each retained change to search for further simplifications.
 
 - Stop after a pass identifies no further supported simplification. Report unresolved candidates and what prevents evaluating them.
