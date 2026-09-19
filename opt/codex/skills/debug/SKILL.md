@@ -5,9 +5,9 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 # Debug
 
-Use @../bisync/SKILL.md after diagnosis establishes which model or system differences require correction.
+- Use @../bisync/SKILL.md after diagnosis establishes which model or system differences require correction.
 
-Use the operator skill for every layer whose model requires revision.
+- Use the operator skill for every layer whose model requires revision.
 
 ## Artifact (Output)
 
@@ -17,7 +17,7 @@ Use the operator skill for every layer whose model requires revision.
 
   - Purpose Formation: the purpose, boundary, agreement, or success conditions were deficient.
 
-  - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritized.
+  - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritised.
 
   - Topology Recomposition: a concern lacked local structural embodiment.
 
@@ -33,7 +33,9 @@ Use the operator skill for every layer whose model requires revision.
 
 - Collect evidence from the system, its intended model, and relevant decisions.
 
-- Map model and system differences without changing either representation. Preserve the evidence needed to reproduce or explain the failure.
+- Map model and system differences without changing either representation.
+
+- Preserve the evidence needed to reproduce or explain the failure.
 
 - Record the model assumptions and dependencies relevant to the observed failure.
 
@@ -47,7 +49,7 @@ _Devise an explanation for observations._
 
   - Ask what would have made the failure impossible or detectable earlier.
 
-  - Distinguish a deficient model from an implementation that fails to realize a sound model.
+  - Distinguish a deficient model from an implementation that fails to realise a sound model.
 
 - Classify each supported model deficiency by its earliest layer.
 

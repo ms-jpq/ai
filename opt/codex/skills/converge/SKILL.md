@@ -47,7 +47,7 @@ description: Iteratively develop and test a shared model of how a system should 
 
 ## Application
 
-- Apply the selected operator to a concrete operand: prose, decision space, control-flow, module or organization, et al.
+- Apply the selected operator to a concrete input, such as prose, a decision space, control flow, a module, or an organization.
 
 - Maintain an internal dialectic.
 

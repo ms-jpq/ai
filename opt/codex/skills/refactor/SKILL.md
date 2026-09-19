@@ -79,23 +79,17 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Keep the previous state recoverable for comparison.
 
-- Add or update the tests derived above.
-
-- Run the affected tests and applicable static and contract checks.
+- Run the affected tests, adding or updating those derived above, alongside applicable static and contract checks.
 
 - Compare results with the derived expectations and reject unexplained differences.
 
-- Compare complexity across the affected system, including callers, configuration, instructions, and operational work.
-
-  - Reject reductions that merely relocate the burden.
+- Reject reductions that merely relocate complexity across callers, configuration, instructions, or operational work when comparing the affected system.
 
 - When the claimed benefit is more local or verifiable subsequent changes, test that claim with a representative change.
 
 - Retain demonstrated simplifications and remove superseded material.
 
 - Ask the user only when progress requires an unresolved product choice or a change beyond the agreed scope.
-
-## Iteration
 
 - Re-invoke `refactor` for another pass after each retained change to search for further simplifications.
 

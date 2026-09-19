@@ -11,7 +11,7 @@ Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable
 
 ## Artifact (Output)
 
-- Revised prose that supports the reader's intended understanding, decision, or action while preserving necessary meaning and factual constraints.
+- Prose that supports the reader's intended understanding, decision, or action while preserving necessary meaning and factual constraints.
 
 ## Observation (Input)
 
@@ -47,7 +47,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict which interpretation, lookup, or decision should change for the reader and which claims must retain their meaning.
+- Predict how the revision changes the reader's interpretation, lookup, or decision without changing necessary meaning.
 
 ## Induction
 
