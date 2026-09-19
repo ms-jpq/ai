@@ -33,7 +33,7 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 - Select one supported simplification opportunity per pass.
 
-- Establish a passing baseline with existing tests or new characterisation tests.
+- Establish a passing baseline with existing tests or new characterization tests.
 
   - Cover a normal case, a boundary case, and relevant failure behaviour.
 
@@ -49,7 +49,7 @@ _Devise an explanation for observations._
 
   - Could a shared mechanism, existing or proposed, replace several special cases?
 
-  - Would changing the organisation eliminate the need for the workaround?
+  - Would changing the organization eliminate the need for the workaround?
 
   - Which names, boundaries, or transformations force unrelated concerns to be understood together?
 

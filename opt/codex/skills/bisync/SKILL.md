@@ -5,17 +5,17 @@ description: Reconcile two system representations while preserving authorized ch
 
 # Bisync
 
-`bisync <src> <dst>` reconciles two representations of one system.
+- `bisync <src> <dst>` reconciles two representations of one system.
 
-- Typical operands are a model and the system it represents.
+  - Typical operands are a model and the system it represents.
 
-Use @../op-purpose-formation/SKILL.md when the system purpose or reconciliation boundary is unclear.
+- Use @../op-purpose-formation/SKILL.md when the system purpose or reconciliation boundary is unclear.
 
-Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
+- Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
 
-Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatible terms.
+- Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatible terms.
 
-Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient concern without mechanism coverage.
+- Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient concern without mechanism coverage.
 
 ## Artifact (Output)
 
@@ -29,7 +29,7 @@ Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient 
 
 - Delimit the shared system and the relevant scope of both representations.
 
-- Take its system purpose, boundary, authority, and commitments as reconciliation constraints.
+- Use the system's purpose, boundary, authority, and commitments as reconciliation constraints.
 
 - Map corresponding claims, parts, relations, and constraints.
 

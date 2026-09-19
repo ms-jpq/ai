@@ -17,7 +17,7 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
   - Purpose Formation: the purpose, boundary, agreement, or success conditions were deficient.
 
-  - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritised.
+  - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritized.
 
   - Topology Recomposition: a concern lacked local structural embodiment.
 
@@ -49,7 +49,7 @@ _Devise an explanation for observations._
 
   - Ask what would have made the failure impossible or detectable earlier.
 
-  - Distinguish a deficient model from an implementation that fails to realise a sound model.
+  - Distinguish a deficient model from an implementation that fails to realize a sound model.
 
 - Classify each supported model deficiency by its earliest layer.
 
