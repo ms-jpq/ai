@@ -5,7 +5,7 @@ description: Develop reusable processes by specifying intermediate outcomes, tes
 
 # Process Development
 
-Use @../converge/SKILL.md when the process's purpose, concerns, outcome dependencies, or mechanisms need clarification.
+- Use @../converge/SKILL.md when the process's purpose, concerns, outcome dependencies, or mechanisms need clarification.
 
 ## Artifact (Output)
 
@@ -61,11 +61,15 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Run representative cases within the task's permitted scope. Mark unexecuted paths as untested.
+- Run representative cases within the task's permitted scope.
+
+  - Mark unexecuted paths as untested.
 
 - Compare actual intermediate and final outcomes with their specified conditions.
 
-- Revise the outcomes, dependencies, or methods according to the observed failure. Correct execution errors without automatically changing the specification.
+- Revise the outcomes, dependencies, or methods according to the observed failure.
+
+  - Correct execution errors without automatically changing the specification.
 
 - Test revisions against previously supported cases to distinguish a reusable improvement from a case-specific workaround.
 

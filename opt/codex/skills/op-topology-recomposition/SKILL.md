@@ -7,17 +7,11 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 ## Artifact (Output)
 
-- A decomposition of the desired outcome into intermediate outcomes and their dependencies.
+- A decomposition of the desired outcome into intermediate outcomes, their dependencies, and explicit conditions for achieving or maintaining each outcome.
 
-  - Explicit conditions for achieving or maintaining each outcome.
+- A named hierarchy of parts organized to achieve those outcomes and resolve structural problems in the concern hierarchy, with explicit boundaries, containment relations, and flows.
 
-- A named hierarchy of parts organized to achieve those outcomes and resolve structural problems in the concern hierarchy.
-
-  - Explicit boundaries, containment relations, and flows.
-
-- An explicit mapping from framed concerns to outcomes and from outcomes to parts.
-
-  - A justified boundary and placement for each part, with reasons for concerns needing no structural embodiment.
+- An explicit mapping from framed concerns to outcomes and from outcomes to parts, justifying each part's boundary and placement and explaining concerns needing no structural embodiment.
 
 - Explicit cycles, their sources, and their precedence, iteration, or feedback semantics.
 
@@ -67,7 +61,7 @@ _Devise an explanation for observations._
 
 - Recomposition may temporarily increase complexity.
 
-  - For deeply entangled subgraphs, temporarily aggregate parts that share any concern across hierarchy levels, even when it is not primary, until the aggregate exposes an emergent concern or a clearer partition.
+  - For deeply entangled subgraphs, temporarily aggregate parts sharing any concern across hierarchy levels, including non-primary concerns, until the aggregate exposes an emergent concern or clearer partition.
 
 - Prefer a single event loop for events requiring shared ordering, unless independent ownership or progress requires separate loops.
 
