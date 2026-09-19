@@ -23,7 +23,7 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 ## Observation (Input)
 
-- Take the framed concerns, priorities, and evidence as the operand.
+- Take the framed concerns, priorities, and evidence as inputs.
 
 - Record mechanisms already intended, operating, or proposed.
 
