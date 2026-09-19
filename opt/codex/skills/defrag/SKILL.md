@@ -5,15 +5,15 @@ description: A semantics-preserving maintenance pass.
 
 # Defrag
 
-Use @../op-purpose-formation/SKILL.md when the corpus's purpose or preservation boundary is unclear.
+- Use @../op-purpose-formation/SKILL.md when the corpus's purpose or preservation boundary is unclear.
 
-Use @../op-problem-framing/SKILL.md when the fragmentation problem or its priorities are unclear.
+- Use @../op-problem-framing/SKILL.md when the fragmentation problem or its priorities are unclear.
 
-Use @../op-conceptual-synthesis/SKILL.md when aliases or inconsistent terms need resolution.
+- Use @../op-conceptual-synthesis/SKILL.md when aliases or inconsistent terms need resolution.
 
-Use @../refine/SKILL.md when local prose needs rewriting after placement is settled.
+- Use @../refine/SKILL.md when local prose needs rewriting after placement is settled.
 
-Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, contracts, or flows.
+- Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, contracts, or flows.
 
 ## Artifact (Output)
 
