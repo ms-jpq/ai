@@ -5,9 +5,9 @@ description: Refine prose for the reader's goal and local context.
 
 # Refine
 
-Use @../op-purpose-formation/SKILL.md when the reader's purpose or intended effect is unclear.
+- Use @../op-purpose-formation/SKILL.md when the reader's purpose or intended effect is unclear.
 
-Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
+- Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
 
 ## Artifact (Output)
 
