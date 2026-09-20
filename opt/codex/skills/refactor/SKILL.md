@@ -5,7 +5,7 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 # Refactor
 
-- Use @../active-review/SKILL.md throughout each pass to uncover concerns, challenge necessity, and test the justification for keeping or changing structure.
+- Use @../adversarial-questions/SKILL.md throughout each pass to derive questions from the refactor's purpose and concerns, answering them through the comparisons and tests below.
 
 - Use @../converge/SKILL.md when review requires revising the system purpose, problem frame, or design model.
 
