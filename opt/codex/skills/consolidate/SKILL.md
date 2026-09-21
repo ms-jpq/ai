@@ -9,13 +9,13 @@ description: Select the strongest solution and incorporate useful contributions 
 
 - Judge coherence, simplicity, and tradeoffs alongside behavioural verification. Passing tests does not establish design superiority.
 
+- Use @../converge/SKILL.md to compare candidate designs and review the consolidated result against the system purpose, concerns, structure, concepts, and mechanisms.
+
 ## Invocation
 
-- Run only when explicitly invoked for a bounded task. The current agent coordinates candidates, comparison, integration, and iteration.
+- Work from available candidates. Develop independent alternatives when a consequential design question needs comparison.
 
-- Use at least two independent implementers and exactly one independent reviewer, excluding the coordinator. Children do not delegate, and the reviewer does not implement a candidate.
-
-- Check capacity, permissions, and isolation. Schedule independent children sequentially when only concurrency is limited, or stop if the required roles cannot be supported.
+- Assign independent review to an agent who did not author the candidate. Delegated work preserves the same information boundaries.
 
 ## Artifact (Output)
 
@@ -25,19 +25,15 @@ description: Select the strongest solution and incorporate useful contributions 
 
 - Establish the shared purpose, requirements, authorized changes, compatibility obligations, scope, and baseline evidence.
 
-- Snapshot the exact starting state, including staged, unstaged, relevant untracked or ignored changes, file modes, symlinks, and deletions.
-
-- Preserve the original working tree and index without resetting, stashing, or committing user changes for convenience.
-
-- Give implementers identical inputs and separate workspaces verified against that snapshot, isolating writable outputs, test data, and external resources from peers and production.
+- Compare candidates against shared requirements and baseline evidence.
 
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Develop materially different candidate designs, including one questioning a significant assumption, without sharing peer proposals, patches, reasoning, or results before candidates are frozen.
+- When developing independent alternatives, keep peer proposals, patches, reasoning, and results separate until candidates are ready for comparison.
 
-- Keep the baseline eligible. Cosmetic variants, deliberately incomplete alternatives, and candidates using the same approach do not supply the required comparison.
+- Keep the baseline eligible. Do not manufacture differences or treat cosmetic variants as independent challenges to a design.
 
 - Propose a foundation and explain why its design and tradeoffs best serve the purpose.
 
@@ -59,31 +55,29 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Give the reviewer the frozen candidates, shared inputs, predictions, test cases, and reproducible commands and results without signalling a preferred winner.
+- Have the reviewer use Convergence on the candidate artifacts, shared inputs, predictions, and reproducible results without signalling a preferred winner.
 
 - Reconcile useful behavioural tests from all candidates with the baseline suite without treating candidate-specific internals as shared requirements.
 
-- Adapt harness bindings while preserving equivalent behavioural expectations across candidates. Resolve conflicting expectations from requirements and contracts, not votes.
+- Resolve conflicting test expectations from requirements and contracts, preserving equivalent behavioural obligations across candidates.
 
-- Inspect deleted assertions, skips, and weakened coverage. Change expectations only for authorized requirement changes while preserving coverage of remaining obligations.
+- Preserve required behavioural coverage unless an authorized requirement change makes it obsolete.
 
-- Run common tests against every candidate and the baseline in comparable isolated conditions, recording actual commands, environment, failures, and unrun checks separately from implementer claims.
+- Test candidates and the baseline under comparable conditions, distinguishing verified results from claims and unrun checks.
 
 - Let the reviewer request experiments or reject every candidate, judging design quality alongside correctness, compatibility, and operational cost.
 
 - Retain the baseline when change has no supported benefit, or integrate the selected foundation and compatible contributions rather than mechanically merging architectures.
 
-- Compare the destination with the snapshot before integration and preserve intervening user edits.
+- Preserve unrelated work and intervening user edits during integration.
 
 - Run the common suite and project checks on the integrated result, then independently review its design. Treat substantive hybrids or repairs as new candidates.
 
 - Continue only for a concrete unresolved question and an observation or comparison that could resolve it.
 
-- Start each cycle from a shared exact baseline without exchanging peer solution histories or allowing authors to review their own candidates.
-
 - Complete when the integrated result passes checks and independent review finds no supported improvement within scope. Earlier review applies only if the examined design and behaviour remain unchanged.
 
-- Stop inconclusively after two cycles without progress on the same question, or earlier at resource, permission, or task-budget limits.
+- Stop inconclusively when a material question cannot be resolved within available resources, permissions, or the task budget.
 
 - Treat missing comparisons, untested improvements, and unavailable checks as uncertainty, not proof of necessity. Extra compute does not expand scope or justify arbitrary alternatives.
 
