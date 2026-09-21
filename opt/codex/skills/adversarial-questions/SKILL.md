@@ -15,13 +15,13 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 - Use @../op-purpose-formation/SKILL.md when the purpose needs clarification.
 
-- Use @../op-problem-framing/SKILL.md when the relevant concerns or their priorities are unclear.
+- Use @../op-problem-framing/SKILL.md to establish or revise the concerns and priorities from which questions are derived.
+
+- Use @../gap-analysis/SKILL.md to discover missing concerns or gaps in question coverage relative to the purpose.
 
 ## Artifact (Output)
 
-- Prioritized questions, each traceable to a concern and the purpose that makes it relevant.
-
-  - Include that connection when it is not apparent from the question.
+- Prioritized questions, each traceable to a concern and its motivating purpose, with that connection stated when not apparent.
 
 - Reusable additions or revisions to the question bank when experience supports them.
 
@@ -37,11 +37,9 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 _Devise an explanation for observations._
 
-- Propose which concerns matter in this situation and explain how attending to each supports the purpose.
+- Propose what needs to be understood or decided about the framed concerns, using their priorities to focus the questions.
 
-- Prioritize those concerns by their consequences for the purpose and the current work.
-
-- Derive questions whose answers would help the caller address each concern.
+- Derive questions from consequential gaps and known concerns to help the caller address them. Missing coverage is not a prerequisite for questioning.
 
 - Adapt relevant bank entries and generate questions where the bank provides no suitable mapping.
 

@@ -13,7 +13,9 @@ description: A semantics-preserving maintenance pass.
 
 - Use @../refine/SKILL.md when local prose needs rewriting after placement is settled.
 
-- Escalate to @../refactor/SKILL.md when a required fix changes responsibilities, contracts, or flows.
+- Use @../refactor/SKILL.md when simplification requires reorganizing responsibilities or flows while preserving required behaviour and contracts.
+
+- Obtain agreement before changing required behaviour or contracts.
 
 ## Artifact (Output)
 

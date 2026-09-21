@@ -5,6 +5,8 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 # Topology Recomposition
 
+- Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced, not merely where responsibilities reside or how parts connect.
+
 ## Artifact (Output)
 
 - A decomposition of the desired outcome into intermediate outcomes, their dependencies, and explicit conditions for achieving or maintaining each outcome.
@@ -31,7 +33,7 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 _Devise an explanation for observations._
 
-- Treat external boundaries as fixed for the pass. Refer proposed changes to those boundaries to Purpose Formation.
+- Treat external boundaries as fixed for the pass. Use @../op-purpose-formation/SKILL.md when those boundaries need revision.
 
 - Decompose the desired outcome into intermediate outcomes that together suffice to achieve it.
 
@@ -47,9 +49,9 @@ _Devise an explanation for observations._
 
   - Move a part upward, downward, or laterally in the hierarchy to give its primary concern the right scope.
 
-  - Merge parts that share concerns or cannot be independently understood or verified.
+  - Merge parts when a shared boundary reduces the context needed to understand or verify their responsibilities.
 
-  - Split a part that holds independent concerns.
+  - Split a part when separate boundaries allow its responsibilities to be understood and verified independently.
 
   - Enclose a system as a part within a larger topology.
 
@@ -93,6 +95,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Fewer parts or flows alone do not establish an improvement.
 
-- Retain only necessary mappings, parts, containment relations, and flows.
-
-- Revise the topology when evidence contradicts the model.
+- Retain only necessary mappings, parts, containment relations, and flows, revising the topology when evidence contradicts the model.

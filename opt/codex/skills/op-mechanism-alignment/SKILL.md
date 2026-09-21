@@ -5,6 +5,8 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 # Mechanism Alignment
 
+- Use @../op-topology-recomposition/SKILL.md when a mechanism requires different part boundaries, placement, or connections.
+
 ## Artifact (Output)
 
 - A minimal basis of named mechanisms that covers salient concerns.
@@ -31,6 +33,8 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 - Keep an implementation distinct from its intended mechanism model.
 
+  - A mechanism describes how an effect is produced, not a part boundary. One mechanism may span parts, and one part may support several mechanisms.
+
 ## Abduction
 
 _Devise an explanation for observations._
@@ -39,9 +43,9 @@ _Devise an explanation for observations._
 
 - Explain how each candidate would produce its intended effects under the proposed assumptions.
 
-- Generalize a mechanism when one causal path addresses several concerns.
+- Generalize a mechanism when one causal path addresses several concerns, without assuming their parts must merge.
 
-- Specialize or split a mechanism when its concerns require incompatible effects or preconditions.
+- Specialize or split a mechanism when its concerns require incompatible effects or preconditions, without assuming separate part boundaries.
 
 ## Deduction
 
@@ -69,4 +73,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Remove a mechanism when testing confirms that its removal preserves required coverage under the stated assumptions.
 
-- Revisit the concern mapping or priorities when changing the mechanism does not resolve the gap.
+- Revisit the mechanism mapping when changing the mechanism does not resolve the gap. Use @../op-problem-framing/SKILL.md when the concerns or their priorities need revision.

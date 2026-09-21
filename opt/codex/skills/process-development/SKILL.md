@@ -35,13 +35,11 @@ description: Develop reusable processes by specifying intermediate outcomes, tes
 
 _Devise an explanation for observations._
 
-- Propose intermediate outcomes and explain how their dependencies make the desired outcome achievable.
+- Use @../op-topology-recomposition/SKILL.md to develop the intermediate outcomes, their conditions, and dependencies.
 
-- Specify how each outcome can be verified before choosing how to produce it.
+- Use @../op-mechanism-alignment/SKILL.md to develop mechanisms that produce each transformation's required effects.
 
-- Connect outcomes through necessary dependencies, leaving independent work unordered.
-
-- Reuse or adapt known methods for each transformation, leaving alternatives open unless the method itself is required.
+- Combine those models into a reusable process, distinguishing required outcomes and dependencies from replaceable methods.
 
 - Express recurring variation as parameters or conditional paths rather than separate copies of the process.
 

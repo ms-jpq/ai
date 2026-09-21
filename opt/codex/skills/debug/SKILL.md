@@ -5,7 +5,7 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 # Debug
 
-- Use @../bisync/SKILL.md after diagnosis establishes which model or system differences require correction.
+- Use @../bisync/SKILL.md when the diagnosed correction requires reconciling maintained representations. Correct an implementation discrepancy directly when the intended model remains sound.
 
 - Use the operator skill for every layer whose model requires revision.
 
@@ -19,11 +19,11 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
   - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritized.
 
-  - Topology Recomposition: a concern lacked local structural embodiment.
+  - Topology Recomposition: outcome dependencies, part boundaries, or connections were deficient.
 
   - Conceptual Synthesis: ambiguous names or collapsed distinctions obscured the relevant meaning.
 
-  - Mechanism Alignment: coverage, causal path, or assumptions were deficient.
+  - Mechanism Alignment: the proposed causal path or its preconditions failed to cover a salient concern.
 
 - A corrective revision, its evidence, and the condition that would reopen the diagnosis.
 

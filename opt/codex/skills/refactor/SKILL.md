@@ -45,13 +45,13 @@ _Devise an explanation for observations._
 
 - Ask what could disappear while the requirements still hold.
 
-  - What assumption makes this mechanism, dependency, branch, or intermediate outcome necessary?
+  - Identify the assumption that makes each candidate necessary before proposing its removal.
 
-  - Could a shared mechanism, existing or proposed, replace several special cases?
+- Use @../op-topology-recomposition/SKILL.md to simplify outcome dependencies, boundaries, and flows.
 
-  - Would changing the organization eliminate the need for the workaround?
+- Use @../op-mechanism-alignment/SKILL.md to replace special cases with shared mechanisms, existing or proposed, while preserving required effects.
 
-  - Which names, boundaries, or transformations force unrelated concerns to be understood together?
+- Use @../op-conceptual-synthesis/SKILL.md when inconsistent names or obscured distinctions complicate the system.
 
 - Propose removal, consolidation, replacement, or restructuring, and explain why the simpler alternative still satisfies the requirements.
 

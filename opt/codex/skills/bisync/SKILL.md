@@ -5,17 +5,17 @@ description: Reconcile two system representations while preserving authorized ch
 
 # Bisync
 
-- `bisync <src> <dst>` reconciles two representations of one system.
-
-  - Typical operands are a model and the system it represents.
+- `bisync <src> <dst>` reconciles two representations of one system, such as a model and the system it represents.
 
 - Use @../op-purpose-formation/SKILL.md when the system purpose or reconciliation boundary is unclear.
 
-- Use @../op-problem-framing/SKILL.md when a difference lacks an agreed direction.
+- Use @../op-problem-framing/SKILL.md when the problems or concerns implicated by a difference are unclear.
 
 - Use @../op-conceptual-synthesis/SKILL.md when the representations use incompatible terms.
 
 - Use @../op-mechanism-alignment/SKILL.md when a difference could leave a salient concern without mechanism coverage.
+
+- Use @../op-topology-recomposition/SKILL.md when reconciliation requires revising outcomes, boundaries, or connections between parts.
 
 ## Artifact (Output)
 
@@ -75,7 +75,7 @@ _Devise an explanation for observations._
 
   - Defer.
 
-- State the authority, evidence, and intent that authorize the disposition.
+- State the permission, evidence, and intended correspondence supporting the disposition. Defer when permission or intent remains unresolved.
 
 - Explain how the proposed disposition accounts for the difference without losing an authorized change.
 

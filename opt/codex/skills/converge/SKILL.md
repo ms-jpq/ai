@@ -21,6 +21,8 @@ description: Iteratively develop and test a shared model of how a system should 
 
 - Aim for a _basis_ of irreducible transformations with distinct primary effects that together span the space of ideas.
 
+- Operators may invoke other operators, not higher-level skills. Higher-level skills compose these building blocks and may reuse one another.
+
 - Counterfactuals test and update these candidates.
 
 - Apply and re-enter these transformations in order as evidence warrants:

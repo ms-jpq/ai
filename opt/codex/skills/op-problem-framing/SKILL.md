@@ -17,7 +17,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 ## Observation (Input)
 
-- Take the system purpose, boundary, authority, and commitments from Purpose Formation as inputs.
+- Take the system purpose, success conditions, boundary, commitments, and unresolved purpose conflicts from Purpose Formation as inputs.
 
 - Record observed resistance: surprise, conflict, uncertainty, failure, or unmet intention.
 
@@ -49,7 +49,7 @@ _Devise an explanation for observations._
 
   - State why each concern matters here and why it has its priority.
 
-  - Report a boundary conflict to Purpose Formation.
+  - Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.
 
 ## Deduction
 
