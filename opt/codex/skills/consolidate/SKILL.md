@@ -31,56 +31,34 @@ description: Select the strongest solution and incorporate useful contributions 
 
 _Devise an explanation for observations._
 
-- When developing independent alternatives, keep peer proposals, patches, reasoning, and results separate until candidates are ready for comparison.
+- Propose the candidate whose design best serves the shared purpose as the foundation, keeping the existing solution eligible.
 
-- Keep the baseline eligible. Do not manufacture differences or treat cosmetic variants as independent challenges to a design.
+- Identify contributions from the alternatives that could improve the foundation, and explain how they fit together.
 
-- Propose a foundation and explain why its design and tradeoffs best serve the purpose.
-
-- Identify useful contributions from all alternatives, including rejected candidates, and explain how they fit the foundation without duplicating responsibilities or weakening contracts.
+- Explain which differences should remain alternatives rather than be combined.
 
 ## Deduction
 
 _Derive consequences of the explanation._
 
-- Predict how the foundation and proposed contributions jointly satisfy requirements under normal, boundary, failure, and compatibility conditions.
+- Predict how the proposed combination improves on the foundation while preserving required behaviour and compatibility.
 
-- Predict interactions between contributions, including new state, dependencies, ordering constraints, caller knowledge, and maintenance obligations.
+- Derive the interactions and obligations introduced by combining contributions, including conflicts, duplication, and dependencies.
 
-- Derive tests and design comparisons that could change the selection or expose an incompatible contribution.
-
-- Have the reviewer challenge the highest-impact design claim, distinguishing testable predictions from qualitative preferences and tradeoffs.
+- Identify tests and design comparisons that could overturn the choice of foundation or a contribution's claimed benefit.
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Have the reviewer use Convergence on the candidate artifacts, shared inputs, predictions, and reproducible results without signalling a preferred winner.
+- Integrate the proposed contributions while preserving unrelated work and required behavioural coverage.
 
-- Reconcile useful behavioural tests from all candidates with the baseline suite without treating candidate-specific internals as shared requirements.
+- Test the combined result against the predictions and requirements, resolving conflicting expectations from shared contracts rather than candidate-specific internals.
 
-- Resolve conflicting test expectations from requirements and contracts, preserving equivalent behavioural obligations across candidates.
+- Have an independent reviewer use `converge` to assess the integrated design, including whether each contribution improves the whole enough to justify its added complexity.
 
-- Preserve required behavioural coverage unless an authorized requirement change makes it obsolete.
+- Retain useful contributions, revise or discard incompatible ones, and reconsider the foundation when the combination fails to serve the purpose.
 
-- Test candidates and the baseline under comparable conditions, distinguishing verified results from claims and unrun checks.
+- Verify the revised whole rather than relying on checks of its separate candidates.
 
-- Let the reviewer request experiments or reject every candidate, judging design quality alongside correctness, compatibility, and operational cost.
-
-- Retain the baseline when change has no supported benefit, or integrate the selected foundation and compatible contributions rather than mechanically merging architectures.
-
-- Preserve unrelated work and intervening user edits during integration.
-
-- Run the common suite and project checks on the integrated result, then independently review its design. Treat substantive hybrids or repairs as new candidates.
-
-- Continue only for a concrete unresolved question and an observation or comparison that could resolve it.
-
-- Complete when the integrated result passes checks and independent review finds no supported improvement within scope. Earlier review applies only if the examined design and behaviour remain unchanged.
-
-- Stop inconclusively when a material question cannot be resolved within available resources, permissions, or the task budget.
-
-- Treat missing comparisons, untested improvements, and unavailable checks as uncertainty, not proof of necessity. Extra compute does not expand scope or justify arbitrary alternatives.
-
-- Resolve routine questions among agents, asking the user only for genuine product or constraint choices or additional permission.
-
-- Keep comparison records temporary and report the selected design, useful contributions, verification, and limitations rather than debate transcripts.
+- Report the consolidated result, consequential tradeoffs, verification, and unresolved limitations.
