@@ -9,7 +9,7 @@ description: Open focused files, directories, and links only when explicitly inv
 
 - Open exactly the provided arguments, if any.
 
-- Otherwise, select recent items from this turn's immediate context: files just edited, paths just read, or URLs just discussed.
+- Otherwise, select recent items from the immediate context: files just edited, paths just read, or URLs just discussed.
 
   - Prefer recency over completeness.
 
