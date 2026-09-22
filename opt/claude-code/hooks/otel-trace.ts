@@ -647,6 +647,11 @@ const extractBlock = (role: Role, block: MessageBlock): ExtractedBlock | undefin
         correlationId: block.id,
         value: block.input,
       })
+    case "mcp_tool_listing":
+      return extractChat({
+        role,
+        part: { type: "text", content: JSON.stringify(block) },
+      })
     case "mcp_tool_use":
       return extractToolUse({
         toolName: `mcp__${block.server_name}__${block.name}`,
