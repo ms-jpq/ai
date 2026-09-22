@@ -165,14 +165,6 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/set-env.sh",
-            "type": "command"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
