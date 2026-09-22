@@ -1,39 +1,45 @@
 ---
 name: process-development
-description: Maximize parallel progress by separating reusable stages from task-specific work.
+description: Extract reusable stages from varied tasks and organize them into efficient pipelines.
 ---
 
 # Process Development
 
 ## Goals
 
-- Make the pipeline as wide as dependencies permit, preserving required outcomes without adding unnecessary coordination.
+- Discover the common process within varied tasks rather than treating each task as a separate procedure.
 
-- Separate the common core from task-specific variations so independent work can proceed in parallel and rejoin only where its outcomes are needed.
+- Make the pipeline as wide as dependencies permit while preserving required outcomes and avoiding unnecessary coordination.
+
+- Keep the common core and residual task-specific work disjoint, joining their outcomes only where needed.
 
 - Use @../converge/SKILL.md when the process's purpose, concerns, outcome dependencies, or mechanisms need clarification.
 
 ## Artifact (Output)
 
-- A reusable process specification separating shared stages from task-specific paths.
+- A reusable pipeline extracted from a family of tasks.
 
   - Applicable situations, required inputs, desired outcome, and constraints.
 
-  - Intermediate outcomes with observable completion conditions and only the dependencies needed to achieve them.
+  - Shared stages defined by intermediate outcomes, completion conditions, and necessary dependencies.
 
   - Transformations defined by required inputs and resulting outcomes, with suggested methods distinguished from required steps.
 
-  - Independent paths, necessary joins, and shared-resource constraints.
+  - Attachment points for residual task-specific work, including errata, without duplicating or complicating the common core.
+
+  - Independent paths, dependency-specific joins, and shared-resource constraints.
 
   - Explicit choices, branches, retries, and unresolved gaps where needed.
 
-- Evidence of preserved outcomes and parallel progress, with untested paths and unresolved bottlenecks explicit.
+- Evidence of reuse, preserved outcomes, and improved progress, with untested paths and unresolved bottlenecks explicit.
 
 ## Observation (Input)
 
 - Read representative tasks, their required outcomes, inputs, constraints, and existing procedures.
 
-- Compare attempts to identify shared stages, task-specific variations, failures, and workarounds.
+- Compare attempts for recurring outcomes and transformations beneath differences in terminology, methods, and task details.
+
+- Record what remains task-specific without assuming every difference needs a general solution.
 
 - Record where work waits, what releases it, and which dependencies or shared resources are claimed to require that order.
 
@@ -43,25 +49,25 @@ description: Maximize parallel progress by separating reusable stages from task-
 
 _Devise an explanation for observations._
 
-- Explain which waits arise from necessary dependencies and which arise from coupling unrelated work.
+- Propose a common core that explains recurring work, distinguishing genuine commonality from superficial resemblance.
 
-- Use @../op-topology-recomposition/SKILL.md to propose intermediate outcomes and dependencies that separate reusable stages from task-specific paths.
+- Use @../op-topology-recomposition/SKILL.md to organize shared intermediate outcomes into stages and isolate residual work into disjoint parts.
 
 - Use @../op-mechanism-alignment/SKILL.md to propose how each transformation produces its outcomes, distinguishing required steps from replaceable methods.
 
-- Keep variations separate without duplicating the core or forcing unrelated tasks through its exceptions. Use parameters where the transformation remains the same.
+- Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required rather than building exceptions into every shared stage.
 
-- Propose parallel paths that join only where their results are needed, retaining necessary sequencing and removing broad synchronization barriers.
+- Apply a fork–join lens to widen the pipeline: independent parts proceed together, and each join waits only for its required outcomes, not every outstanding task.
 
 ## Deduction
 
 _Derive consequences of the explanation._
 
-- Trace common and variant cases through the proposed paths, checking that each join receives the outcomes its dependants require.
+- Trace representative tasks through the proposed core and attachment points, checking that shared stages retain their meaning and no required work disappears.
 
-- Predict which waits disappear, which remain, and whether contention or coordination would erase the expected gain.
+- Predict which duplication and waits disappear, which dependencies remain, and whether adaptation or coordination costs erase the gains from reuse and parallelism.
 
-- Predict how a delayed, failed, or retried path affects the others and what permits recovery without blocking independent work.
+- Predict how a delayed, failed, or retried part affects its dependants and what permits unrelated parts to continue.
 
 - Identify observations that distinguish a missing dependency, an ineffective method, and execution that departs from the specification.
 
@@ -69,18 +75,22 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Run shared stages and representative variations together within the permitted scope, checking intermediate and final outcomes. Mark unexecuted paths as untested.
+- Apply the pipeline to differing tasks within the permitted scope, checking intermediate and final outcomes. Mark unexecuted paths as untested.
 
-- Compare actual waiting and parallel progress with predictions, including interference, duplicated work, and coordination costs.
+- Check whether the core is reused without task-specific exceptions spreading through it, and whether residual work joins without duplication, interference, or unrelated waiting.
+
+- Compare progress, repeated effort, and coordination costs with predictions.
 
 - Revise boundaries, dependencies, or methods where the comparison exposes a defect. Correct execution errors without automatically changing the specification.
 
-- Test revisions against previously supported cases to distinguish a reusable improvement from a case-specific workaround.
+- Test revisions against previously supported cases and new variations to distinguish reusable stages from a process fitted to one task.
 
 - Remove stages, steps, or barriers shown unnecessary for required outcomes. Retain parallelism only when it improves progress without violating constraints.
 
 ## Iteration
 
-- Re-invoke `process-development` when use exposes avoidable waiting, a failure, or a variation the shared process handles poorly.
+- Re-invoke `process-development` when new tasks reveal further commonality, a forced abstraction, or avoidable waiting.
+
+- Promote recurring residual work into shared stages when its inputs and outcomes support reuse. Return false commonality to task-specific paths.
 
 - Update the reusable specification so later executions benefit from the revision.
