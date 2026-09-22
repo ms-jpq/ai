@@ -27,7 +27,9 @@ done
 
 case "$FILE_PATH" in
 *.md)
-  find -L "$BASE/markdown" -maxdepth 1 -type f -perm -u+x -exec '{}' "$FILE_PATH" ';'
+  if command -v -- vale > /dev/null; then
+    vale --config="$BASE/vale.ini" --no-global --output=line "$FILE_PATH"
+  fi
   ;;
 *.json | *.yml | *.yaml | *.toml)
   "$BASE/json-schema.ts" "$FILE_PATH"

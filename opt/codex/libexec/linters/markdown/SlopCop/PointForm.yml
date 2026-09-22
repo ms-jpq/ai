@@ -1,0 +1,11 @@
+---
+extends: metric
+message: "Consider point form: this prose block exceeds 33 words (%s)."
+level: warning
+scope:
+  - paragraph
+  - list
+  - heading
+  - blockquote
+formula: words
+condition: "> 33.0"
