@@ -3,9 +3,13 @@ extends: metric
 message: "Consider point form: this prose block exceeds 33 words (%s)."
 level: warning
 scope:
-  - paragraph
-  - list
-  - heading
-  - blockquote
+  - paragraph & ~doc(pre) & ~doc(code)
+  - list & ~doc(pre) & ~doc(code)
+  - heading & ~doc(pre) & ~doc(code)
+  - blockquote & ~doc(pre) & ~doc(code)
+  - text.class.language-markdown
+  - text.class.language-md
+  - text.class.language-text
+  - text.class.language-txt
 formula: words
 condition: "> 33.0"

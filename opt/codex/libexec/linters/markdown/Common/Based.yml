@@ -1,0 +1,9 @@
+---
+extends: existence
+message: "Review '%s'."
+scope:
+  - text & ~doc(pre) & ~doc(code)
+  - text.class.language-markdown
+  - text.class.language-md
+  - text.class.language-text
+  - text.class.language-txt

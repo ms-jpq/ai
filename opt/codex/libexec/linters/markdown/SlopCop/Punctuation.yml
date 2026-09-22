@@ -1,5 +1,5 @@
 ---
-extends: existence
+extends: Common.Based
 message: "Avoid '%s': use plain punctuation and Markdown list markers."
 level: warning
 nonword: true
