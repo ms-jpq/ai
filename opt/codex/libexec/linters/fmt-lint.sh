@@ -28,7 +28,7 @@ done
 case "$FILE_PATH" in
 *.md)
   if command -v -- vale > /dev/null; then
-    vale --config="$BASE/vale.ini" --no-global --output=line "$FILE_PATH"
+    vale --config="$BASE/markdown/vale.ini" --no-global --output=line "$FILE_PATH"
   fi
   ;;
 *.json | *.yml | *.yaml | *.toml)
