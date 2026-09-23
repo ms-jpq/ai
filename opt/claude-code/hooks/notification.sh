@@ -23,7 +23,7 @@ Notification)
 Stop | StopFailure)
   TRANSCRIPT="$(jq --raw-output '.transcript_path' <<< "$JSON")"
 
-  if jq --raw-output '.promptSource // empty' "$TRANSCRIPT" 2> /dev/null | tail -n 1 | grep --quiet --fixed-strings -- system; then
+  if tail -n 3 -- "$TRANSCRIPT" 2> /dev/null | jq --raw-output '.promptSource // empty' 2> /dev/null | tail -n 1 | grep --quiet --fixed-strings -- system; then
     exit
   fi
   MESSAGE="$(jq -e --raw-output '.last_assistant_message' <<< "$JSON")"
