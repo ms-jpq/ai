@@ -13,7 +13,7 @@ if ROOT="$(git -C "$CWD" rev-parse --show-toplevel 2> /dev/null)"; then
 else
   MESSAGES="$CWD/.notes/events"
 fi
-SIGNAL="$MESSAGES/.events-ready"
+SIGNAL="$CWD/.events-ready"
 
 if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
   exit
@@ -33,22 +33,20 @@ CONSUME=(
 
 case "$EVENT" in
 SessionStart)
-  touch -- "$SIGNAL"
   CONTEXT="$("${CONSUME[@]}")"
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "watchPaths": [$signal],
     "additionalContext": $context
   }
 }
 JQ
-  exec -- jq -e --null-input --arg signal "$SIGNAL" --arg context "$CONTEXT" "$JQ"
+  exec -- jq -e --null-input --arg context "$CONTEXT" "$JQ"
   ;;
 FileChanged)
   FILE="$(jq -e --raw-output '.file_path' <<< "$JSON")"
-  if [[ $FILE != "$SIGNAL" ]]; then
+  if ! [[ $FILE -ef $SIGNAL ]]; then
     exit
   fi
   CONTEXT="$("${CONSUME[@]}")"
