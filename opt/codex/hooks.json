@@ -63,16 +63,6 @@
         "matcher": "Bash|apply_patch"
       }
     ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/codex/hooks/sessions.sh",
-            "type": "command"
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "hooks": [
@@ -90,14 +80,6 @@
           }
         ],
         "matcher": "startup|clear"
-      },
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/codex/hooks/sessions.sh",
-            "type": "command"
-          }
-        ]
       }
     ],
     "Stop": [
@@ -105,10 +87,6 @@
         "hooks": [
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/auto-commit.sh",
-            "type": "command"
-          },
-          {
-            "command": "~/.local/opt/ai/opt/codex/hooks/sessions.sh",
             "type": "command"
           },
           {
@@ -128,10 +106,6 @@
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/auto-commit.sh",
             "type": "command"
-          },
-          {
-            "command": "~/.local/opt/ai/opt/codex/hooks/sessions.sh",
-            "type": "command"
           }
         ]
       }
@@ -139,10 +113,6 @@
     "UserPromptSubmit": [
       {
         "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/codex/hooks/sessions.sh",
-            "type": "command"
-          },
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
