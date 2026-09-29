@@ -5,6 +5,7 @@ set -o pipefail
 JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
+CONFIG="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 BASE="$(realpath -- "${0%/*}/..")"
 SCRATCHPAD="$(jq -e --raw-output '.scratchpad_dir' <<< "$JSON")"
 STATE="$SCRATCHPAD/local-instruction-updates"
@@ -27,7 +28,7 @@ if [[ $EVENT == PostToolBatch ]] && { LAST_CHECK="$(< "$CHECKED")"; } 2> /dev/nu
 fi
 
 SOURCES=()
-for SOURCE in "$CWD/.claude/"{CLAUDE.md,rules,skills}; do
+for SOURCE in "$CONFIG/"{CLAUDE.md,rules,skills} "$CWD/.claude/"{CLAUDE.md,rules,skills}; do
   if [[ -e $SOURCE || -L $SOURCE ]]; then
     SOURCES+=("$SOURCE")
   fi
