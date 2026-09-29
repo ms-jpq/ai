@@ -76,6 +76,10 @@
       {
         "hooks": [
           {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/message-delivery.sh",
+            "type": "command"
+          },
+          {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
             "type": "command"
           }
@@ -176,6 +180,10 @@
       {
         "hooks": [
           {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/message-delivery.sh",
+            "type": "command"
+          },
+          {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
           },
@@ -244,6 +252,10 @@
     "UserPromptSubmit": [
       {
         "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/message-delivery.sh",
+            "type": "command"
+          },
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
