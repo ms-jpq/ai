@@ -7,7 +7,7 @@ MODE="$1"
 shift -- 1
 STATE="$1"
 
-LOGS="$STATE/../s6-logs/supervisor"
+LOGS="$STATE/../log/s6.log"
 mkdir -p -- "$STATE" "$LOGS"
 
 case "$MODE" in

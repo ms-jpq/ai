@@ -3,7 +3,7 @@
 set -o pipefail
 
 SERVICE="${PWD%/log}"
-LOGS="../../../s6-logs/${SERVICE##*/}"
+LOGS="../../../log/job-${SERVICE##*/}.log"
 
 mkdir -p -- "$LOGS"
 exec -- s6-log -b T "$LOGS"
