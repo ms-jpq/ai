@@ -30,6 +30,10 @@ SANDBOX=(
   --network
 )
 
+if [[ $OSTYPE == darwin* ]]; then
+  SANDBOX+=(--path /Users --path "$HOME" --path "$HOME/.local" --path "$HOME/.local/opt")
+fi
+
 if CWD="$(~/.local/libexec/dnif.sh "$PWD" '.git' | tac | grep -E --max-count 1 -e '.')" && [[ $CWD != "$PWD" ]]; then
   SANDBOX+=(--dir "$CWD:rw")
 fi
