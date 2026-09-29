@@ -5,7 +5,9 @@ set -o pipefail
 if [[ -f data/pgid ]]; then
   GROUP="$(< data/pgid)"
   if ! kill -KILL -- "-$GROUP"; then
-    kill -0 -- "-$GROUP"
+    if kill -0 -- "-$GROUP"; then
+      exit 1
+    fi
   fi
   rm -fr -- data/pgid
 fi
