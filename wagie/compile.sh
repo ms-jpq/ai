@@ -3,23 +3,23 @@
 set -o pipefail
 
 OUT="$(realpath --canonicalize-missing -- "$1")"
-CLAUDE_CONFIG_DIR="$OUT/.claude"
+ROOT="$OUT/.claude"
 SELF="$(realpath -- "$0")"
 SELF="${SELF%/*}"
 
-mkdir -v -p -- "$CLAUDE_CONFIG_DIR"
-cp -af --dereference -- "$SELF/../opt/claude-code"/{bin,hooks,keybindings.json} "$CLAUDE_CONFIG_DIR/"
-mkdir -v -p -- "$CLAUDE_CONFIG_DIR/libexec/linters"
-cp -af -- "$SELF/../opt/claude-code/libexec"/{notify.sh,otel-headers-helper.sh} "$CLAUDE_CONFIG_DIR/libexec/"
-cp -af --dereference -- "$SELF/../opt/claude-code/libexec"/{log-hooks.sh,read-session.sh,session-file.sh,which-session.sh} "$CLAUDE_CONFIG_DIR/libexec/"
-env -C "$CLAUDE_CONFIG_DIR/libexec/linters" -- rsync --archive --copy-links --exclude='/markdown/' -- "$SELF/../opt/codex/libexec/linters/" .
-cp -af -- "$SELF/../opt/codex/libexec/worktree" "$CLAUDE_CONFIG_DIR/libexec/"
-cp -af --dereference -- "$SELF/../opt/codex"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
-if [[ -f $CLAUDE_CONFIG_DIR/AGENTS.md ]]; then
-  mv -- "$CLAUDE_CONFIG_DIR/AGENTS.md" "$CLAUDE_CONFIG_DIR/CLAUDE.md"
+mkdir -v -p -- "$ROOT"
+cp -af --dereference -- "$SELF/../opt/claude-code"/{bin,hooks,keybindings.json} "$ROOT/"
+mkdir -v -p -- "$ROOT/libexec/linters"
+cp -af -- "$SELF/../opt/claude-code/libexec"/{notify.sh,otel-headers-helper.sh} "$ROOT/libexec/"
+cp -af --dereference -- "$SELF/../opt/claude-code/libexec"/{log-hooks.sh,read-session.sh,session-file.sh,which-session.sh} "$ROOT/libexec/"
+env -C "$ROOT/libexec/linters" -- rsync --archive --copy-links --exclude='/markdown/' -- "$SELF/../opt/codex/libexec/linters/" .
+cp -af -- "$SELF/../opt/codex/libexec/worktree" "$ROOT/libexec/"
+cp -af --dereference -- "$SELF/../opt/codex"/{agents,rules,skills,AGENTS.md} "$ROOT/"
+if [[ -f $ROOT/AGENTS.md ]]; then
+  mv -- "$ROOT/AGENTS.md" "$ROOT/CLAUDE.md"
 fi
 
-rm -fr -- "$CLAUDE_CONFIG_DIR/skills/shitpost" "$CLAUDE_CONFIG_DIR/agents/web-research.md"
+rm -fr -- "$ROOT/skills/shitpost" "$ROOT/agents/web-research.md"
 
 mkdir -v -p -- "$OUT/opt"
 cp -af --dereference -- "$SELF/../opt/mcp/." "$OUT/opt/mcp/"
@@ -34,9 +34,9 @@ LAYERS=(
 for LAYER in "${LAYERS[@]}"; do
   SRC=$OUT/$LAYER
   if [[ -d $SRC ]]; then
-    mkdir -p -- "$CLAUDE_CONFIG_DIR/$LAYER"
-    env -C "$CLAUDE_CONFIG_DIR/$LAYER" -- rsync --archive --copy-links --keep-dirlinks -- "$SRC/" .
+    mkdir -p -- "$ROOT/$LAYER"
+    env -C "$ROOT/$LAYER" -- rsync --archive --copy-links --keep-dirlinks -- "$SRC/" .
   fi
 done
 
-find "$CLAUDE_CONFIG_DIR" -type f -name '*.md' -exec sed -i -e 's/AGENTS\.md/CLAUDE.md/g' {} +
+find "$ROOT" -type f -name '*.md' -exec sed -i -e 's/AGENTS\.md/CLAUDE.md/g' {} +
