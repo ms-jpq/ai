@@ -34,7 +34,8 @@ LAYERS=(
 for LAYER in "${LAYERS[@]}"; do
   SRC=$OUT/$LAYER
   if [[ -d $SRC ]]; then
-    env -C "$CLAUDE_CONFIG_DIR" -- rsync --archive --copy-links --keep-dirlinks -- "$SRC" .
+    mkdir -p -- "$CLAUDE_CONFIG_DIR/$LAYER"
+    env -C "$CLAUDE_CONFIG_DIR/$LAYER" -- rsync --archive --copy-links --keep-dirlinks -- "$SRC/" .
   fi
 done
 
