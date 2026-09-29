@@ -57,6 +57,12 @@ shutdown)
     fi
   fi
   ;;
+stat)
+  for SERVICE in "$STATE/"[!.]*/; do
+    printf -- '%s: ' "${SERVICE%/}"
+    s6-svstat "$SERVICE"
+  done
+  ;;
 *)
   set -x
   exit 2
