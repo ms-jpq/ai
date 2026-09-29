@@ -6,7 +6,8 @@ MODE="$1"
 shift -- 1
 STATE="$1"
 
-mkdir -p -- "$STATE"
+LOGS="$STATE/../s6-logs/supervisor"
+mkdir -p -- "$STATE" "$LOGS"
 
 case "$MODE" in
 compile)
@@ -24,7 +25,7 @@ compile)
 start)
   "$0" shutdown "$@"
   "$0" compile "$@"
-  exec -- s6-svscan "$STATE"
+  s6-svscan "$STATE" 2>&1 | s6-log -b T "$LOGS"
   ;;
 shutdown)
   if ! [[ -p $STATE/.s6-svscan/control ]]; then
