@@ -21,38 +21,14 @@ fi
 
 umask 077
 mkdir -p -- "$MESSAGES"
-CONSUME=(
-  flock -- "$MESSAGES"
-  find "$MESSAGES"
-  -maxdepth 1
-  -type f
-  ! -name '.*'
-  -exec cat -- '{}' ';'
-  -delete
-)
 
 case "$EVENT" in
 SessionStart)
-  CONTEXT="$("${CONSUME[@]}")"
-  read -r -d '' -- JQ <<- 'JQ' || true
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionStart",
-    "additionalContext": $context
-  }
-}
-JQ
-  exec -- jq -e --null-input --arg context "$CONTEXT" "$JQ"
   ;;
 FileChanged)
   FILE="$(jq -e --raw-output '.file_path' <<< "$JSON")"
   if ! [[ $FILE -ef $SIGNAL ]]; then
     exit
-  fi
-  CONTEXT="$("${CONSUME[@]}")"
-  if [[ -n $CONTEXT ]]; then
-    printf -- '%s\n' "$CONTEXT" >&2
-    exit 2
   fi
   ;;
 *)
@@ -60,3 +36,10 @@ FileChanged)
   exit 2
   ;;
 esac
+
+if grep --recursive --quiet -- . "$MESSAGES"; then
+  tee >&2 <<- 'EOF'
+Pending messages. Use `/event-bus read` to inspect and handle them when ready.
+EOF
+  exit 2
+fi

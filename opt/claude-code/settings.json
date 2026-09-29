@@ -157,6 +157,7 @@
             "type": "command"
           },
           {
+            "asyncRewake": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
             "type": "command"
           },
