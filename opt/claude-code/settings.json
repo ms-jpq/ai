@@ -165,7 +165,12 @@
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/s6.sh",
             "type": "command"
-          },
+          }
+        ],
+        "matcher": "^(startup|resume|fork|clear)$"
+      },
+      {
+        "hooks": [
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/local-instruction-updates.sh",
             "type": "command"

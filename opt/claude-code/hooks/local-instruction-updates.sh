@@ -1,7 +1,6 @@
 #!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
 set -o pipefail
-shopt -u failglob
 
 JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
@@ -27,7 +26,12 @@ if [[ $EVENT == PostToolBatch ]] && { LAST_CHECK="$(< "$CHECKED")"; } 2> /dev/nu
   fi
 fi
 
-SOURCES=("$CWD/.claude"/@(CLAUDE.md|rules|skills))
+SOURCES=()
+for SOURCE in "$CWD/.claude/"{CLAUDE.md,rules,skills}; do
+  if [[ -e $SOURCE || -L $SOURCE ]]; then
+    SOURCES+=("$SOURCE")
+  fi
+done
 CONTEXT="$("$BASE/libexec/instruction-delta.sh" "$STATE/current" "${SOURCES[@]}")"
 printf -- '%s' "$EPOCHSECONDS" > "$CHECKED"
 
