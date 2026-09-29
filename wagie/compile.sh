@@ -2,16 +2,17 @@
 
 set -o pipefail
 
-OUT="$1"
+OUT="$(realpath --canonicalize-missing -- "$1")"
 CLAUDE_CONFIG_DIR="$OUT/.claude"
-SELF="${0%/*}"
+SELF="$(realpath -- "$0")"
+SELF="${SELF%/*}"
 
 mkdir -v -p -- "$CLAUDE_CONFIG_DIR"
 cp -af --dereference -- "$SELF/../opt/claude-code"/{bin,hooks,keybindings.json} "$CLAUDE_CONFIG_DIR/"
 mkdir -v -p -- "$CLAUDE_CONFIG_DIR/libexec/linters"
 cp -af -- "$SELF/../opt/claude-code/libexec"/{notify.sh,otel-headers-helper.sh} "$CLAUDE_CONFIG_DIR/libexec/"
 cp -af --dereference -- "$SELF/../opt/claude-code/libexec"/{log-hooks.sh,read-session.sh,session-file.sh,which-session.sh} "$CLAUDE_CONFIG_DIR/libexec/"
-rsync --archive --copy-links --exclude='/markdown/' -- "$SELF/../opt/codex/libexec/linters/" "$CLAUDE_CONFIG_DIR/libexec/linters/"
+env -C "$CLAUDE_CONFIG_DIR/libexec/linters" -- rsync --archive --copy-links --exclude='/markdown/' -- "$SELF/../opt/codex/libexec/linters/" .
 cp -af -- "$SELF/../opt/codex/libexec/worktree" "$CLAUDE_CONFIG_DIR/libexec/"
 cp -af --dereference -- "$SELF/../opt/codex"/{agents,rules,skills,AGENTS.md} "$CLAUDE_CONFIG_DIR/"
 if [[ -f $CLAUDE_CONFIG_DIR/AGENTS.md ]]; then
@@ -33,7 +34,7 @@ LAYERS=(
 for LAYER in "${LAYERS[@]}"; do
   SRC=$OUT/$LAYER
   if [[ -d $SRC ]]; then
-    rsync --archive --copy-links --keep-dirlinks -- "$SRC" "$CLAUDE_CONFIG_DIR/"
+    env -C "$CLAUDE_CONFIG_DIR" -- rsync --archive --copy-links --keep-dirlinks -- "$SRC" .
   fi
 done
 
