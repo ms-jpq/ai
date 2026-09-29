@@ -45,7 +45,7 @@ Stop | StopFailure)
   done > "$TMP"
 
   SUCC=false
-  if CTX="$(xargs -r --null -I % --max-procs=0 -- ~/.local/libexec/flock.sh % "$BASE/libexec/linters/fmt-lint.sh" % < "$TMP" 2>&1 | tee -- "$BATCH")"; then
+  if CTX="$(xargs -r --null -I % --max-procs=0 -- flock -- % "$BASE/libexec/linters/fmt-lint.sh" % < "$TMP" 2>&1 | tee -- "$BATCH")"; then
     SUCC=true
   else
     rm -fr -- "$BATCH"

@@ -27,6 +27,10 @@ WorktreeRemove)
   ;;
 esac
 
+if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
+  exit
+fi
+
 NOTES="$CWD/.notes"
 if ! [[ -L $NOTES ]]; then
   exit

@@ -17,6 +17,10 @@ Stop | StopFailure)
   ;;
 esac
 
+if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
+  exit
+fi
+
 NOTES="$CWD/.notes"
 if ! [[ -d $NOTES && -e "$NOTES/.git" ]]; then
   exit

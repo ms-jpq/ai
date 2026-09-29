@@ -21,6 +21,10 @@ Notification)
   MESSAGE="$(jq -e --raw-output '.message' <<< "$JSON")"
   ;;
 Stop | StopFailure)
+  if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
+    exit
+  fi
+
   TRANSCRIPT="$(jq --raw-output '.transcript_path' <<< "$JSON")"
 
   if tail -n 3 -- "$TRANSCRIPT" 2> /dev/null | jq --raw-output '.promptSource // empty' 2> /dev/null | tail -n 1 | grep --quiet --fixed-strings -- system; then

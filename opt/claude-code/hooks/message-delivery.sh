@@ -16,8 +16,7 @@ fi
 
 case "$EVENT" in
 PostToolBatch | UserPromptSubmit | Stop)
-  AGENT="$(jq --raw-output '.agent_id // ""' <<< "$JSON")"
-  if [[ -n $AGENT ]]; then
+  if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
     exit
   fi
   ;;
