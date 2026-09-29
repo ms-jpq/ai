@@ -30,6 +30,17 @@
   },
   "feedbackSurveyRate": 0,
   "hooks": {
+    "FileChanged": [
+      {
+        "hooks": [
+          {
+            "asyncRewake": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "hooks": [
@@ -75,10 +86,6 @@
     "PostToolBatch": [
       {
         "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
-            "type": "command"
-          },
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/run-post.sh",
             "type": "command"
@@ -140,6 +147,10 @@
       {
         "hooks": [
           {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
+            "type": "command"
+          },
+          {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
@@ -150,10 +161,6 @@
     "Stop": [
       {
         "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
-            "type": "command"
-          },
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
             "type": "command"
@@ -213,10 +220,6 @@
     "UserPromptSubmit": [
       {
         "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
-            "type": "command"
-          },
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",

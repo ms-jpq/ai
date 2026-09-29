@@ -9,15 +9,52 @@ EVENT="$(jq -e --raw-output '.hook_event_name | strings' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd | strings' <<< "$JSON")"
 
 if ROOT="$(git -C "$CWD" rev-parse --show-toplevel 2> /dev/null)"; then
-  HANDLERS="$ROOT/.notes/events"
+  MESSAGES="$ROOT/.notes/events"
 else
-  HANDLERS="$CWD/.notes/events"
+  MESSAGES="$CWD/.notes/events"
+fi
+SIGNAL="$MESSAGES/.events-ready"
+
+if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
+  exit
 fi
 
+umask 077
+mkdir -p -- "$MESSAGES"
+CONSUME=(
+  flock -- "$MESSAGES"
+  find "$MESSAGES"
+  -maxdepth 1
+  -type f
+  ! -name '.*'
+  -exec cat -- '{}' ';'
+  -delete
+)
+
 case "$EVENT" in
-PostToolBatch | UserPromptSubmit | Stop)
-  if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
+SessionStart)
+  touch -- "$SIGNAL"
+  CONTEXT="$("${CONSUME[@]}")"
+  read -r -d '' -- JQ <<- 'JQ' || true
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "watchPaths": [$signal],
+    "additionalContext": $context
+  }
+}
+JQ
+  exec -- jq -e --null-input --arg signal "$SIGNAL" --arg context "$CONTEXT" "$JQ"
+  ;;
+FileChanged)
+  FILE="$(jq -e --raw-output '.file_path' <<< "$JSON")"
+  if [[ $FILE != "$SIGNAL" ]]; then
     exit
+  fi
+  CONTEXT="$("${CONSUME[@]}")"
+  if [[ -n $CONTEXT ]]; then
+    printf -- '%s\n' "$CONTEXT" >&2
+    exit 2
   fi
   ;;
 *)
@@ -25,22 +62,3 @@ PostToolBatch | UserPromptSubmit | Stop)
   exit 2
   ;;
 esac
-
-read -r -d '' -- JQ <<- 'JQ' || true
-{
-  "hookSpecificOutput": {
-    "hookEventName": $event,
-    "additionalContext": $context
-  }
-}
-JQ
-
-umask 077
-mkdir -p -- "$HANDLERS"
-CONTEXT="$(flock -- "$HANDLERS" find "$HANDLERS" -maxdepth 1 -type f -executable -exec env -C "$CWD" -- '{}' ';')"
-
-if [[ -z $CONTEXT ]]; then
-  exit
-fi
-
-exec -- jq -e --null-input --arg event "$EVENT" --arg context "$CONTEXT" "$JQ"
