@@ -5,14 +5,10 @@ set -o pipefail
 JSON="$(tee)"
 # "${0%/*}/../libexec/log-hooks.sh" "$0" <<< "$JSON"
 
-EVENT="$(jq -e --raw-output '.hook_event_name | strings' <<< "$JSON")"
-CWD="$(jq -e --raw-output '.cwd | strings' <<< "$JSON")"
+EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
+CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 
-if ROOT="$(git -C "$CWD" rev-parse --show-toplevel 2> /dev/null)"; then
-  EVENTS="$ROOT/.notes/events"
-else
-  EVENTS="$CWD/.notes/events"
-fi
+EVENTS="$CWD/.notes/events"
 SIGNAL="$CWD/.events-ready"
 
 if jq -e '.agent_id' <<< "$JSON" > /dev/null; then

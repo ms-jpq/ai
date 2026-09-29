@@ -4,6 +4,7 @@ set -o pipefail
 
 : "${S67_WORKSPACE?}"
 : "${S67_INTERVAL?}"
+: "${S67_TIMEOUT?}"
 : "${S67_BACKOFF_INITIAL?}"
 : "${S67_BACKOFF_MAX?}"
 
@@ -14,7 +15,7 @@ exec 2>&1
 printf -- '%s' "$$" > data/pgid
 
 while true; do
-  if ./data/reporter.sh nice -n 19 env -C "$S67_WORKSPACE" -- "$JOB"; then
+  if ./data/reporter.sh env -C "$S67_WORKSPACE" -- timeout --foreground --kill-after=5s "$S67_TIMEOUT" nice -n 19 "$JOB"; then
     DELAY="$S67_INTERVAL"
     BACKOFF="$S67_BACKOFF_INITIAL"
   else

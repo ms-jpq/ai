@@ -2,11 +2,7 @@
 
 set -o pipefail
 
-if ROOT="$(git rev-parse --show-toplevel 2> /dev/null)"; then
-  INBOX="$ROOT/.notes/events"
-else
-  INBOX="$PWD/.notes/events"
-fi
+INBOX="$PWD/.notes/events"
 
 mkdir -p -- "$INBOX"
 exec -- flock -- "$INBOX" find "$INBOX" -type f -exec cat -- '{}' ';' -delete

@@ -74,7 +74,6 @@ fi
 
 if ! [[ -d $SENTINELS ]]; then
   mkdir -p -- "$SENTINELS"
-  find "$SENTINELS" -mindepth 1 -delete
 
   PREFACE="$(< "$BASE/libexec/rules-preface.txt")"
   CONTEXT+=("# agentsMd"$'\n'"$PREFACE")
