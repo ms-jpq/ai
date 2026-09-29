@@ -49,9 +49,6 @@ case "$CMD_LINE" in
 'gh '*' delete'* | 'gh '*' archive'*)
   REASON='review dangerous gh command'
   ;;
-# *terraform*)
-#   REASON='review dangerous terraform command'
-#   ;;
 'terraform '*)
   REASON='review dangerous terraform command'
   ;;
