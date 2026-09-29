@@ -37,7 +37,7 @@ JQ
 
 umask 077
 mkdir -p -- "$MESSAGES"
-CONTEXT="$(find "$MESSAGES" -maxdepth 1 -type f -exec cat -- '{}' ';' -delete)"
+CONTEXT="$(flock -- "$MESSAGES" find "$MESSAGES" -maxdepth 1 -type f -exec cat -- '{}' ';' -delete)"
 
 if [[ -z $CONTEXT ]]; then
   exit
