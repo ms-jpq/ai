@@ -3,10 +3,34 @@
 set -o pipefail
 
 MODE="$1"
-STATE="$2"
+shift -- 1
+STATE="$1"
 
 mkdir -p -- "$STATE"
-if [[ -p $STATE/.s6-svscan/control ]]; then
+
+case "$MODE" in
+compile)
+  shopt -u failglob
+  BASE="$(realpath -- "${0%/*}/base")"
+  RSYNC=(rsync --archive --copy-links --delete)
+
+  "${RSYNC[@]}" --exclude='/.s6-svscan/' -- "$BASE/" "$STATE/"
+  for SERVICE in .claude/s6/*/; do
+    NAME="${SERVICE%/}"
+    NAME="${NAME##*/}"
+    "${RSYNC[@]}" -- "$SERVICE" "$STATE/$NAME/"
+  done
+  ;;
+start)
+  "$0" shutdown "$@"
+  "$0" compile "$@"
+  exec -- s6-svscan "$STATE"
+  ;;
+shutdown)
+  if ! [[ -p $STATE/.s6-svscan/control ]]; then
+    exit
+  fi
+
   if s6-svscanctl -t "$STATE"; then
     s6-setlock "$STATE/.s6-svscan/lock" true
   else
@@ -15,13 +39,6 @@ if [[ -p $STATE/.s6-svscan/control ]]; then
       exit "$STATUS"
     fi
   fi
-fi
-
-case "$MODE" in
-start)
-  exec -- s6-svscan "$STATE"
-  ;;
-shutdown)
   ;;
 *)
   set -x
