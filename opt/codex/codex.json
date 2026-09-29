@@ -11,12 +11,6 @@
     "inherit": "all"
   },
   "tui": {
-    "status_line": [
-      "run-state",
-      "model-with-reasoning",
-      "context-used",
-      "context-window-size",
-      "task-progress"
-    ]
+    "status_line": ["run-state", "model-with-reasoning", "context-used", "context-window-size", "task-progress"]
   }
 }
