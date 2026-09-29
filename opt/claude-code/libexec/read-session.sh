@@ -1,1 +1,0 @@
-../../codex/libexec/read-session.sh

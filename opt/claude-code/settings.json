@@ -95,16 +95,6 @@
             "type": "command"
           }
         ]
-      },
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
-            "type": "command"
-          }
-        ],
-        "matcher": "ExitPlanMode"
       }
     ],
     "PostToolUseFailure": [
@@ -146,31 +136,12 @@
         "matcher": "Bash"
       }
     ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
-            "type": "command"
-          }
-        ]
-      }
-    ],
     "SessionStart": [
       {
         "hooks": [
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
-            "type": "command"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           }
         ]
@@ -198,11 +169,6 @@
           },
           {
             "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
-            "type": "command"
-          },
-          {
-            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/telemetry.sh",
             "type": "command"
           }
@@ -223,11 +189,6 @@
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
-            "type": "command"
-          },
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           },
           {
@@ -259,15 +220,6 @@
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/workspace.sh",
-            "type": "command"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/sessions.sh",
             "type": "command"
           }
         ]

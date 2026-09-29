@@ -1,1 +1,0 @@
-../../codex/hooks/sessions.sh

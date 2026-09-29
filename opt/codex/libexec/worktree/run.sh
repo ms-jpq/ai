@@ -81,9 +81,7 @@ r | resume)
 
   MESSAGE="$(realpath --relative-to "$WORKTREE" -- "$TASK")"
   RESUME="claude --agent wt-worker --name ${SESSION@Q} -- ${MESSAGE@Q}"
-  if [[ -e "$NOTES/.HISTORY.md" ]]; then
-    RESUME="claude --continue -- ${MESSAGE@Q} || $RESUME"
-  fi
+  RESUME="claude --continue -- ${MESSAGE@Q} || $RESUME"
 
   exec -- "$SELF/tmux.sh" launch "$SESSION" "$WORKTREE" "$RESUME"
   ;;
