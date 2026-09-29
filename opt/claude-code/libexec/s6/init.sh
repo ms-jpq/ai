@@ -1,6 +1,7 @@
 #!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
 set -o pipefail
+shopt -u failglob
 
 MODE="$1"
 shift -- 1
@@ -11,21 +12,33 @@ mkdir -p -- "$STATE" "$LOGS"
 
 case "$MODE" in
 compile)
-  shopt -u failglob
-  BASE="$(realpath -- "${0%/*}/base")"
-  RSYNC=(rsync --archive --copy-links --delete)
+  WORKSPACE="$2"
+  BASE="$(realpath -- "${0%/*}")"
+  RSYNC=(rsync --archive --copy-links --checksum --delete)
+  find "$STATE" -mindepth 1 -maxdepth 1 ! -name .s6-svscan -exec rm -rf -- '{}' +
+  mkdir -p -- "$STATE/.env"
+  printf -- '%s' "$WORKSPACE" > "$STATE/.env/S67_WORKSPACE"
 
-  "${RSYNC[@]}" --exclude='/.s6-svscan/' -- "$BASE/" "$STATE/"
-  for SERVICE in .claude/s6/*/; do
-    NAME="${SERVICE%/}"
-    NAME="${NAME##*/}"
-    "${RSYNC[@]}" -- "$SERVICE" "$STATE/$NAME/"
+  for LAYER in "$BASE" "$WORKSPACE/.claude/s6"; do
+    for JOB in "$LAYER/jobs/"*; do
+      if [[ -x $JOB ]]; then
+        DEST="$STATE/${JOB##*/}"
+        "${RSYNC[@]}" -- "$BASE/base/" "$DEST/"
+        mkdir -p -- "$DEST/data"
+        cp -L -- "$JOB" "$DEST/data/job"
+      fi
+    done
+    for SERVICE in "$LAYER/overlay/"*/; do
+      NAME="${SERVICE%/}"
+      NAME="${NAME##*/}"
+      "${RSYNC[@]}" -- "$SERVICE" "$STATE/$NAME/"
+    done
   done
   ;;
 start)
   "$0" shutdown "$@"
   "$0" compile "$@"
-  s6-svscan "$STATE" 2>&1 | s6-log -b T "$LOGS"
+  s6-envdir -f -n "$STATE/.env" s6-svscan "$STATE" 2>&1 | s6-log -b T "$LOGS"
   ;;
 shutdown)
   if ! [[ -p $STATE/.s6-svscan/control ]]; then
