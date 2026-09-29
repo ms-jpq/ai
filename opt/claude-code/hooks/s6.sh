@@ -17,6 +17,9 @@ STATE="$SCRATCHPAD/s6-init"
 case "$EVENT" in
 SessionStart)
   WORKSPACE="$(jq -e --raw-output '.cwd' <<< "$JSON")"
+  S67_HARNESS_PID="${CLAUDE_PID?}"
+  S67_HARNESS_STARTED="$(LC_ALL=C.UTF-8 ps -p "$S67_HARNESS_PID" -o lstart=)"
+  export -- S67_HARNESS_PID S67_HARNESS_STARTED
   exec -- "$INIT" start "$STATE" "$WORKSPACE"
   ;;
 SessionEnd)
