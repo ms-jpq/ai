@@ -20,7 +20,7 @@ mkdir -v -p -- "${DIRS[@]}"
   cp -af --dereference -- "$OPT/claude-code/libexec"/{log-hooks.sh,instruction-delta.sh} "$ROOT/libexec/"
   cp -af --dereference -- "$OPT/codex"/{agents,rules,skills,AGENTS.md} "$ROOT/"
   cp -af --dereference -- "$OPT/mcp/." "$OUT/opt/mcp/"
-  cp -af -- "$OPT/claude-code/libexec"/{notify.sh,otel-headers-helper.sh} "$ROOT/libexec/"
+  cp -af -- "$OPT/claude-code/libexec"/{notify.sh,otel-headers-helper.sh,s6} "$ROOT/libexec/"
   cp -af -- "$OPT/codex/libexec/worktree" "$ROOT/libexec/"
   env -C "$ROOT/libexec/linters" -- "${RSYNC[@]}" --exclude='/markdown/' -- "$OPT/codex/libexec/linters/" .
   mv -- "$ROOT/AGENTS.md" "$ROOT/CLAUDE.md"

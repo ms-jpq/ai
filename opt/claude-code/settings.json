@@ -149,9 +149,24 @@
         "matcher": "Bash"
       }
     ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/s6.sh",
+            "type": "command"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/s6.sh",
+            "type": "command"
+          },
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/local-instruction-updates.sh",
             "type": "command"
