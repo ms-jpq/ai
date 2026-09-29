@@ -16,7 +16,6 @@
       "model-with-reasoning",
       "context-used",
       "context-window-size",
-      "thread-title",
       "task-progress"
     ]
   }
