@@ -24,6 +24,15 @@
       {
         "hooks": [
           {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/codex/hooks/instruction-updates.sh",
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
             "command": "~/.local/opt/ai/opt/codex/hooks/rules.sh",
             "type": "command"
           },
@@ -64,6 +73,15 @@
       }
     ],
     "SessionStart": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/codex/hooks/instruction-updates.sh",
+            "type": "command"
+          }
+        ]
+      },
       {
         "hooks": [
           {
@@ -122,6 +140,15 @@
       }
     ],
     "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "async": true,
+            "command": "~/.local/opt/ai/opt/codex/hooks/instruction-updates.sh",
+            "type": "command"
+          }
+        ]
+      },
       {
         "hooks": [
           {
