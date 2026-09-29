@@ -14,7 +14,7 @@ exec 2>&1
 printf -- '%s' "$$" > data/pgid
 
 while true; do
-  if env -C "$S67_WORKSPACE" -- "$JOB"; then
+  if ./data/reporter.sh nice -n 19 env -C "$S67_WORKSPACE" -- "$JOB"; then
     DELAY="$S67_INTERVAL"
     BACKOFF="$S67_BACKOFF_INITIAL"
   else

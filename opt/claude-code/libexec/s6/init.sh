@@ -14,24 +14,27 @@ case "$MODE" in
 compile)
   WORKSPACE="$2"
   BASE="$(realpath -- "${0%/*}")"
-  RSYNC=(rsync --archive --copy-links --checksum --delete)
+  RSYNC=(rsync --archive --copy-links --checksum)
+
   find "$STATE" -mindepth 1 -maxdepth 1 ! -name .s6-svscan -exec rm -rf -- '{}' +
   mkdir -p -- "$STATE/.env"
   printf -- '%s' "$WORKSPACE" > "$STATE/.env/S67_WORKSPACE"
 
   for LAYER in "$BASE" "$WORKSPACE/.claude/s6"; do
     for JOB in "$LAYER/jobs/"*; do
-      if [[ -x $JOB ]]; then
+      if [[ -x $JOB/run ]]; then
         DEST="$STATE/${JOB##*/}"
-        "${RSYNC[@]}" -- "$BASE/base/" "$DEST/"
-        mkdir -p -- "$DEST/data"
-        cp -L -- "$JOB" "$DEST/data/job"
+        "${RSYNC[@]}" --delete -- "$BASE/base/" "$DEST/"
+        cp -L -- "$JOB/run" "$DEST/data/job"
+        if [[ -d $JOB/env ]]; then
+          "${RSYNC[@]}" -- "$JOB/env/" "$DEST/env/"
+        fi
       fi
     done
     for SERVICE in "$LAYER/overlay/"*/; do
       NAME="${SERVICE%/}"
       NAME="${NAME##*/}"
-      "${RSYNC[@]}" -- "$SERVICE" "$STATE/$NAME/"
+      "${RSYNC[@]}" --delete -- "$SERVICE" "$STATE/$NAME/"
     done
   done
   ;;
