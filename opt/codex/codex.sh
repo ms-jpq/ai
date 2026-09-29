@@ -29,7 +29,7 @@ MCP="$(envsubst < "$ROOT/opt/claude-code/local-plugins/omnibus/.mcp.json")"
 LS="$(jq -e 'del(."$schema")' "$BASE/codex.json" | "$BASE/libexec/codex.jq" --raw-output --argjson mcp "$MCP")"
 readarray -t LINES --- <<< "$LS"
 
-ARGV=()
+ARGV=(--no-daemon)
 case "${1:-}" in
 "" | exec | review | resume | fork | app-server | mcp-server | exec-server)
   ARGV+=(--strict-config)
