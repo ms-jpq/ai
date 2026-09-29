@@ -5,26 +5,29 @@ shopt -u failglob
 
 JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
-SESSION_ID="$(jq -e --raw-output '.session_id' <<< "$JSON")"
+CWD="$(jq -e --raw-output '.cwd' <<< "$JSON")"
 BASE="$(realpath -- "${0%/*}/..")"
-SESSIONS="$HOME/.local/opt/ai/var/sessions"
-STATE="$SESSIONS/$SESSION_ID.instructions"
+SCRATCHPAD="$(jq -e --raw-output '.scratchpad_dir' <<< "$JSON")"
+STATE="$SCRATCHPAD/local-instruction-updates"
 CHECKED="$STATE/checked"
+INTERVAL=9
+
+if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
+  exit
+fi
 
 if [[ ${RECUR:-} != 1 ]]; then
   mkdir -p -- "$STATE"
   RECUR=1 exec -- flock --exclusive -- "$STATE" "$0" "$@" <<< "$JSON"
 fi
 
-INTERVAL=9
-
-if [[ $EVENT == PostToolUse ]] && { LAST_CHECK="$(< "$CHECKED")"; } 2> /dev/null; then
+if [[ $EVENT == PostToolBatch ]] && { LAST_CHECK="$(< "$CHECKED")"; } 2> /dev/null; then
   if [[ $LAST_CHECK =~ ^[0-9]+$ ]] && ((EPOCHSECONDS - LAST_CHECK >= 0 && EPOCHSECONDS - LAST_CHECK < INTERVAL)); then
     exit
   fi
 fi
 
-SOURCES=("$BASE"/@(AGENTS.md|rules|rules.d|skills))
+SOURCES=("$CWD/.claude"/@(CLAUDE.md|rules|skills))
 CONTEXT="$("$BASE/libexec/instruction-delta.sh" "$STATE/current" "${SOURCES[@]}")"
 printf -- '%s' "$EPOCHSECONDS" > "$CHECKED"
 

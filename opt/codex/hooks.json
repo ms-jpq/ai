@@ -106,11 +106,6 @@
       {
         "hooks": [
           {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
-            "type": "command"
-          },
-          {
             "command": "~/.local/opt/ai/opt/codex/hooks/auto-commit.sh",
             "type": "command"
           },
@@ -128,11 +123,6 @@
     "StopFailure": [
       {
         "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
-            "type": "command"
-          },
           {
             "command": "~/.local/opt/ai/opt/codex/hooks/auto-commit.sh",
             "type": "command"

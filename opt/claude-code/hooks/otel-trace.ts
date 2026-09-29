@@ -63,7 +63,6 @@ import { EOL } from "node:os"
 import { dirname, resolve } from "node:path"
 import { env, stdin } from "node:process"
 import { text } from "node:stream/consumers"
-import { fileURLToPath } from "node:url"
 import { promisify } from "node:util"
 
 type NonEmpty<T> = readonly [T, ...T[]]
@@ -179,10 +178,7 @@ type Ctx = { userId: string; sessionId: string }
 
 const encoding = "utf-8" satisfies BufferEncoding
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..", "..")
-const SESSIONS_DIR = resolve(ROOT, "var", "sessions")
-
-const hookInput = async (): Promise<HookInput> => JSON.parse(await text(stdin))
+const hookInput = async (): Promise<HookInput & { scratchpad_dir?: string }> => JSON.parse(await text(stdin))
 
 const gitUserName = (): Promise<string> =>
   promisify(execFile)("git", ["config", "user.name"])
@@ -216,9 +212,12 @@ const measure = (label: string): Disposable => {
   }
 }
 
-const openState = async (hook: HookInput): Promise<AsyncDisposable & { uuid?: string }> => {
+const openState = async (
+  hook: HookInput,
+  { scratchpad }: { scratchpad: string },
+): Promise<AsyncDisposable & { uuid?: string }> => {
   const key = hook.hook_event_name === "SubagentStop" ? `${hook.session_id}.${hook.agent_id}` : hook.session_id
-  const path = resolve(SESSIONS_DIR, `${key}.openinference.uuid`)
+  const path = resolve(scratchpad, "telemetry", `${key}.openinference.uuid`)
   const tmp = `${path}.${randomUUID()}.tmp`
 
   const uuid = (await readFile(path, encoding).catch(() => "")).trim() || undefined
@@ -1118,9 +1117,10 @@ const emitSpanTree = async ({
 
 const main = async (): Promise<void> => {
   const [hook, userId] = await Promise.all([hookInput(), gitUserName()])
+  ok(hook.scratchpad_dir, "scratchpad_dir is required")
   using _ = measure(`${hook.hook_event_name} (session=${hook.session_id})`)
 
-  await using state = await openState(hook)
+  await using state = await openState(hook, { scratchpad: hook.scratchpad_dir })
   await using otel = openProvider(hook)
   if (!otel) {
     return

@@ -5,6 +5,10 @@ set -o pipefail
 STATE="$1"
 shift -- 1
 
+if ! (($#)); then
+  exit
+fi
+
 INITIAL=0
 if ! [[ -d $STATE ]]; then
   INITIAL=1
