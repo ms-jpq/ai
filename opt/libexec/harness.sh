@@ -31,7 +31,7 @@ SANDBOX=(
 )
 
 if [[ $OSTYPE == darwin* ]]; then
-  SANDBOX+=(--path /Users --path "$HOME" --path "$HOME/.local" --path "$HOME/.local/opt")
+  SANDBOX+=(--path '/Users' --path "$HOME" --path "$HOME/.local" --path "$HOME/.local/opt" --path '/var/folders')
 fi
 
 if CWD="$(~/.local/libexec/dnif.sh "$PWD" '.git' | tac | grep -E --max-count 1 -e '.')" && [[ $CWD != "$PWD" ]]; then
