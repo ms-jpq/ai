@@ -76,7 +76,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/message-delivery.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
             "type": "command"
           },
           {
@@ -151,7 +151,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/message-delivery.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
             "type": "command"
           },
           {
@@ -214,7 +214,7 @@
       {
         "hooks": [
           {
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/message-delivery.sh",
+            "command": "~/.local/opt/ai/opt/claude-code/hooks/event-bus.sh",
             "type": "command"
           },
           {

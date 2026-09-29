@@ -9,9 +9,9 @@ EVENT="$(jq -e --raw-output '.hook_event_name | strings' <<< "$JSON")"
 CWD="$(jq -e --raw-output '.cwd | strings' <<< "$JSON")"
 
 if ROOT="$(git -C "$CWD" rev-parse --show-toplevel 2> /dev/null)"; then
-  MESSAGES="$ROOT/.notes/messages"
+  HANDLERS="$ROOT/.notes/events"
 else
-  MESSAGES="$CWD/.notes/messages"
+  HANDLERS="$CWD/.notes/events"
 fi
 
 case "$EVENT" in
@@ -36,8 +36,8 @@ read -r -d '' -- JQ <<- 'JQ' || true
 JQ
 
 umask 077
-mkdir -p -- "$MESSAGES"
-CONTEXT="$(flock -- "$MESSAGES" find "$MESSAGES" -maxdepth 1 -type f -exec cat -- '{}' ';' -delete)"
+mkdir -p -- "$HANDLERS"
+CONTEXT="$(flock -- "$HANDLERS" find "$HANDLERS" -maxdepth 1 -type f -executable -exec env -C "$CWD" -- '{}' ';')"
 
 if [[ -z $CONTEXT ]]; then
   exit
