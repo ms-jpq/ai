@@ -88,7 +88,6 @@
       {
         "hooks": [
           {
-            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/local-instruction-updates.sh",
             "type": "command"
           },
@@ -247,7 +246,6 @@
       {
         "hooks": [
           {
-            "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/local-instruction-updates.sh",
             "type": "command"
           },
