@@ -2,5 +2,4 @@
 
 set -o pipefail
 
-exec 2>&1
 exec -- tail -f /dev/null

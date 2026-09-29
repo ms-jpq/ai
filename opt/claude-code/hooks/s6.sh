@@ -16,7 +16,8 @@ STATE="$SCRATCHPAD/s6-init"
 
 case "$EVENT" in
 SessionStart)
-  exec -- "$INIT" start "$STATE"
+  WORKSPACE="$(jq -e --raw-output '.cwd' <<< "$JSON")"
+  exec -- "$INIT" start "$STATE" "$WORKSPACE"
   ;;
 SessionEnd)
   exec -- "$INIT" shutdown "$STATE"
