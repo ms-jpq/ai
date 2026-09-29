@@ -17,8 +17,8 @@ if "$@"; then
 else
   STATUS=$?
   MESSAGE="Job $JOB_NAME failed (exit $STATUS)."
-  printf -- '%s\n' "$MESSAGE"
   if [[ -e $FAILED ]]; then
+    printf -- '%s\n' "$MESSAGE"
     exit "$STATUS"
   fi
 fi
