@@ -2,11 +2,8 @@
 
 set -o pipefail
 
-: "${S67_WORKSPACE?}"
-
 JOB_NAME="${PWD##*/}"
 FAILED="$PWD/data/failed"
-EVENTS="$S67_WORKSPACE/.notes/events"
 STATUS=0
 
 if "$@"; then
@@ -23,17 +20,7 @@ else
   fi
 fi
 
-TIMESTAMP="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-
-mkdir -p -- "$EVENTS"
-NOTICE="$(mktemp "$EVENTS/../.s6-event.XXXXXX")"
-tee -- "$NOTICE" <<- EOF
-$TIMESTAMP
-$MESSAGE
-Log: $PWD/../../log/job-$JOB_NAME.log/current
-EOF
-mv -- "$NOTICE" "$EVENTS/${NOTICE##*/}"
-touch -- "$S67_WORKSPACE/.events-ready"
+printf -- '%s\n' "$MESSAGE"
 
 if ((STATUS)); then
   touch -- "$FAILED"
