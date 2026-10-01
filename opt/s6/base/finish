@@ -14,7 +14,7 @@ ATTEMPTS="$INSTANCE_DATA/attempt"
 
 exec 2>&1
 
-kill -KILL -- "-$PID" || true
+kill -KILL -- "-$PID" 2> /dev/null || true
 
 EXIT_STATUS=0
 if [[ -d $INSTANCE_DATA/recurring ]]; then
