@@ -7,7 +7,8 @@ ACTION="$1"
 shift -- 1
 STATE="$1"
 
-LOGS="$STATE/log/s6.log"
+BASE="$(realpath -- "${0%/*}")"
+LOGS="$STATE/../log/s6.log"
 mkdir -p -- "$STATE" "$LOGS"
 
 case "$ACTION" in
@@ -15,7 +16,7 @@ start)
   WS="$(realpath -- "$2")"
 
   "$0" shutdown "$@"
-  "${0%/*}/jobs/quine/run"
+  env -C "$STATE" -- "$BASE/jobs/quine/run"
   S67_WORKSPACE="$WS" s6-svscan "$STATE" 2>&1 | s6-log -b T "$LOGS"
   ;;
 shutdown)
