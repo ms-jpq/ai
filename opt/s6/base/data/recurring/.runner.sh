@@ -2,19 +2,17 @@
 
 set -o pipefail
 
-: "${S67_WORKSPACE?}"
 : "${S67_INTERVAL?}"
-: "${S67_TIMEOUT?}"
 : "${S67_BACKOFF_INITIAL?}"
 : "${S67_BACKOFF_MAX?}"
 
-JOB="$PWD/data/job"
+ONESHOT="${0%/*}/../oneshot/.runner.sh"
 BACKOFF="$S67_BACKOFF_INITIAL"
 
 exec 2>&1
 
 while true; do
-  if env -C "$S67_WORKSPACE" -- timeout --foreground --kill-after=5s "$S67_TIMEOUT" nice -n 19 -- "$JOB" "$@"; then
+  if "$ONESHOT" "$@"; then
     DELAY="$S67_INTERVAL"
     BACKOFF="$S67_BACKOFF_INITIAL"
   else
