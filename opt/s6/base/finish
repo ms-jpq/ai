@@ -2,5 +2,12 @@
 
 set -o pipefail
 
-GROUP="${4:?}"
-kill -KILL -- "-$GROUP" || true
+exec 2>&1
+
+kill -KILL -- "-$4" || true
+
+tee <<- EOF
+---------------------------------
+Service $3 stopped (s6 status $1)
+---------------------------------
+EOF
