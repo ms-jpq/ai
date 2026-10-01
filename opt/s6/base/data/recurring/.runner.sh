@@ -6,7 +6,7 @@ set -o pipefail
 : "${S67_BACKOFF_INITIAL?}"
 : "${S67_BACKOFF_MAX?}"
 
-ONESHOT="${0%/*}/../oneshot/.runner.sh"
+ONESHOT="$PWD/data/oneshot/.runner.sh"
 BACKOFF="$S67_BACKOFF_INITIAL"
 
 exec 2>&1
