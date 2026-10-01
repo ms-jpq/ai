@@ -13,4 +13,4 @@ if STARTED="$(LC_ALL=C.UTF-8 ps -p "$S67_HARNESS_PID" -o lstart=)"; then
   fi
 fi
 
-exec -- s6-svscanctl -t "$STATE"
+exec -- s6-svscanctl -t -- "$STATE"

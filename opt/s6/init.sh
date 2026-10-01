@@ -17,15 +17,15 @@ start)
 
   "$0" shutdown "$@"
   env -C "$STATE" -- "$BASE/jobs/quine/run"
-  S67_WORKSPACE="$WS" s6-svscan "$STATE" 2>&1 | s6-log -b T "$LOGS"
+  S67_WORKSPACE="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
   ;;
 shutdown)
   if ! [[ -p $STATE/.s6-svscan/control ]]; then
     exit
   fi
 
-  if s6-svscanctl -t "$STATE"; then
-    s6-setlock "$STATE/.s6-svscan/lock" true
+  if s6-svscanctl -t -- "$STATE"; then
+    s6-setlock -- "$STATE/.s6-svscan/lock" true
   else
     STATUS=$?
     if ((STATUS != 100)); then
@@ -36,7 +36,7 @@ shutdown)
 stat)
   for SERVICE in "$STATE/"[!.]*/; do
     printf -- '%s: ' "${SERVICE%/}"
-    s6-svstat "$SERVICE"
+    s6-svstat -- "$SERVICE"
   done
   ;;
 *)
