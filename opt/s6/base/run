@@ -2,4 +2,4 @@
 
 set -o pipefail
 
-exec -- s6-envdir ./env ./data/runner.sh
+exec -- s6-envdir ./env ./data/runner.sh "$@"
