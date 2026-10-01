@@ -1,30 +1,37 @@
 #!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
 set -o pipefail
-shopt -u failglob
+shopt -u failglob dotglob
 
-BASE="${0%/jobs/quine/run}"
+ROOT="${0%/jobs/quine/run}"
 
 if [[ ${RECUR:-} == 1 ]]; then
-  REQUEST="$1"
-  KIND="${REQUEST%/*}"
-  JOB="${KIND%/data/*}"
-  KIND="${KIND##*/}"
-  NAME="${JOB##*/}:$KIND:${REQUEST##*/}"
-  DEST="$PWD/$NAME"
-  if [[ -d $DEST ]]; then
-    exit
+  JOB="$PWD/${1#./}"
+  SOURCES=("$ROOT/base/./")
+  if [[ -d $JOB/env ]]; then
+    SOURCES+=("$JOB/./env")
   fi
-  rsync --archive --relative -- "$BASE/base/./" "$JOB/./"en[v] "$DEST/"
-  ln -sf -- "$JOB/run" "$DEST/data/job"
-  if [[ $KIND == recurring ]]; then
-    ln -sf -- recurring/.runner.sh "$DEST/data/.runner.sh"
-  fi
+  for REQUEST in "$JOB"/data/@(oneshot|recurring)/*; do
+    if ! [[ -f $REQUEST ]]; then
+      continue
+    fi
+    KIND="${REQUEST%/*}"
+    KIND="${KIND##*/}"
+    DEST="$2/${REQUEST##*/}"
+    if [[ -d $DEST ]]; then
+      continue
+    fi
+    rsync --archive --relative -- "${SOURCES[@]}" "$DEST/"
+    ln -sf -- "$JOB/run" "$DEST/data/job"
+    if [[ $KIND == recurring ]]; then
+      ln -sf -- recurring/.runner.sh "$DEST/data/.runner.sh"
+    fi
+  done
   exit
 fi
 
-find "$BASE/jobs" -mindepth 4 -maxdepth 4 -type f ! -name '.*' \( -path '*/data/oneshot/*' -o -path '*/data/recurring/*' \) -exec env RECUR=1 "$0" '{}' ';'
+RECUR=1 find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d -execdir "$0" '{}' "$PWD" ';'
 
 if (($#)); then
-  exec -- s6-svscanctl -h "$PWD"
+  exec -- s6-svscanctl -h -- "$PWD"
 fi
