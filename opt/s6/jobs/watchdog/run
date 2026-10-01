@@ -5,12 +5,10 @@ set -o pipefail
 : "${S67_HARNESS_PID?}"
 : "${S67_HARNESS_STARTED?}"
 
-STATE="$(realpath -- "${0%/*}/../..")"
-
 if STARTED="$(LC_ALL=C.UTF-8 ps -p "$S67_HARNESS_PID" -o lstart=)"; then
   if [[ $STARTED == "$S67_HARNESS_STARTED" ]]; then
     exit
   fi
 fi
 
-exec -- s6-svscanctl -t -- "$STATE"
+exec -- s6-svscanctl -t -- "${0%/*}/../../../.."

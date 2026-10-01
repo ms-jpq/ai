@@ -12,6 +12,8 @@ Service $3 stopped (s6 status $1)
 ---------------------------------
 EOF
 
-if [[ ./data/.runner.sh -ef ./data/oneshot/.runner.sh ]]; then
+INSTANCE_DATA='./data'
+if [[ $INSTANCE_DATA/.runner.sh -ef $INSTANCE_DATA/oneshot/.runner.sh ]]; then
+  touch -- "../../data/done/$3"
   exit 125
 fi
