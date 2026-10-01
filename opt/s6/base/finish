@@ -16,12 +16,7 @@ exec 2>&1
 
 kill -KILL -- "-$PID" || true
 
-tee <<- EOF
-------------------------------------------------------------------
-Service Stopped :: $JOB@$INSTANCE - status=$STATUS, signal=$SIGNAL
-------------------------------------------------------------------
-EOF
-
+EXIT_STATUS=0
 if [[ -d $INSTANCE_DATA/recurring ]]; then
   if ((STATUS == 0 && SIGNAL == 0)); then
     rm -fr -- "$ATTEMPTS"
@@ -30,5 +25,13 @@ if [[ -d $INSTANCE_DATA/recurring ]]; then
   fi
 else
   touch -- "../../data/done/$INSTANCE"
-  exit 125
+  EXIT_STATUS=125
 fi
+
+tee <<- EOF || exit "$EXIT_STATUS"
+------------------------------------------------------------------
+Service Stopped :: $JOB@$INSTANCE - status=$STATUS, signal=$SIGNAL
+------------------------------------------------------------------
+EOF
+
+exit "$EXIT_STATUS"
