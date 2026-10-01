@@ -9,6 +9,8 @@ PID="$4"
 
 JOB="${PWD%/instances/*}"
 JOB="${JOB##*/}"
+INSTANCE_DATA='./data'
+ATTEMPTS="$INSTANCE_DATA/attempt"
 
 exec 2>&1
 
@@ -19,9 +21,6 @@ tee <<- EOF
 Service Stopped :: $JOB@$INSTANCE - status=$STATUS, signal=$SIGNAL
 ------------------------------------------------------------------
 EOF
-
-INSTANCE_DATA='./data'
-ATTEMPTS="$INSTANCE_DATA/attempt"
 
 if [[ -d $INSTANCE_DATA/recurring ]]; then
   if ((STATUS == 0 && SIGNAL == 0)); then
