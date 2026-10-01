@@ -11,3 +11,7 @@ tee <<- EOF
 Service $3 stopped (s6 status $1)
 ---------------------------------
 EOF
+
+if [[ ./data/.runner.sh -ef ./data/oneshot/.runner.sh ]]; then
+  exit 125
+fi
