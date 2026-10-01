@@ -2,18 +2,34 @@
 
 set -o pipefail
 
+STATUS="$1"
+SIGNAL="$2"
+INSTANCE="$3"
+PID="$4"
+
+JOB="${PWD%/instances/*}"
+JOB="${JOB##*/}"
+
 exec 2>&1
 
-kill -KILL -- "-$4" || true
+kill -KILL -- "-$PID" || true
 
 tee <<- EOF
----------------------------------
-Service $3 stopped (s6 status $1)
----------------------------------
+------------------------------------------------------------------
+Service Stopped :: $JOB@$INSTANCE - status=$STATUS, signal=$SIGNAL
+------------------------------------------------------------------
 EOF
 
 INSTANCE_DATA='./data'
-if [[ $INSTANCE_DATA/.runner.sh -ef $INSTANCE_DATA/oneshot/.runner.sh ]]; then
-  touch -- "../../data/done/$3"
+ATTEMPTS="$INSTANCE_DATA/attempt"
+
+if [[ -d $INSTANCE_DATA/recurring ]]; then
+  if ((STATUS == 0 && SIGNAL == 0)); then
+    rm -fr -- "$ATTEMPTS"
+  else
+    printf -- '\n' >> "$ATTEMPTS"
+  fi
+else
+  touch -- "../../data/done/$INSTANCE"
   exit 125
 fi
