@@ -16,16 +16,17 @@ start)
   WS="$(realpath -- "$2")"
 
   "$0" shutdown "$@"
-  env -C "$STATE" -- "$BASE/jobs/quine/run"
-  S67_WORKSPACE="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
+  env -C "$STATE" -- RECUR=0 "$BASE/jobs/quine/run"
+  S67_BOOT=1 S67_WORKSPACE="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
   ;;
 shutdown)
-  if ! [[ -p $STATE/.s6-svscan/control ]]; then
+  SCAN="$STATE/.s6-svscan"
+  if ! [[ -p $SCAN/control ]]; then
     exit
   fi
 
   if s6-svscanctl -t -- "$STATE"; then
-    s6-setlock -- "$STATE/.s6-svscan/lock" true
+    s6-setlock -- "$SCAN/lock" true
   else
     STATUS=$?
     if ((STATUS != 100)); then
