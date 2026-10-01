@@ -3,53 +3,29 @@
 set -o pipefail
 shopt -u failglob
 
-MODE="$1"
+ACTION="$1"
 shift -- 1
 STATE="$1"
+SCAN="$STATE/scan"
 
 LOGS="$STATE/../log/s6.log"
-mkdir -p -- "$STATE" "$LOGS"
+mkdir -p -- "$SCAN" "$LOGS"
 
-case "$MODE" in
-compile)
-  WORKSPACE="$2"
-  BASE="$(realpath -- "${0%/*}")"
-  RSYNC=(rsync --archive --copy-links --checksum)
-
-  find "$STATE" -mindepth 1 -maxdepth 1 ! -name .s6-svscan -exec rm -rf -- '{}' +
-  mkdir -p -- "$STATE/.env"
-  printf -- '%s' "$WORKSPACE" > "$STATE/.env/S67_WORKSPACE"
-
-  for LAYER in "$BASE" "$WORKSPACE/.claude/s6"; do
-    for JOB in "$LAYER/jobs/"*; do
-      if [[ -x $JOB/run ]]; then
-        DEST="$STATE/${JOB##*/}"
-        "${RSYNC[@]}" --delete -- "$BASE/base/" "$DEST/"
-        cp -L -- "$JOB/run" "$DEST/data/job"
-        if [[ -d $JOB/env ]]; then
-          "${RSYNC[@]}" -- "$JOB/env/" "$DEST/env/"
-        fi
-      fi
-    done
-    for SERVICE in "$LAYER/overlay/"*/; do
-      NAME="${SERVICE%/}"
-      NAME="${NAME##*/}"
-      "${RSYNC[@]}" --delete -- "$SERVICE" "$STATE/$NAME/"
-    done
-  done
-  ;;
+case "$ACTION" in
 start)
+  WS="$(realpath -- "$2")"
+
   "$0" shutdown "$@"
-  "$0" compile "$@"
-  s6-envdir -f -n "$STATE/.env" s6-svscan "$STATE" 2>&1 | s6-log -b T "$LOGS"
+  "${0%/*}/jobs/quine/run" --bootstrap "$STATE"
+  S67_WORKSPACE="$WS" s6-svscan "$SCAN" 2>&1 | s6-log -b T "$LOGS"
   ;;
 shutdown)
-  if ! [[ -p $STATE/.s6-svscan/control ]]; then
+  if ! [[ -p $SCAN/.s6-svscan/control ]]; then
     exit
   fi
 
-  if s6-svscanctl -t "$STATE"; then
-    s6-setlock "$STATE/.s6-svscan/lock" true
+  if s6-svscanctl -t "$SCAN"; then
+    s6-setlock "$SCAN/.s6-svscan/lock" true
   else
     STATUS=$?
     if ((STATUS != 100)); then
@@ -58,7 +34,7 @@ shutdown)
   fi
   ;;
 stat)
-  for SERVICE in "$STATE/"[!.]*/; do
+  for SERVICE in "$SCAN/"[!.]*/; do
     printf -- '%s: ' "${SERVICE%/}"
     s6-svstat "$SERVICE"
   done
