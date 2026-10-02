@@ -63,19 +63,21 @@ job)
   fi
   s6-svwait -U -t "$TIMEOUT" -- "$MANAGER"
 
-  for DONE in "$MANAGER"/data/done/*; do
-    INSTANCE="${DONE##*/}"
-    s6-instance-delete -- "$MANAGER" "$INSTANCE"
-    if [[ -e $MANAGER/instances/$INSTANCE || -L $MANAGER/instance/$INSTANCE ]]; then
-      exit 1
-    fi
-    rm -- "$DONE"
-  done
+  RECUR=cleanup find "$MANAGER/data/done" -mindepth 1 -maxdepth 1 ! -name '.*' -exec "$SELF" "$NAME" '{}' +
 
   for MODE in recurring oneshot; do
     if [[ -d $JOB/data/$MODE ]]; then
       find "$JOB/data/$MODE" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -print0 | RECUR="$MODE" "${XARGS[@]}" "$SELF" "$NAME" '{}'
     fi
+  done
+  ;;
+cleanup)
+  MANAGER="$PWD/$1"
+  shift -- 1
+  for SVC in "$@"; do
+    INSTANCE="${SVC##*/}"
+    s6-instance-delete -- "$MANAGER" "$INSTANCE"
+    rm -fr -- "$SVC"
   done
   ;;
 recurring | oneshot)
