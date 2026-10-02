@@ -39,3 +39,50 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
     done
   done
 }
+
+{
+  mkdir -p -- "$TEST_DIR/steps/dog"
+  cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
+#!/usr/bin/env bash
+cat << STDOUT
+$1:$PAYLOAD
+STDOUT
+
+cat >&2 << STDERR
+diagnostic
+STDERR
+
+exit "$RESULT"
+EOF
+  chmod +x -- "$TEST_DIR/steps/dog/run.sh"
+  "$ROOT/../dl/job/data/service-template.sh" "$TEST_DIR/steps" "$TEST_DIR/jobs"
+  cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
+exit 99
+EOF
+
+  for INSTANCE in walk feed; do
+    RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh dog "$INSTANCE"
+    SERVICE="$TEST_DIR/snapshot-1/dog/instances/$INSTANCE"
+    PAYLOAD=first RESULT=0 "$SERVICE/data/job" "$INSTANCE" 2> "$TEST_DIR/stderr"
+    [[ $(< "$TEST_DIR/stderr") == diagnostic ]]
+    [[ $(< "$TEST_DIR/steps/dog/outbox/$INSTANCE/stdout") == "$INSTANCE:first" ]]
+    [[ -d $SERVICE/data/versions/latest/meta ]]
+  done
+
+  SERVICE="$TEST_DIR/snapshot-1/dog/instances/walk"
+  FIRST="$(readlink -- "$SERVICE/data/versions/latest")"
+  if PAYLOAD=failed RESULT=7 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"; then
+    exit 1
+  else
+    [[ $? == 7 ]]
+  fi
+  LATEST="$(readlink -- "$SERVICE/data/versions/latest")"
+  [[ $LATEST == "$FIRST" ]]
+  PAYLOAD=second RESULT=0 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"
+  LATEST="$(readlink -- "$SERVICE/data/versions/latest")"
+  [[ $LATEST != "$FIRST" ]]
+  [[ $(< "$SERVICE/data/versions/$FIRST/stdout") == walk:first ]]
+  rm -fr -- "$SERVICE"
+  [[ $(< "$TEST_DIR/steps/dog/outbox/walk/stdout") == walk:second ]]
+  [[ $(< "$TEST_DIR/steps/dog/outbox/feed/stdout") == feed:first ]]
+}
