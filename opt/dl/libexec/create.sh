@@ -2,11 +2,9 @@
 
 set -o pipefail
 
-SCRIPT="$1"
-shift -- 1
-
-NAME="${SCRIPT##*/}"
-BUNDLE="${SCRIPT%"$NAME"}${NAME%.*}"
+BUNDLE="$1"
+SCRIPT="$2"
+shift -- 2
 
 if ! [[ -f $SCRIPT && -x $SCRIPT ]]; then
   set -x
