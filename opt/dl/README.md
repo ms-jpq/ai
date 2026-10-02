@@ -4,89 +4,41 @@
 
 ```text
 STEPS/
-├── dog/
-│   ├── run.sh
-│   ├── env/
-│   ├── wants/
-│   │   └── lil -> ../../lil
-│   └── outbox/
-│       ├── .versions/
-│       │   ├── walk/
-│       │   │   ├── <revision>/
-│       │   │   │   ├── input/
-│       │   │   │   │   ├── lil-walk -> /…/STEPS/lil/outbox/.versions/walk/<revision-A>/output/
-│       │   │   │   │   └── lil-feed -> /…/STEPS/lil/outbox/.versions/feed/<revision-B>/output/
-│       │   │   │   └── output/
-│       │   │   │       ├── stdout
-│       │   │   │       └── status      # exit code: 0
-│       │   │   └── latest -> <revision>/
-│       │   └── feed/
-│       │       ├── <revision>/
-│       │       │   ├── input/
-│       │       │   │   ├── lil-walk -> /…/STEPS/lil/outbox/.versions/walk/<revision-A>/output/
-│       │       │   │   └── lil-feed -> /…/STEPS/lil/outbox/.versions/feed/<revision-B>/output/
-│       │       │   └── output/
-│       │       │       ├── stdout
-│       │       │       └── status      # exit code: 0
-│       │       └── latest -> <revision>/
-│       ├── walk -> .versions/walk/latest
-│       └── feed -> .versions/feed/latest
-└── lil/
+└── <step>/
     ├── run.sh
     ├── env/
     ├── wants/
+    │   └── <dependency> -> ../../<dependency>/
     └── outbox/
         ├── .versions/
-        │   ├── walk/
-        │   │   ├── <revision-A>/
-        │   │   │   ├── input/
-        │   │   │   └── output/
-        │   │   │       ├── stdout
-        │   │   │       └── status      # exit code: 0
-        │   │   └── latest -> <revision-A>/
-        │   └── feed/
-        │       ├── <revision-B>/
+        │   └── <instance>/
+        │       ├── <revision>/
         │       │   ├── input/
+        │       │   │   └── <input> -> /…/STEPS/<dependency>/outbox/.versions/<upstream-instance>/<upstream-revision>/output/
         │       │   └── output/
         │       │       ├── stdout
         │       │       └── status      # exit code: 0
-        │       └── latest -> <revision-B>/
-        ├── walk -> .versions/walk/latest
-        └── feed -> .versions/feed/latest
+        │       └── latest -> <revision>/
+        └── <instance> -> .versions/<instance>/latest
 
 JOBS/
 ├── .versions/
-│   ├── dog.<revision>/
-│   │   ├── run.sh -> data/step.sh
-│   │   ├── env/
-│   │   └── data/
-│   │       ├── command
-│   │       ├── step.sh
-│   │       └── outbox -> /…/STEPS/dog/outbox/
-│   └── lil.<revision>/
+│   └── <step>.<revision>/
 │       ├── run.sh -> data/step.sh
 │       ├── env/
 │       └── data/
 │           ├── command
 │           ├── step.sh
-│           └── outbox -> /…/STEPS/lil/outbox/
-├── dog -> .versions/dog.<revision>/
-└── lil -> .versions/lil.<revision>/
+│           └── outbox -> /…/STEPS/<step>/outbox/
+└── <step> -> .versions/<step>.<revision>/
 
 STATE/
-└── dog/
+└── <step>/
     ├── template/
     └── instances/
-        ├── walk/
-        │   └── data/
-        │       ├── inbox/
-        │       │   ├── lil-walk -> /…/STEPS/lil/outbox/walk
-        │       │   └── lil-feed -> /…/STEPS/lil/outbox/feed
-        │       └── versions -> /…/STEPS/dog/outbox/.versions/walk/
-        └── feed/
+        └── <instance>/
             └── data/
                 ├── inbox/
-                │   ├── lil-walk -> /…/STEPS/lil/outbox/walk
-                │   └── lil-feed -> /…/STEPS/lil/outbox/feed
-                └── versions -> /…/STEPS/dog/outbox/.versions/feed/
+                │   └── <input> -> /…/STEPS/<dependency>/outbox/<upstream-instance>
+                └── versions -> /…/STEPS/<step>/outbox/.versions/<instance>/
 ```
