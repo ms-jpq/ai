@@ -15,7 +15,7 @@ step)
     "${SELF%/*}/data/gc.sh" "$PWD/records"
   fi
   if [[ -f dispatch.sh ]]; then
-    unset RECUR
+    unset -- RECUR
     exec -- s6-envdir -- env ./dispatch.sh
   fi
   ;;
