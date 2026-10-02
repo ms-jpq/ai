@@ -1,4 +1,9 @@
-.PHONY: test
+.PHONY: test test.node test.quine
 
-test: ./node_modules/.bin
+test: test.node test.quine
+
+test.node: ./node_modules/.bin
 	npm run test
+
+test.quine:
+	./opt/s6/quine.test.sh

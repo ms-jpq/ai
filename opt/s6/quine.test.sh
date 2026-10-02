@@ -7,10 +7,10 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 
 rm -fr -- "$TEST_DIR"
 mkdir -p -- "$TEST_DIR/"{bootstrap,snapshot-1,snapshot-2}
-RECUR=bootstrap env -C "$TEST_DIR/bootstrap" -- "$ROOT/jobs/quine/run"
+RECUR=bootstrap env -C "$TEST_DIR/bootstrap" -- ../../../../opt/s6/jobs/quine/run
 
 for SNAPSHOT in snapshot-1 snapshot-2; do
-  RECUR=seed env -C "$TEST_DIR/$SNAPSHOT" -- "$TEST_DIR/bootstrap/quine/instances/-/data/job" quine
+  RECUR=seed env -C "$TEST_DIR/$SNAPSHOT" -- ../bootstrap/quine/instances/-/data/job quine
 done
 
-git diff --no-index --exit-code -- "$TEST_DIR/snapshot-1" "$TEST_DIR/snapshot-2"
+exec -- git diff --no-index --exit-code -- "$TEST_DIR/snapshot-1" "$TEST_DIR/snapshot-2"
