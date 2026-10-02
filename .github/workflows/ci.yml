@@ -21,7 +21,7 @@ jobs:
 
       - run: |-
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends s6 rsync
+          sudo apt-get install --yes --no-install-recommends s6 execline rsync b3sum
 
       - run: |-
           gmake lint test
