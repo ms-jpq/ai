@@ -5,7 +5,7 @@ set -o pipefail
 : "${S67_WORKING_DIRECTORY?}"
 : "${S67_RUNTIME_MAX_SEC?}"
 : "${S67_RESTART_SEC?}"
-: "${S67_RESTART_MAX_DELAY_SEC?}"
+: "${S67_RESTART_MAX_DELAY_SEC:=$((S67_ON_UNIT_INACTIVE_SEC * 2))}"
 
 exec 2>&1
 
