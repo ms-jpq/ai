@@ -8,12 +8,12 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 {
   rm -fr -- "$TEST_DIR"
   mkdir -p -- "$TEST_DIR/"snapshot-{1,2,3}
-  cp --archive -- "$ROOT" "$TEST_DIR/s6"
-  ln -sTnfr -- "$TEST_DIR/s6/jobs/quine" "$TEST_DIR/s6/jobs/quine-2"
-  ln -sTnf -- /dev/null "$TEST_DIR/s6/jobs/quine/data/null"
+  cp --archive -- "$ROOT/." "$TEST_DIR/"
+  ln -sTnfr -- "$TEST_DIR/jobs/quine" "$TEST_DIR/jobs/quine-2"
+  ln -sTnf -- /dev/null "$TEST_DIR/jobs/quine/data/null"
 
-  RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../s6/jobs/quine/run.sh
-  RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../s6/jobs/quine-2/run.sh quine-2 -
+  RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh
+  RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../jobs/quine-2/run.sh quine-2 -
   RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../snapshot-1/quine/instances/-/data/job quine -
 
   [[ -d $TEST_DIR/snapshot-2/quine-2/template ]]
@@ -28,10 +28,10 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 }
 
 {
-  "$ROOT/../dl/libexec/s6-template.sh" "$ROOT/../dl/examples" "$TEST_DIR/s6/jobs"
+  "$ROOT/../dl/libexec/s6-template.sh" "$ROOT/../dl/examples" "$TEST_DIR/jobs"
   for JOB in dog lil; do
-    [[ -L $TEST_DIR/s6/jobs/$JOB ]]
-    RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../s6/jobs/quine/run.sh "$JOB" -
+    [[ -L $TEST_DIR/jobs/$JOB ]]
+    RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh "$JOB" -
     cmp -- "$ROOT/../dl/examples/$JOB/run.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/job"
     for ENV in "$ROOT/../dl/examples/$JOB/env/"*; do
       cmp -- "$ENV" "$TEST_DIR/snapshot-1/$JOB/instances/-/env/${ENV##*/}"
