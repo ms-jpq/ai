@@ -27,10 +27,16 @@ case "${RECUR:-}" in
   trap 'rm -f -- "$LINK"' EXIT
 
   rsync --archive --include='/env/***' --include='/data/***' --exclude='/*' -- "$SRC/" "$REVISION/"
-  mkdir -p -- "$REVISION/data" "$SRC/outbox"
+  mkdir -p -- "$REVISION/data/wants" "$SRC/records"
   cp --preserve=mode,timestamps -- "${RUN[*]}" "$REVISION/data/command"
   cp --preserve=mode,timestamps -- "${0%/*}/step.sh" "$REVISION/data/step.sh"
-  ln -sTnf -- "$SRC/outbox" "$REVISION/data/outbox"
+  ln -sTnf -- "$SRC/records" "$REVISION/data/records"
+  for DEPENDENCY in "$SRC/wants/"*; do
+    if [[ -L $DEPENDENCY ]]; then
+      TARGET="$(realpath -- "$DEPENDENCY")"
+      ln -sTnf -- "$TARGET" "$REVISION/data/wants/${DEPENDENCY##*/}"
+    fi
+  done
   ln -sTnf -- data/step.sh "$REVISION/run.sh"
   ln -sTnfr -- "$REVISION" "$LINK"
   mv --force --no-target-directory -- "$LINK" "$DST"
