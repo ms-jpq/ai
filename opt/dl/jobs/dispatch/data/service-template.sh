@@ -19,10 +19,10 @@ LINK="${DST%/*}/.${REVISION##*/}.link"
 trap 'rm -f -- "$LINK"' EXIT
 
 rsync --archive --include='/env/***' --include='/data/***' --exclude='/*' -- "$SRC/" "$REVISION/"
-mkdir -p -- "$REVISION/data/"{inbox,recurring,oneshot} "$SRC/records"
+mkdir -p -- "$REVISION/env" "$REVISION/data/"{inbox,recurring,oneshot} "$SRC/records"
+printf -- '%s' "$SRC/records" > "$REVISION/env/S67_RECORDS_DIR"
 cp --preserve=mode,timestamps -- "${RUN[*]}" "$REVISION/data/command"
 cp --preserve=mode,timestamps -- "${0%/*}/step.sh" "$REVISION/data/step.sh"
-ln -sTnf -- "$SRC/records" "$REVISION/data/records"
 ln -sTnf -- data/step.sh "$REVISION/run.sh"
 ln -sTnfr -- "$REVISION" "$LINK"
 mv --force --no-target-directory -- "$LINK" "$DST"

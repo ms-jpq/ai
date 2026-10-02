@@ -26,6 +26,7 @@ JOBS/
 │   └── dog.<revision>/
 │       ├── run.sh -> data/step.sh
 │       ├── env/
+│       │   └── S67_RECORDS_DIR          /…/STEPS/dog/records
 │       └── data/
 │           ├── command
 │           ├── step.sh
@@ -43,6 +44,7 @@ STATE/
     ├── instance/<instance> -> ../instances/<instance>/
     └── instances/<instance>/
         ├── env/
+        │   └── S67_RECORDS_DIR          /…/STEPS/dog/records
         └── data/
             ├── command
             ├── step.sh

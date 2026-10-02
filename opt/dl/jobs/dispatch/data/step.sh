@@ -3,11 +3,11 @@
 set -o pipefail
 shopt -u failglob
 
-: "${RECORDS?}"
+: "${S67_RECORDS_DIR?}"
 
 INSTANCE="$1"
 DATA="$(realpath -- "${0%/*}")"
-VERSIONS="$RECORDS/$INSTANCE"
+VERSIONS="$S67_RECORDS_DIR/$INSTANCE"
 
 mkdir -p -- "$VERSIONS"
 for DEPENDENCY in "$DATA/inbox/"*; do
