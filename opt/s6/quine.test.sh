@@ -3,9 +3,6 @@
 set -o pipefail
 
 ROOT="${0%/*}"
-if [[ $ROOT != /* ]]; then
-  ROOT="$PWD/$ROOT"
-fi
 TEST_DIR="$ROOT/../../var/tmp/quine-test"
 
 rm -fr -- "$TEST_DIR"
