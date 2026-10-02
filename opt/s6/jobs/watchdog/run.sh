@@ -2,11 +2,11 @@
 
 set -o pipefail
 
-: "${S67_HARNESS_PID?}"
-: "${S67_HARNESS_STARTED?}"
+mapfile -t PARENT < "${0%/*}/parent"
+P_PID="${PARENT[0]}" P_STARTED="${PARENT[1]}"
 
-if STARTED="$(LC_ALL=C.UTF-8 ps -p "$S67_HARNESS_PID" -o lstart=)"; then
-  if [[ $STARTED == "$S67_HARNESS_STARTED" ]]; then
+if STARTED="$(LC_ALL=C.UTF-8 ps -p "$P_PID" -o lstart=)"; then
+  if [[ $STARTED == "$P_STARTED" ]]; then
     exit
   fi
 fi
