@@ -10,17 +10,8 @@ STEPS/
 │   ├── wants/
 │   │   └── lil -> ../../lil
 │   └── outbox/
-│       ├── .messages/
-│       │   ├── walk/
-│       │   │   └── message-A/
-│       │   │       ├── headers
-│       │   │       └── body
-│       │   └── feed/
-│       │       └── message-B/
-│       │           ├── headers
-│       │           └── body
-│       ├── walk -> .messages/walk/message-A/
-│       └── feed -> .messages/feed/message-B/
+│       ├── walk -> /…/STATE/dog/instances/walk/data/results/latest
+│       └── feed -> /…/STATE/dog/instances/feed/data/results/latest
 └── lil/
     ├── run.sh
     ├── env/
@@ -41,13 +32,19 @@ JOBS/
 STATE/
 └── dog/
     ├── template/
-    │   └── data/
-    │       └── outbox -> /…/STEPS/dog/outbox/
     └── instances/
         ├── walk/
         │   └── data/
-        │       └── outbox -> /…/STEPS/dog/outbox/
+        │       └── results/
+        │           ├── <id-A>/
+        │           │   ├── headers
+        │           │   └── stdout
+        │           └── latest -> <id-A>/
         └── feed/
             └── data/
-                └── outbox -> /…/STEPS/dog/outbox/
+                └── results/
+                    ├── <id-B>/
+                    │   ├── headers
+                    │   └── stdout
+                    └── latest -> <id-B>/
 ```
