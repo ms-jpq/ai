@@ -14,9 +14,9 @@ if (($# > 1)) || [[ $DEPTH != +([0-9]) ]]; then
 fi
 DEPTH=$((10#$DEPTH))
 
-DELIMITER='\0'
+TEE=(tee)
 if [[ -t 1 ]]; then
-  DELIMITER='\n'
+  TEE=(tree --fromfile --noreport .)
 fi
 
 if ((DEPTH == 0)) || ! [[ -d $WANTS ]]; then
@@ -25,10 +25,10 @@ fi
 
 cd -P -- "$WANTS"
 find . -mindepth 1 -maxdepth 1 -type l -printf '%P\0' | while IFS= read -r -d '' REQUEST; do
-  printf -- '%s%b' "$REQUEST" "$DELIMITER"
+  printf -- '%s\n' "$REQUEST"
   if ((DEPTH > 1)); then
-    "$SELF" "$REQUEST" "$((DEPTH - 1))" | while IFS= read -r -d '' DEPENDENCY; do
-      printf -- '%s/%s%b' "$REQUEST" "$DEPENDENCY" "$DELIMITER"
+    "$SELF" "$REQUEST" "$((DEPTH - 1))" | while IFS= read -r DEPENDENCY; do
+      printf -- '%s/%s\n' "$REQUEST" "$DEPENDENCY"
     done
   fi
-done
+done | "${TEE[@]}"
