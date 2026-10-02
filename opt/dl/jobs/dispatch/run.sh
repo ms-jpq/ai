@@ -5,19 +5,22 @@ set -o pipefail
 SELF="$(realpath -- "$0")"
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
+cd -P -- "$1"
+
 case "${RECUR:-}" in
 '')
   find . -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -print0 | RECUR=step "${XARGS[@]}" "$SELF" '{}'
   ;;
 step)
-  cd -P -- "$1"
+  unset -- RECUR
+  if ! [[ -x dispatch.sh ]]; then
+    set -x
+    exit 2
+  fi
   if [[ -d records ]]; then
     "${SELF%/*}/data/gc.sh" "$PWD/records"
   fi
-  if [[ -f dispatch.sh ]]; then
-    unset -- RECUR
-    exec -- s6-envdir -- env ./dispatch.sh
-  fi
+  exec -- ./dispatch.sh
   ;;
 *)
   set -x
