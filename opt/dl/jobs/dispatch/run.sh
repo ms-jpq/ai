@@ -3,20 +3,24 @@
 set -o pipefail
 
 SELF="$(realpath -- "$0")"
-cd -P -- "$1"
-shift -- 1
-STEP="$PWD"
+XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
-"${SELF%/*}/data/list-dependencies" --plain "$STEP" 1 | while IFS= read -r DEPENDENCY; do
-  if ! [[ -f wants/$DEPENDENCY/outbox/stdout ]]; then
-    printf -- 'Missing dependency output: %s\n' "$STEP/wants/$DEPENDENCY/outbox/stdout" >&2
-    exit 1
+case "${RECUR:-}" in
+'')
+  find . -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -print0 | RECUR=step "${XARGS[@]}" "$SELF" '{}'
+  ;;
+step)
+  cd -P -- "$1"
+  if [[ -d records ]]; then
+    "${SELF%/*}/data/gc.sh" "$PWD/records"
   fi
-done
-
-mkdir -p -- outbox
-OUTPUT="$(mktemp -- "$STEP/outbox/.stdout.XXXXXX")"
-trap 'rm -f -- "$OUTPUT"' EXIT
-
-s6-envdir -- env ./run.sh "$@" > "$OUTPUT"
-mv --force --no-target-directory -- "$OUTPUT" outbox/stdout
+  if [[ -f dispatch.sh ]]; then
+    unset RECUR
+    exec -- s6-envdir -- env ./dispatch.sh
+  fi
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac
