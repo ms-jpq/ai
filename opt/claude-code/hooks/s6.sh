@@ -11,16 +11,16 @@ if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
 fi
 
 SCRATCHPAD="$(jq -e --raw-output '.scratchpad_dir' <<< "$JSON")"
-INIT="$BASE/libexec/s6/init.sh"
+CTL="$BASE/libexec/s6/ctl.sh"
 STATE="$SCRATCHPAD/s6-init"
 
 case "$EVENT" in
 SessionStart)
   WORKSPACE="$(jq -e --raw-output '.cwd' <<< "$JSON")"
-  exec -- "$INIT" start "$STATE" "$WORKSPACE" "${CLAUDE_PID?}"
+  exec -- "$CTL" start "$STATE" "$WORKSPACE" "${CLAUDE_PID?}"
   ;;
 SessionEnd)
-  exec -- "$INIT" shutdown "$STATE"
+  exec -- "$CTL" shutdown "$STATE"
   ;;
 *)
   set -x
