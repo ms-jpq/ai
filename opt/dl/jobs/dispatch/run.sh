@@ -1,6 +1,7 @@
 #!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
 set -o pipefail
+shopt -u failglob
 
 : "${S67_JOBS_DIR?}"
 
@@ -17,6 +18,13 @@ step)
   JOB="$(realpath --canonicalize-missing -- "$S67_JOBS_DIR")/${1##*/}"
   cd -P -- "$1"
   "$DATA/service-template.sh" "$PWD" "$JOB"
+
+  for DEPENDENCY in "$PWD/wants/"*; do
+    if [[ -L $DEPENDENCY ]]; then
+      TARGET="$(realpath -- "$DEPENDENCY")"
+      ln -sTnf -- "$TARGET/records" "$JOB/data/inbox/${DEPENDENCY##*/}"
+    fi
+  done
 
   "$DATA/gc.sh" "$PWD/records"
   exec -- ./dispatch.sh "$JOB/data"

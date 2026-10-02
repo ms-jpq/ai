@@ -41,6 +41,21 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 }
 
 {
+  cp --archive -- "$ROOT/../dl/examples" "$TEST_DIR/examples"
+  S67_JOBS_DIR="$TEST_DIR/example-jobs" "$ROOT/../dl/jobs/dispatch/run.sh" "$TEST_DIR/examples"
+  INBOX="$TEST_DIR/example-jobs/dog/data/inbox/lil"
+  [[ $INBOX -ef $TEST_DIR/examples/lil/records ]]
+  "$TEST_DIR/example-jobs/lil/data/step.sh" fetch
+  [[ $(< "$INBOX/fetch/output/exit_status") == 0 ]]
+  FIRST="$(readlink -- "$INBOX/.versions/fetch/latest")"
+  "$TEST_DIR/example-jobs/lil/data/step.sh" fetch
+  LATEST="$(readlink -- "$INBOX/.versions/fetch/latest")"
+  [[ $LATEST != "$FIRST" ]]
+  "$TEST_DIR/example-jobs/lil/data/step.sh" other
+  [[ $(< "$INBOX/other/output/exit_status") == 0 ]]
+}
+
+{
   mkdir -p -- "$TEST_DIR/steps/dog/data/inbox" "$TEST_DIR/upstream/other-instance/output"
   cat > "$TEST_DIR/upstream/other-instance/output/exit_status" << 'EOF'
 0
