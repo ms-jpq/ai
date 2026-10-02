@@ -8,12 +8,10 @@ DATA="$(realpath -- "${0%/*}")"
 RECORDS="$(realpath -- "$DATA/records")"
 VERSIONS="$RECORDS/.versions/$INSTANCE"
 
-mkdir -p -- "$VERSIONS" "$DATA/inbox"
+mkdir -p -- "$VERSIONS"
 ln -sTnf -- "$VERSIONS/latest/output" "$DATA/outbox"
-for DEPENDENCY in "$DATA/wants/"*; do
-  if [[ -L $DEPENDENCY ]]; then
-    INPUT="$(realpath -- "$DEPENDENCY")/records/$INSTANCE"
-    ln -sTnf -- "$INPUT" "$DATA/inbox/${DEPENDENCY##*/}"
+for INPUT in "$DATA/inbox/"*; do
+  if [[ -L $INPUT ]]; then
     [[ -d $INPUT/output ]]
     [[ $(< "$INPUT/output/exit_status") == 0 ]]
   fi

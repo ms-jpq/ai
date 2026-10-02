@@ -18,12 +18,6 @@ step)
   cd -P -- "$1"
   "$DATA/service-template.sh" "$PWD" "$JOB"
 
-  if ! [[ -x dispatch.sh ]]; then
-    set -x
-    exit 2
-  fi
-
-  mkdir -p -- "$JOB/data/recurring" "$JOB/data/oneshot"
   "$DATA/gc.sh" "$PWD/records"
   exec -- ./dispatch.sh "$JOB/data"
   ;;

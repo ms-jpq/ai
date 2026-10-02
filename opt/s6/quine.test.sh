@@ -41,9 +41,19 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 }
 
 {
-  mkdir -p -- "$TEST_DIR/steps/dog"
+  mkdir -p -- "$TEST_DIR/steps/dog/data/inbox" "$TEST_DIR/upstream/other-instance/output"
+  cat > "$TEST_DIR/upstream/other-instance/output/exit_status" << 'EOF'
+0
+EOF
+  cat > "$TEST_DIR/upstream/other-instance/output/stdout" << 'EOF'
+input from another instance
+EOF
+  INPUT="$(realpath -- "$TEST_DIR/upstream/other-instance")"
+  ln -sTnf -- "$INPUT" "$TEST_DIR/steps/dog/data/inbox/dogs"
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 #!/usr/bin/env bash
+set -euo pipefail
+[[ $(< input/dogs/output/stdout) == 'input from another instance' ]]
 cat << STDOUT
 $1:$PAYLOAD
 STDOUT
@@ -60,6 +70,7 @@ EOF
 set -euo pipefail
 [[ -d records ]]
 [[ -f $1/command ]]
+[[ -d $1/inbox ]]
 [[ -d $1/recurring ]]
 [[ -d $1/oneshot ]]
 [[ -z ${RECUR:-} ]]
