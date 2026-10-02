@@ -4,7 +4,7 @@ set -o pipefail
 shopt -u failglob dotglob
 
 SELF="$(realpath -- "$0")"
-ROOT="${SELF%/jobs/quine/run}"
+ROOT="${SELF%/jobs/quine/run.sh}"
 TIMEOUT=6000
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
@@ -24,12 +24,17 @@ seed | job)
   NAME="${1##*/}"
   JOB="$ROOT/jobs/$NAME"
   MANAGER="$PWD/$NAME"
+  RUN=("$JOB"/run.*)
+  if ((${#RUN[@]} != 1)) || ! [[ -f ${RUN[*]} && -x ${RUN[*]} ]]; then
+    set -x
+    exit 2
+  fi
 
   STAGING="$(mktemp -d -- "$PWD/.$NAME.XXXXXX")"
   trap 'rm -fr -- "$STAGING"' EXIT
   rsync --archive -- "$ROOT/base/" "$STAGING/template/"
   rsync --archive --checksum --exclude=/data/recurring --exclude=/data/oneshot --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$STAGING/template/"
-  ln -s -- "$JOB/run" "$STAGING/template/data/job"
+  ln -s -- "${RUN[*]}" "$STAGING/template/data/job"
   mkdir -p -- "$STAGING/template/data/recurring"
 
   if ! [[ -d $MANAGER ]]; then

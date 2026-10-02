@@ -7,7 +7,7 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 
 rm -fr -- "$TEST_DIR"
 mkdir -p -- "$TEST_DIR/"snapshot-{1,2}
-RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../../../../opt/s6/jobs/quine/run
+RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../../../../opt/s6/jobs/quine/run.sh
 
 RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../snapshot-1/quine/instances/-/data/job quine
 

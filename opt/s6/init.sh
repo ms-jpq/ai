@@ -16,7 +16,7 @@ start)
   WS="$(realpath -- "$2")"
 
   "$0" shutdown "$@"
-  env -C "$STATE" -- RECUR=bootstrap "$BASE/jobs/quine/run"
+  env -C "$STATE" -- RECUR=bootstrap "$BASE/jobs/quine/run.sh"
   S67_BOOT=1 S67_WORKSPACE="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
   ;;
 shutdown)
