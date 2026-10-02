@@ -9,22 +9,28 @@ STEPS/
     ├── env/
     ├── wants/
     │   └── <dependency> -> ../../<dependency>/
-    ├── versions/<instance>/<revision>/
-    │   ├── input/
-    │   │   ├── dogs -> <selected dogs revision>/output/
-    │   │   └── rules -> <selected rules revision>/output/
-    │   └── output/
-    │       ├── stdout
-    │       └── status                 # exit code
+    ├── versions/<instance>/
+    │   ├── <revision>/
+    │   │   ├── input/
+    │   │   │   ├── dogs -> /…/STEPS/dogs/versions/<instance>/latest/output/
+    │   │   │   └── rules -> /…/STEPS/rules/versions/<instance>/latest/output/
+    │   │   └── output/
+    │   │       ├── stdout
+    │   │       └── status             # exit code
+    │   └── latest -> <revision>/
     └── outbox/
-        └── <instance> -> ../versions/<instance>/<revision>/output/
+        └── <instance> -> ../versions/<instance>/latest/output/
 
 STATE/
-└── <step>/
+└── dog/
     ├── template/
-    └── instances/<instance>/data/
-        ├── inbox/
-        │   └── <input> -> /…/STEPS/<dependency>/outbox/<upstream-instance>/
-        ├── outbox -> /…/STEPS/<step>/outbox/
-        └── versions -> /…/STEPS/<step>/versions/<instance>/
+    ├── instances/
+    │   └── walk/
+    │       └── data/
+    │           ├── inbox/
+    │           │   └── lil -> /…/STEPS/lil/outbox/default/
+    │           ├── outbox -> /…/STEPS/dog/outbox/
+    │           └── versions -> /…/STEPS/dog/versions/walk/
+    └── instance/
+        └── walk -> ../instances/walk/
 ```
