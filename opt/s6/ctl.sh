@@ -8,7 +8,7 @@ shift -- 1
 STATE="$1"
 
 BASE="$(realpath -- "${0%/*}")"
-LOGS="$STATE/../log/s6.log"
+LOGS="$STATE/../log"
 mkdir -p -- "$STATE" "$LOGS"
 
 case "$ACTION" in
@@ -26,7 +26,7 @@ start)
   printf -- '%s' "$P_STARTED" > "$STATE/watchdog/data/$P_PID"
   ln -s -- "../$P_PID" "$STATE/watchdog/data/recurring/$P_PID"
 
-  S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
+  S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T 1 >> "$LOGS/s6.log"
   ;;
 stop)
   SCAN="$STATE/.s6-svscan"
