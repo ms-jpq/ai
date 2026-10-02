@@ -2,12 +2,11 @@
 
 set -o pipefail
 
-SELF="$(realpath -- "$0")"
-SCRIPT="$(realpath -- "$1")"
+SCRIPT="$1"
 shift -- 1
 
 NAME="${SCRIPT##*/}"
-BUNDLE="${SCRIPT%/*}/${NAME%.*}"
+BUNDLE="${SCRIPT%"$NAME"}${NAME%.*}"
 
 if ! [[ -f $SCRIPT && -x $SCRIPT ]]; then
   set -x
@@ -21,7 +20,7 @@ for OPTION in "$@"; do
 done
 
 mkdir -- "$BUNDLE"
-cp -a -- "${SELF%/*}/../examples/lil/." "$BUNDLE/"
+cp -a -- "${0%/*}/../examples/lil/." "$BUNDLE/"
 cp -p --remove-destination -- "$SCRIPT" "$BUNDLE/run.sh"
 for OPTION in "$@"; do
   printf -- '%s' "${OPTION#*=}" > "$BUNDLE/env/${OPTION%%=*}"
