@@ -19,14 +19,35 @@ STEPS/
         │   │       ├── stdout
         │   │       └── status         # exit code
         │   └── latest -> <revision>/
-        └── <instance> -> .versions/<instance>/latest/output/
+        └── <instance> -> .versions/<instance>/latest/
+
+JOBS/
+├── .versions/
+│   └── dog.<revision>/
+│       ├── run.sh -> data/step.sh
+│       ├── env/
+│       └── data/
+│           ├── command
+│           ├── step.sh
+│           └── outbox -> /…/STEPS/dog/outbox/
+└── dog -> .versions/dog.<revision>/
 
 STATE/
 └── dog/
     ├── template/
+    │   ├── env/
+    │   └── data/
+    │       ├── command
+    │       ├── step.sh
+    │       ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh
+    │       └── outbox -> /…/STEPS/dog/outbox/
     ├── instances/
     │   └── walk/
+    │       ├── env/
     │       └── data/
+    │           ├── command
+    │           ├── step.sh
+    │           ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh
     │           ├── inbox/
     │           │   └── lil -> /…/STEPS/lil/outbox/default/
     │           ├── outbox -> /…/STEPS/dog/outbox/
