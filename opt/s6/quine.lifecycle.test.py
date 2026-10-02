@@ -4,7 +4,7 @@ from collections.abc import Callable, Mapping
 from os import environ
 from pathlib import Path
 from shutil import copytree
-from subprocess import DEVNULL, STDOUT, Popen, run
+from subprocess import STDOUT, Popen, run
 from sys import stderr
 from tempfile import TemporaryDirectory
 from time import monotonic, sleep

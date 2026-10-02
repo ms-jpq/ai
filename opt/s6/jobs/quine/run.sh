@@ -49,7 +49,8 @@ seed | job)
     cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$STAGING/template/data/job"
   fi
   mkdir -p -- "$STAGING/template/data/recurring"
-  tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --exclude=./.definition --create --file=- --directory="$STAGING/template" . | sha256sum > "$STAGING/template/.definition"
+  tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$STAGING/template" . | sha256sum > "$STAGING/.definition"
+  mv -- "$STAGING/.definition" "$STAGING/template/.definition"
 
   if ! [[ -d $MANAGER ]]; then
     s6-instance-maker -- "$STAGING/template" "$STAGING/manager"
