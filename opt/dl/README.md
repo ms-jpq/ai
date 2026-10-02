@@ -11,13 +11,12 @@ STEPS/
     ├── wants/
     │   └── <dependency> -> ../../<dependency>/
     └── records/
-        ├── <instance> -> .versions/<instance>/latest/ -> <revision>/
-        └── .versions/<instance>/
+        └── <instance>/
             ├── latest -> <revision>/
             └── <revision>/
                 ├── input/
                 │   └── <dependency> -> /…/STEPS/<dependency>/records/
-                │       └── <instance> -> .versions/<instance>/latest/ -> <revision>/
+                │       └── <instance>/latest -> <revision>/
                 └── output/
                     ├── stdout
                     └── exit_status
@@ -32,7 +31,7 @@ JOBS/
 │           ├── step.sh
 │           ├── inbox/
 │           │   └── <dependency> -> /…/STEPS/<dependency>/records/
-│           │       └── <instance> -> .versions/<instance>/latest/ -> <revision>/
+│           │       └── <instance>/latest -> <revision>/
 │           ├── recurring/
 │           │   └── <instance> -> ../inbox/
 │           ├── oneshot/
@@ -51,7 +50,8 @@ STATE/
             ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
             ├── inbox/
             │   └── <dependency> -> /…/STEPS/<dependency>/records/
-            │       └── <instance> -> .versions/<instance>/latest/ -> <revision>/
-            └── outbox -> /…/STEPS/dog/records/.versions/<instance>/latest/output/
-                       -> <revision>/output/
+            │       └── <instance>/latest -> <revision>/
+            └── outbox -> /…/STEPS/dog/records/<instance>/<revision>/output/
+                ├── stdout
+                └── exit_status
 ```

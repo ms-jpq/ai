@@ -6,14 +6,13 @@ shopt -u failglob
 INSTANCE="$1"
 DATA="$(realpath -- "${0%/*}")"
 RECORDS="$(realpath -- "$DATA/records")"
-VERSIONS="$RECORDS/.versions/$INSTANCE"
+VERSIONS="$RECORDS/$INSTANCE"
 
 mkdir -p -- "$VERSIONS"
-ln -sTnf -- "$VERSIONS/latest/output" "$DATA/outbox"
 for DEPENDENCY in "$DATA/inbox/"*; do
   if [[ -L $DEPENDENCY ]]; then
     AVAILABLE=0
-    for INPUT in "$DEPENDENCY/"*; do
+    for INPUT in "$DEPENDENCY/"*/latest; do
       if [[ -L $INPUT ]]; then
         [[ -d $INPUT/output ]]
         [[ $(< "$INPUT/output/exit_status") == 0 ]]
@@ -26,6 +25,7 @@ done
 
 REVISION="$(mktemp -d -- "$VERSIONS/XXXXXXXXXX")"
 mkdir -- "$REVISION/input" "$REVISION/output"
+ln -sTnf -- "$REVISION/output" "$DATA/outbox"
 cp --archive -- "$DATA/inbox/." "$REVISION/input/"
 cd -- "$REVISION"
 
@@ -41,5 +41,3 @@ fi
 
 ln -s -- "${REVISION##*/}" "$REVISION/.latest"
 mv --force --no-target-directory -- "$REVISION/.latest" "$VERSIONS/latest"
-ln -s -- ".versions/$INSTANCE/latest" "$REVISION/.outbox"
-mv --force --no-target-directory -- "$REVISION/.outbox" "$RECORDS/$INSTANCE"

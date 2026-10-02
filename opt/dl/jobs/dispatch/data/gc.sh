@@ -8,9 +8,7 @@ XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 case "${RECUR:-}" in
 '')
   cd -P -- "$1"
-  if [[ -d .versions ]]; then
-    find .versions -mindepth 1 -maxdepth 1 -type d -print0 | RECUR=1 "${XARGS[@]}" "$SELF" '{}'
-  fi
+  find . -mindepth 1 -maxdepth 1 -type d -print0 | RECUR=1 "${XARGS[@]}" "$SELF" '{}'
   ;;
 1)
   find "$1" -mindepth 3 -maxdepth 3 -type f -path '*/output/exit_status' -printf '%T@ %p\0' | LC_ALL=C.UTF-8 sort --zero-terminated --numeric-sort --reverse | tail --zero-terminated --lines=+3 | cut --zero-terminated --delimiter=' ' --fields=2- | RECUR=2 "${XARGS[@]}" "$SELF" '{}'

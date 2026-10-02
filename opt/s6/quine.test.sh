@@ -53,36 +53,35 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
   fi
   "$TEST_DIR/example-jobs/lil/data/step.sh" -
   [[ $INBOX -ef $DEPENDENCY ]]
-  [[ $(< "$INBOX/-/output/exit_status") == 0 ]]
-  FIRST="$(readlink -- "$DEPENDENCY/.versions/-/latest")"
+  [[ $(< "$INBOX/-/latest/output/exit_status") == 0 ]]
+  FIRST="$(readlink -- "$DEPENDENCY/-/latest")"
   "$TEST_DIR/example-jobs/lil/data/step.sh" -
-  LATEST="$(readlink -- "$DEPENDENCY/.versions/-/latest")"
+  LATEST="$(readlink -- "$DEPENDENCY/-/latest")"
   [[ $LATEST != "$FIRST" ]]
-  [[ $INBOX/- -ef $DEPENDENCY/.versions/-/$LATEST ]]
+  [[ $INBOX/-/latest -ef $DEPENDENCY/-/$LATEST ]]
   "$TEST_DIR/example-jobs/lil/data/step.sh" other
-  [[ $(< "$DEPENDENCY/other/output/exit_status") == 0 ]]
+  [[ $(< "$DEPENDENCY/other/latest/output/exit_status") == 0 ]]
   "$TEST_DIR/example-jobs/dog/data/step.sh" -
-  [[ $(< "$TEST_DIR/examples/dog/records/-/output/exit_status") == 0 ]]
-  [[ $TEST_DIR/examples/dog/records/-/input/lil -ef $INBOX ]]
-  [[ $(< "$TEST_DIR/examples/dog/records/-/input/lil/other/output/exit_status") == 0 ]]
+  [[ $(< "$TEST_DIR/examples/dog/records/-/latest/output/exit_status") == 0 ]]
+  [[ $TEST_DIR/examples/dog/records/-/latest/input/lil -ef $INBOX ]]
+  [[ $(< "$TEST_DIR/examples/dog/records/-/latest/input/lil/other/latest/output/exit_status") == 0 ]]
 }
 
 {
-  mkdir -p -- "$TEST_DIR/steps/dog/data/inbox" "$TEST_DIR/upstream/.versions/other-instance/revision/output"
-  cat > "$TEST_DIR/upstream/.versions/other-instance/revision/output/exit_status" << 'EOF'
+  mkdir -p -- "$TEST_DIR/steps/dog/data/inbox" "$TEST_DIR/upstream/other-instance/revision/output"
+  cat > "$TEST_DIR/upstream/other-instance/revision/output/exit_status" << 'EOF'
 0
 EOF
-  cat > "$TEST_DIR/upstream/.versions/other-instance/revision/output/stdout" << 'EOF'
+  cat > "$TEST_DIR/upstream/other-instance/revision/output/stdout" << 'EOF'
 input from another instance
 EOF
-  ln -sTnf -- revision "$TEST_DIR/upstream/.versions/other-instance/latest"
-  ln -sTnf -- .versions/other-instance/latest "$TEST_DIR/upstream/other-instance"
+  ln -sTnf -- revision "$TEST_DIR/upstream/other-instance/latest"
   INPUT="$(realpath -- "$TEST_DIR/upstream")"
   ln -sTnf -- "$INPUT" "$TEST_DIR/steps/dog/data/inbox/dogs"
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-[[ $(< input/dogs/other-instance/output/stdout) == 'input from another instance' ]]
+[[ $(< input/dogs/other-instance/latest/output/stdout) == 'input from another instance' ]]
 cat << STDOUT
 $1:$PAYLOAD
 STDOUT
@@ -119,11 +118,11 @@ EOF
     [[ $(< "$TEST_DIR/stderr") == diagnostic ]]
     [[ $(< "$SERVICE/data/outbox/stdout") == "$INSTANCE:first" ]]
     [[ $(< "$SERVICE/data/outbox/exit_status") == 0 ]]
-    [[ -d $TEST_DIR/steps/dog/records/$INSTANCE/input ]]
+    [[ -d $TEST_DIR/steps/dog/records/$INSTANCE/latest/input ]]
   done
 
   SERVICE="$TEST_DIR/snapshot-1/dog/instances/walk"
-  VERSIONS="$TEST_DIR/steps/dog/records/.versions/walk"
+  VERSIONS="$TEST_DIR/steps/dog/records/walk"
   FIRST="$(readlink -- "$VERSIONS/latest")"
   if PAYLOAD=failed RESULT=67 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"; then
     exit 1
@@ -132,13 +131,19 @@ EOF
   fi
   LATEST="$(readlink -- "$VERSIONS/latest")"
   [[ $LATEST == "$FIRST" ]]
+  [[ $(< "$SERVICE/data/outbox/stdout") == walk:failed ]]
+  [[ $(< "$SERVICE/data/outbox/exit_status") == 67 ]]
+  if [[ $SERVICE/data/outbox -ef $VERSIONS/latest/output ]]; then
+    exit 1
+  fi
   FAILED=("$VERSIONS/"*/output/exit_status)
   grep --quiet --line-regexp 67 "${FAILED[@]}"
   PAYLOAD=second RESULT=0 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"
   LATEST="$(readlink -- "$VERSIONS/latest")"
   [[ $LATEST != "$FIRST" ]]
   [[ $(< "$VERSIONS/$FIRST/output/stdout") == walk:first ]]
+  [[ $SERVICE/data/outbox -ef $VERSIONS/latest/output ]]
   rm -fr -- "$SERVICE"
-  [[ $(< "$TEST_DIR/steps/dog/records/walk/output/stdout") == walk:second ]]
-  [[ $(< "$TEST_DIR/steps/dog/records/feed/output/stdout") == feed:first ]]
+  [[ $(< "$TEST_DIR/steps/dog/records/walk/latest/output/stdout") == walk:second ]]
+  [[ $(< "$TEST_DIR/steps/dog/records/feed/latest/output/stdout") == feed:first ]]
 }
