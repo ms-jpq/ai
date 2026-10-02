@@ -10,12 +10,13 @@ JOB="${PWD%/instances/*}"
 JOB="${JOB##*/}"
 INSTANCE_DATA='./data'
 ATTEMPTS="$INSTANCE_DATA/attempt"
+PGID_FILE="$INSTANCE_DATA/.pgid"
 
 exec 2>&1
 
-if [[ -n ${4:-} ]] || [[ -f $INSTANCE_DATA/pgid ]]; then
-  PGID="${4:-$(< "$INSTANCE_DATA/pgid")}"
-  rm -f -- "$INSTANCE_DATA/pgid"
+if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
+  PGID="${4:-$(< "$PGID_FILE")}"
+  rm -f -- "$PGID_FILE"
   kill -KILL -- "-$PGID" 2> /dev/null || true
 fi
 

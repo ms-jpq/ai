@@ -2,5 +2,5 @@
 
 set -o pipefail
 
-printf -- '%s' "$$" > ./data/pgid
+printf -- '%s' "$$" > ./data/.pgid
 exec -- s6-envdir -- ./env ./data/runner.sh "$@"
