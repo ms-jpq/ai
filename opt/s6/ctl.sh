@@ -16,15 +16,16 @@ start)
   WS="$(realpath -- "$2")"
   P_PID="${3:-$PPID}"
   P_STARTED="$(LC_ALL=C.UTF-8 ps -p "$P_PID" -o lstart=)"
+  DATA="$STATE/watchdog/data"
 
   "$0" stop "$@"
   env -C "$STATE" -- RECUR=bootstrap "$BASE/jobs/quine/run.sh"
   rm -fr -- "$STATE/watchdog"
   env -C "$STATE" -- RECUR=seed "$BASE/jobs/quine/run.sh" watchdog "$P_PID"
 
-  mkdir -p -- "$STATE/watchdog/data/recurring"
-  printf -- '%s' "$P_STARTED" > "$STATE/watchdog/data/$P_PID"
-  ln -sTnfr -- "$STATE/watchdog/data/$P_PID" "$STATE/watchdog/data/recurring/$P_PID"
+  mkdir -p -- "$DATA/recurring"
+  printf -- '%s' "$P_STARTED" > "$DATA/lstart"
+  ln -sTnfr -- "$DATA/lstart" "$DATA/recurring/$P_PID"
 
   S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -l 0 -- T 1 >> "$LOGS/s6.log"
   ;;

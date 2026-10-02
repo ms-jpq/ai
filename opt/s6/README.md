@@ -8,13 +8,13 @@ opt/s6/jobs/watchdog/
 
 STATE/watchdog/
 ├── data/
-│   ├── 1234
+│   ├── lstart
 │   └── recurring/
-│       └── 1234 -> ../1234
+│       └── <pid> -> ../lstart
 ├── template/
 ├── instances/
-│   └── 1234/
+│   └── <pid>/
 │       └── data/job -> /…/opt/s6/jobs/watchdog/run.sh
 └── instance/
-    └── 1234 -> ../instances/1234
+    └── <pid> -> ../instances/<pid>
 ```
