@@ -10,7 +10,7 @@ XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 case "${RECUR:-}" in
 '')
   mkdir -p -- "$DST"
-  RECUR=1 find "$SRC" -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -printf '%f\0' | "${XARGS[@]}" "$0" "$SRC/{}" "$DST/{}"
+  find "$SRC" -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -printf '%f\0' | RECUR=1 "${XARGS[@]}" "$0" "$SRC/{}" "$DST/{}"
   ;;
 1)
   RUN=("$SRC"/run.*)
