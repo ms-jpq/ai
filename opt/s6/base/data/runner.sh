@@ -2,10 +2,10 @@
 
 set -o pipefail
 
-: "${S67_WORKSPACE?}"
-: "${S67_TIMEOUT?}"
-: "${S67_BACKOFF_INITIAL?}"
-: "${S67_BACKOFF_MAX?}"
+: "${S67_WORKING_DIRECTORY?}"
+: "${S67_RUNTIME_MAX_SEC?}"
+: "${S67_RESTART_SEC?}"
+: "${S67_RESTART_MAX_DELAY_SEC?}"
 
 exec 2>&1
 
@@ -13,12 +13,12 @@ INSTANCE_DATA="$PWD/data"
 
 if [[ -d $INSTANCE_DATA/recurring ]]; then
   if ATTEMPT="$(wc -l 2> /dev/null < "$INSTANCE_DATA/attempt")"; then
-    DELAY="$S67_BACKOFF_INITIAL"
-    while ((--ATTEMPT > 0 && DELAY < S67_BACKOFF_MAX)); do
-      DELAY=$((DELAY >= S67_BACKOFF_MAX - DELAY ? S67_BACKOFF_MAX : DELAY * 2))
+    DELAY="$S67_RESTART_SEC"
+    while ((--ATTEMPT > 0 && DELAY < S67_RESTART_MAX_DELAY_SEC)); do
+      DELAY=$((DELAY >= S67_RESTART_MAX_DELAY_SEC - DELAY ? S67_RESTART_MAX_DELAY_SEC : DELAY * 2))
     done
     sleep -- "$DELAY"
   fi
 fi
 
-exec -- env -C "$S67_WORKSPACE" -- timeout --foreground --kill-after=5s "$S67_TIMEOUT" nice -n 19 -- "$INSTANCE_DATA/job" "$@"
+exec -- env -C "$S67_WORKING_DIRECTORY" -- timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" nice -n 19 -- "$INSTANCE_DATA/job" "$@"
