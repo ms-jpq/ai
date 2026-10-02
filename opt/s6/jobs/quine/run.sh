@@ -18,11 +18,11 @@ bootstrap)
   ;;
 reconcile)
   trap 's6-svscanctl -h -- "$PWD"' EXIT
-  find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 | RECUR=job "${XARGS[@]}" "$SELF" '{}'
+  find "$ROOT/jobs" -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -print0 | RECUR=job "${XARGS[@]}" "$SELF" '{}'
   ;;
 seed | job)
   NAME="${1##*/}"
-  JOB="$ROOT/jobs/$NAME"
+  JOB="$(realpath -- "$ROOT/jobs/$NAME")"
   MANAGER="$PWD/$NAME"
   RUN=("$JOB"/run.*)
   if ((${#RUN[@]} != 1)) || ! [[ -f ${RUN[*]} && -x ${RUN[*]} ]]; then
