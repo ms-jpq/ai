@@ -58,6 +58,6 @@ function report(L_message)
 {
   printf "> %s\n", L_message
   printf "> %s:%d\n", FILENAME, FNR
-  printf "> %s\n", $0
+  printf "> %s\n\n", $0
   STATUS = 1
 }
