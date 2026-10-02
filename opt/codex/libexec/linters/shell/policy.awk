@@ -10,7 +10,7 @@ BEGIN {
 
 {
   if ($0 ~ /\[\[[[:space:]]+-v([[:space:]]|\])/) {
-    report("Do not use [[ -v ... ]]; use [[ -n ${NAME:-} ]].")
+    report("Do not use unsafe [[ -v ... ]]; use [[ -n ${NAME:-} ]].")
   }
   if ($0 ~ /\]\][[:space:]]*(\|\||&&)[[:space:]]*(continue|break|exit)([[:space:];]|$)/) {
     report("Do not short-circuit from a [[ ... ]] test; use an if block.")
