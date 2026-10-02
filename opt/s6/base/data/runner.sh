@@ -25,4 +25,5 @@ if [[ -d $INSTANCE_DATA/recurring ]]; then
   fi
 fi
 
-exec -- env -C "$S67_WORKING_DIRECTORY" -- timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" nice -n 19 -- "$INSTANCE_DATA/job" "$@"
+cd -- "$S67_WORKING_DIRECTORY"
+exec -- timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" nice -n 19 -- "$INSTANCE_DATA/job" "$@"
