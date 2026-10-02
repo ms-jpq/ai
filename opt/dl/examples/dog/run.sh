@@ -2,4 +2,4 @@
 
 set -o pipefail
 
-sleep -- 6767
+printf -- '%s\n' "$0"
