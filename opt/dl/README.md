@@ -10,13 +10,15 @@ STEPS/
     ├── wants/
     │   └── <dependency> -> ../../<dependency>/
     └── records/
-        ├── <instance> -> .versions/<instance>/latest/
+        ├── <instance> -> .versions/<instance>/latest/ -> <revision>/
         └── .versions/<instance>/
             ├── latest -> <revision>/
             └── <revision>/
                 ├── input/
                 │   ├── dogs -> /…/STEPS/dogs/records/<instance>/
+                │   │          -> .versions/<instance>/latest/ -> <revision>/
                 │   └── rules -> /…/STEPS/rules/records/<instance>/
+                │              -> .versions/<instance>/latest/ -> <revision>/
                 └── output/
                     ├── stdout
                     └── exit_status
@@ -39,19 +41,17 @@ STATE/
     │   └── data/
     │       ├── command
     │       ├── step.sh
-    │       ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh
+    │       ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
     │       └── records -> /…/STEPS/dog/records/
-    ├── instances/
-    │   └── walk/
-    │       ├── env/
-    │       └── data/
-    │           ├── command
-    │           ├── step.sh
-    │           ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh
-    │           ├── inbox/
-    │           │   └── lil -> /…/STEPS/lil/records/.versions/<instance>/latest/
-    │           ├── records -> /…/STEPS/dog/records/
-    │           └── versions -> /…/STEPS/dog/records/.versions/walk/
-    └── instance/
-        └── walk -> ../instances/walk/
+    ├── instances/walk/
+    │   ├── env/
+    │   └── data/
+    │       ├── command
+    │       ├── step.sh
+    │       ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
+    │       ├── inbox/
+    │       │   └── lil -> /…/STEPS/lil/records/.versions/<instance>/latest/ -> <revision>/
+    │       ├── records -> /…/STEPS/dog/records/
+    │       └── versions -> /…/STEPS/dog/records/.versions/walk/
+    └── instance/walk -> ../instances/walk/
 ```
