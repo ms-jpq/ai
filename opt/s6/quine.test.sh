@@ -152,3 +152,54 @@ EOF
   [[ $(< "$TEST_DIR/steps/dog/records/walk/latest/output/stdout") == walk:second ]]
   [[ $(< "$TEST_DIR/steps/dog/records/feed/latest/output/stdout") == feed:first ]]
 }
+
+{
+  mkdir -p -- "$TEST_DIR/queue-step" "$TEST_DIR/bin"
+  cp --preserve=mode -- "$ROOT/../dl/examples/dog/run.sh" "$TEST_DIR/queue-step/run.sh"
+  cat > "$TEST_DIR/bin/s6-instance-create" << 'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+MANAGER="${@: -2:1}"
+INSTANCE="${@: -1}"
+if [[ $INSTANCE == rejected ]]; then
+  exit 67
+fi
+mkdir -p -- "$MANAGER/instances/$INSTANCE"
+cp --archive -- "$MANAGER/template/." "$MANAGER/instances/$INSTANCE/"
+EOF
+  cat > "$TEST_DIR/bin/noop" << 'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+  chmod +x -- "$TEST_DIR/bin/"{s6-instance-create,noop}
+  for COMMAND in s6-svok s6-svwait s6-svc s6-instance-control; do
+    ln -s -- noop "$TEST_DIR/bin/$COMMAND"
+  done
+  TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
+  for PASS in 1 2; do
+    "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/queue-dog"
+    printf -- 'Prepared queue snapshot %s\n' "$PASS"
+  done
+  ln -s -- /dev/null "$TEST_DIR/jobs/queue-dog/data/recurring/keep"
+  ln -s -- /missing/inbox "$TEST_DIR/jobs/queue-dog/data/oneshot/run"
+  ln -s -- /dev/null "$TEST_DIR/jobs/queue-dog/data/oneshot/.pending"
+  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog
+  [[ -d $TEST_DIR/snapshot-1/queue-dog/instances/keep ]]
+  [[ -d $TEST_DIR/snapshot-1/queue-dog/instances/run ]]
+  [[ -L $TEST_DIR/jobs/queue-dog/data/recurring/keep ]]
+  if [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/run ]] || [[ -d $TEST_DIR/snapshot-1/queue-dog/instances/.pending ]]; then
+    exit 1
+  fi
+  [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/.pending ]]
+
+  ln -s -- /dev/null "$TEST_DIR/jobs/queue-dog/data/oneshot/rejected"
+  if PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog; then
+    exit 1
+  fi
+  [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/rejected ]]
+  "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/queue-dog"
+  [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/rejected ]]
+  if [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/run ]]; then
+    exit 1
+  fi
+}
