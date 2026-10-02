@@ -1,0 +1,32 @@
+#!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
+
+set -o pipefail
+
+SELF="$(realpath -- "$0")"
+cd -P -- "$1"
+shift -- 1
+DEPTH="${1:-67}"
+if (($# > 1)) || [[ $DEPTH != +([0-9]) ]]; then
+  set -x
+  exit 2
+fi
+DEPTH=$((10#$DEPTH))
+
+DELIMITER='\0'
+if [[ -t 1 ]]; then
+  DELIMITER='\n'
+fi
+
+if ((DEPTH == 0)) || ! [[ -d wants ]]; then
+  exit
+fi
+
+cd -P -- wants
+find . -mindepth 1 -maxdepth 1 -type l -print0 | while IFS= read -r -d '' REQUEST; do
+  printf -- '%s%b' "${REQUEST##*/}" "$DELIMITER"
+  if ((DEPTH > 1)); then
+    "$SELF" "$REQUEST" "$((DEPTH - 1))" | while IFS= read -r -d '' DEPENDENCY; do
+      printf -- '%s/%s%b' "${REQUEST##*/}" "$DEPENDENCY" "$DELIMITER"
+    done
+  fi
+done
