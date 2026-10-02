@@ -67,7 +67,7 @@ job)
 
   for MODE in recurring oneshot; do
     if [[ -d $JOB/data/$MODE ]]; then
-      find "$JOB/data/$MODE" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -print0 | RECUR="$MODE" "${XARGS[@]}" "$SELF" "$NAME" '{}'
+      find "$JOB/data/$MODE/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -print0 | RECUR="$MODE" "${XARGS[@]}" "$SELF" "$NAME" '{}'
     fi
   done
   ;;
