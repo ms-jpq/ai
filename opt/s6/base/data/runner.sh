@@ -5,6 +5,7 @@ set -o pipefail
 : "${S67_WORKING_DIRECTORY?}"
 : "${S67_RUNTIME_MAX_SEC?}"
 : "${S67_RESTART_SEC?}"
+: "${S67_ON_UNIT_INACTIVE_SEC?}"
 : "${S67_RESTART_MAX_DELAY_SEC:=$((S67_ON_UNIT_INACTIVE_SEC * 2))}"
 
 exec 2>&1
@@ -13,10 +14,13 @@ INSTANCE_DATA="$PWD/data"
 
 if [[ -d $INSTANCE_DATA/recurring ]]; then
   if ATTEMPT="$(wc -l 2> /dev/null < "$INSTANCE_DATA/attempt")"; then
-    DELAY="$S67_RESTART_SEC"
-    while ((--ATTEMPT > 0 && DELAY < S67_RESTART_MAX_DELAY_SEC)); do
-      DELAY=$((DELAY >= S67_RESTART_MAX_DELAY_SEC - DELAY ? S67_RESTART_MAX_DELAY_SEC : DELAY * 2))
-    done
+    DELAY="$S67_ON_UNIT_INACTIVE_SEC"
+    if ((ATTEMPT > 0)); then
+      DELAY="$S67_RESTART_SEC"
+      while ((--ATTEMPT > 0 && DELAY < S67_RESTART_MAX_DELAY_SEC)); do
+        DELAY=$((DELAY >= S67_RESTART_MAX_DELAY_SEC - DELAY ? S67_RESTART_MAX_DELAY_SEC : DELAY * 2))
+      done
+    fi
     sleep -- "$DELAY"
   fi
 fi
