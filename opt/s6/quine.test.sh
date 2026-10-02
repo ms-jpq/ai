@@ -23,5 +23,4 @@ LINK="$(readlink -- "$TEST_DIR/snapshot-1/quine/template/data/null")"
 [[ -L $TEST_DIR/snapshot-1/quine/template/data/null ]]
 [[ $LINK == /dev/null ]]
 
-git diff --no-index --exit-code -- "$TEST_DIR/snapshot-1/quine" "$TEST_DIR/snapshot-2/quine-2"
-exec -- git diff --no-index --exit-code -- "$TEST_DIR/snapshot-1/quine" "$TEST_DIR/snapshot-3/quine"
+exec -- diff --recursive --no-dereference --unified --from-file="$TEST_DIR/snapshot-1/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
