@@ -71,10 +71,10 @@ EOF
 
   SERVICE="$TEST_DIR/snapshot-1/dog/instances/walk"
   FIRST="$(readlink -- "$SERVICE/data/versions/latest")"
-  if PAYLOAD=failed RESULT=7 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"; then
+  if PAYLOAD=failed RESULT=67 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"; then
     exit 1
   else
-    [[ $? == 7 ]]
+    [[ $? == 67 ]]
   fi
   LATEST="$(readlink -- "$SERVICE/data/versions/latest")"
   [[ $LATEST == "$FIRST" ]]
