@@ -32,7 +32,8 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
   for JOB in dog lil; do
     [[ -L $TEST_DIR/jobs/$JOB ]]
     RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh "$JOB" -
-    diff --unified -- "$ROOT/../dl/examples/$JOB/run.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/job"
+    diff --unified -- "$ROOT/../dl/examples/$JOB/run.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/command"
+    diff --unified -- "$ROOT/../dl/job/data/step.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/job"
     for ENV in "$ROOT/../dl/examples/$JOB/env/"*; do
       diff --unified -- "$ENV" "$TEST_DIR/snapshot-1/$JOB/instances/-/env/${ENV##*/}"
     done

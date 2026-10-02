@@ -13,12 +13,12 @@ STEPS/
 │       ├── .versions/
 │       │   ├── walk/
 │       │   │   ├── <revision>/
-│       │   │   │   ├── headers
+│       │   │   │   ├── meta/
 │       │   │   │   └── stdout
 │       │   │   └── latest -> <revision>/
 │       │   └── feed/
 │       │       ├── <revision>/
-│       │       │   ├── headers
+│       │       │   ├── meta/
 │       │       │   └── stdout
 │       │       └── latest -> <revision>/
 │       ├── walk -> .versions/walk/latest
@@ -32,11 +32,19 @@ STEPS/
 JOBS/
 ├── .versions/
 │   ├── dog.<revision>/
-│   │   ├── run.sh
-│   │   └── env/
+│   │   ├── run.sh -> data/step.sh
+│   │   ├── env/
+│   │   └── data/
+│   │       ├── command
+│   │       ├── step.sh
+│   │       └── outbox -> /…/STEPS/dog/outbox/
 │   └── lil.<revision>/
-│       ├── run.sh
-│       └── env/
+│       ├── run.sh -> data/step.sh
+│       ├── env/
+│       └── data/
+│           ├── command
+│           ├── step.sh
+│           └── outbox -> /…/STEPS/lil/outbox/
 ├── dog -> .versions/dog.<revision>/
 └── lil -> .versions/lil.<revision>/
 
