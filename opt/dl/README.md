@@ -47,14 +47,11 @@ STATE/
     ├── instance/<instance> -> ../instances/<instance>/
     └── instances/<instance>/
         ├── env/
-        │   └── S67_RECORDS_DIR          /…/STEPS/dog/records
         └── data/
             ├── command
             ├── step.sh
-            ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
+            ├── job
             ├── inbox/
-            │   └── <dependency> -> /…/STEPS/<dependency>/records/
-            │       └── <instance>/latest -> <revision>/
             └── outbox -> /…/STEPS/dog/records/<instance>/<revision>/output/
                 ├── stdout
                 └── exit_status
