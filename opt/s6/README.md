@@ -1,7 +1,7 @@
 # S6
 
 ```text
-jobs/watchdog/
+JOBS/watchdog/
 ├── run.sh
 ├── env/S67_ON_UNIT_INACTIVE_SEC
 └── data/recurring/.gitignore
@@ -14,7 +14,7 @@ STATE/watchdog/
 ├── template/
 ├── instances/
 │   └── <pid>/
-│       └── data/job -> /…/jobs/watchdog/run.sh
+│       └── data/job -> /…/JOBS/watchdog/run.sh
 └── instance/
     └── <pid> -> ../instances/<pid>
 ```
