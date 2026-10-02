@@ -3,35 +3,146 @@
 set -o pipefail
 shopt -u failglob dotglob
 
-ROOT="${0%/jobs/quine/run}"
+SELF="$(realpath -- "$0")"
+ROOT="${SELF%/jobs/quine/run}"
 
-if [[ ${RECUR:-} == 1 ]]; then
-  JOB="$PWD/${1#./}"
-  SOURCES=("$ROOT/base/./")
-  if [[ -d $JOB/env ]]; then
-    SOURCES+=("$JOB/./env")
+case "${RECUR:-}" in
+0)
+  RECUR=1 exec -- s6-setlock -- "$PWD/.reconcile.lock" "$SELF" quine "$PWD" bootstrap
+  ;;
+'')
+  STATE="$(realpath -- "${0%/*}/../../../..")"
+  RECUR=3 exec -- s6-setlock -- "$STATE/.reconcile.lock" "$SELF" "$STATE"
+  ;;
+3)
+  STATE="$1"
+  trap 's6-svscanctl -a -- "$STATE"' EXIT
+  find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 \
+    | xargs --null --no-run-if-empty --max-procs=0 -I '{}' -- env RECUR=1 "$SELF" '{}' "$STATE"
+  ;;
+1)
+  NAME="${1##*/}"
+  JOB="$ROOT/jobs/$NAME"
+  STATE="$2"
+  MANAGER="$STATE/$NAME"
+
+  STAGING="$(mktemp -d -- "$STATE/.$NAME.XXXXXX")"
+  trap 'rm -rf -- "$STAGING"' EXIT
+  rsync --archive -- "$ROOT/base/" "$STAGING/template/"
+  rsync --archive --checksum --exclude=/data/recurring --exclude=/data/oneshot --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$STAGING/template/"
+  ln -s -- "$JOB/run" "$STAGING/template/data/job"
+  mkdir -p -- "$STAGING/template/data/recurring"
+
+  if ! [[ -d $MANAGER ]]; then
+    s6-instance-maker -- "$STAGING/template" "$STAGING/manager"
+    mkdir -p -- "$STAGING/manager/data/done"
+    mv -- "$STAGING/manager" "$MANAGER"
+  else
+    rsync --archive --checksum --delete -- "$STAGING/template/" "$MANAGER/template/"
   fi
-  for REQUEST in "$JOB"/data/@(oneshot|recurring)/*; do
-    if ! [[ -f $REQUEST ]]; then
+
+  if [[ ${3:-} == bootstrap ]]; then
+    for REQUEST in "$JOB"/data/recurring/*; do
+      if ! [[ -L $REQUEST ]]; then
+        continue
+      fi
+      INSTANCE="${REQUEST##*/}"
+      if ! [[ -d $MANAGER/instances/$INSTANCE ]]; then
+        rsync --archive -- "$MANAGER/template/" "$STAGING/instance/"
+        mv -- "$STAGING/instance" "$MANAGER/instances/$INSTANCE"
+      fi
+      if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
+        ln -s -- "../instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
+      fi
+    done
+    exit
+  fi
+
+  if ! s6-svok "$MANAGER"; then
+    exit
+  fi
+  s6-svwait -U -t 5000 -- "$MANAGER"
+
+  for DONE in "$MANAGER"/data/done/*; do
+    INSTANCE="${DONE##*/}"
+    if [[ -d $MANAGER/instances/$INSTANCE || -L $MANAGER/instance/$INSTANCE ]]; then
+      s6-instance-delete -- "$MANAGER" "$INSTANCE"
+    fi
+    if [[ -e $MANAGER/instances/$INSTANCE || -L $MANAGER/instance/$INSTANCE ]]; then
+      exit 1
+    fi
+    rm -- "$DONE"
+  done
+
+  for REQUEST in "$JOB"/data/recurring/*; do
+    if ! [[ -L $REQUEST ]]; then
       continue
     fi
-    KIND="${REQUEST%/*}"
-    KIND="${KIND##*/}"
-    DEST="$2/${REQUEST##*/}"
-    if [[ -d $DEST ]]; then
-      continue
+    INSTANCE="${REQUEST##*/}"
+    if [[ -L $JOB/data/oneshot/$INSTANCE ]]; then
+      tee >&2 <<- EOF
+Conflicting requests:
+$JOB/data/recurring/$INSTANCE
+$JOB/data/oneshot/$INSTANCE
+EOF
+      exit 2
     fi
-    rsync --archive --relative -- "${SOURCES[@]}" "$DEST/"
-    ln -sf -- "$JOB/run" "$DEST/data/job"
-    if [[ $KIND == recurring ]]; then
-      ln -sf -- recurring/.runner.sh "$DEST/data/.runner.sh"
+    if ! [[ -d $MANAGER/instances/$INSTANCE ]]; then
+      s6-instance-create -t 5000 -- "$MANAGER" "$INSTANCE"
+    elif ! [[ -d $MANAGER/instances/$INSTANCE/data/recurring ]]; then
+      printf -- 'Instance still belongs to a oneshot: %s@%s\n' "$NAME" "$INSTANCE" >&2
+      exit 2
     fi
   done
-  exit
-fi
 
-RECUR=1 find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d -execdir "$0" '{}' "$PWD" ';'
+  for REQUEST in "$JOB"/data/oneshot/*; do
+    if [[ -L $REQUEST ]]; then
+      RECUR=2 "$SELF" "$NAME" "$STATE" "${REQUEST##*/}"
+    fi
+  done
+  ;;
+2)
+  JOB="$ROOT/jobs/$1"
+  MANAGER="$2/$1"
+  INSTANCE="$3"
+  SERVICE="$MANAGER/instances/$INSTANCE"
 
-if (($#)); then
-  exec -- s6-svscanctl -h -- "$PWD"
-fi
+  # should use heredoc + tee to show both paths imo
+  # like recurring/foo and oneshot/foo
+
+  # | >>> Done in both conflict checks: print the recurring and oneshot paths.
+  if [[ -L $JOB/data/recurring/$INSTANCE ]]; then
+    tee >&2 <<- EOF
+Conflicting requests:
+$JOB/data/recurring/$INSTANCE
+$JOB/data/oneshot/$INSTANCE
+EOF
+    exit 2
+  fi
+  if [[ -d $SERVICE ]]; then
+    STATUS="$(s6-svstat -o up -- "$SERVICE")"
+    if [[ ! -f $SERVICE/down || $STATUS == true ]]; then
+      exit
+    fi
+    # wait why are we waiting for it to finish?
+
+    # | >>> The job is already down here, but its finish script may still be running.
+    # | Wait for finish before checking done; otherwise we could miss its completion flag
+    # | and consume a queued request against the previous instance.
+    s6-svwait -D -t 5000 -- "$SERVICE"
+    if [[ -f $MANAGER/data/done/$INSTANCE ]]; then
+      exit
+    fi
+  else
+    s6-instance-create -D -t 5000 -- "$MANAGER" "$INSTANCE"
+  fi
+  rm -fr -- "$SERVICE/data/recurring"
+  s6-svc -wu -T 5000 -U -- "$SERVICE/log"
+  rm -- "$JOB/data/oneshot/$INSTANCE"
+  s6-instance-control -wu -T 5000 -o -- "$MANAGER" "$INSTANCE"
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac
