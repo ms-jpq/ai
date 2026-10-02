@@ -8,6 +8,10 @@ STEPS/
     ├── run.sh
     ├── dispatch.sh
     ├── env/
+    ├── data/
+    │   ├── recurring/
+    │   │   └── <instance> -> /…/JOBS/<step>/data/inbox/
+    │   └── oneshot/
     ├── wants/
     │   └── <dependency> -> ../../<dependency>/
     └── records/
@@ -33,9 +37,8 @@ JOBS/
 │           ├── inbox/
 │           │   └── <dependency> -> /…/STEPS/<dependency>/records/
 │           │       └── <instance>/latest -> <revision>/
-│           ├── recurring/
-│           │   └── <instance> -> ../inbox/
-│           └── oneshot/
+│           ├── recurring -> ../../../../STEPS/dog/data/recurring/
+│           └── oneshot -> ../../../../STEPS/dog/data/oneshot/
 └── dog -> .versions/dog.<revision>/
 
 STATE/

@@ -19,13 +19,15 @@ ln -s -- ../inbox "$SRC/data/oneshot/initial"
 "$TEMPLATE" "$SRC" "$DST"
 FIRST="$(realpath -- "$DST")"
 for MODE in recurring oneshot; do
-  if [[ -L $DST/data/$MODE ]]; then
-    exit 1
-  fi
+  [[ -L $DST/data/$MODE ]]
+  [[ $DST/data/$MODE -ef $SRC/data/$MODE ]]
   ln -s -- ../inbox "$DST/data/$MODE/queued request"
   ln -s -- /missing/inbox "$DST/data/$MODE/.pending"
 done
 rm -- "$DST/data/oneshot/initial"
+if [[ -L $SRC/data/oneshot/initial ]]; then
+  exit 1
+fi
 
 cat > "$SRC/run.sh" << 'EOF'
 #!/usr/bin/env bash
@@ -40,7 +42,7 @@ for PASS in 1 2 3; do
     [[ -L $DST/data/$MODE/queued\ request ]]
     [[ -L $DST/data/$MODE ]]
     [[ $DST/data/$MODE -ef $FIRST/data/$MODE ]]
-    [[ $DST/data/$MODE/queued\ request -ef $FIRST/data/inbox ]]
+    [[ $DST/data/$MODE/queued\ request -ef $SRC/data/inbox ]]
     [[ -L $DST/data/$MODE/.pending ]]
   done
   if [[ -L $DST/data/oneshot/initial ]]; then

@@ -3,10 +3,11 @@
 set -o pipefail
 
 ROOT="${0%/*}"
-TEST_DIR="$ROOT/../../var/tmp/quine-test"
+mkdir -p -- "$ROOT/../../var/tmp"
+TEST_DIR="$(mktemp -d -- "$ROOT/../../var/tmp/quine-test.XXXXXX")"
+trap 'rm -fr -- "$TEST_DIR"' EXIT
 
 {
-  rm -fr -- "$TEST_DIR"
   mkdir -p -- "$TEST_DIR/"snapshot-{1,2,3}
   cp --archive -- "$ROOT/." "$TEST_DIR/"
   ln -sTnfr -- "$TEST_DIR/jobs/quine" "$TEST_DIR/jobs/quine-2"
@@ -73,20 +74,30 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 }
 
 {
-  mkdir -p -- "$TEST_DIR/steps/dog/data/inbox" "$TEST_DIR/upstream/other-instance/revision/output"
-  cat > "$TEST_DIR/upstream/other-instance/revision/output/exit_status" << 'EOF'
+  mkdir -p -- "$TEST_DIR/steps/dog/data/inbox"
+  for DEPENDENCY in dogs rules; do
+    for INSTANCE in other-instance second-instance; do
+      OUTPUT="$TEST_DIR/upstream/$DEPENDENCY/$INSTANCE/revision/output"
+      mkdir -p -- "$OUTPUT"
+      cat > "$OUTPUT/exit_status" << 'EOF'
 0
 EOF
-  cat > "$TEST_DIR/upstream/other-instance/revision/output/stdout" << 'EOF'
-input from another instance
+      cat > "$OUTPUT/stdout" << EOF
+$DEPENDENCY:$INSTANCE
 EOF
-  ln -sTnf -- revision "$TEST_DIR/upstream/other-instance/latest"
-  INPUT="$(realpath -- "$TEST_DIR/upstream")"
-  ln -sTnf -- "$INPUT" "$TEST_DIR/steps/dog/data/inbox/dogs"
+      ln -sTnf -- revision "$TEST_DIR/upstream/$DEPENDENCY/$INSTANCE/latest"
+    done
+    INPUT="$(realpath -- "$TEST_DIR/upstream/$DEPENDENCY")"
+    ln -sTnf -- "$INPUT" "$TEST_DIR/steps/dog/data/inbox/$DEPENDENCY"
+  done
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-[[ $(< input/dogs/other-instance/latest/output/stdout) == 'input from another instance' ]]
+for DEPENDENCY in dogs rules; do
+  for INSTANCE in other-instance second-instance; do
+    [[ $(< "input/$DEPENDENCY/$INSTANCE/latest/output/stdout") == "$DEPENDENCY:$INSTANCE" ]]
+  done
+done
 cat << STDOUT
 $1:$PAYLOAD
 STDOUT
