@@ -2,6 +2,11 @@
 
 BEGIN {
   STATUS = 0
+  TEST = ""
+}
+
+FNR == 1 {
+  TEST = ""
 }
 
 /^[[:space:]]*#/ {
@@ -17,6 +22,31 @@ BEGIN {
   }
   if ($0 ~ /^[[:space:]]*(function[[:space:]]+|[[:alpha:]_][[:alnum:]_]*[[:space:]]*\(\)[[:space:]]*\{)/) {
     report("Do not declare shell functions; split reusable behaviour into an array or a script.")
+  }
+  LINE = $0
+  gsub(/"([^"\\]|\\.)*"|'[^']*'/, "_", LINE)
+  gsub(/\\./, "_", LINE)
+  sub(/(^|[[:space:]])#.*/, "", LINE)
+  while (length(LINE)) {
+    if (TEST == "") {
+      OPEN = index(LINE, "[[")
+      if (! OPEN) {
+        break
+      }
+      LINE = substr(LINE, OPEN + 2)
+      TEST = " "
+    }
+    if (! match(LINE, /(^|[[:space:]])\]\]([[:space:];&|)]|$)/)) {
+      TEST = TEST LINE "\n"
+      break
+    }
+    CLOSE = RSTART + index(substr(LINE, RSTART, RLENGTH), "]]") - 1
+    TEST = TEST substr(LINE, 1, CLOSE - 1)
+    if (TEST ~ /&&|\|\||(^|[[:space:](])!([[:space:](]|$)/) {
+      report("Keep &&, ||, and ! outside [[ ... ]]; combine or negate separate tests.")
+    }
+    TEST = ""
+    LINE = substr(LINE, CLOSE + 2)
   }
 }
 
