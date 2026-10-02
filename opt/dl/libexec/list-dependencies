@@ -16,7 +16,7 @@ DEPTH=$((10#$DEPTH))
 
 TEE=(tee)
 if [[ -t 1 ]]; then
-  TEE=(tree --fromfile --noreport .)
+  TEE=(tree --fromfile --noreport . -F)
 fi
 
 if ((DEPTH == 0)) || ! [[ -d $WANTS ]]; then
