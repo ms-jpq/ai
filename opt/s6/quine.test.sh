@@ -28,7 +28,7 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 }
 
 {
-  "$ROOT/../dl/libexec/jobs/data/s6-template.sh" "$ROOT/../dl/examples" "$TEST_DIR/jobs"
+  "$ROOT/../dl/job/data/s6-template.sh" "$ROOT/../dl/examples" "$TEST_DIR/jobs"
   for JOB in dog lil; do
     [[ -L $TEST_DIR/jobs/$JOB ]]
     RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh "$JOB" -
