@@ -2,14 +2,22 @@
 
 set -o pipefail
 
+if (($# == 0)); then
+  printf '%s\n' snapshots templates graph execution queues | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  exit
+fi
+trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
+
 ROOT="${0%/*}"
 mkdir -p -- "$ROOT/../../var/tmp"
 TEST_DIR="$(mktemp -d -- "$ROOT/../../var/tmp/quine-test.XXXXXX")"
 trap 'rm -fr -- "$TEST_DIR"' EXIT
+mkdir -- "$TEST_DIR/snapshot-1"
+cp --archive -- "$ROOT/." "$TEST_DIR/"
 
-{
-  mkdir -p -- "$TEST_DIR/"snapshot-{1,2,3}
-  cp --archive -- "$ROOT/." "$TEST_DIR/"
+case "$1" in
+snapshots)
+  mkdir -- "$TEST_DIR/"snapshot-{2,3}
   ln -sTnfr -- "$TEST_DIR/jobs/quine" "$TEST_DIR/jobs/quine-2"
   ln -sTnf -- /dev/null "$TEST_DIR/jobs/quine/data/null"
 
@@ -26,16 +34,17 @@ trap 'rm -fr -- "$TEST_DIR"' EXIT
   [[ $LINK == /dev/null ]]
 
   diff --recursive --no-dereference --unified --from-file="$TEST_DIR/snapshot-1/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
-}
+  ;;
 
-{
+templates)
+  cp --archive -- "$ROOT/../dl/examples" "$TEST_DIR/examples"
   for JOB in dog lil; do
-    "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$ROOT/../dl/examples/$JOB" "$TEST_DIR/jobs/$JOB"
+    "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/examples/$JOB" "$TEST_DIR/jobs/$JOB"
     [[ -L $TEST_DIR/jobs/$JOB ]]
     RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh "$JOB" -
     diff --unified -- "$ROOT/../dl/examples/$JOB/run.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/command"
     diff --unified -- "$ROOT/../dl/jobs/dispatch/data/step.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/job"
-    EXPECTED_RECORDS="$(realpath -- "$ROOT/../dl/examples/$JOB/records")"
+    EXPECTED_RECORDS="$(realpath -- "$TEST_DIR/examples/$JOB/records")"
     [[ $(< "$TEST_DIR/snapshot-1/$JOB/instances/-/env/S67_RECORDS_DIR") == "$EXPECTED_RECORDS" ]]
     if [[ -e $TEST_DIR/jobs/$JOB/data/records ]] || [[ -L $TEST_DIR/jobs/$JOB/data/records ]]; then
       exit 1
@@ -44,9 +53,9 @@ trap 'rm -fr -- "$TEST_DIR"' EXIT
       diff --unified -- "$ENV" "$TEST_DIR/snapshot-1/$JOB/instances/-/env/${ENV##*/}"
     done
   done
-}
+  ;;
 
-{
+graph)
   cp --archive -- "$ROOT/../dl/examples" "$TEST_DIR/examples"
   S67_JOBS_DIR="$TEST_DIR/example-jobs" "$ROOT/../dl/jobs/dispatch/run.sh" "$TEST_DIR/examples"
   DEPENDENCY="$TEST_DIR/examples/lil/records"
@@ -71,9 +80,9 @@ trap 'rm -fr -- "$TEST_DIR"' EXIT
   [[ $(< "$TEST_DIR/examples/dog/records/-/latest/output/exit_status") == 0 ]]
   [[ $TEST_DIR/examples/dog/records/-/latest/input/lil -ef $INBOX ]]
   [[ $(< "$TEST_DIR/examples/dog/records/-/latest/input/lil/other/latest/output/exit_status") == 0 ]]
-}
+  ;;
 
-{
+execution)
   mkdir -p -- "$TEST_DIR/steps/dog/data/inbox"
   for DEPENDENCY in dogs rules; do
     for INSTANCE in other-instance second-instance; do
@@ -162,9 +171,9 @@ EOF
   rm -fr -- "$SERVICE"
   [[ $(< "$TEST_DIR/steps/dog/records/walk/latest/output/stdout") == walk:second ]]
   [[ $(< "$TEST_DIR/steps/dog/records/feed/latest/output/stdout") == feed:first ]]
-}
+  ;;
 
-{
+queues)
   mkdir -p -- "$TEST_DIR/queue-step" "$TEST_DIR/bin"
   cp --preserve=mode -- "$ROOT/../dl/examples/dog/run.sh" "$TEST_DIR/queue-step/run.sh"
   cat > "$TEST_DIR/bin/s6-instance-create" << 'EOF'
@@ -187,9 +196,8 @@ EOF
     ln -s -- noop "$TEST_DIR/bin/$COMMAND"
   done
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
-  for PASS in 1 2; do
+  for _ in 1 2; do
     "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/queue-dog"
-    printf -- 'Prepared queue snapshot %s\n' "$PASS"
   done
   ln -s -- /dev/null "$TEST_DIR/jobs/queue-dog/data/recurring/keep"
   ln -s -- /missing/inbox "$TEST_DIR/jobs/queue-dog/data/oneshot/run"
@@ -213,4 +221,9 @@ EOF
   if [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/run ]]; then
     exit 1
   fi
-}
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac

@@ -1,6 +1,7 @@
 #!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
 set -o pipefail
+trap 'printf "%s:%s: %s\n" "$0" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
 TEMPLATE="${1:-${0%.test.sh}.sh}"
 mkdir -p -- "${0%/*}/../../../../../var/tmp"
@@ -8,24 +9,24 @@ TEST_DIR="$(mktemp -d -- "${0%/*}/../../../../../var/tmp/service-template-test.X
 trap 'rm -fr -- "$TEST_DIR"' EXIT
 SRC="$TEST_DIR/steps/dog house"
 DST="$TEST_DIR/jobs/dog house"
-mkdir -p -- "$SRC/data/"{inbox,recurring,oneshot}
+mkdir -p -- "$SRC/queue/"{recurring,oneshot} "$SRC/data/inbox"
 cat > "$SRC/run.sh" << 'EOF'
 #!/usr/bin/env bash
 exit 0
 EOF
 chmod +x -- "$SRC/run.sh"
-ln -s -- ../inbox "$SRC/data/oneshot/initial"
+ln -s -- ../../data/inbox "$SRC/queue/oneshot/initial"
 
 "$TEMPLATE" "$SRC" "$DST"
 FIRST="$(realpath -- "$DST")"
 for MODE in recurring oneshot; do
   [[ -L $DST/data/$MODE ]]
-  [[ $DST/data/$MODE -ef $SRC/data/$MODE ]]
-  ln -s -- ../inbox "$DST/data/$MODE/queued request"
+  [[ $DST/data/$MODE -ef $SRC/queue/$MODE ]]
+  ln -s -- ../../data/inbox "$DST/data/$MODE/queued request"
   ln -s -- /missing/inbox "$DST/data/$MODE/.pending"
 done
 rm -- "$DST/data/oneshot/initial"
-if [[ -L $SRC/data/oneshot/initial ]]; then
+if [[ -L $SRC/queue/oneshot/initial ]]; then
   exit 1
 fi
 
@@ -33,7 +34,7 @@ cat > "$SRC/run.sh" << 'EOF'
 #!/usr/bin/env bash
 exit 67
 EOF
-for PASS in 1 2 3; do
+for _ in 1 2 3; do
   "$TEMPLATE" "$SRC" "$DST"
   CURRENT="$(realpath -- "$DST")"
   [[ $CURRENT != "$FIRST" ]]
@@ -48,7 +49,6 @@ for PASS in 1 2 3; do
   if [[ -L $DST/data/oneshot/initial ]]; then
     exit 1
   fi
-  printf -- 'Refresh %s preserved pending requests\n' "$PASS"
 done
 "$FIRST/data/command"
 

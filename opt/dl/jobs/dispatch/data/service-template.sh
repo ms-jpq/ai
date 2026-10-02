@@ -19,9 +19,9 @@ LINK="${DST%/*}/.${REVISION##*/}.link"
 trap 'rm -f -- "$LINK"' EXIT
 
 rsync --archive --exclude=/data/recurring --exclude=/data/oneshot --include='/env/***' --include='/data/***' --exclude='/*' -- "$SRC/" "$REVISION/"
-mkdir -p -- "$REVISION/env" "$REVISION/data/inbox" "$SRC/records" "$SRC/data/"{recurring,oneshot}
+mkdir -p -- "$REVISION/env" "$REVISION/data/inbox" "$SRC/records" "$SRC/queue/"{recurring,oneshot}
 for MODE in recurring oneshot; do
-  ln -sTnfr -- "$SRC/data/$MODE" "$REVISION/data/$MODE"
+  ln -sTnfr -- "$SRC/queue/$MODE" "$REVISION/data/$MODE"
 done
 printf -- '%s' "$SRC/records" > "$REVISION/env/S67_RECORDS_DIR"
 cp --preserve=mode,timestamps -- "${RUN[*]}" "$REVISION/data/command"
