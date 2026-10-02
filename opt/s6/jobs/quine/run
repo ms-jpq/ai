@@ -10,7 +10,7 @@ XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
 case "${RECUR:-}" in
 bootstrap)
-  S67_BOOT=0 RECUR=job exec -- s6-setlock -- "$PWD/.reconcile.lock" "$SELF" quine
+  RECUR=seed exec -- s6-setlock -- "$PWD/.reconcile.lock" "$SELF" quine
   ;;
 '')
   cd -P -- "${0%/*}/../../../.."
@@ -20,8 +20,7 @@ reconcile)
   trap 's6-svscanctl -h -- "$PWD"' EXIT
   find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 | RECUR=job "${XARGS[@]}" "$SELF" '{}'
   ;;
-job)
-
+seed | job)
   NAME="${1##*/}"
   JOB="$ROOT/jobs/$NAME"
   MANAGER="$PWD/$NAME"
@@ -41,23 +40,23 @@ job)
     rsync --archive --checksum --delete -- "$STAGING/template/" "$MANAGER/template/"
   fi
 
-  if [[ ${S67_BOOT:-0} == 0 ]]; then
-    for REQUEST in "$JOB"/data/recurring/*; do
-      if ! [[ -L $REQUEST ]]; then
-        continue
-      fi
-      INSTANCE="${REQUEST##*/}"
-      if ! [[ -d $MANAGER/instances/$INSTANCE ]]; then
-        rsync --archive -- "$MANAGER/template/" "$STAGING/instance/"
-        mv -- "$STAGING/instance" "$MANAGER/instances/$INSTANCE"
-      fi
-      if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
-        ln -s -- "../instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
-      fi
-    done
-    exit
-  fi
-
+  ;;&
+seed)
+  for REQUEST in "$JOB"/data/recurring/*; do
+    if ! [[ -L $REQUEST ]]; then
+      continue
+    fi
+    INSTANCE="${REQUEST##*/}"
+    if ! [[ -d $MANAGER/instances/$INSTANCE ]]; then
+      rsync --archive -- "$MANAGER/template/" "$STAGING/instance/"
+      mv -- "$STAGING/instance" "$MANAGER/instances/$INSTANCE"
+    fi
+    if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
+      ln -s -- "../instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
+    fi
+  done
+  ;;
+job)
   if ! s6-svok "$MANAGER"; then
     exit
   fi
