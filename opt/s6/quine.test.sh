@@ -15,8 +15,12 @@ RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../s6/jobs/quine/run.sh
 RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../s6/jobs/quine-2/run.sh quine-2 -
 RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../snapshot-1/quine/instances/-/data/job quine -
 
-[[ -d $TEST_DIR/snapshot-2/quine-2/template && ! -L $TEST_DIR/snapshot-2/quine-2/template ]]
+[[ -d $TEST_DIR/snapshot-2/quine-2/template ]]
+if [[ -L $TEST_DIR/snapshot-2/quine-2/template ]]; then
+  exit 1
+fi
 LINK="$(readlink -- "$TEST_DIR/snapshot-1/quine/template/data/null")"
-[[ -L $TEST_DIR/snapshot-1/quine/template/data/null && $LINK == /dev/null ]]
+[[ -L $TEST_DIR/snapshot-1/quine/template/data/null ]]
+[[ $LINK == /dev/null ]]
 git diff --no-index --exit-code -- "$TEST_DIR/snapshot-1/quine" "$TEST_DIR/snapshot-2/quine-2"
 exec -- git diff --no-index --exit-code -- "$TEST_DIR/snapshot-1/quine" "$TEST_DIR/snapshot-3/quine"
