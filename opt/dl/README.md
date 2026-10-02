@@ -9,17 +9,17 @@ STEPS/
     ├── env/
     ├── wants/
     │   └── <dependency> -> ../../<dependency>/
-    └── outbox/
-        ├── .versions/<instance>/
-        │   ├── <revision>/
-        │   │   ├── input/
-        │   │   │   ├── dogs -> /…/STEPS/dogs/outbox/<instance>/
-        │   │   │   └── rules -> /…/STEPS/rules/outbox/<instance>/
-        │   │   └── output/
-        │   │       ├── stdout
-        │   │       └── exit_status
-        │   └── latest -> <revision>/
-        └── <instance> -> .versions/<instance>/latest/
+    └── records/
+        ├── <instance> -> .versions/<instance>/latest/
+        └── .versions/<instance>/
+            ├── latest -> <revision>/
+            └── <revision>/
+                ├── input/
+                │   ├── dogs -> /…/STEPS/dogs/records/<instance>/
+                │   └── rules -> /…/STEPS/rules/records/<instance>/
+                └── output/
+                    ├── stdout
+                    └── exit_status
 
 JOBS/
 ├── .versions/
@@ -29,7 +29,7 @@ JOBS/
 │       └── data/
 │           ├── command
 │           ├── step.sh
-│           └── outbox -> /…/STEPS/dog/outbox/
+│           └── records -> /…/STEPS/dog/records/
 └── dog -> .versions/dog.<revision>/
 
 STATE/
@@ -40,7 +40,7 @@ STATE/
     │       ├── command
     │       ├── step.sh
     │       ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh
-    │       └── outbox -> /…/STEPS/dog/outbox/
+    │       └── records -> /…/STEPS/dog/records/
     ├── instances/
     │   └── walk/
     │       ├── env/
@@ -49,9 +49,9 @@ STATE/
     │           ├── step.sh
     │           ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh
     │           ├── inbox/
-    │           │   └── lil -> /…/STEPS/lil/outbox/.versions/<instance>/latest/
-    │           ├── outbox -> /…/STEPS/dog/outbox/
-    │           └── versions -> /…/STEPS/dog/outbox/.versions/walk/
+    │           │   └── lil -> /…/STEPS/lil/records/.versions/<instance>/latest/
+    │           ├── records -> /…/STEPS/dog/records/
+    │           └── versions -> /…/STEPS/dog/records/.versions/walk/
     └── instance/
         └── walk -> ../instances/walk/
 ```
