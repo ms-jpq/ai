@@ -10,8 +10,19 @@ STEPS/
 │   ├── wants/
 │   │   └── lil -> ../../lil
 │   └── outbox/
-│       ├── walk -> /…/STATE/dog/instances/walk/data/results/latest
-│       └── feed -> /…/STATE/dog/instances/feed/data/results/latest
+│       ├── .versions/
+│       │   ├── walk/
+│       │   │   ├── <revision>/
+│       │   │   │   ├── headers
+│       │   │   │   └── stdout
+│       │   │   └── latest -> <revision>/
+│       │   └── feed/
+│       │       ├── <revision>/
+│       │       │   ├── headers
+│       │       │   └── stdout
+│       │       └── latest -> <revision>/
+│       ├── walk -> .versions/walk/latest
+│       └── feed -> .versions/feed/latest
 └── lil/
     ├── run.sh
     ├── env/
@@ -35,16 +46,8 @@ STATE/
     └── instances/
         ├── walk/
         │   └── data/
-        │       └── results/
-        │           ├── <id-A>/
-        │           │   ├── headers
-        │           │   └── stdout
-        │           └── latest -> <id-A>/
+        │       └── versions -> /…/STEPS/dog/outbox/.versions/walk/
         └── feed/
             └── data/
-                └── results/
-                    ├── <id-B>/
-                    │   ├── headers
-                    │   └── stdout
-                    └── latest -> <id-B>/
+                └── versions -> /…/STEPS/dog/outbox/.versions/feed/
 ```
