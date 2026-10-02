@@ -10,11 +10,11 @@ XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
 case "${RECUR:-}" in
 bootstrap)
-  RECUR=seed exec -- s6-setlock -- "$SELF" "$SELF" quine -
+  RECUR=seed exec -- s6-setlock -t "$TIMEOUT" -- "$SELF" "$SELF" quine -
   ;;
 '')
   cd -P -- "${0%/*}/../../../.."
-  RECUR=reconcile exec -- s6-setlock -- "$SELF" "$SELF"
+  RECUR=reconcile exec -- s6-setlock -t "$TIMEOUT" -- "$SELF" "$SELF"
   ;;
 reconcile)
   trap 's6-svscanctl -h -- "$PWD"' EXIT

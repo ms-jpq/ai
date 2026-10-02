@@ -7,4 +7,4 @@ JOB="${SERVICE%/instances/*}"
 LOGS="$JOB/../../log/${JOB##*/}"
 
 mkdir -p -- "$LOGS"
-exec -- s6-log -b -d "$(< ./notification-fd)" -- T 1 >> "$LOGS/${SERVICE##*/}.log"
+exec -- s6-log -b -l 0 -d "$(< ./notification-fd)" -- T "p${JOB##*/}@${SERVICE##*/}" 1 >> "$LOGS/${SERVICE##*/}.log"

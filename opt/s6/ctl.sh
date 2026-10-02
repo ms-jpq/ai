@@ -1,7 +1,6 @@
 #!/usr/bin/env -S -- bash -Eeuo pipefail -O dotglob -O nullglob -O extglob -O failglob -O globstar
 
 set -o pipefail
-shopt -u failglob
 
 ACTION="$1"
 shift -- 1
@@ -9,6 +8,7 @@ STATE="$1"
 
 BASE="$(realpath -- "${0%/*}")"
 LOGS="$STATE/../log"
+TIMEOUT=6000
 mkdir -p -- "$STATE" "$LOGS"
 
 case "$ACTION" in
@@ -26,7 +26,7 @@ start)
   printf -- '%s' "$P_STARTED" > "$STATE/watchdog/data/$P_PID"
   ln -s -- "../$P_PID" "$STATE/watchdog/data/recurring/$P_PID"
 
-  S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T 1 >> "$LOGS/s6.log"
+  S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -l 0 -- T 1 >> "$LOGS/s6.log"
   ;;
 stop)
   SCAN="$STATE/.s6-svscan"
@@ -35,19 +35,13 @@ stop)
   fi
 
   if s6-svscanctl -t -- "$STATE"; then
-    s6-setlock -- "$SCAN/lock" true
+    s6-setlock -t "$TIMEOUT" -- "$SCAN/lock" true
   else
     STATUS=$?
     if ((STATUS != 100)); then
       exit "$STATUS"
     fi
   fi
-  ;;
-stat)
-  for SERVICE in "$STATE/"[!.]*/; do
-    printf -- '%s: ' "${SERVICE%/}"
-    s6-svstat -- "$SERVICE"
-  done
   ;;
 *)
   set -x
