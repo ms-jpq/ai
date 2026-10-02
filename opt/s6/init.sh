@@ -14,9 +14,12 @@ mkdir -p -- "$STATE" "$LOGS"
 case "$ACTION" in
 start)
   WS="$(realpath -- "$2")"
+  P_PID="${3:-$PPID}"
+  P_STARTED="$(LC_ALL=C.UTF-8 ps -p "$P_PID" -o lstart=)"
 
   "$0" shutdown "$@"
   env -C "$STATE" -- RECUR=bootstrap "$BASE/jobs/quine/run.sh"
+  printf -- '%s\n' "$P_PID" "$P_STARTED" > "$STATE/../watchdog-parent"
   S67_BOOT=1 S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
   ;;
 shutdown)
