@@ -43,32 +43,46 @@ TEST_DIR="$ROOT/../../var/tmp/quine-test"
 {
   cp --archive -- "$ROOT/../dl/examples" "$TEST_DIR/examples"
   S67_JOBS_DIR="$TEST_DIR/example-jobs" "$ROOT/../dl/jobs/dispatch/run.sh" "$TEST_DIR/examples"
+  DEPENDENCY="$TEST_DIR/examples/lil/records"
   INBOX="$TEST_DIR/example-jobs/dog/data/inbox/lil"
-  [[ $INBOX -ef $TEST_DIR/examples/lil/records ]]
-  "$TEST_DIR/example-jobs/lil/data/step.sh" fetch
-  [[ $(< "$INBOX/fetch/output/exit_status") == 0 ]]
-  FIRST="$(readlink -- "$INBOX/.versions/fetch/latest")"
-  "$TEST_DIR/example-jobs/lil/data/step.sh" fetch
-  LATEST="$(readlink -- "$INBOX/.versions/fetch/latest")"
+  if [[ -e $TEST_DIR/example-jobs/dog/data/dependencies ]]; then
+    exit 1
+  fi
+  if "$TEST_DIR/example-jobs/dog/data/step.sh" -; then
+    exit 1
+  fi
+  "$TEST_DIR/example-jobs/lil/data/step.sh" -
+  [[ $INBOX -ef $DEPENDENCY ]]
+  [[ $(< "$INBOX/-/output/exit_status") == 0 ]]
+  FIRST="$(readlink -- "$DEPENDENCY/.versions/-/latest")"
+  "$TEST_DIR/example-jobs/lil/data/step.sh" -
+  LATEST="$(readlink -- "$DEPENDENCY/.versions/-/latest")"
   [[ $LATEST != "$FIRST" ]]
+  [[ $INBOX/- -ef $DEPENDENCY/.versions/-/$LATEST ]]
   "$TEST_DIR/example-jobs/lil/data/step.sh" other
-  [[ $(< "$INBOX/other/output/exit_status") == 0 ]]
+  [[ $(< "$DEPENDENCY/other/output/exit_status") == 0 ]]
+  "$TEST_DIR/example-jobs/dog/data/step.sh" -
+  [[ $(< "$TEST_DIR/examples/dog/records/-/output/exit_status") == 0 ]]
+  [[ $TEST_DIR/examples/dog/records/-/input/lil -ef $INBOX ]]
+  [[ $(< "$TEST_DIR/examples/dog/records/-/input/lil/other/output/exit_status") == 0 ]]
 }
 
 {
-  mkdir -p -- "$TEST_DIR/steps/dog/data/inbox" "$TEST_DIR/upstream/other-instance/output"
-  cat > "$TEST_DIR/upstream/other-instance/output/exit_status" << 'EOF'
+  mkdir -p -- "$TEST_DIR/steps/dog/data/inbox" "$TEST_DIR/upstream/.versions/other-instance/revision/output"
+  cat > "$TEST_DIR/upstream/.versions/other-instance/revision/output/exit_status" << 'EOF'
 0
 EOF
-  cat > "$TEST_DIR/upstream/other-instance/output/stdout" << 'EOF'
+  cat > "$TEST_DIR/upstream/.versions/other-instance/revision/output/stdout" << 'EOF'
 input from another instance
 EOF
-  INPUT="$(realpath -- "$TEST_DIR/upstream/other-instance")"
+  ln -sTnf -- revision "$TEST_DIR/upstream/.versions/other-instance/latest"
+  ln -sTnf -- .versions/other-instance/latest "$TEST_DIR/upstream/other-instance"
+  INPUT="$(realpath -- "$TEST_DIR/upstream")"
   ln -sTnf -- "$INPUT" "$TEST_DIR/steps/dog/data/inbox/dogs"
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
-[[ $(< input/dogs/output/stdout) == 'input from another instance' ]]
+[[ $(< input/dogs/other-instance/output/stdout) == 'input from another instance' ]]
 cat << STDOUT
 $1:$PAYLOAD
 STDOUT

@@ -10,10 +10,17 @@ VERSIONS="$RECORDS/.versions/$INSTANCE"
 
 mkdir -p -- "$VERSIONS"
 ln -sTnf -- "$VERSIONS/latest/output" "$DATA/outbox"
-for INPUT in "$DATA/inbox/"*; do
-  if [[ -L $INPUT ]]; then
-    [[ -d $INPUT/output ]]
-    [[ $(< "$INPUT/output/exit_status") == 0 ]]
+for DEPENDENCY in "$DATA/inbox/"*; do
+  if [[ -L $DEPENDENCY ]]; then
+    AVAILABLE=0
+    for INPUT in "$DEPENDENCY/"*; do
+      if [[ -L $INPUT ]]; then
+        [[ -d $INPUT/output ]]
+        [[ $(< "$INPUT/output/exit_status") == 0 ]]
+        AVAILABLE=1
+      fi
+    done
+    ((AVAILABLE))
   fi
 done
 
