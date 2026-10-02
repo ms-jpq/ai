@@ -3,9 +3,10 @@
 set -o pipefail
 shopt -u failglob
 
+: "${RECORDS?}"
+
 INSTANCE="$1"
 DATA="$(realpath -- "${0%/*}")"
-RECORDS="$(realpath -- "$DATA/records")"
 VERSIONS="$RECORDS/$INSTANCE"
 
 mkdir -p -- "$VERSIONS"

@@ -34,8 +34,7 @@ JOBS/
 │           │       └── <instance>/latest -> <revision>/
 │           ├── recurring/
 │           │   └── <instance> -> ../inbox/
-│           ├── oneshot/
-│           └── records -> /…/STEPS/dog/records/
+│           └── oneshot/
 └── dog -> .versions/dog.<revision>/
 
 STATE/
