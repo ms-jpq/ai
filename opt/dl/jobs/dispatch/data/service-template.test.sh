@@ -9,7 +9,9 @@ TEST_DIR="$(mktemp -d -- "${0%/*}/../../../../../var/tmp/service-template-test.X
 trap 'rm -fr -- "$TEST_DIR"' EXIT
 SRC="$TEST_DIR/steps/dog house"
 DST="$TEST_DIR/jobs/dog house"
-mkdir -p -- "$SRC/requests/"{recurring,oneshot} "$SRC/data/inbox"
+mkdir -p -- "$SRC/requests/"{recurring,oneshot} "$SRC/data/inbox" "$SRC/wants" "$TEST_DIR/steps/lil"
+ln -s -- ../../lil "$SRC/wants/lil"
+ln -s -- /missing/old-records "$SRC/data/inbox/lil"
 cat > "$SRC/run.sh" << 'EOF'
 #!/usr/bin/env bash
 exit 0
@@ -19,6 +21,12 @@ ln -s -- ../../data/inbox "$SRC/requests/oneshot/initial"
 
 "$TEMPLATE" "$SRC" "$DST"
 FIRST="$(realpath -- "$DST")"
+INBOX="$(readlink -- "$DST/data/inbox/lil")"
+DEPENDENCY="$(realpath -- "$TEST_DIR/steps/lil")"
+[[ $INBOX == "$DEPENDENCY/records" ]]
+mkdir -p -- "$TEST_DIR/steps/lil/records/walk/revision/output"
+ln -s -- revision "$TEST_DIR/steps/lil/records/walk/latest"
+[[ $DST/data/inbox/lil/walk/latest/output -ef $TEST_DIR/steps/lil/records/walk/revision/output ]]
 for MODE in recurring oneshot; do
   [[ -L $DST/data/$MODE ]]
   [[ $DST/data/$MODE -ef $SRC/requests/$MODE ]]
@@ -72,3 +80,11 @@ fi
 AFTER="$(readlink -- "$DST")"
 [[ $BEFORE == "$AFTER" ]]
 [[ -L $DST/data/oneshot/late ]]
+
+chmod +x -- "$SRC/run.sh"
+ln -s -- /missing/dependency "$SRC/wants/missing"
+if "$TEMPLATE" "$SRC" "$DST" 2> "$TEST_DIR/error"; then
+  exit 1
+fi
+AFTER="$(readlink -- "$DST")"
+[[ $AFTER == "$BEFORE" ]]

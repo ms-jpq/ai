@@ -27,5 +27,11 @@ printf -- '%s' "$SRC/records" > "$REVISION/env/S67_RECORDS_DIR"
 cp --preserve=mode,timestamps -- "${RUN[*]}" "$REVISION/data/command"
 cp --preserve=mode,timestamps -- "${0%/*}/step.sh" "$REVISION/data/step.sh"
 ln -sTnf -- data/step.sh "$REVISION/run.sh"
+for DEPENDENCY in "$SRC/wants/"*; do
+  if [[ -L $DEPENDENCY ]]; then
+    TARGET="$(realpath -- "$DEPENDENCY")"
+    ln -sTnf -- "$TARGET/records" "$REVISION/data/inbox/${DEPENDENCY##*/}"
+  fi
+done
 ln -sTnfr -- "$REVISION" "$LINK"
 mv --force --no-target-directory -- "$LINK" "$DST"

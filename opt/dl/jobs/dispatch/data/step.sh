@@ -5,9 +5,8 @@ shopt -u failglob
 
 : "${S67_RECORDS_DIR?}"
 
-INSTANCE="$1"
 DATA="$(realpath -- "${0%/*}")"
-VERSIONS="$S67_RECORDS_DIR/$INSTANCE"
+VERSIONS="$S67_RECORDS_DIR/$1"
 
 mkdir -p -- "$VERSIONS"
 for DEPENDENCY in "$DATA/inbox/"*; do
@@ -30,11 +29,8 @@ ln -sTnf -- "$REVISION/output" "$DATA/outbox"
 cp --archive -- "$DATA/inbox/." "$REVISION/input/"
 cd -- "$REVISION"
 
-if "$DATA/command" "$@" > output/stdout; then
-  STATUS=0
-else
-  STATUS="$?"
-fi
+STATUS=0
+"$DATA/command" "$@" > output/stdout || STATUS="$?"
 printf -- '%s\n' "$STATUS" > output/exit_status
 if ((STATUS != 0)); then
   exit "$STATUS"
