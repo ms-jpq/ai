@@ -6,12 +6,12 @@ BUNDLE="$1"
 SCRIPT="$2"
 shift -- 2
 
-if ! [[ -f $SCRIPT && -x $SCRIPT ]]; then
+if ! [[ -f $SCRIPT ]] || ! [[ -x $SCRIPT ]]; then
   set -x
   exit 2
 fi
 for OPTION in "$@"; do
-  if [[ $OPTION != *=* || ${OPTION%%=*} != +([[:alnum:]_]) ]]; then
+  if [[ $OPTION != *=* ]] || [[ ${OPTION%%=*} != +([[:alnum:]_]) ]]; then
     set -x
     exit 2
   fi

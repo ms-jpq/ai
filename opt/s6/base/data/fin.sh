@@ -13,7 +13,7 @@ ATTEMPTS="$INSTANCE_DATA/attempt"
 
 exec 2>&1
 
-if [[ -n ${4:-} || -f $INSTANCE_DATA/pgid ]]; then
+if [[ -n ${4:-} ]] || [[ -f $INSTANCE_DATA/pgid ]]; then
   PGID="${4:-$(< "$INSTANCE_DATA/pgid")}"
   rm -f -- "$INSTANCE_DATA/pgid"
   kill -KILL -- "-$PGID" 2> /dev/null || true

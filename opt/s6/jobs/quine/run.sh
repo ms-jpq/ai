@@ -25,7 +25,7 @@ seed | job)
   JOB="$(realpath -- "$ROOT/jobs/$NAME")"
   MANAGER="$PWD/$NAME"
   RUN=("$JOB"/run.*)
-  if ((${#RUN[@]} != 1)) || ! [[ -f ${RUN[*]} && -x ${RUN[*]} ]]; then
+  if ((${#RUN[@]} != 1)) || ! [[ -f ${RUN[*]} ]] || ! [[ -x ${RUN[*]} ]]; then
     set -x
     exit 2
   fi
@@ -87,7 +87,7 @@ recurring | oneshot)
   RECURRING="$JOB/data/recurring/$INSTANCE"
   ONESHOT="$JOB/data/oneshot/$INSTANCE"
 
-  if [[ -L $RECURRING && -L $ONESHOT ]]; then
+  if [[ -L $RECURRING ]] && [[ -L $ONESHOT ]]; then
     tee >&2 <<- EOF
 Conflicting Requests:
 $RECURRING
