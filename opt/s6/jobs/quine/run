@@ -23,17 +23,6 @@ reconcile)
   find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 | xargs --null --no-run-if-empty --max-procs=0 -I '{}' -- env RECUR=job "$SELF" '{}'
   ;;
 job)
-  # with reconcile using -h, can you simplfy job)
-
-  # | >>> -h is exactly -a -n, so it adds no behavior we can remove from job.
-  # | It rescans STATE's managers, not their nested instance directories, and runs
-  # | after these job calls return. Template preparation, readiness checks, and
-  # | completed-instance deletion still belong here.
-  #
-  # # it must mean that job) has less to do now?
-
-  # | >>> Yes after the recurring extraction: job now dispatches those instances.
-  # | -h adds no further reduction; it is the same root rescan as -a -n.
 
   NAME="${1##*/}"
   JOB="$ROOT/jobs/$NAME"
@@ -78,25 +67,19 @@ job)
 
   for DONE in "$MANAGER"/data/done/*; do
     INSTANCE="${DONE##*/}"
-    if [[ -d $MANAGER/instances/$INSTANCE || -L $MANAGER/instance/$INSTANCE ]]; then
-      s6-instance-delete -- "$MANAGER" "$INSTANCE"
-    fi
+    s6-instance-delete -- "$MANAGER" "$INSTANCE"
     if [[ -e $MANAGER/instances/$INSTANCE || -L $MANAGER/instance/$INSTANCE ]]; then
       exit 1
     fi
     rm -- "$DONE"
   done
 
-  for REQUEST in "$JOB"/data/recurring/*; do
-    if [[ -L $REQUEST ]]; then
-      RECUR=recurring "$SELF" "$NAME" "${REQUEST##*/}"
-    fi
-  done
-
-  for REQUEST in "$JOB"/data/oneshot/*; do
-    if [[ -L $REQUEST ]]; then
-      RECUR=oneshot "$SELF" "$NAME" "${REQUEST##*/}"
-    fi
+  for MODE in recurring oneshot; do
+    for REQUEST in "$JOB"/data/"$MODE"/*; do
+      if [[ -L $REQUEST ]]; then
+        RECUR="$MODE" "$SELF" "$NAME" "${REQUEST##*/}"
+      fi
+    done
   done
   ;;
 recurring | oneshot)
