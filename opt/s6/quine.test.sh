@@ -65,24 +65,28 @@ EOF
     SERVICE="$TEST_DIR/snapshot-1/dog/instances/$INSTANCE"
     PAYLOAD=first RESULT=0 "$SERVICE/data/job" "$INSTANCE" 2> "$TEST_DIR/stderr"
     [[ $(< "$TEST_DIR/stderr") == diagnostic ]]
-    [[ $(< "$TEST_DIR/steps/dog/outbox/$INSTANCE/stdout") == "$INSTANCE:first" ]]
-    [[ -d $SERVICE/data/versions/latest/meta ]]
+    [[ $(< "$SERVICE/data/outbox/stdout") == "$INSTANCE:first" ]]
+    [[ $(< "$SERVICE/data/outbox/exit_status") == 0 ]]
+    [[ -d $TEST_DIR/steps/dog/records/$INSTANCE/input ]]
   done
 
   SERVICE="$TEST_DIR/snapshot-1/dog/instances/walk"
-  FIRST="$(readlink -- "$SERVICE/data/versions/latest")"
+  VERSIONS="$TEST_DIR/steps/dog/records/.versions/walk"
+  FIRST="$(readlink -- "$VERSIONS/latest")"
   if PAYLOAD=failed RESULT=67 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"; then
     exit 1
   else
     [[ $? == 67 ]]
   fi
-  LATEST="$(readlink -- "$SERVICE/data/versions/latest")"
+  LATEST="$(readlink -- "$VERSIONS/latest")"
   [[ $LATEST == "$FIRST" ]]
+  FAILED=("$VERSIONS/"*/output/exit_status)
+  grep --quiet --line-regexp 67 "${FAILED[@]}"
   PAYLOAD=second RESULT=0 "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"
-  LATEST="$(readlink -- "$SERVICE/data/versions/latest")"
+  LATEST="$(readlink -- "$VERSIONS/latest")"
   [[ $LATEST != "$FIRST" ]]
-  [[ $(< "$SERVICE/data/versions/$FIRST/stdout") == walk:first ]]
+  [[ $(< "$VERSIONS/$FIRST/output/stdout") == walk:first ]]
   rm -fr -- "$SERVICE"
-  [[ $(< "$TEST_DIR/steps/dog/outbox/walk/stdout") == walk:second ]]
-  [[ $(< "$TEST_DIR/steps/dog/outbox/feed/stdout") == feed:first ]]
+  [[ $(< "$TEST_DIR/steps/dog/records/walk/output/stdout") == walk:second ]]
+  [[ $(< "$TEST_DIR/steps/dog/records/feed/output/stdout") == feed:first ]]
 }
