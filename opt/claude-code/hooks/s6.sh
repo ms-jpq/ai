@@ -20,7 +20,7 @@ SessionStart)
   exec -- "$CTL" start "$STATE" "$WORKSPACE" "${CLAUDE_PID?}"
   ;;
 SessionEnd)
-  exec -- "$CTL" shutdown "$STATE"
+  exec -- "$CTL" stop "$STATE"
   ;;
 *)
   set -x

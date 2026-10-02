@@ -17,7 +17,7 @@ start)
   P_PID="${3:-$PPID}"
   P_STARTED="$(LC_ALL=C.UTF-8 ps -p "$P_PID" -o lstart=)"
 
-  "$0" shutdown "$@"
+  "$0" stop "$@"
   env -C "$STATE" -- RECUR=bootstrap "$BASE/jobs/quine/run.sh"
   rm -fr -- "$STATE/watchdog"
   env -C "$STATE" -- RECUR=seed "$BASE/jobs/quine/run.sh" watchdog "$P_PID"
@@ -28,7 +28,7 @@ start)
 
   S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
   ;;
-shutdown)
+stop)
   SCAN="$STATE/.s6-svscan"
   if ! [[ -p $SCAN/control ]]; then
     exit
