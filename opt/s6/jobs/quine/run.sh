@@ -34,7 +34,7 @@ seed | job)
   trap 'rm -fr -- "$STAGING"' EXIT
   rsync --archive -- "$ROOT/base/" "$STAGING/template/"
   rsync --archive --checksum --exclude=/data/recurring --exclude=/data/oneshot --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$STAGING/template/"
-  ln -s -- "${RUN[*]}" "$STAGING/template/data/job"
+  ln -sTnf -- "${RUN[*]}" "$STAGING/template/data/job"
   mkdir -p -- "$STAGING/template/data/recurring"
 
   if ! [[ -d $MANAGER ]]; then
@@ -53,7 +53,7 @@ seed)
     mv -- "$STAGING/instance" "$MANAGER/instances/$INSTANCE"
   fi
   if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
-    ln -s -- "../instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
+    ln -sTnfr -- "$MANAGER/instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
   fi
   ;;
 job)

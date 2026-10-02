@@ -23,12 +23,13 @@ case "${RECUR:-}" in
   mkdir -p -- "$VERSIONS"
 
   REVISION="$(mktemp -d -- "$VERSIONS/${DST##*/}.XXXXXX")"
-  trap 'rm -f -- "$REVISION.link"' EXIT
+  LINK="${DST%/*}/.${REVISION##*/}.link"
+  trap 'rm -f -- "$LINK"' EXIT
 
   rsync --archive --include='/env/***' --include='/data/***' --exclude='/*' -- "$SRC/" "$REVISION/"
   cp --preserve=mode,timestamps -- "${RUN[*]}" "$REVISION/${RUN[0]##*/}"
-  ln -s -- ".versions/${REVISION##*/}" "$REVISION.link"
-  mv --force --no-target-directory -- "$REVISION.link" "$DST"
+  ln -sTnfr -- "$REVISION" "$LINK"
+  mv --force --no-target-directory -- "$LINK" "$DST"
   ;;
 *)
   set -x
