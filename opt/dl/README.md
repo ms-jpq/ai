@@ -13,13 +13,21 @@ STEPS/
 │       ├── .versions/
 │       │   ├── walk/
 │       │   │   ├── <revision>/
-│       │   │   │   ├── meta/
-│       │   │   │   └── stdout
+│       │   │   │   ├── input/
+│       │   │   │   │   ├── lil-walk -> /…/STEPS/lil/outbox/.versions/walk/<revision-A>/output/
+│       │   │   │   │   └── lil-feed -> /…/STEPS/lil/outbox/.versions/feed/<revision-B>/output/
+│       │   │   │   └── output/
+│       │   │   │       ├── stdout
+│       │   │   │       └── status      # exit code: 0
 │       │   │   └── latest -> <revision>/
 │       │   └── feed/
 │       │       ├── <revision>/
-│       │       │   ├── meta/
-│       │       │   └── stdout
+│       │       │   ├── input/
+│       │       │   │   ├── lil-walk -> /…/STEPS/lil/outbox/.versions/walk/<revision-A>/output/
+│       │       │   │   └── lil-feed -> /…/STEPS/lil/outbox/.versions/feed/<revision-B>/output/
+│       │       │   └── output/
+│       │       │       ├── stdout
+│       │       │       └── status      # exit code: 0
 │       │       └── latest -> <revision>/
 │       ├── walk -> .versions/walk/latest
 │       └── feed -> .versions/feed/latest
@@ -28,6 +36,23 @@ STEPS/
     ├── env/
     ├── wants/
     └── outbox/
+        ├── .versions/
+        │   ├── walk/
+        │   │   ├── <revision-A>/
+        │   │   │   ├── input/
+        │   │   │   └── output/
+        │   │   │       ├── stdout
+        │   │   │       └── status      # exit code: 0
+        │   │   └── latest -> <revision-A>/
+        │   └── feed/
+        │       ├── <revision-B>/
+        │       │   ├── input/
+        │       │   └── output/
+        │       │       ├── stdout
+        │       │       └── status      # exit code: 0
+        │       └── latest -> <revision-B>/
+        ├── walk -> .versions/walk/latest
+        └── feed -> .versions/feed/latest
 
 JOBS/
 ├── .versions/
@@ -54,8 +79,14 @@ STATE/
     └── instances/
         ├── walk/
         │   └── data/
+        │       ├── inbox/
+        │       │   ├── lil-walk -> /…/STEPS/lil/outbox/walk
+        │       │   └── lil-feed -> /…/STEPS/lil/outbox/feed
         │       └── versions -> /…/STEPS/dog/outbox/.versions/walk/
         └── feed/
             └── data/
+                ├── inbox/
+                │   ├── lil-walk -> /…/STEPS/lil/outbox/walk
+                │   └── lil-feed -> /…/STEPS/lil/outbox/feed
                 └── versions -> /…/STEPS/dog/outbox/.versions/feed/
 ```
