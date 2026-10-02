@@ -22,6 +22,7 @@ done
 mkdir -- "$BUNDLE"
 cp -a -- "${0%/*}/../examples/lil/." "$BUNDLE/"
 cp -p --remove-destination -- "$SCRIPT" "$BUNDLE/run.sh"
+
 for OPTION in "$@"; do
   printf -- '%s' "${OPTION#*=}" > "$BUNDLE/env/${OPTION%%=*}"
 done
