@@ -19,8 +19,13 @@ start)
 
   "$0" shutdown "$@"
   env -C "$STATE" -- RECUR=bootstrap "$BASE/jobs/quine/run.sh"
-  printf -- '%s\n' "$P_PID" "$P_STARTED" > "$STATE/../watchdog-parent"
-  S67_BOOT=1 S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
+  rm -fr -- "$STATE/watchdog"
+  env -C "$STATE" -- RECUR=seed "$BASE/jobs/quine/run.sh" watchdog "$P_PID"
+
+  mkdir -p -- "$STATE/watchdog/data/recurring"
+  printf -- '%s\n' "$P_STARTED" > "$STATE/watchdog/data/$P_PID"
+  ln -s -- "../$P_PID" "$STATE/watchdog/data/recurring/$P_PID"
+  S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -- T "$LOGS"
   ;;
 shutdown)
   SCAN="$STATE/.s6-svscan"
