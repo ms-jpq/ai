@@ -22,7 +22,7 @@ fi
 EXIT_STATUS=0
 if [[ -d $INSTANCE_DATA/recurring ]]; then
   if ((STATUS == 0 && SIGNAL == 0)); then
-    rm -fr -- "$ATTEMPTS"
+    : > "$ATTEMPTS"
   else
     printf -- '\n' >> "$ATTEMPTS"
   fi
