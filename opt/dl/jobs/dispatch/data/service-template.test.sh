@@ -9,24 +9,24 @@ TEST_DIR="$(mktemp -d -- "${0%/*}/../../../../../var/tmp/service-template-test.X
 trap 'rm -fr -- "$TEST_DIR"' EXIT
 SRC="$TEST_DIR/steps/dog house"
 DST="$TEST_DIR/jobs/dog house"
-mkdir -p -- "$SRC/queue/"{recurring,oneshot} "$SRC/data/inbox"
+mkdir -p -- "$SRC/requests/"{recurring,oneshot} "$SRC/data/inbox"
 cat > "$SRC/run.sh" << 'EOF'
 #!/usr/bin/env bash
 exit 0
 EOF
 chmod +x -- "$SRC/run.sh"
-ln -s -- ../../data/inbox "$SRC/queue/oneshot/initial"
+ln -s -- ../../data/inbox "$SRC/requests/oneshot/initial"
 
 "$TEMPLATE" "$SRC" "$DST"
 FIRST="$(realpath -- "$DST")"
 for MODE in recurring oneshot; do
   [[ -L $DST/data/$MODE ]]
-  [[ $DST/data/$MODE -ef $SRC/queue/$MODE ]]
+  [[ $DST/data/$MODE -ef $SRC/requests/$MODE ]]
   ln -s -- ../../data/inbox "$DST/data/$MODE/queued request"
   ln -s -- /missing/inbox "$DST/data/$MODE/.pending"
 done
 rm -- "$DST/data/oneshot/initial"
-if [[ -L $SRC/queue/oneshot/initial ]]; then
+if [[ -L $SRC/requests/oneshot/initial ]]; then
   exit 1
 fi
 
