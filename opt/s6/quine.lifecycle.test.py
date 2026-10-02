@@ -58,6 +58,15 @@ printf '%s\\n' CODE > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
     request = step / "requests/recurring/walk"
     request.symlink_to("/dev/null")
     _run(str(quine), cwd=state, env={**environment, "RECUR": "bootstrap"})
+    keeper = s6 / "jobs/keeper/run.sh"
+    _write(keeper, text="#!/bin/sh\nexit 0\n")
+    keeper.chmod(0o755)
+    _run(
+        str(quine), "keeper", "parent", cwd=state, env={**environment, "RECUR": "seed"}
+    )
+    runtime_requests = state / "keeper/data/recurring"
+    runtime_requests.mkdir()
+    (runtime_requests / "parent").symlink_to("/dev/null")
 
     with (root / "scan.log").open("w+") as log:
         scan = Popen(
@@ -108,6 +117,7 @@ printf '%s\\n' CODE > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
             _wait(lambda: (service / "down").exists())
             (root / "release-three").touch()
             _wait(lambda: not service.exists())
+            assert (root / "finished-three").read_text() == "new\n"
 
             step = root / "removed-step"
             _write(step / "env/PAYLOAD", text="four")
@@ -117,6 +127,9 @@ printf '%s\\n' CODE > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
             _wait(lambda: (service / "down").exists())
             (root / "release-four").touch()
             _wait(lambda: not service.exists())
+            assert (root / "finished-four").read_text() == "new\n"
+            assert (state / "keeper/instances/parent").is_dir()
+            assert not (state / "keeper/instances/parent/down").exists()
             assert (
                 _run(
                     "s6-svstat", "-o", "wantedup", str(state / "quine/instances/-")
