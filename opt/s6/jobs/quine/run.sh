@@ -136,8 +136,9 @@ refresh)
   fi
   touch -- "$SERVICE/down"
   s6-instance-control -O -- "$MANAGER" "$INSTANCE"
-  STATUS="$(s6-svstat -o up,wantedup,ready -- "$SERVICE")"
-  if [[ $STATUS == 'false false true' ]]; then
+  STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
+  if [[ $STATUS == 'false false' ]]; then
+    s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
     s6-instance-delete -- "$MANAGER" "$INSTANCE"
   fi
   ;;
