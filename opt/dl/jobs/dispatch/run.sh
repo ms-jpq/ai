@@ -5,6 +5,7 @@ set -o pipefail
 : "${S67_JOBS_DIR?}"
 
 SELF="$(realpath -- "$0")"
+DATA="${SELF%/*}/data"
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
 case "${RECUR:-}" in
@@ -13,15 +14,17 @@ case "${RECUR:-}" in
   ;;
 step)
   unset -- RECUR
-  JOB="$(realpath --canonicalize-missing -- "$S67_JOBS_DIR/${1##*/}")"
+  JOB="$(realpath --canonicalize-missing -- "$S67_JOBS_DIR")/${1##*/}"
   cd -P -- "$1"
+  "$DATA/service-template.sh" "$PWD" "$JOB"
+
   if ! [[ -x dispatch.sh ]]; then
     set -x
     exit 2
   fi
-  "${SELF%/*}/data/service-template.sh" "$PWD" "$JOB"
+
   mkdir -p -- "$JOB/data/recurring" "$JOB/data/oneshot"
-  "${SELF%/*}/data/gc.sh" "$PWD/records"
+  "$DATA/gc.sh" "$PWD/records"
   exec -- ./dispatch.sh "$JOB/data"
   ;;
 *)

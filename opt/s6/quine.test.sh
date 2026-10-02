@@ -55,7 +55,19 @@ STDERR
 exit "$RESULT"
 EOF
   chmod +x -- "$TEST_DIR/steps/dog/run.sh"
-  "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/steps/dog" "$TEST_DIR/jobs/dog"
+  cat > "$TEST_DIR/steps/dog/dispatch.sh" << 'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ -d records ]]
+[[ -f $1/command ]]
+[[ -d $1/recurring ]]
+[[ -d $1/oneshot ]]
+[[ -z ${RECUR:-} ]]
+ln -s -- /dev/null "$1/oneshot/walk"
+EOF
+  chmod +x -- "$TEST_DIR/steps/dog/dispatch.sh"
+  S67_JOBS_DIR="$TEST_DIR/jobs" "$ROOT/../dl/jobs/dispatch/run.sh" "$TEST_DIR/steps"
+  [[ -L $TEST_DIR/jobs/dog/data/oneshot/walk ]]
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 exit 99
 EOF
