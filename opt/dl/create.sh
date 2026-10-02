@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-BUNDLE="$1"
+STEP="$1"
 SCRIPT="$2"
 shift -- 2
 
@@ -17,10 +17,10 @@ for OPTION in "$@"; do
   fi
 done
 
-mkdir -- "$BUNDLE"
-cp -a -- "${0%/*}/../examples/lil/." "$BUNDLE/"
-cp -p --remove-destination -- "$SCRIPT" "$BUNDLE/run.sh"
+mkdir -- "$STEP"
+cp -a -- "${0%/*}/examples/lil/." "$STEP/"
+cp -p --remove-destination -- "$SCRIPT" "$STEP/run.sh"
 
 for OPTION in "$@"; do
-  printf -- '%s' "${OPTION#*=}" > "$BUNDLE/env/${OPTION%%=*}"
+  printf -- '%s' "${OPTION#*=}" > "$STEP/env/${OPTION%%=*}"
 done

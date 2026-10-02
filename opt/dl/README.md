@@ -3,7 +3,7 @@
 @../s6/README.md
 
 ```text
-steps/
+STEPS/
 ├── dog/
 │   ├── run.sh
 │   ├── env/
@@ -27,16 +27,27 @@ steps/
     ├── wants/
     └── outbox/
 
+JOBS/
+├── .versions/
+│   ├── dog.<revision>/
+│   │   ├── run.sh
+│   │   └── env/
+│   └── lil.<revision>/
+│       ├── run.sh
+│       └── env/
+├── dog -> .versions/dog.<revision>/
+└── lil -> .versions/lil.<revision>/
+
 STATE/
 └── dog/
     ├── template/
     │   └── data/
-    │       └── outbox -> /…/steps/dog/outbox/
+    │       └── outbox -> /…/STEPS/dog/outbox/
     └── instances/
         ├── walk/
         │   └── data/
-        │       └── outbox -> /…/steps/dog/outbox/
+        │       └── outbox -> /…/STEPS/dog/outbox/
         └── feed/
             └── data/
-                └── outbox -> /…/steps/dog/outbox/
+                └── outbox -> /…/STEPS/dog/outbox/
 ```
