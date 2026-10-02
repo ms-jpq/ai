@@ -9,17 +9,17 @@ STEPS/
     ├── env/
     ├── wants/
     │   └── <dependency> -> ../../<dependency>/
-    ├── versions/<instance>/
-    │   ├── <revision>/
-    │   │   ├── input/
-    │   │   │   ├── dogs -> /…/STEPS/dogs/versions/<instance>/latest/output/
-    │   │   │   └── rules -> /…/STEPS/rules/versions/<instance>/latest/output/
-    │   │   └── output/
-    │   │       ├── stdout
-    │   │       └── status             # exit code
-    │   └── latest -> <revision>/
     └── outbox/
-        └── <instance> -> ../versions/<instance>/latest/output/
+        ├── .versions/<instance>/
+        │   ├── <revision>/
+        │   │   ├── input/
+        │   │   │   ├── dogs -> /…/STEPS/dogs/outbox/<instance>/
+        │   │   │   └── rules -> /…/STEPS/rules/outbox/<instance>/
+        │   │   └── output/
+        │   │       ├── stdout
+        │   │       └── status         # exit code
+        │   └── latest -> <revision>/
+        └── <instance> -> .versions/<instance>/latest/output/
 
 STATE/
 └── dog/
@@ -30,7 +30,7 @@ STATE/
     │           ├── inbox/
     │           │   └── lil -> /…/STEPS/lil/outbox/default/
     │           ├── outbox -> /…/STEPS/dog/outbox/
-    │           └── versions -> /…/STEPS/dog/versions/walk/
+    │           └── versions -> /…/STEPS/dog/outbox/.versions/walk/
     └── instance/
         └── walk -> ../instances/walk/
 ```
