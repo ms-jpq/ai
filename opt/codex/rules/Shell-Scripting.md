@@ -51,6 +51,8 @@
 
 - Do not attach `continue`, `break`, or `exit` to a `[[ ... ]]` test with `&&` or `||`. Use an `if` block.
 
+- Keep `&&`, `||`, and `!` outside `[[ ... ]]`: use `[[ ... ]] && [[ ... ]]`, `[[ ... ]] || [[ ... ]]`, and `! [[ ... ]]`.
+
 - `shift -- <count>` after consuming positional args.
 
 ---
