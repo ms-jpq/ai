@@ -5,10 +5,8 @@ shopt -u failglob dotglob
 
 SELF="$(realpath -- "$0")"
 ROOT="${SELF%/jobs/quine/run}"
-# use this for timeouts insetadaof a bnunch of matgic numbers
-
-# | >>> All six explicit s6 timeouts now use TIMEOUT, in milliseconds.
 TIMEOUT=6000
+XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
 case "${RECUR:-}" in
 bootstrap)
@@ -20,7 +18,7 @@ bootstrap)
   ;;
 reconcile)
   trap 's6-svscanctl -h -- "$PWD"' EXIT
-  find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 | xargs --null --no-run-if-empty --max-procs=0 -I '{}' -- env RECUR=job "$SELF" '{}'
+  find "$ROOT/jobs" -mindepth 1 -maxdepth 1 -type d ! -name '.*' -print0 | RECUR=job "${XARGS[@]}" "$SELF" '{}'
   ;;
 job)
 
@@ -75,24 +73,22 @@ job)
   done
 
   for MODE in recurring oneshot; do
-    for REQUEST in "$JOB"/data/"$MODE"/*; do
-      if [[ -L $REQUEST ]]; then
-        RECUR="$MODE" "$SELF" "$NAME" "${REQUEST##*/}"
-      fi
-    done
+    if [[ -d $JOB/data/$MODE ]]; then
+      find "$JOB/data/$MODE" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -print0 | RECUR="$MODE" "${XARGS[@]}" "$SELF" "$NAME" '{}'
+    fi
   done
   ;;
 recurring | oneshot)
   JOB="$ROOT/jobs/$1"
   MANAGER="$PWD/$1"
-  INSTANCE="$2"
+  INSTANCE="${2##*/}"
   SERVICE="$MANAGER/instances/$INSTANCE"
   RECURRING="$JOB/data/recurring/$INSTANCE"
   ONESHOT="$JOB/data/oneshot/$INSTANCE"
 
   if [[ -L $RECURRING && -L $ONESHOT ]]; then
     tee >&2 <<- EOF
-Conflicting requests:
+Conflicting Requests:
 $RECURRING
 $ONESHOT
 EOF
