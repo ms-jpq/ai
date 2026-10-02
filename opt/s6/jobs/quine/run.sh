@@ -134,7 +134,8 @@ refresh)
   if [[ -d $JOB ]] && [[ -L $RECURRING ]] && ! [[ -f $SERVICE/down ]] && cmp --silent -- "$MANAGER/template/.definition" "$SERVICE/.definition"; then
     exit
   fi
-  s6-instance-control -Q -- "$MANAGER" "$INSTANCE"
+  touch -- "$SERVICE/down"
+  s6-instance-control -O -- "$MANAGER" "$INSTANCE"
   STATUS="$(s6-svstat -o up,wantedup,ready -- "$SERVICE")"
   if [[ $STATUS == 'false false true' ]]; then
     s6-instance-delete -- "$MANAGER" "$INSTANCE"
