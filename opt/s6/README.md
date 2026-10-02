@@ -12,9 +12,9 @@ STATE/watchdog/
 │   └── recurring/
 │       └── <pid> -> ../lstart
 ├── template/
-├── instances/
-│   └── <pid>/
-│       └── data/job -> /…/JOBS/watchdog/run.sh
-└── instance/
-    └── <pid> -> ../instances/<pid>
+├── instance/
+│   └── <pid> -> ../instances/<pid>
+└── instances/
+    └── <pid>/
+        └── data/job -> /…/JOBS/watchdog/run.sh
 ```

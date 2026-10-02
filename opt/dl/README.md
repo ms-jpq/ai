@@ -37,21 +37,15 @@ JOBS/
 STATE/
 └── dog/
     ├── template/
-    │   ├── env/
-    │   └── data/
-    │       ├── command
-    │       ├── step.sh
-    │       ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
-    │       └── records -> /…/STEPS/dog/records/
-    ├── instances/walk/
-    │   ├── env/
-    │   └── data/
-    │       ├── command
-    │       ├── step.sh
-    │       ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
-    │       ├── inbox/
-    │       │   └── lil -> /…/STEPS/lil/records/.versions/<instance>/latest/ -> <revision>/
-    │       ├── records -> /…/STEPS/dog/records/
-    │       └── versions -> /…/STEPS/dog/records/.versions/walk/
-    └── instance/walk -> ../instances/walk/
+    ├── instance/<instance> -> ../instances/<instance>/
+    └── instances/<instance>/
+        ├── env/
+        └── data/
+            ├── command
+            ├── step.sh
+            ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
+            ├── inbox/
+            │   └── lil -> /…/STEPS/lil/records/.versions/<instance>/latest/ -> <revision>/
+            ├── records -> /…/STEPS/dog/records/
+            └── versions -> /…/STEPS/dog/records/.versions/<instance>/
 ```
