@@ -119,7 +119,7 @@ oneshot)
   fi
 
   rm -fr -- "$SERVICE/data/recurring"
-  s6-svc -wu -T "$TIMEOUT" -U -- "$SERVICE/log"
+  s6-svc -wU -T "$TIMEOUT" -U -- "$SERVICE/log"
   rm -- "$ONESHOT"
   s6-instance-control -wu -T "$TIMEOUT" -o -- "$MANAGER" "$INSTANCE"
   ;;
