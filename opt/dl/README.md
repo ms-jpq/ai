@@ -15,10 +15,8 @@ STEPS/
             ├── latest -> <revision>/
             └── <revision>/
                 ├── input/
-                │   ├── dogs -> /…/STEPS/dogs/records/<instance>/
-                │   │          -> .versions/<instance>/latest/ -> <revision>/
-                │   └── rules -> /…/STEPS/rules/records/<instance>/
-                │              -> .versions/<instance>/latest/ -> <revision>/
+                │   └── <dependency> -> /…/STEPS/<dependency>/records/<instance>/
+                │                      -> .versions/<instance>/latest/ -> <revision>/
                 └── output/
                     ├── stdout
                     └── exit_status
@@ -45,7 +43,7 @@ STATE/
             ├── step.sh
             ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh -> data/step.sh
             ├── inbox/
-            │   └── lil -> /…/STEPS/lil/records/.versions/<instance>/latest/ -> <revision>/
-            ├── records -> /…/STEPS/dog/records/
-            └── versions -> /…/STEPS/dog/records/.versions/<instance>/
+            │   └── <dependency> -> /…/STEPS/<dependency>/records/.versions/<instance>/latest/ -> <revision>/
+            └── outbox -> /…/STEPS/dog/records/.versions/<instance>/latest/output/
+                       -> <revision>/output/
 ```
