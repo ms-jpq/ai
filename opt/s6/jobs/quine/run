@@ -26,7 +26,7 @@ seed | job)
   MANAGER="$PWD/$NAME"
 
   STAGING="$(mktemp -d -- "$PWD/.$NAME.XXXXXX")"
-  trap 'rm -rf -- "$STAGING"' EXIT
+  trap 'rm -fr -- "$STAGING"' EXIT
   rsync --archive -- "$ROOT/base/" "$STAGING/template/"
   rsync --archive --checksum --exclude=/data/recurring --exclude=/data/oneshot --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$STAGING/template/"
   ln -s -- "$JOB/run" "$STAGING/template/data/job"
