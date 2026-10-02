@@ -10,7 +10,7 @@ XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
 case "${RECUR:-}" in
 bootstrap)
-  RECUR=seed exec -- s6-setlock -- "$SELF" "$SELF" quine
+  RECUR=seed exec -- s6-setlock -- "$SELF" "$SELF" quine -
   ;;
 '')
   cd -P -- "${0%/*}/../../../.."
@@ -47,19 +47,14 @@ seed | job)
 
   ;;&
 seed)
-  for REQUEST in "$JOB"/data/recurring/*; do
-    if ! [[ -L $REQUEST ]]; then
-      continue
-    fi
-    INSTANCE="${REQUEST##*/}"
-    if ! [[ -d $MANAGER/instances/$INSTANCE ]]; then
-      rsync --archive -- "$MANAGER/template/" "$STAGING/instance/"
-      mv -- "$STAGING/instance" "$MANAGER/instances/$INSTANCE"
-    fi
-    if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
-      ln -s -- "../instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
-    fi
-  done
+  INSTANCE="$2"
+  if ! [[ -d $MANAGER/instances/$INSTANCE ]]; then
+    rsync --archive -- "$MANAGER/template/" "$STAGING/instance/"
+    mv -- "$STAGING/instance" "$MANAGER/instances/$INSTANCE"
+  fi
+  if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
+    ln -s -- "../instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
+  fi
   ;;
 job)
   if ! s6-svok "$MANAGER"; then

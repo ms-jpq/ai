@@ -9,6 +9,6 @@ rm -fr -- "$TEST_DIR"
 mkdir -p -- "$TEST_DIR/"snapshot-{1,2}
 RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../../../../opt/s6/jobs/quine/run.sh
 
-RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../snapshot-1/quine/instances/-/data/job quine
+RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../snapshot-1/quine/instances/-/data/job quine -
 
 exec -- git diff --no-index --exit-code -- "$TEST_DIR/snapshot-1/quine" "$TEST_DIR/snapshot-2/quine"
