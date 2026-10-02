@@ -5,11 +5,9 @@ set -o pipefail
 SELF="$(realpath -- "$0")"
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
-cd -P -- "$1"
-
 case "${RECUR:-}" in
 '')
-  find . -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -print0 | RECUR=step "${XARGS[@]}" "$SELF" '{}'
+  find "$1" -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -print0 | RECUR=step "${XARGS[@]}" "$SELF" '{}'
   ;;
 step)
   unset -- RECUR
