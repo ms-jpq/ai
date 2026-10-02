@@ -17,7 +17,7 @@ STEPS/
         │   │   │   └── rules -> /…/STEPS/rules/outbox/<instance>/
         │   │   └── output/
         │   │       ├── stdout
-        │   │       └── status         # exit code
+        │   │       └── exit_status
         │   └── latest -> <revision>/
         └── <instance> -> .versions/<instance>/latest/
 
@@ -49,7 +49,7 @@ STATE/
     │           ├── step.sh
     │           ├── job -> /…/JOBS/.versions/dog.<revision>/run.sh
     │           ├── inbox/
-    │           │   └── lil -> /…/STEPS/lil/outbox/default/
+    │           │   └── lil -> /…/STEPS/lil/outbox/.versions/<instance>/latest/
     │           ├── outbox -> /…/STEPS/dog/outbox/
     │           └── versions -> /…/STEPS/dog/outbox/.versions/walk/
     └── instance/
