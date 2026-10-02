@@ -6,15 +6,16 @@ shopt -u failglob dotglob
 SELF="$(realpath -- "$0")"
 ROOT="${SELF%/jobs/quine/run.sh}"
 TIMEOUT=6000
+LOCK='.reconcile.lock'
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
 case "${RECUR:-}" in
 bootstrap)
-  RECUR=seed exec -- s6-setlock -t "$TIMEOUT" -- "$SELF" "$SELF" quine -
+  RECUR=seed exec -- s6-setlock -t "$TIMEOUT" -- "$LOCK" "$SELF" quine -
   ;;
 '')
   cd -P -- "${0%/*}/../../../.."
-  RECUR=reconcile exec -- s6-setlock -t "$TIMEOUT" -- "$SELF" "$SELF"
+  RECUR=reconcile exec -- s6-setlock -t "$TIMEOUT" -- "$LOCK" "$SELF"
   ;;
 reconcile)
   trap 's6-svscanctl -h -- "$PWD"' EXIT
