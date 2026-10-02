@@ -24,7 +24,7 @@ if ((DEPTH == 0)) || ! [[ -d $WANTS ]]; then
 fi
 
 cd -P -- "$WANTS"
-find . -mindepth 1 -maxdepth 1 -type l -printf '%P\0' | while IFS= read -r -d '' REQUEST; do
+find . -mindepth 1 -maxdepth 1 -type l -printf '%P\0' | sort --zero-terminated | while IFS= read -r -d '' REQUEST; do
   printf -- '%s\n' "$REQUEST"
   if ((DEPTH > 1)); then
     "$SELF" "$REQUEST" "$((DEPTH - 1))" | while IFS= read -r DEPENDENCY; do
