@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 ---
 on:
   push:
@@ -17,6 +18,10 @@ jobs:
           cache: pip
 
       - uses: actions/setup-node@v4
+
+      - run: |-
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends s6 rsync
 
       - run: |-
           gmake lint test
