@@ -8,7 +8,7 @@ INSTANCE_DATA="$PWD/data"
 ATTEMPTS="$INSTANCE_DATA/attempt"
 PGID_FILE="$INSTANCE_DATA/.pgid"
 
-MODE="${0##*/}"
+MODE="${RECUR:-${0##*/}}"
 if [[ $MODE == run ]] && [[ $0 -ef ../data/lifecycle.sh ]]; then
   MODE=log
 fi
@@ -28,10 +28,6 @@ lifecycle.sh)
   : "${S67_WORKING_DIRECTORY?}"
   : "${S67_RUNTIME_MAX_SEC?}"
   : "${S67_RESTART_SEC?}"
-  INSTANCE="$1"
-  JOB="${PWD%/instances/*}"
-  LOGS="$JOB/../../log/${JOB##*/}"
-
   if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then
     DELAY="$S67_RESTART_SEC"
     if ((DELAY < S67_ON_UNIT_INACTIVE_SEC)); then
@@ -58,15 +54,23 @@ lifecycle.sh)
     fi
   fi
 
+  RECUR=attempt exec -- timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" "$0" "$@"
+  ;;
+attempt)
+  unset -- RECUR
+  INSTANCE="$1"
+  JOB="${PWD%/instances/*}"
+  LOGS="$JOB/../../log/${JOB##*/}"
+
   mkdir -p -- "$LOGS"
+  cd -- "$S67_WORKING_DIRECTORY"
 
   {
-    cd -- "$S67_WORKING_DIRECTORY"
     STATUS=0
-    timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" nice -n 19 -- "$INSTANCE_DATA/job" "$@" || STATUS=$?
+    nice -n 19 -- "$INSTANCE_DATA/job" "$@" || STATUS=$?
     printf -- '\n'
     exit "$STATUS"
-  } 2>&1 | s6-log -b -l 0 -- T "p${JOB##*/}@$INSTANCE" 1 >> "$LOGS/$INSTANCE.log" || exit "$?"
+  } 2>&1 | s6-log -b -l 0 -- T "p${JOB##*/}@$INSTANCE" 1 | tee --append -- "$LOGS/$INSTANCE.log" > /dev/null || exit "$?"
   ;;
 finish)
   STATUS="$1"

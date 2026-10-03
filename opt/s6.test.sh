@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl snapshots templates execution queues policy logger lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl snapshots templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -66,6 +66,7 @@ logger)
     printf '%s' 0 > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"
     cat > "$SERVICE/data/job" << 'BASH'
 #!/usr/bin/env bash
+printf 'ran\n' > "${0%/*}/ran"
 printf 'command stdout\n'
 printf 'command stderr\n' >&2
 exit "${TEST_JOB_STATUS:-0}"
@@ -112,6 +113,69 @@ BASH
   [[ $(< "${FAILED[1]}/exit_status") == 256 ]]
   [[ $(< "${FAILED[1]}/signal") == 15 ]]
   [[ -f ${FAILED[1]}/log ]]
+
+  rm -- "$SERVICE/data/attempt" "$SERVICE/data/ran"
+  if S67_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
+    exit 1
+  fi
+  if [[ -e $SERVICE/data/ran ]]; then
+    exit 1
+  fi
+  [[ -s $TEST_DIR/output ]]
+  if [[ -e $TEST_DIR/log/dog/$INSTANCE.log ]]; then
+    exit 1
+  fi
+
+  mkdir -p -- "$TEST_DIR/bin"
+  cat > "$TEST_DIR/bin/tee" << 'BASH'
+#!/usr/bin/env bash
+ulimit -f 0
+trap '' XFSZ
+exec -- "${TEST_TEE?}" "$@"
+BASH
+  chmod +x -- "$TEST_DIR/bin/tee"
+  TEST_TEE="$(command -v -- tee)"
+  export TEST_TEE
+  if PATH="$TEST_DIR/bin:$PATH" S67_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
+    exit 1
+  fi
+  [[ -f $SERVICE/data/ran ]]
+  ;;
+runtime)
+  SERVICE="$STATE/dog/instances/walk"
+  mkdir -p -- "$SERVICE" "$STATE/dog/data/done"
+  cp --archive -- "$ROOT/base/." "$SERVICE/"
+  printf '%s' "$SERVICE" > "$SERVICE/env/S67_WORKING_DIRECTORY"
+  printf '%s' 1s > "$SERVICE/env/S67_RUNTIME_MAX_SEC"
+  cat > "$SERVICE/data/job" << 'BASH'
+#!/usr/bin/env bash
+if [[ -n ${RECUR:-} ]]; then exit 67; fi
+sleep 30 &
+printf '%s' "$!" > child
+exit 0
+BASH
+  chmod +x -- "$SERVICE/data/job"
+  trap '
+    if [[ -f $SERVICE/data/.pgid ]]; then
+      kill -KILL -- "-$(< "$SERVICE/data/.pgid")" 2> /dev/null || true
+    fi
+    rm -fr -- "$TEST_DIR"
+  ' EXIT
+  START="$SECONDS"
+  STATUS=0
+  timeout --foreground 5s s6-setsid -i env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output" || STATUS=$?
+  [[ $STATUS == 124 ]]
+  ((SECONDS - START < 4))
+  [[ -s $SERVICE/child ]]
+  CHILD="$(< "$SERVICE/child")"
+  kill -0 -- "$CHILD"
+  STATUS=0
+  env -C "$SERVICE" -- ./finish 124 0 walk > "$TEST_DIR/finish.log" || STATUS=$?
+  [[ $STATUS == 125 ]]
+  timeout --foreground 2s bash -s -- "$CHILD" << 'BASH'
+while kill -0 "$1" 2>/dev/null; do sleep 0.02; done
+BASH
+  [[ -f $STATE/dog/data/done/walk ]]
   ;;
 lifecycle)
   STEP="$TEST_DIR/steps/dog"
