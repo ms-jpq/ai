@@ -19,8 +19,12 @@ log)
   JOB="${SERVICE%/instances/*}"
   exec -- s6-log -b -l 0 -d "$(< ./notification-fd)" -- "p${JOB##*/}@${SERVICE##*/}" 1 >&67
   ;;
-run)
-  printf -- '%s' "$$" > "$PGID_FILE"
+run | finish)
+  if [[ $MODE == run ]]; then
+    printf -- '%s' "$$" > "$PGID_FILE"
+  else
+    export -- RECUR=finished
+  fi
   exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
   ;;
 lifecycle.sh)
@@ -71,9 +75,6 @@ attempt)
     printf -- '\n'
     exit "$STATUS"
   } 2>&1 | s6-log -b -l 0 -- T "p${JOB##*/}@$INSTANCE" 1 | tee --append -- "$LOGS/$INSTANCE.log" > /dev/null || exit "$?"
-  ;;
-finish)
-  RECUR=finished exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
   ;;
 finished)
   : "${S9_ON_UNIT_INACTIVE_SEC?}"
