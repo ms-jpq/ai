@@ -113,13 +113,13 @@ instance)
       exit
     fi
     touch -- "$SERVICE/down"
-    s6-instance-control -O -- "$SUPERVISOR" "$INSTANCE"
+    s6-instance-control -d -- "$SUPERVISOR" "$INSTANCE"
     STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
     if [[ $STATUS != 'false false' ]]; then
       exit
     fi
     s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
-    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
+    RECUR=cleanup "$0" "$NAME" "$DONE/$INSTANCE"
   fi
   if ! [[ -L $DATA/launch ]]; then
     if ! [[ -d $JOB ]] || ! [[ -L $REQUEST ]]; then
