@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl snapshots templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl snapshots publication templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -309,6 +309,76 @@ snapshots)
   diff --recursive --no-dereference --unified --from-file="$STATE/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
   ;;
 
+publication)
+  mkdir -p -- "$TEST_DIR/bin" "$TEST_DIR/old/data/launch" "$TEST_DIR/new/data/launch"
+  for REVISION in old new; do
+    printf '#!/usr/bin/env bash\nprintf "%s\\n"\n' "$REVISION" > "$TEST_DIR/$REVISION/run.sh"
+    chmod +x -- "$TEST_DIR/$REVISION/run.sh"
+    ln -s -- "/$REVISION" "$TEST_DIR/$REVISION/data/launch/walk"
+  done
+  ln -s -- "$TEST_DIR/old" "$JOBS/dog"
+  cat > "$TEST_DIR/bin/control" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+case "${0##*/}" in
+s6-svok)
+  if [[ $1 == */instances/* ]]; then
+    [[ -f $TEST_ROOT/blocked ]]
+  fi
+  ;;
+s6-svwait)
+  ln -sTnf -- "$TEST_ROOT/new" "$TEST_ROOT/jobs/dog"
+  ;;
+s6-instance-create)
+  cp --archive -- "${@: -2:1}/template" "${@: -2:1}/instances/${@: -1}"
+  ln -s -- "../instances/${@: -1}" "${@: -2:1}/instance/${@: -1}"
+  ;;
+s6-instance-delete)
+  if [[ $1 != -- ]]; then exit 67; fi
+  rm -f -- "${@: -2:1}/instance/${@: -1}"
+  if [[ ${TEST_DELETE_STATUS:-0} != 0 ]]; then
+    touch -- "$TEST_ROOT/blocked"
+    exit "$TEST_DELETE_STATUS"
+  fi
+  rm -fr -- "${@: -2:1}/instances/${@: -1}"
+  ;;
+s6-svstat)
+  printf 'false false\n'
+  ;;
+esac
+BASH
+  chmod +x -- "$TEST_DIR/bin/control"
+  for COMMAND in s6-svok s6-svwait s6-svc s6-instance-control s6-instance-create s6-instance-delete s6-svstat; do
+    ln -s -- control "$TEST_DIR/bin/$COMMAND"
+  done
+  RECONCILE=(env "PATH=$TEST_DIR/bin:$PATH" "TEST_ROOT=$TEST_DIR" RECUR=job "${QUINE[@]}" dog)
+  "${RECONCILE[@]}"
+  SERVICE="$STATE/dog/instances/walk"
+  diff --unified -- "$TEST_DIR/old/run.sh" "$SERVICE/data/job"
+  TARGET="$(readlink -- "$SERVICE/data/launch")"
+  [[ $TARGET == /old ]]
+  [[ -L $TEST_DIR/new/data/launch/walk ]]
+  if [[ -L $TEST_DIR/old/data/launch/walk ]]; then exit 1; fi
+
+  touch -- "$STATE/dog/data/done/walk"
+  if TEST_DELETE_STATUS=99 "${RECONCILE[@]}"; then exit 1; fi
+  [[ -d $SERVICE ]]
+  [[ -f $STATE/dog/data/done/walk ]]
+  if "${RECONCILE[@]}"; then exit 1; fi
+  [[ -d $SERVICE ]]
+  [[ -f $STATE/dog/data/done/walk ]]
+  [[ -L $TEST_DIR/new/data/launch/walk ]]
+  rm -- "$TEST_DIR/blocked"
+  "${RECONCILE[@]}"
+  diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/job"
+  TARGET="$(readlink -- "$SERVICE/data/launch")"
+  [[ $TARGET == /new ]]
+  if [[ -f $STATE/dog/data/done/walk ]]; then exit 1; fi
+
+  printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
+  "${RECONCILE[@]}"
+  if [[ -d $SERVICE ]]; then exit 1; fi
+  ;;
 templates)
   cp --archive -- "$DL/examples" "$TEST_DIR/examples"
   for JOB in dog lil; do
