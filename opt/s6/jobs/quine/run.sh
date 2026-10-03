@@ -91,7 +91,7 @@ cleanup)
   shift -- 1
   for SVC in "$@"; do
     INSTANCE="${SVC##*/}"
-    s6-instance-delete -- "$MANAGER" "$INSTANCE"
+    s6-instance-delete -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
     rm -fr -- "$SVC"
   done
   ;;
@@ -118,7 +118,7 @@ instance)
       exit
     fi
     s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
-    s6-instance-delete -- "$MANAGER" "$INSTANCE"
+    s6-instance-delete -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
   fi
   if ! [[ -L $DATA/launch ]]; then
     if ! [[ -d $JOB ]] || ! [[ -L $REQUEST ]]; then

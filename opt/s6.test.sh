@@ -372,6 +372,7 @@ policy)
   mkdir -p -- "$SERVICE" "$STATE/dog/data/done" "$TEST_DIR/bin"
   cp --archive -- "$ROOT/base/." "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S67_WORKING_DIRECTORY"
+  printf '%s' 2 > "$SERVICE/env/S67_RESTART_SEC"
   cat > "$SERVICE/data/job" << 'BASH'
 #!/usr/bin/env bash
 printf '%s' "$1"
@@ -383,9 +384,10 @@ BASH
   chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
   ln -s -- /dev/null "$SERVICE/data/launch"
-  trap 'printf "policy:%s interval=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
-  while read -r INTERVAL STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
+  trap 'printf "policy:%s interval=%s cap=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$CAP" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
+  while read -r INTERVAL CAP STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
     printf '%s' "$INTERVAL" > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"
+    printf '%s' "${CAP#-}" > "$SERVICE/env/S67_RESTART_MAX_DELAY_SEC"
     rm -f -- "$SERVICE/delay"
     PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
     [[ $(< "$TEST_DIR/output") == walk ]]
@@ -399,14 +401,22 @@ BASH
     ATTEMPT="$(wc -l < "$SERVICE/data/attempt")"
     ((ATTEMPT == EXPECTED_ATTEMPTS))
     if ((EXIT_STATUS == 0)); then [[ -L $SERVICE/data/launch ]]; fi
-  done << EOF
-60 7 none 0 1
-60 7 $(< "$SERVICE/env/S67_RESTART_SEC") 0 2
-60 0 $(($(< "$SERVICE/env/S67_RESTART_SEC") * 2)) 0 0
-60 0 60 0 0
-0 0 0 0 0
--1 7 none 125 0
--1 0 none 125 0
+  done << 'EOF'
+60 - 7 none 0 1
+60 - 7 2 0 2
+60 - 0 4 0 0
+60 - 0 60 0 0
+0 - 7 0 0 1
+0 - 7 2 0 2
+0 - 7 4 0 3
+0 - 0 4 0 0
+0 - 0 0 0 0
+0 1 7 0 0 1
+0 1 0 1 0 0
+0 0 7 0 0 1
+0 0 0 0 0 0
+-1 - 7 none 125 0
+-1 - 0 none 125 0
 EOF
   [[ -f $STATE/dog/data/done/walk ]]
   if [[ -L $SERVICE/data/launch ]]; then
