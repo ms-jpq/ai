@@ -89,10 +89,10 @@ job)
   ;;
 cleanup)
   shift -- 1
-  for SVC in "$@"; do
-    INSTANCE="${SVC##*/}"
+  for INSTANCE in "$@"; do
+    INSTANCE="${INSTANCE##*/}"
     s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
-    rm -fr -- "$SVC"
+    rm -fr -- "${DONE:?}/$INSTANCE"
   done
   ;;
 instance)
@@ -114,15 +114,19 @@ instance)
     fi
     touch -- "$SERVICE/down"
     STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
-    if [[ $STATUS == *' true' ]]; then
+    case "$STATUS" in
+    'false false')
+      ;;
+    *' true')
       s6-instance-control -d -- "$SUPERVISOR" "$INSTANCE"
       exit
-    fi
-    if [[ $STATUS != 'false false' ]]; then
+      ;;
+    *)
       exit
-    fi
+      ;;
+    esac
     s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
-    RECUR=cleanup "$0" "$NAME" "$DONE/$INSTANCE"
+    RECUR=cleanup "$0" "$NAME" "$INSTANCE"
   fi
   if ! [[ -L $DATA/launch ]]; then
     if ! [[ -d $JOB ]] || ! [[ -L $REQUEST ]]; then
