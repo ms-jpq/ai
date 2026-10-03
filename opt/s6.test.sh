@@ -24,8 +24,8 @@ cp --archive -- "$ROOT/." "$TEST_DIR/"
 case "$1" in
 ctl)
   RUNTIME="$TEST_DIR/runtime"
-  mkdir -p -- "$TEST_DIR/bin" "$RUNTIME/log-archive" "$RUNTIME/failed"
-  printf '%s' retained > "$RUNTIME/log-archive/existing.log"
+  mkdir -p -- "$TEST_DIR/bin" "$RUNTIME/dead" "$RUNTIME/failed"
+  printf '%s' retained > "$RUNTIME/dead/existing.log"
   printf '%s' retained > "$RUNTIME/failed/existing"
   cat > "$TEST_DIR/bin/ps" << 'BASH'
 #!/usr/bin/env bash
@@ -39,13 +39,13 @@ BASH
   chmod +x -- "$TEST_DIR/bin/"{ps,s6-svscan}
   for _ in 1 2; do
     PATH="$TEST_DIR/bin:$PATH" "$TEST_DIR/ctl.sh" start "$RUNTIME" "$TEST_DIR" 67
-    for DIR in services log log-archive failed; do
+    for DIR in services log dead failed; do
       [[ -d $RUNTIME/$DIR ]]
     done
     [[ -d $RUNTIME/services/quine/instances/- ]]
     [[ -d $RUNTIME/services/watchdog/instances/67 ]]
     [[ $(< "$RUNTIME/services/watchdog/data/launch/67") == 'parent start time' ]]
-    [[ $(< "$RUNTIME/log-archive/existing.log") == retained ]]
+    [[ $(< "$RUNTIME/dead/existing.log") == retained ]]
     [[ $(< "$RUNTIME/failed/existing") == retained ]]
   done
   COUNT="$(grep --fixed-strings --count "$RUNTIME/services" "$RUNTIME/log/s6.log")"
@@ -88,7 +88,7 @@ BASH
     if [[ -e $TEST_DIR/log/dog/$INSTANCE.log ]]; then
       exit 1
     fi
-    ARCHIVES=("$TEST_DIR/log-archive/dog/$INSTANCE."*.log "$TEST_DIR/failed/dog/$INSTANCE."*/log)
+    ARCHIVES=("$TEST_DIR/dead/dog/$INSTANCE."*/log "$TEST_DIR/failed/dog/$INSTANCE."*/log)
     [[ ${#ARCHIVES[@]} == 2 ]]
     for ARCHIVE in "${ARCHIVES[@]}"; do
       for STREAM in stdout stderr; do
@@ -99,6 +99,10 @@ BASH
         exit 1
       fi
     done
+    DEAD=("$TEST_DIR/dead/dog/$INSTANCE."*)
+    [[ ${#DEAD[@]} == 1 ]]
+    [[ $(< "${DEAD[0]}/exit_status") == 0 ]]
+    [[ $(< "${DEAD[0]}/signal") == 0 ]]
     FAILED=("$TEST_DIR/failed/dog/$INSTANCE."*)
     [[ ${#FAILED[@]} == 1 ]]
     [[ $(< "${FAILED[0]}/exit_status") == 67 ]]
@@ -113,6 +117,19 @@ BASH
   [[ $(< "${FAILED[1]}/exit_status") == 256 ]]
   [[ $(< "${FAILED[1]}/signal") == 15 ]]
   [[ -f ${FAILED[1]}/log ]]
+
+  printf '%s' "$TEST_DIR/telemetry" > "$SERVICE/env/S9_DEAD_DIR"
+  for STATUS in 0 67; do
+    env -C "$SERVICE" -- ./finish "$STATUS" 0 "$INSTANCE" > "$TEST_DIR/finish.log"
+  done
+  RECORDS=("$TEST_DIR/telemetry/dog/"*)
+  [[ ${#RECORDS[@]} == 2 ]]
+  for RECORD in "${RECORDS[@]}"; do
+    [[ -f $RECORD/log ]]
+    [[ $(< "$RECORD/signal") == 0 ]]
+  done
+  [[ $(< "${RECORDS[0]}/exit_status") == 0 ]]
+  [[ $(< "${RECORDS[1]}/exit_status") == 67 ]]
 
   rm -- "$SERVICE/data/attempt" "$SERVICE/data/ran"
   if S9_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then

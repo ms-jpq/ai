@@ -23,7 +23,10 @@ STATE/
 ├── log/
 │   ├── s6.log
 │   └── watchdog/<pid>.log
-├── log-archive/watchdog/<pid>.<timestamp>.log
+├── dead/watchdog/<pid>.<timestamp>/
+│   ├── log
+│   ├── exit_status
+│   └── signal
 └── failed/watchdog/<pid>.<timestamp>/
     ├── log
     ├── exit_status

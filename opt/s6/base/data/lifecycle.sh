@@ -73,6 +73,10 @@ attempt)
   } 2>&1 | s6-log -b -l 0 -- T "p${JOB##*/}@$INSTANCE" 1 | tee --append -- "$LOGS/$INSTANCE.log" > /dev/null || exit "$?"
   ;;
 finish)
+  RECUR=finished exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
+  ;;
+finished)
+  : "${S9_ON_UNIT_INACTIVE_SEC?}"
   STATUS="$1"
   SIGNAL="$2"
   INSTANCE="$3"
@@ -80,7 +84,6 @@ finish)
   STATE="$JOB/../.."
   JOB="${JOB##*/}"
   LOG_SRC="$STATE/log/$JOB/$INSTANCE.log"
-  S9_ON_UNIT_INACTIVE_SEC="$(< ./env/S9_ON_UNIT_INACTIVE_SEC)"
   TIMESTAMP="$(date -u +%Y%m%dT%H%M%S.%N)"
 
   if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
@@ -90,14 +93,13 @@ finish)
   fi
 
   if ((STATUS == 0 && SIGNAL == 0)); then
-    LOG_DST="$STATE/log-archive/$JOB/$INSTANCE.$TIMESTAMP.log"
-    mkdir -p -- "${LOG_DST%/*}"
+    LOG_DST="${S9_DEAD_DIR:-$STATE/dead}/$JOB/$INSTANCE.$TIMESTAMP/log"
   else
-    LOG_DST="$STATE/failed/$JOB/$INSTANCE.$TIMESTAMP/log"
-    mkdir -p -- "${LOG_DST%/*}"
-    printf -- '%s' "$STATUS" > "${LOG_DST%/*}/exit_status"
-    printf -- '%s' "$SIGNAL" > "${LOG_DST%/*}/signal"
+    LOG_DST="${S9_DEAD_DIR:-$STATE/failed}/$JOB/$INSTANCE.$TIMESTAMP/log"
   fi
+  mkdir -p -- "${LOG_DST%/*}"
+  printf -- '%s' "$STATUS" > "${LOG_DST%/*}/exit_status"
+  printf -- '%s' "$SIGNAL" > "${LOG_DST%/*}/signal"
 
   mkdir -p -- "${LOG_SRC%/*}"
   touch -- "$LOG_SRC"
