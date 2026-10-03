@@ -83,6 +83,8 @@
 
 ## Command Construction
 
+- Use language-specific heredoc delimiters, such as `<< 'BASH'` or `<< 'PYTHON'`, so Tree-sitter highlights the embedded code.
+
 - Prefer long flags unless the short form is conventional (`grep -e`, `sed -E -e`, `column -t`).
 
 - Use `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).

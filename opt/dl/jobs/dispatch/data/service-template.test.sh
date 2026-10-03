@@ -15,10 +15,10 @@ DEPENDENCY="$TEST_DIR/steps/lil"
 mkdir -p -- "$SOURCE_LAUNCH" "$SRC/data/inbox" "$SRC/wants" "$DEPENDENCY"
 ln -s -- ../../lil "$SRC/wants/lil"
 ln -s -- /missing/old-records "$SRC/data/inbox/lil"
-cat > "$SRC/run.sh" << 'EOF'
+cat > "$SRC/run.sh" << 'BASH'
 #!/usr/bin/env bash
 exit 0
-EOF
+BASH
 chmod +x -- "$SRC/run.sh"
 ln -s -- ../data/inbox "$SOURCE_LAUNCH/initial"
 
@@ -39,10 +39,10 @@ if [[ -L $SOURCE_LAUNCH/initial ]]; then
   exit 1
 fi
 
-cat > "$SRC/run.sh" << 'EOF'
+cat > "$SRC/run.sh" << 'BASH'
 #!/usr/bin/env bash
 exit 67
-EOF
+BASH
 for _ in 1 2 3; do
   "$TEMPLATE" "$SRC" "$DST"
   CURRENT="$(realpath -- "$DST")"

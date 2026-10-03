@@ -30,14 +30,14 @@ lifecycle)
   export S67_WORKING_DIRECTORY="$TEST_DIR"
   mkdir -p -- "$STEP/env" "$STEP/data" "$JOBS/keeper/env"
   printf '%s' 10 > "$TEST_DIR/base/env/S67_RUNTIME_MAX_SEC"
-  cat > "$STEP/run.sh" << 'EOF'
+  cat > "$STEP/run.sh" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 CODE=old
 printf '%s:%s:%s\n' "$CODE" "$PAYLOAD" "$(< "${0%/*}/value")" > "$S67_WORKING_DIRECTORY/started-$PAYLOAD"
 while ! [[ -f $S67_WORKING_DIRECTORY/release-$PAYLOAD ]]; do sleep 0.05; done
 printf '%s\n' "$CODE" > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
-EOF
+BASH
   chmod +x -- "$STEP/run.sh"
   touch -- "$STEP/env/S67_DAEMON" "$JOBS/keeper/env/S67_DAEMON"
   printf '%s' one > "$STEP/env/PAYLOAD"
@@ -45,10 +45,10 @@ EOF
   "$TEMPLATE" "$STEP" "$JOB"
   ln -s -- /dev/null "$STEP/launch/walk"
   RECUR=bootstrap "${QUINE[@]}" quine
-  cat > "$JOBS/keeper/run.sh" << 'EOF'
+  cat > "$JOBS/keeper/run.sh" << 'BASH'
 #!/usr/bin/env bash
 exit 0
-EOF
+BASH
   chmod +x -- "$JOBS/keeper/run.sh"
   RECUR=seed "${QUINE[@]}" keeper parent
   mkdir -p -- "$STATE/keeper/data/launch"
@@ -218,7 +218,7 @@ EOF
     INPUT="$(realpath -- "$TEST_DIR/upstream/$DEPENDENCY")"
     ln -sTnf -- "$INPUT" "$TEST_DIR/steps/dog/data/inbox/$DEPENDENCY"
   done
-  cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
+  cat > "$TEST_DIR/steps/dog/run.sh" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 for DEPENDENCY in dogs rules; do
@@ -235,9 +235,9 @@ diagnostic
 STDERR
 
 exit "$RESULT"
-EOF
+BASH
   chmod +x -- "$TEST_DIR/steps/dog/run.sh"
-  cat > "$TEST_DIR/steps/dog/dispatch.sh" << 'EOF'
+  cat > "$TEST_DIR/steps/dog/dispatch.sh" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 [[ -d records ]]
@@ -246,13 +246,13 @@ set -euo pipefail
 [[ -d $1/launch ]]
 [[ -z ${RECUR:-} ]]
 ln -s -- /dev/null "$1/launch/walk"
-EOF
+BASH
   chmod +x -- "$TEST_DIR/steps/dog/dispatch.sh"
   S67_JOBS_DIR="$JOBS" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
   [[ -L $JOBS/dog/data/launch/walk ]]
-  cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
+  cat > "$TEST_DIR/steps/dog/run.sh" << 'BASH'
 exit 99
-EOF
+BASH
 
   for INSTANCE in walk feed; do
     RECUR=seed "${QUINE[@]}" dog "$INSTANCE"
@@ -297,7 +297,7 @@ queues)
   MANAGER="$STATE/queue-dog"
   mkdir -p -- "$TEST_DIR/queue-step" "$TEST_DIR/bin"
   cp --preserve=mode -- "$DL/examples/dog/run.sh" "$TEST_DIR/queue-step/run.sh"
-  cat > "$TEST_DIR/bin/s6-instance-create" << 'EOF'
+  cat > "$TEST_DIR/bin/s6-instance-create" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 MANAGER="${@: -2:1}"
@@ -307,20 +307,20 @@ if [[ $INSTANCE == rejected ]]; then
 fi
 mkdir -p -- "$MANAGER/instances/$INSTANCE"
 cp --archive -- "$MANAGER/template/." "$MANAGER/instances/$INSTANCE/"
-EOF
-  cat > "$TEST_DIR/bin/noop" << 'EOF'
+BASH
+  cat > "$TEST_DIR/bin/noop" << 'BASH'
 #!/usr/bin/env bash
 exit 0
-EOF
-  cat > "$TEST_DIR/bin/s6-svstat" << 'EOF'
+BASH
+  cat > "$TEST_DIR/bin/s6-svstat" << 'BASH'
 #!/usr/bin/env bash
 printf '%s\n' "${TEST_STATUS:-true}"
-EOF
-  cat > "$TEST_DIR/bin/s6-instance-delete" << 'EOF'
+BASH
+  cat > "$TEST_DIR/bin/s6-instance-delete" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 rm -fr -- "${@: -2:1}/instances/${@: -1}"
-EOF
+BASH
   chmod +x -- "$TEST_DIR/bin/"{s6-instance-create,s6-instance-delete,s6-svstat,noop}
   for COMMAND in s6-svok s6-svwait s6-svc s6-instance-control; do
     ln -s -- noop "$TEST_DIR/bin/$COMMAND"
@@ -397,45 +397,47 @@ policy)
   mkdir -p -- "$SERVICE" "$STATE/dog/data/done" "$TEST_DIR/bin"
   cp --archive -- "$ROOT/base/." "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S67_WORKING_DIRECTORY"
-  cat > "$SERVICE/data/job" << 'EOF'
+  cat > "$SERVICE/data/job" << 'BASH'
 #!/usr/bin/env bash
 printf '%s' "$1"
-EOF
-  cat > "$TEST_DIR/bin/sleep" << 'EOF'
+BASH
+  cat > "$TEST_DIR/bin/sleep" << 'BASH'
 #!/usr/bin/env bash
 printf '%s' "${@: -1}" > ./delay
-EOF
+BASH
   chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
-  touch -- "$SERVICE/env/S67_DAEMON"
-  PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
-  [[ $(< "$TEST_DIR/output") == walk ]]
-  if [[ -f $SERVICE/delay ]]; then
-    exit 1
-  fi
-  rm -- "$SERVICE/data/.pgid"
-  env -C "$SERVICE" -- ./finish 7 0 walk > "$TEST_DIR/finish.log"
-  ATTEMPT="$(wc -l < "$SERVICE/data/attempt")"
-  ((ATTEMPT == 1))
-  printf '%s' 0 > "$SERVICE/env/S67_DAEMON"
-  PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
-  [[ $(< "$SERVICE/delay") == "$(< "$SERVICE/env/S67_RESTART_SEC")" ]]
-  rm -- "$SERVICE/data/.pgid"
-  env -C "$SERVICE" -- ./finish 0 0 walk > "$TEST_DIR/finish.log"
-  ATTEMPT="$(wc -l < "$SERVICE/data/attempt")"
-  ((ATTEMPT == 0))
-  rm -- "$SERVICE/env/S67_DAEMON" "$SERVICE/delay"
-  PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
-  if [[ -f $SERVICE/delay ]]; then
-    exit 1
-  fi
-  rm -- "$SERVICE/data/.pgid"
   ln -s -- /dev/null "$SERVICE/data/launch"
-  if env -C "$SERVICE" -- ./finish 7 0 walk > "$TEST_DIR/finish.log"; then
-    exit 1
-  else
-    [[ $? == 125 ]]
-  fi
+  trap 'printf "policy:%s marker=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$MARKER" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
+  while read -r MARKER STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
+    case "$MARKER" in
+    empty) : > "$SERVICE/env/S67_DAEMON" ;;
+    zero) printf '%s' 0 > "$SERVICE/env/S67_DAEMON" ;;
+    absent) rm -- "$SERVICE/env/S67_DAEMON" ;;
+    *)
+      set -x
+      exit 2
+      ;;
+    esac
+    rm -f -- "$SERVICE/delay"
+    PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
+    [[ $(< "$TEST_DIR/output") == walk ]]
+    ACTUAL_DELAY=none
+    if [[ -f $SERVICE/delay ]]; then ACTUAL_DELAY="$(< "$SERVICE/delay")"; fi
+    [[ $ACTUAL_DELAY == "$DELAY" ]]
+    rm -- "$SERVICE/data/.pgid"
+    EXIT_STATUS=0
+    env -C "$SERVICE" -- ./finish "$STATUS" 0 walk > "$TEST_DIR/finish.log" || EXIT_STATUS=$?
+    ((EXIT_STATUS == EXPECTED_EXIT))
+    ATTEMPT="$(wc -l < "$SERVICE/data/attempt")"
+    ((ATTEMPT == EXPECTED_ATTEMPTS))
+    if ((EXIT_STATUS == 0)); then [[ -L $SERVICE/data/launch ]]; fi
+  done << EOF
+empty 7 none 0 1
+zero 0 $(< "$SERVICE/env/S67_RESTART_SEC") 0 0
+zero 0 $(< "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC") 0 0
+absent 7 none 125 0
+EOF
   [[ -f $STATE/dog/data/done/walk ]]
   if [[ -L $SERVICE/data/launch ]]; then
     exit 1
