@@ -93,10 +93,11 @@ finished)
   fi
 
   if ((STATUS == 0 && SIGNAL == 0)); then
-    LOG_DST="${S9_DEAD_DIR:-$STATE/dead}/$JOB/$INSTANCE.$TIMESTAMP/log"
+    : "${S9_DEAD_DIR:=$STATE/dead}"
   else
-    LOG_DST="${S9_DEAD_DIR:-$STATE/failed}/$JOB/$INSTANCE.$TIMESTAMP/log"
+    : "${S9_DEAD_DIR:=$STATE/failed}"
   fi
+  LOG_DST="$S9_DEAD_DIR/$JOB/$INSTANCE.$TIMESTAMP/log"
   mkdir -p -- "${LOG_DST%/*}"
   printf -- '%s' "$STATUS" > "${LOG_DST%/*}/exit_status"
   printf -- '%s' "$SIGNAL" > "${LOG_DST%/*}/signal"
