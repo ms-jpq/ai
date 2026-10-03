@@ -3,7 +3,6 @@
 set -o pipefail
 
 INSTANCE_DATA="$PWD/data"
-DAEMON="$PWD/env/S67_DAEMON"
 ATTEMPTS="$INSTANCE_DATA/attempt"
 PGID_FILE="$INSTANCE_DATA/.pgid"
 
@@ -15,13 +14,13 @@ run)
   exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
   ;;
 lifecycle.sh)
+  : "${S67_ON_UNIT_INACTIVE_SEC?}"
   : "${S67_WORKING_DIRECTORY?}"
   : "${S67_RUNTIME_MAX_SEC?}"
   : "${S67_RESTART_SEC?}"
-  : "${S67_ON_UNIT_INACTIVE_SEC?}"
-  : "${S67_RESTART_MAX_DELAY_SEC:=$((S67_ON_UNIT_INACTIVE_SEC * 2))}"
 
-  if [[ -f $DAEMON ]]; then
+  if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then
+    : "${S67_RESTART_MAX_DELAY_SEC:=$((S67_ON_UNIT_INACTIVE_SEC * 2))}"
     if ATTEMPT="$(wc -l 2> /dev/null < "$ATTEMPTS")"; then
       DELAY="$S67_ON_UNIT_INACTIVE_SEC"
       if ((ATTEMPT > 0)); then
@@ -43,6 +42,7 @@ finish)
   INSTANCE="$3"
   JOB="${PWD%/instances/*}"
   JOB="${JOB##*/}"
+  S67_ON_UNIT_INACTIVE_SEC="$(< ./env/S67_ON_UNIT_INACTIVE_SEC)"
 
   if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
     PGID="${4:-$(< "$PGID_FILE")}"
@@ -51,7 +51,7 @@ finish)
   fi
 
   EXIT_STATUS=0
-  if [[ -f $DAEMON ]]; then
+  if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then
     if ((STATUS == 0 && SIGNAL == 0)); then
       : > "$ATTEMPTS"
     else

@@ -39,7 +39,7 @@ while ! [[ -f $S67_WORKING_DIRECTORY/release-$PAYLOAD ]]; do sleep 0.05; done
 printf '%s\n' "$CODE" > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
 BASH
   chmod +x -- "$STEP/run.sh"
-  touch -- "$STEP/env/S67_DAEMON" "$JOBS/keeper/env/S67_DAEMON"
+  printf '%s' 60 | tee "$STEP/env/S67_ON_UNIT_INACTIVE_SEC" > "$JOBS/keeper/env/S67_ON_UNIT_INACTIVE_SEC"
   printf '%s' one > "$STEP/env/PAYLOAD"
   printf '%s' old-data > "$STEP/data/value"
   "$TEMPLATE" "$STEP" "$JOB"
@@ -338,11 +338,11 @@ BASH
   fi
 
   mkdir -- "$STEP/env"
-  touch -- "$STEP/env/S67_DAEMON"
+  printf '%s' 0 > "$STEP/env/S67_ON_UNIT_INACTIVE_SEC"
   rm -- "$LAUNCH/rejected"
   "$TEMPLATE" "$STEP" "$JOBS/daemon-dog"
   "${RECONCILE[@]}" daemon-dog
-  [[ -f $STATE/daemon-dog/instances/run/env/S67_DAEMON ]]
+  [[ $(< "$STATE/daemon-dog/instances/run/env/S67_ON_UNIT_INACTIVE_SEC") == 0 ]]
   [[ -L $LAUNCH/run ]]
   SERVICE="$STATE/daemon-dog/instances/run"
   "${RECONCILE[@]}" daemon-dog
@@ -383,17 +383,9 @@ BASH
   chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
   ln -s -- /dev/null "$SERVICE/data/launch"
-  trap 'printf "policy:%s marker=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$MARKER" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
-  while read -r MARKER STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
-    case "$MARKER" in
-    empty) : > "$SERVICE/env/S67_DAEMON" ;;
-    zero) printf '%s' 0 > "$SERVICE/env/S67_DAEMON" ;;
-    absent) rm -- "$SERVICE/env/S67_DAEMON" ;;
-    *)
-      set -x
-      exit 2
-      ;;
-    esac
+  trap 'printf "policy:%s interval=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
+  while read -r INTERVAL STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
+    printf '%s' "$INTERVAL" > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"
     rm -f -- "$SERVICE/delay"
     PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
     [[ $(< "$TEST_DIR/output") == walk ]]
@@ -408,10 +400,13 @@ BASH
     ((ATTEMPT == EXPECTED_ATTEMPTS))
     if ((EXIT_STATUS == 0)); then [[ -L $SERVICE/data/launch ]]; fi
   done << EOF
-empty 7 none 0 1
-zero 0 $(< "$SERVICE/env/S67_RESTART_SEC") 0 0
-zero 0 $(< "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC") 0 0
-absent 7 none 125 0
+60 7 none 0 1
+60 7 $(< "$SERVICE/env/S67_RESTART_SEC") 0 2
+60 0 $(($(< "$SERVICE/env/S67_RESTART_SEC") * 2)) 0 0
+60 0 60 0 0
+0 0 0 0 0
+-1 7 none 125 0
+-1 0 none 125 0
 EOF
   [[ -f $STATE/dog/data/done/walk ]]
   if [[ -L $SERVICE/data/launch ]]; then

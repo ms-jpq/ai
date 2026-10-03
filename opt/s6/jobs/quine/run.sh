@@ -104,7 +104,7 @@ instance)
     REQUEST="$MANAGER/data/launch/$INSTANCE"
   fi
 
-  if [[ -f $SERVICE/env/S67_DAEMON ]]; then
+  if [[ -d $SERVICE ]] && (($(< "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC") >= 0)); then
     if [[ $DATA/job -ef $SELF ]]; then
       exit
     fi
@@ -126,7 +126,7 @@ instance)
     fi
   fi
   if ! [[ -d $SERVICE ]]; then
-    if [[ -f $TEMPLATE/env/S67_DAEMON ]]; then
+    if (($(< "$TEMPLATE/env/S67_ON_UNIT_INACTIVE_SEC") >= 0)); then
       exec -- s6-instance-create -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
     fi
     s6-instance-create -D -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
