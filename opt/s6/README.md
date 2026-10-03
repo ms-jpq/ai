@@ -27,8 +27,5 @@ STATE/
 │   ├── log
 │   ├── exit_status
 │   └── signal
-└── failed/watchdog/<pid>.<timestamp>/
-    ├── log
-    ├── exit_status
-    └── signal
+└── failed/watchdog/<pid>.<timestamp> -> ../../dead/watchdog/<pid>.<timestamp>
 ```

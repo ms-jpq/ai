@@ -89,6 +89,8 @@
 
 - Use `--` to terminate option parsing (`cd -- "$DIR"`, `declare -A -- VAR=()`).
 
+- Prefer `ln -sTnfr -- TARGET LINK` since relative symlinks enhances portability.
+
 - Use arrays for long, conditional, or repeated command invocations.
 
   ```bash

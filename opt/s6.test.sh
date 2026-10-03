@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl snapshots publication templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl snapshots prepare publication templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -61,7 +61,7 @@ logger)
   for INSTANCE in walk log; do
     SERVICE="$STATE/dog/instances/$INSTANCE"
     mkdir -p -- "$SERVICE"
-    cp --archive -- "$ROOT/base/." "$SERVICE/"
+    rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
     mkdir -p -- "$STATE/dog/data/done"
     printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
     cat > "$SERVICE/data/job" << 'BASH'
@@ -83,12 +83,12 @@ BASH
       rm -- "$SERVICE/data/.pgid"
       env -C "$SERVICE" -- ./finish "$STATUS" 0 "$INSTANCE" | env -C "$SERVICE/log" -- ./run 3> "$TEST_DIR/ready" 67>&1 | s6-log -b -l 0 -- T 1 >> "$TEST_DIR/log/s6.log"
       diff --unified -- <(printf '\n') "$TEST_DIR/ready"
-      grep --quiet --fixed-strings "dog@$INSTANCE status=$STATUS, signal=0" "$TEST_DIR/log/s6.log"
+      grep --quiet --fixed-strings -- "dog@$INSTANCE --- exit_status=$STATUS signal=0 ---" "$TEST_DIR/log/s6.log"
     done
     if [[ -e $TEST_DIR/log/dog/$INSTANCE.log ]]; then
       exit 1
     fi
-    ARCHIVES=("$TEST_DIR/dead/dog/$INSTANCE."*/log "$TEST_DIR/failed/dog/$INSTANCE."*/log)
+    ARCHIVES=("$TEST_DIR/dead/dog/$INSTANCE."*/log)
     [[ ${#ARCHIVES[@]} == 2 ]]
     for ARCHIVE in "${ARCHIVES[@]}"; do
       for STREAM in stdout stderr; do
@@ -100,11 +100,15 @@ BASH
       grep --quiet --fixed-strings -- "dog@$INSTANCE --- exit_status=$(< "${ARCHIVE%/*}/exit_status") signal=$(< "${ARCHIVE%/*}/signal") ---" "$ARCHIVE"
     done
     DEAD=("$TEST_DIR/dead/dog/$INSTANCE."*)
-    [[ ${#DEAD[@]} == 1 ]]
+    [[ ${#DEAD[@]} == 2 ]]
     [[ $(< "${DEAD[0]}/exit_status") == 0 ]]
     [[ $(< "${DEAD[0]}/signal") == 0 ]]
     FAILED=("$TEST_DIR/failed/dog/$INSTANCE."*)
     [[ ${#FAILED[@]} == 1 ]]
+    [[ -L ${FAILED[0]} ]]
+    [[ ${FAILED[0]} -ef ${DEAD[1]} ]]
+    TARGET="$(readlink -- "${FAILED[0]}")"
+    if [[ $TARGET == /* ]]; then exit 1; fi
     [[ $(< "${FAILED[0]}/exit_status") == 67 ]]
     [[ $(< "${FAILED[0]}/signal") == 0 ]]
   done
@@ -130,6 +134,7 @@ BASH
   done
   [[ $(< "${RECORDS[0]}/exit_status") == 0 ]]
   [[ $(< "${RECORDS[1]}/exit_status") == 67 ]]
+  [[ $TEST_DIR/failed/dog/${RECORDS[1]##*/} -ef ${RECORDS[1]} ]]
 
   rm -- "$SERVICE/data/attempt" "$SERVICE/data/ran"
   if S9_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
@@ -157,11 +162,35 @@ BASH
     exit 1
   fi
   [[ -f $SERVICE/data/ran ]]
+
+  rm -- "$SERVICE/data/.pgid"
+  printf '%s' -1 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
+  printf '%s' blocked > "$TEST_DIR/blocked"
+  for FAILURE in archive footer; do
+    case "$FAILURE" in
+    archive) printf '%s' "$TEST_DIR/blocked" > "$SERVICE/env/S9_DEAD_DIR" ;;
+    footer) printf '%s' "$TEST_DIR/footer-records" > "$SERVICE/env/S9_DEAD_DIR" ;;
+    *)
+      set -x
+      exit 2
+      ;;
+    esac
+    ln -sTnfr -- /dev/null "$SERVICE/data/launch"
+    if PATH="$TEST_DIR/bin:$PATH" env -C "$SERVICE" -- ./finish 67 0 "$INSTANCE" > "$TEST_DIR/finish.log"; then
+      exit 1
+    fi
+    [[ -f $STATE/dog/data/done/$INSTANCE ]]
+    if [[ -L $SERVICE/data/launch ]]; then exit 1; fi
+    [[ -f $TEST_DIR/log/dog/$INSTANCE.log ]]
+    rm -- "$STATE/dog/data/done/$INSTANCE"
+  done
+  REMAINING="$(find "$TEST_DIR/footer-records/dog" -mindepth 1 -maxdepth 1 -print -quit)"
+  [[ -z $REMAINING ]]
   ;;
 runtime)
   SERVICE="$STATE/dog/instances/walk"
   mkdir -p -- "$SERVICE" "$STATE/dog/data/done"
-  cp --archive -- "$ROOT/base/." "$SERVICE/"
+  rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
   printf '%s' 1s > "$SERVICE/env/S9_RUNTIME_MAX_SEC"
   cat > "$SERVICE/data/job" << 'BASH'
@@ -215,7 +244,7 @@ BASH
   printf '%s' one > "$STEP/env/PAYLOAD"
   printf '%s' old-data > "$STEP/data/value"
   "$TEMPLATE" "$STEP" "$JOB"
-  ln -s -- /dev/null "$STEP/launch/walk"
+  ln -sTnfr -- /dev/null "$STEP/launch/walk"
   RECUR=bootstrap "${QUINE[@]}" quine
   cat > "$JOBS/keeper/run.sh" << 'BASH'
 #!/usr/bin/env bash
@@ -224,7 +253,7 @@ BASH
   chmod +x -- "$JOBS/keeper/run.sh"
   RECUR=seed "${QUINE[@]}" keeper parent
   mkdir -p -- "$STATE/keeper/data/launch"
-  ln -s -- /dev/null "$STATE/keeper/data/launch/parent"
+  ln -sTnfr -- /dev/null "$STATE/keeper/data/launch/parent"
 
   s6-svscan -- "$STATE" > "$TEST_DIR/scan.log" 67>&1 2>&1 &
   SCAN_PID=$!
@@ -285,7 +314,7 @@ BASH
     two)
       printf '%s' three > "$STEP/env/PAYLOAD"
       "$TEMPLATE" "$STEP" "$JOB"
-      ln -s -- /dev/null "$STEP/launch/walk"
+      ln -sTnfr -- /dev/null "$STEP/launch/walk"
       "${WAIT[@]}" -s "$TEST_DIR/started-three"
       ;;
     three)
@@ -326,14 +355,65 @@ snapshots)
   diff --recursive --no-dereference --unified --from-file="$STATE/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
   ;;
 
+prepare)
+  PREPARE="$TEST_DIR/libexec/prepare.sh"
+  SRC="$TEST_DIR/source"
+  DST="$TEST_DIR/output/dog"
+  mkdir -p -- "$SRC/nested" "$TEST_DIR/external" "$DST"
+  printf '%s' original > "$SRC/value"
+  printf '%s' first > "$TEST_DIR/external/first"
+  printf '%s' second > "$TEST_DIR/external/second"
+  printf '%s' existing > "$DST/value"
+  ln -sTnfr -- "$TEST_DIR/external/first" "$TEST_DIR/external/latest"
+  ln -sTnfr -- "$SRC/value" "$SRC/nested/internal"
+  ln -sTnf -- "$SRC/value" "$SRC/absolute-internal"
+  ln -sTnf -- nested/internal "$SRC/chain"
+  ln -sTnf -- ../../external/latest "$SRC/nested/external"
+  ln -sTnf -- "$TEST_DIR/external/latest" "$SRC/absolute"
+  ln -sTnfr -- "$TEST_DIR/missing" "$SRC/dangling"
+  ln -sTnfr -- "$SRC" "$TEST_DIR/source-link"
+
+  STAGING="$("$PREPARE" "$TEST_DIR/source-link" "$DST")"
+  [[ $STAGING == "$TEST_DIR/output/.dog" ]]
+  [[ $(< "$DST/value") == existing ]]
+  [[ $(< "$STAGING/value") == original ]]
+  for LINK in nested/internal absolute-internal chain nested/external absolute dangling; do
+    [[ -L $STAGING/$LINK ]]
+    TARGET="$(readlink -- "$STAGING/$LINK")"
+    if [[ $TARGET == /* ]]; then exit 1; fi
+  done
+  if "$PREPARE" "$SRC" "$DST" > "$TEST_DIR/output-path" 2> "$TEST_DIR/error"; then exit 1; fi
+  [[ $(< "$STAGING/value") == original ]]
+
+  mv -- "$DST" "$TEST_DIR/output/.old"
+  mv --no-target-directory -- "$STAGING" "$DST"
+  printf '%s' changed > "$SRC/value"
+  ln -sTnfr -- "$TEST_DIR/external/second" "$TEST_DIR/external/latest"
+  [[ $(< "$DST/value") == original ]]
+  [[ $(< "$DST/nested/internal") == original ]]
+  [[ $(< "$DST/absolute-internal") == original ]]
+  TARGET="$(readlink -- "$DST/chain")"
+  [[ $TARGET == nested/internal ]]
+  [[ $(< "$DST/chain") == original ]]
+  [[ $(< "$DST/nested/external") == second ]]
+  [[ $(< "$DST/absolute") == second ]]
+  if [[ -e $DST/dangling ]]; then exit 1; fi
+  printf '%s' arrived > "$TEST_DIR/missing"
+  [[ $(< "$DST/dangling") == arrived ]]
+  mv -- "$TEST_DIR/output" "$TEST_DIR/relocated"
+  DST="$TEST_DIR/relocated/dog"
+  [[ $(< "$DST/nested/internal") == original ]]
+  [[ $(< "$DST/absolute-internal") == original ]]
+  [[ $(< "$DST/nested/external") == second ]]
+  ;;
 publication)
   mkdir -p -- "$TEST_DIR/bin" "$TEST_DIR/old/data/launch" "$TEST_DIR/new/data/launch"
   for REVISION in old new; do
     printf '#!/usr/bin/env bash\nprintf "%s\\n"\n' "$REVISION" > "$TEST_DIR/$REVISION/run.sh"
     chmod +x -- "$TEST_DIR/$REVISION/run.sh"
-    ln -s -- "/$REVISION" "$TEST_DIR/$REVISION/data/launch/walk"
+    ln -sTnf -- "/$REVISION" "$TEST_DIR/$REVISION/data/launch/walk"
   done
-  ln -s -- "$TEST_DIR/old" "$JOBS/dog"
+  ln -sTnfr -- "$TEST_DIR/old" "$JOBS/dog"
   cat > "$TEST_DIR/bin/control" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -344,11 +424,11 @@ s6-svok)
   fi
   ;;
 s6-svwait)
-  ln -sTnf -- "$TEST_ROOT/new" "$TEST_ROOT/jobs/dog"
+  ln -sTnfr -- "$TEST_ROOT/new" "$TEST_ROOT/jobs/dog"
   ;;
 s6-instance-create)
   cp --archive -- "${@: -2:1}/template" "${@: -2:1}/instances/${@: -1}"
-  ln -s -- "../instances/${@: -1}" "${@: -2:1}/instance/${@: -1}"
+  ln -sTnfr -- "${@: -2:1}/instances/${@: -1}" "${@: -2:1}/instance/${@: -1}"
   ;;
 s6-instance-delete)
   if [[ ${TEST_DELETE_STATUS:-0} != 0 ]]; then
@@ -369,7 +449,7 @@ esac
 BASH
   chmod +x -- "$TEST_DIR/bin/control"
   for COMMAND in s6-svok s6-svwait s6-svc s6-instance-control s6-instance-create s6-instance-delete s6-svstat; do
-    ln -s -- control "$TEST_DIR/bin/$COMMAND"
+    ln -sTnfr -- "$TEST_DIR/bin/control" "$TEST_DIR/bin/$COMMAND"
   done
   RECONCILE=(env "PATH=$TEST_DIR/bin:$PATH" "TEST_ROOT=$TEST_DIR" RECUR=job "${QUINE[@]}" dog)
   "${RECONCILE[@]}"
@@ -402,7 +482,7 @@ BASH
 
   mkdir -p -- "$TEST_DIR/new/env"
   printf '%s' 0 > "$TEST_DIR/new/env/S9_ON_UNIT_INACTIVE_SEC"
-  ln -s -- /new "$TEST_DIR/new/data/launch/walk"
+  ln -sTnf -- /new "$TEST_DIR/new/data/launch/walk"
   "${RECONCILE[@]}"
   touch -- "$SERVICE/stale"
   TEST_SUPERVISOR_STATUS=1 "${RECONCILE[@]}"
@@ -415,6 +495,13 @@ BASH
   "${RECONCILE[@]}"
   if [[ -e $STATE/dog/data/done/finished ]]; then exit 1; fi
   [[ -d $SERVICE ]]
+
+  printf '%s' payload > "$TEST_DIR/new/data/payload"
+  ln -sTnfr -- "$TEST_DIR/new/data/payload" "$TEST_DIR/new/data/launch/mail"
+  printf '%s' -1 > "$TEST_DIR/new/env/S9_ON_UNIT_INACTIVE_SEC"
+  "${RECONCILE[@]}"
+  [[ $(< "$STATE/dog/instances/mail/data/launch") == payload ]]
+  if [[ -L $TEST_DIR/new/data/launch/mail ]]; then exit 1; fi
   ;;
 templates)
   cp --archive -- "$DL/examples" "$TEST_DIR/examples"
@@ -449,10 +536,10 @@ EOF
       cat > "$OUTPUT/stdout" << EOF
 $DEPENDENCY:$INSTANCE
 EOF
-      ln -sTnf -- revision "$TEST_DIR/upstream/$DEPENDENCY/$INSTANCE/latest"
+      ln -sTnfr -- "${OUTPUT%/*}" "$TEST_DIR/upstream/$DEPENDENCY/$INSTANCE/latest"
     done
     INPUT="$(realpath -- "$TEST_DIR/upstream/$DEPENDENCY")"
-    ln -sTnf -- "$INPUT" "$STEP/data/inbox/$DEPENDENCY"
+    ln -sTnfr -- "$INPUT" "$STEP/data/inbox/$DEPENDENCY"
   done
   cat > "$STEP/run.sh" << 'BASH'
 #!/usr/bin/env bash
@@ -481,7 +568,7 @@ set -euo pipefail
 [[ -d $1/inbox ]]
 [[ -d $1/launch ]]
 [[ -z ${RECUR:-} ]]
-ln -s -- /dev/null "$1/launch/walk"
+ln -sTnfr -- /dev/null "$1/launch/walk"
 BASH
   chmod +x -- "$STEP/dispatch.sh"
   S9_JOBS_DIR="$JOBS" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
@@ -560,14 +647,14 @@ rm -fr -- "${@: -2:1}/instances/${@: -1}"
 BASH
   chmod +x -- "$TEST_DIR/bin/"{s6-instance-create,s6-instance-delete,s6-svstat,noop}
   for COMMAND in s6-svok s6-svwait s6-svc s6-instance-control; do
-    ln -s -- noop "$TEST_DIR/bin/$COMMAND"
+    ln -sTnfr -- "$TEST_DIR/bin/noop" "$TEST_DIR/bin/$COMMAND"
   done
   RECONCILE=(env "PATH=$TEST_DIR/bin:$PATH" RECUR=job "${QUINE[@]}")
   for _ in 1 2; do
     "$TEMPLATE" "$STEP" "$JOB"
   done
-  ln -s -- /missing/inbox "$LAUNCH/run"
-  ln -s -- /dev/null "$LAUNCH/.pending"
+  ln -sTnfr -- /missing/inbox "$LAUNCH/run"
+  ln -sTnfr -- /dev/null "$LAUNCH/.pending"
   "${RECONCILE[@]}" queue-dog
   [[ -d $MANAGER/instances/run ]]
   [[ -L $MANAGER/instances/run/data/launch ]]
@@ -576,7 +663,7 @@ BASH
   fi
   [[ -L $LAUNCH/.pending ]]
 
-  ln -s -- /dev/null "$LAUNCH/rejected"
+  ln -sTnfr -- /dev/null "$LAUNCH/rejected"
   if "${RECONCILE[@]}" queue-dog; then
     exit 1
   fi
@@ -587,7 +674,7 @@ BASH
     exit 1
   fi
 
-  ln -s -- /dev/null "$LAUNCH/run"
+  ln -sTnfr -- /dev/null "$LAUNCH/run"
   if env -C "$MANAGER/instances/run" -- ./finish 0 0 run > "$TEST_DIR/finish.log"; then
     exit 1
   else
@@ -632,7 +719,7 @@ BASH
 policy)
   SERVICE="$STATE/dog/instances/walk"
   mkdir -p -- "$SERVICE" "$STATE/dog/data/done" "$TEST_DIR/bin"
-  cp --archive -- "$ROOT/base/." "$SERVICE/"
+  rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
   printf '%s' 2 > "$SERVICE/env/S9_RESTART_SEC"
   cat > "$SERVICE/data/job" << 'BASH'
@@ -645,7 +732,7 @@ printf '%s' "${@: -1}" > ./delay
 BASH
   chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
-  ln -s -- /dev/null "$SERVICE/data/launch"
+  ln -sTnfr -- /dev/null "$SERVICE/data/launch"
   trap 'printf "policy:%s interval=%s cap=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$CAP" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
   while read -r INTERVAL CAP STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
     printf '%s' "$INTERVAL" > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"

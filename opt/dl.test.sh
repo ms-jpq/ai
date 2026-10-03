@@ -53,14 +53,14 @@ templates)
   SOURCE_LAUNCH="$SRC/launch"
   DEPENDENCY="$TEST_DIR/steps/lil"
   mkdir -p -- "$SOURCE_LAUNCH" "$SRC/data/inbox" "$SRC/wants" "$DEPENDENCY"
-  ln -s -- ../../lil "$SRC/wants/lil"
-  ln -s -- /missing/old-records "$SRC/data/inbox/lil"
+  ln -sTnfr -- "$DEPENDENCY" "$SRC/wants/lil"
+  ln -sTnfr -- /missing/old-records "$SRC/data/inbox/lil"
   cat > "$SRC/run.sh" << 'BASH'
 #!/usr/bin/env bash
 exit 0
 BASH
   chmod +x -- "$SRC/run.sh"
-  ln -s -- ../data/inbox "$SOURCE_LAUNCH/initial"
+  ln -sTnfr -- "$SRC/data/inbox" "$SOURCE_LAUNCH/initial"
 
   "$TEMPLATE" "$SRC" "$DST"
   FIRST="$(realpath -- "$DST")"
@@ -68,12 +68,12 @@ BASH
   DEPENDENCY="$(realpath -- "$DEPENDENCY")"
   [[ $INBOX == "$DEPENDENCY/records" ]]
   mkdir -p -- "$DEPENDENCY/records/walk/revision/output"
-  ln -s -- revision "$DEPENDENCY/records/walk/latest"
+  ln -sTnfr -- "$DEPENDENCY/records/walk/revision" "$DEPENDENCY/records/walk/latest"
   [[ $DST/data/inbox/lil/walk/latest/output -ef $DEPENDENCY/records/walk/revision/output ]]
   [[ -L $LAUNCH ]]
   [[ $LAUNCH -ef $SOURCE_LAUNCH ]]
-  ln -s -- ../data/inbox "$LAUNCH/queued request"
-  ln -s -- /missing/inbox "$LAUNCH/.pending"
+  ln -sTnfr -- "$SRC/data/inbox" "$LAUNCH/queued request"
+  ln -sTnfr -- /missing/inbox "$LAUNCH/.pending"
   rm -- "$LAUNCH/initial"
   if [[ -L $SOURCE_LAUNCH/initial ]]; then
     exit 1
@@ -97,7 +97,7 @@ BASH
   fi
   "$FIRST/data/command"
 
-  ln -s -- /dev/null "$FIRST/data/launch/late"
+  ln -sTnfr -- /dev/null "$FIRST/data/launch/late"
   [[ -L $LAUNCH/late ]]
   rm -- "$LAUNCH/queued request"
   "$TEMPLATE" "$SRC" "$DST"
@@ -118,7 +118,7 @@ BASH
   [[ -L $LAUNCH/late ]]
 
   chmod +x -- "$SRC/run.sh"
-  ln -s -- /missing/dependency "$SRC/wants/missing"
+  ln -sTnfr -- /missing/dependency "$SRC/wants/missing"
   if "$TEMPLATE" "$SRC" "$DST" 2> "$TEST_DIR/error"; then
     exit 1
   fi
