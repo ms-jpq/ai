@@ -19,12 +19,13 @@ log)
   JOB="${SERVICE%/instances/*}"
   exec -- s6-log -b -l 0 -d "$(< ./notification-fd)" -- "p${JOB##*/}@${SERVICE##*/}" 1 >&67
   ;;
+run)
+  printf -- '%s' "$$" > "$PGID_FILE"
+  ;;&
+finish)
+  export -- RECUR=finished
+  ;;&
 run | finish)
-  if [[ $MODE == run ]]; then
-    printf -- '%s' "$$" > "$PGID_FILE"
-  else
-    export -- RECUR=finished
-  fi
   exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
   ;;
 lifecycle.sh)
