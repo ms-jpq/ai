@@ -336,7 +336,12 @@ s6-instance-delete)
   rm -fr -- "${@: -2:1}/instances/${@: -1}"
   ;;
 s6-svstat)
-  printf 'false false\n'
+  printf '%s\n' "${TEST_SERVICE_STATUS:-false false}"
+  ;;
+s6-instance-control)
+  if [[ $1 == -d ]]; then
+    printf 'stop\n' >> "$TEST_ROOT/stops"
+  fi
   ;;
 esac
 BASH
@@ -365,6 +370,11 @@ BASH
   if [[ -f $STATE/dog/data/done/walk ]]; then exit 1; fi
 
   printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
+  TEST_SERVICE_STATUS='true true' "${RECONCILE[@]}"
+  [[ -d $SERVICE ]]
+  TEST_SERVICE_STATUS='true false' "${RECONCILE[@]}"
+  [[ -d $SERVICE ]]
+  [[ $(< "$TEST_DIR/stops") == stop ]]
   "${RECONCILE[@]}"
   if [[ -d $SERVICE ]]; then exit 1; fi
   ;;

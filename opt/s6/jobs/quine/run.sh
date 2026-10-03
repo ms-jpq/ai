@@ -113,8 +113,11 @@ instance)
       exit
     fi
     touch -- "$SERVICE/down"
-    s6-instance-control -d -- "$SUPERVISOR" "$INSTANCE"
     STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
+    if [[ $STATUS == *' true' ]]; then
+      s6-instance-control -d -- "$SUPERVISOR" "$INSTANCE"
+      exit
+    fi
     if [[ $STATUS != 'false false' ]]; then
       exit
     fi
