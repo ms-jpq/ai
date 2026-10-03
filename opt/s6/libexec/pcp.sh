@@ -21,7 +21,7 @@ case "${RECUR:-}" in
   rsync --archive -- "$SRC/" "$STAGING/" >&2
   find "$STAGING" -type l -printf '%P\0' | RECUR=1 xargs --null --no-run-if-empty --max-procs=0 -I '{}' -- "$0" "$SRC/{}" "$STAGING/{}" "$SRC"
   trap - EXIT
-  printf '%s\n' "$STAGING"
+  printf -- '%s' "$STAGING"
   ;;
 1)
   TARGET="$(readlink -- "$DST")"

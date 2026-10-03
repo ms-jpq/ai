@@ -132,7 +132,7 @@ EOF
   fi
   rm -fr -- "$LOG_SRC"
 
-  printf -- '%s\n' "$EXIT_LINES"
+  printf -- '%s' "$EXIT_LINES"
   exit "$EXIT_STATUS"
   ;;
 *)
