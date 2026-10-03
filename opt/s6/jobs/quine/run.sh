@@ -9,10 +9,10 @@ SELF="$(realpath -- "$0")"
 ROOT="${SELF%/jobs/quine/run.sh}"
 LOCK='./.reconcile.lock'
 JOB="$ROOT/jobs/$NAME"
-MANAGER="$PWD/$NAME"
-TEMPLATE="$MANAGER/template"
-INSTANCES="$MANAGER/instances"
-DONE="$MANAGER/data/done"
+SUPERVISOR="$PWD/$NAME"
+TEMPLATE="$SUPERVISOR/template"
+INSTANCES="$SUPERVISOR/instances"
+DONE="$SUPERVISOR/data/done"
 TIMEOUT=6000
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
@@ -51,10 +51,10 @@ seed | job)
     tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$STAGING/.sum"
     mv -- "$STAGING/.sum" "$BUILD/.sum"
 
-    if ! [[ -d $MANAGER ]]; then
+    if ! [[ -d $SUPERVISOR ]]; then
       s6-instance-maker -- "$BUILD" "$STAGING/manager"
       mkdir -p -- "$STAGING/manager/data/done"
-      mv -- "$STAGING/manager" "$MANAGER"
+      mv -- "$STAGING/manager" "$SUPERVISOR"
     else
       rsync --archive --checksum --delete -- "$BUILD/" "$TEMPLATE/"
     fi
@@ -67,20 +67,20 @@ seed)
     rsync --archive -- "$TEMPLATE/" "$STAGING/instance/"
     mv -- "$STAGING/instance" "$INSTANCES/$INSTANCE"
   fi
-  if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
-    ln -sTnfr -- "$INSTANCES/$INSTANCE" "$MANAGER/instance/$INSTANCE"
+  if ! [[ -L $SUPERVISOR/instance/$INSTANCE ]]; then
+    ln -sTnfr -- "$INSTANCES/$INSTANCE" "$SUPERVISOR/instance/$INSTANCE"
   fi
   ;;
 job)
-  if ! s6-svok "$MANAGER"; then
+  if ! s6-svok "$SUPERVISOR"; then
     exit
   fi
-  s6-svwait -U -t "$TIMEOUT" -- "$MANAGER"
+  s6-svwait -U -t "$TIMEOUT" -- "$SUPERVISOR"
 
   RECUR=cleanup find "$DONE" -mindepth 1 -maxdepth 1 ! -name '.*' -exec "$SELF" "$NAME" '{}' +
   {
     find "$INSTANCES" -mindepth 1 -maxdepth 1 -type d -printf '%f\0'
-    for SOURCE in "$JOB" "$MANAGER"; do
+    for SOURCE in "$JOB" "$SUPERVISOR"; do
       if [[ -d $SOURCE/data/launch ]]; then
         find "$SOURCE/data/launch/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
       fi
@@ -91,7 +91,7 @@ cleanup)
   shift -- 1
   for SVC in "$@"; do
     INSTANCE="${SVC##*/}"
-    s6-instance-delete -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
+    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
     rm -fr -- "$SVC"
   done
   ;;
@@ -101,7 +101,7 @@ instance)
   DATA="$SERVICE/data"
   REQUEST="$JOB/data/launch/$INSTANCE"
   if ! [[ -L $REQUEST ]]; then
-    REQUEST="$MANAGER/data/launch/$INSTANCE"
+    REQUEST="$SUPERVISOR/data/launch/$INSTANCE"
   fi
 
   if [[ -d $SERVICE ]] && (($(< "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC") >= 0)); then
@@ -112,13 +112,13 @@ instance)
       exit
     fi
     touch -- "$SERVICE/down"
-    s6-instance-control -O -- "$MANAGER" "$INSTANCE"
+    s6-instance-control -O -- "$SUPERVISOR" "$INSTANCE"
     STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
     if [[ $STATUS != 'false false' ]]; then
       exit
     fi
     s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
-    s6-instance-delete -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
+    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
   fi
   if ! [[ -L $DATA/launch ]]; then
     if ! [[ -d $JOB ]] || ! [[ -L $REQUEST ]]; then
@@ -127,9 +127,9 @@ instance)
   fi
   if ! [[ -d $SERVICE ]]; then
     if (($(< "$TEMPLATE/env/S67_ON_UNIT_INACTIVE_SEC") >= 0)); then
-      exec -- s6-instance-create -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
+      exec -- s6-instance-create -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
     fi
-    s6-instance-create -D -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
+    s6-instance-create -D -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
   else
     STATUS="$(s6-svstat -o up -- "$SERVICE")"
     if ! [[ -f $SERVICE/down ]] || [[ $STATUS == true ]]; then
@@ -145,7 +145,7 @@ instance)
   if ! [[ -L $DATA/launch ]]; then
     mv --no-target-directory -- "$REQUEST" "$DATA/launch"
   fi
-  s6-instance-control -wu -T "$TIMEOUT" -o -- "$MANAGER" "$INSTANCE"
+  s6-instance-control -wu -T "$TIMEOUT" -o -- "$SUPERVISOR" "$INSTANCE"
   ;;
 *)
   set -x
