@@ -55,7 +55,7 @@ printf '%s\\n' CODE > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
     _write(step / "env/PAYLOAD", text="one")
     _write(step / "data/value", text="old-data")
     _run(str(template), str(step), str(job))
-    request = step / "requests/recurring/walk"
+    request = step / "launch/recurring/walk"
     request.symlink_to("/dev/null")
     _run(str(quine), cwd=state, env={**environment, "RECUR": "bootstrap"})
     keeper = s6 / "jobs/keeper/run.sh"
@@ -64,8 +64,8 @@ printf '%s\\n' CODE > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
     _run(
         str(quine), "keeper", "parent", cwd=state, env={**environment, "RECUR": "seed"}
     )
-    runtime_requests = state / "keeper/data/recurring"
-    runtime_requests.mkdir()
+    runtime_requests = state / "keeper/data/launch/recurring"
+    runtime_requests.mkdir(parents=True)
     (runtime_requests / "parent").symlink_to("/dev/null")
 
     with (root / "scan.log").open("w+") as log:

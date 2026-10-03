@@ -21,7 +21,7 @@ if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
 fi
 
 EXIT_STATUS=0
-if [[ -d $INSTANCE_DATA/recurring ]]; then
+if [[ -d $INSTANCE_DATA/launch/recurring ]]; then
   if ((STATUS == 0 && SIGNAL == 0)); then
     : > "$ATTEMPTS"
   else

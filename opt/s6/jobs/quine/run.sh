@@ -25,6 +25,9 @@ seed | job | cleanup | recurring | oneshot | refresh)
   NAME="${1##*/}"
   JOB="$ROOT/jobs/$NAME"
   MANAGER="$PWD/$NAME"
+  TEMPLATE="$MANAGER/template"
+  INSTANCES="$MANAGER/instances"
+  DONE="$MANAGER/data/done"
   ;;&
 seed | job)
   if [[ $RECUR == seed ]] || [[ -d $JOB ]]; then
@@ -36,36 +39,37 @@ seed | job)
     fi
 
     STAGING="$(mktemp -d -- "$PWD/.$NAME.XXXXXX")"
+    BUILD="$STAGING/template"
     trap 'rm -fr -- "$STAGING"' EXIT
-    rsync --archive -- "$ROOT/base/" "$STAGING/template/"
-    rsync --archive --checksum --exclude=/data/recurring --exclude=/data/oneshot --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$STAGING/template/"
+    rsync --archive -- "$ROOT/base/" "$BUILD/"
+    rsync --archive --checksum --exclude=/data/launch --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$BUILD/"
     if [[ ${RUN[*]} -ef $SELF ]]; then
-      ln -sTnf -- "${RUN[*]}" "$STAGING/template/data/job"
+      ln -sTnf -- "${RUN[*]}" "$BUILD/data/job"
     else
-      cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$STAGING/template/data/job"
+      cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$BUILD/data/job"
     fi
-    mkdir -p -- "$STAGING/template/data/recurring"
-    tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$STAGING/template" . | b3sum > "$STAGING/.sum"
-    mv -- "$STAGING/.sum" "$STAGING/template/.sum"
+    mkdir -p -- "$BUILD/data/launch/recurring"
+    tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$STAGING/.sum"
+    mv -- "$STAGING/.sum" "$BUILD/.sum"
 
     if ! [[ -d $MANAGER ]]; then
-      s6-instance-maker -- "$STAGING/template" "$STAGING/manager"
+      s6-instance-maker -- "$BUILD" "$STAGING/manager"
       mkdir -p -- "$STAGING/manager/data/done"
       mv -- "$STAGING/manager" "$MANAGER"
     else
-      rsync --archive --checksum --delete -- "$STAGING/template/" "$MANAGER/template/"
+      rsync --archive --checksum --delete -- "$BUILD/" "$TEMPLATE/"
     fi
   fi
 
   ;;&
 seed)
   INSTANCE="$2"
-  if ! [[ -d $MANAGER/instances/$INSTANCE ]]; then
-    rsync --archive -- "$MANAGER/template/" "$STAGING/instance/"
-    mv -- "$STAGING/instance" "$MANAGER/instances/$INSTANCE"
+  if ! [[ -d $INSTANCES/$INSTANCE ]]; then
+    rsync --archive -- "$TEMPLATE/" "$STAGING/instance/"
+    mv -- "$STAGING/instance" "$INSTANCES/$INSTANCE"
   fi
   if ! [[ -L $MANAGER/instance/$INSTANCE ]]; then
-    ln -sTnfr -- "$MANAGER/instances/$INSTANCE" "$MANAGER/instance/$INSTANCE"
+    ln -sTnfr -- "$INSTANCES/$INSTANCE" "$MANAGER/instance/$INSTANCE"
   fi
   ;;
 job)
@@ -74,16 +78,16 @@ job)
   fi
   s6-svwait -U -t "$TIMEOUT" -- "$MANAGER"
 
-  RECUR=cleanup find "$MANAGER/data/done" -mindepth 1 -maxdepth 1 ! -name '.*' -exec "$SELF" "$NAME" '{}' +
-  find "$MANAGER/instances" -mindepth 1 -maxdepth 1 -type d -print0 | RECUR=refresh "${XARGS[@]}" "$SELF" "$NAME" '{}'
+  RECUR=cleanup find "$DONE" -mindepth 1 -maxdepth 1 ! -name '.*' -exec "$SELF" "$NAME" '{}' +
+  find "$INSTANCES" -mindepth 1 -maxdepth 1 -type d -print0 | RECUR=refresh "${XARGS[@]}" "$SELF" "$NAME" '{}'
   if ! [[ -d $JOB ]]; then
     exit
   fi
 
   for MODE in recurring oneshot; do
     for SOURCE in "$JOB" "$MANAGER"; do
-      if [[ -d $SOURCE/data/$MODE ]]; then
-        find "$SOURCE/data/$MODE/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
+      if [[ -d $SOURCE/data/launch/$MODE ]]; then
+        find "$SOURCE/data/launch/$MODE/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
       fi
     done | sort --zero-terminated --unique | RECUR="$MODE" "${XARGS[@]}" "$SELF" "$NAME" '{}'
   done
@@ -98,14 +102,15 @@ cleanup)
   ;;
 recurring | oneshot | refresh)
   INSTANCE="${2##*/}"
-  SERVICE="$MANAGER/instances/$INSTANCE"
-  RECURRING="$JOB/data/recurring/$INSTANCE"
-  ONESHOT="$JOB/data/oneshot/$INSTANCE"
+  SERVICE="$INSTANCES/$INSTANCE"
+  DATA="$SERVICE/data"
+  RECURRING="$JOB/data/launch/recurring/$INSTANCE"
+  ONESHOT="$JOB/data/launch/oneshot/$INSTANCE"
   if ! [[ -L $RECURRING ]]; then
-    RECURRING="$MANAGER/data/recurring/$INSTANCE"
+    RECURRING="$MANAGER/data/launch/recurring/$INSTANCE"
   fi
   if ! [[ -L $ONESHOT ]]; then
-    ONESHOT="$MANAGER/data/oneshot/$INSTANCE"
+    ONESHOT="$MANAGER/data/launch/oneshot/$INSTANCE"
   fi
 
   if [[ -L $RECURRING ]] && [[ -L $ONESHOT ]]; then
@@ -118,10 +123,10 @@ EOF
   fi
   ;;&
 refresh)
-  if ! [[ -d $SERVICE/data/recurring ]] || [[ $SERVICE/data/job -ef $SELF ]]; then
+  if ! [[ -d $DATA/launch/recurring ]] || [[ $DATA/job -ef $SELF ]]; then
     exit
   fi
-  if [[ -d $JOB ]] && [[ -L $RECURRING ]] && ! [[ -f $SERVICE/down ]] && cmp --silent -- "$MANAGER/template/.sum" "$SERVICE/.sum"; then
+  if [[ -d $JOB ]] && [[ -L $RECURRING ]] && ! [[ -f $SERVICE/down ]] && cmp --silent -- "$TEMPLATE/.sum" "$SERVICE/.sum"; then
     exit
   fi
   touch -- "$SERVICE/down"
@@ -135,7 +140,7 @@ refresh)
 recurring)
   if ! [[ -d $SERVICE ]]; then
     s6-instance-create -t "$TIMEOUT" -- "$MANAGER" "$INSTANCE"
-  elif ! [[ -d $SERVICE/data/recurring ]]; then
+  elif ! [[ -d $DATA/launch/recurring ]]; then
     printf -- 'Instance still belongs to a oneshot: %s@%s\n' "${JOB##*/}" "$INSTANCE" >&2
     exit 2
   fi
@@ -149,12 +154,12 @@ oneshot)
       exit
     fi
     s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
-    if [[ -f $MANAGER/data/done/$INSTANCE ]]; then
+    if [[ -f $DONE/$INSTANCE ]]; then
       exit
     fi
   fi
 
-  rm -fr -- "$SERVICE/data/recurring"
+  rm -fr -- "$DATA/launch/recurring"
   s6-svc -wU -T "$TIMEOUT" -U -- "$SERVICE/log"
   rm -- "$ONESHOT"
   s6-instance-control -wu -T "$TIMEOUT" -o -- "$MANAGER" "$INSTANCE"

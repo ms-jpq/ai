@@ -18,11 +18,9 @@ REVISION="$(mktemp -d -- "$VERSIONS/${DST##*/}.XXXXXX")"
 LINK="${DST%/*}/.${REVISION##*/}.link"
 trap 'rm -f -- "$LINK"' EXIT
 
-rsync --archive --exclude=/data/recurring --exclude=/data/oneshot --include='/env/***' --include='/data/***' --exclude='/*' -- "$SRC/" "$REVISION/"
-mkdir -p -- "$REVISION/env" "$REVISION/data/inbox" "$SRC/records" "$SRC/requests/"{recurring,oneshot}
-for MODE in recurring oneshot; do
-  ln -sTnfr -- "$SRC/requests/$MODE" "$REVISION/data/$MODE"
-done
+rsync --archive --exclude=/data/launch --include='/env/***' --include='/data/***' --exclude='/*' -- "$SRC/" "$REVISION/"
+mkdir -p -- "$REVISION/env" "$REVISION/data/inbox" "$SRC/records" "$SRC/launch/"{recurring,oneshot}
+ln -sTnfr -- "$SRC/launch" "$REVISION/data/launch"
 printf -- '%s' "$SRC/records" > "$REVISION/env/S67_RECORDS_DIR"
 cp --preserve=mode,timestamps -- "${RUN[*]}" "$REVISION/data/command"
 cp --preserve=mode,timestamps -- "${0%/*}/step.sh" "$REVISION/data/step.sh"

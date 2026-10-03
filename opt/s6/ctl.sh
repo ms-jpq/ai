@@ -23,9 +23,9 @@ start)
   rm -fr -- "$STATE/watchdog"
   env -C "$STATE" -- RECUR=seed "$BASE/jobs/quine/run.sh" watchdog "$P_PID"
 
-  mkdir -p -- "$DATA/recurring"
+  mkdir -p -- "$DATA/launch/recurring"
   printf -- '%s' "$P_STARTED" > "$DATA/lstart"
-  ln -sTnfr -- "$DATA/lstart" "$DATA/recurring/$P_PID"
+  ln -sTnfr -- "$DATA/lstart" "$DATA/launch/recurring/$P_PID"
 
   S67_WORKING_DIRECTORY="$WS" s6-svscan -- "$STATE" 2>&1 | s6-log -b -l 0 -- T 1 >> "$LOGS/s6.log"
   ;;

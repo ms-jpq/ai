@@ -9,6 +9,8 @@ fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
 ROOT="${0%/*}"
+DL="$ROOT/../dl"
+TEMPLATE="$DL/jobs/dispatch/data/service-template.sh"
 mkdir -p -- "$ROOT/../../var/tmp"
 TEST_DIR="$(mktemp -d -- "$ROOT/../../var/tmp/quine-test.XXXXXX")"
 trap 'rm -fr -- "$TEST_DIR"' EXIT
@@ -37,27 +39,28 @@ snapshots)
   ;;
 
 templates)
-  cp --archive -- "$ROOT/../dl/examples" "$TEST_DIR/examples"
+  cp --archive -- "$DL/examples" "$TEST_DIR/examples"
   for JOB in dog lil; do
-    "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/examples/$JOB" "$TEST_DIR/jobs/$JOB"
+    SERVICE="$TEST_DIR/snapshot-1/$JOB/instances/-"
+    "$TEMPLATE" "$TEST_DIR/examples/$JOB" "$TEST_DIR/jobs/$JOB"
     [[ -L $TEST_DIR/jobs/$JOB ]]
     RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh "$JOB" -
-    diff --unified -- "$ROOT/../dl/examples/$JOB/run.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/command"
-    diff --unified -- "$ROOT/../dl/jobs/dispatch/data/step.sh" "$TEST_DIR/snapshot-1/$JOB/instances/-/data/job"
+    diff --unified -- "$DL/examples/$JOB/run.sh" "$SERVICE/data/command"
+    diff --unified -- "$DL/jobs/dispatch/data/step.sh" "$SERVICE/data/job"
     EXPECTED_RECORDS="$(realpath -- "$TEST_DIR/examples/$JOB/records")"
-    [[ $(< "$TEST_DIR/snapshot-1/$JOB/instances/-/env/S67_RECORDS_DIR") == "$EXPECTED_RECORDS" ]]
+    [[ $(< "$SERVICE/env/S67_RECORDS_DIR") == "$EXPECTED_RECORDS" ]]
     if [[ -e $TEST_DIR/jobs/$JOB/data/records ]] || [[ -L $TEST_DIR/jobs/$JOB/data/records ]]; then
       exit 1
     fi
-    for ENV in "$ROOT/../dl/examples/$JOB/env/"*; do
-      diff --unified -- "$ENV" "$TEST_DIR/snapshot-1/$JOB/instances/-/env/${ENV##*/}"
+    for ENV in "$DL/examples/$JOB/env/"*; do
+      diff --unified -- "$ENV" "$SERVICE/env/${ENV##*/}"
     done
   done
   ;;
 
 graph)
-  cp --archive -- "$ROOT/../dl/examples" "$TEST_DIR/examples"
-  S67_JOBS_DIR="$TEST_DIR/example-jobs" "$ROOT/../dl/jobs/dispatch/run.sh" "$TEST_DIR/examples"
+  cp --archive -- "$DL/examples" "$TEST_DIR/examples"
+  S67_JOBS_DIR="$TEST_DIR/example-jobs" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/examples"
   DEPENDENCY="$TEST_DIR/examples/lil/records"
   INBOX="$TEST_DIR/example-jobs/dog/data/inbox/lil"
   if [[ -e $TEST_DIR/example-jobs/dog/data/dependencies ]]; then
@@ -124,14 +127,14 @@ set -euo pipefail
 [[ -d records ]]
 [[ -f $1/command ]]
 [[ -d $1/inbox ]]
-[[ -d $1/recurring ]]
-[[ -d $1/oneshot ]]
+[[ -d $1/launch/recurring ]]
+[[ -d $1/launch/oneshot ]]
 [[ -z ${RECUR:-} ]]
-ln -s -- /dev/null "$1/oneshot/walk"
+ln -s -- /dev/null "$1/launch/oneshot/walk"
 EOF
   chmod +x -- "$TEST_DIR/steps/dog/dispatch.sh"
-  S67_JOBS_DIR="$TEST_DIR/jobs" "$ROOT/../dl/jobs/dispatch/run.sh" "$TEST_DIR/steps"
-  [[ -L $TEST_DIR/jobs/dog/data/oneshot/walk ]]
+  S67_JOBS_DIR="$TEST_DIR/jobs" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
+  [[ -L $TEST_DIR/jobs/dog/data/launch/oneshot/walk ]]
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 exit 99
 EOF
@@ -174,8 +177,11 @@ EOF
   ;;
 
 queues)
+  JOB="$TEST_DIR/jobs/queue-dog"
+  LAUNCH="$JOB/data/launch"
+  MANAGER="$TEST_DIR/snapshot-1/queue-dog"
   mkdir -p -- "$TEST_DIR/queue-step" "$TEST_DIR/bin"
-  cp --preserve=mode -- "$ROOT/../dl/examples/dog/run.sh" "$TEST_DIR/queue-step/run.sh"
+  cp --preserve=mode -- "$DL/examples/dog/run.sh" "$TEST_DIR/queue-step/run.sh"
   cat > "$TEST_DIR/bin/s6-instance-create" << 'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -197,28 +203,28 @@ EOF
   done
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
   for _ in 1 2; do
-    "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/queue-dog"
+    "$TEMPLATE" "$TEST_DIR/queue-step" "$JOB"
   done
-  ln -s -- /dev/null "$TEST_DIR/jobs/queue-dog/data/recurring/keep"
-  ln -s -- /missing/inbox "$TEST_DIR/jobs/queue-dog/data/oneshot/run"
-  ln -s -- /dev/null "$TEST_DIR/jobs/queue-dog/data/oneshot/.pending"
+  ln -s -- /dev/null "$LAUNCH/recurring/keep"
+  ln -s -- /missing/inbox "$LAUNCH/oneshot/run"
+  ln -s -- /dev/null "$LAUNCH/oneshot/.pending"
   PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog
-  [[ -d $TEST_DIR/snapshot-1/queue-dog/instances/keep ]]
-  [[ -d $TEST_DIR/snapshot-1/queue-dog/instances/run ]]
-  [[ -L $TEST_DIR/jobs/queue-dog/data/recurring/keep ]]
-  if [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/run ]] || [[ -d $TEST_DIR/snapshot-1/queue-dog/instances/.pending ]]; then
+  [[ -d $MANAGER/instances/keep ]]
+  [[ -d $MANAGER/instances/run ]]
+  [[ -L $LAUNCH/recurring/keep ]]
+  if [[ -L $LAUNCH/oneshot/run ]] || [[ -d $MANAGER/instances/.pending ]]; then
     exit 1
   fi
-  [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/.pending ]]
+  [[ -L $LAUNCH/oneshot/.pending ]]
 
-  ln -s -- /dev/null "$TEST_DIR/jobs/queue-dog/data/oneshot/rejected"
+  ln -s -- /dev/null "$LAUNCH/oneshot/rejected"
   if PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog; then
     exit 1
   fi
-  [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/rejected ]]
-  "$ROOT/../dl/jobs/dispatch/data/service-template.sh" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/queue-dog"
-  [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/rejected ]]
-  if [[ -L $TEST_DIR/jobs/queue-dog/data/oneshot/run ]]; then
+  [[ -L $LAUNCH/oneshot/rejected ]]
+  "$TEMPLATE" "$TEST_DIR/queue-step" "$JOB"
+  [[ -L $LAUNCH/oneshot/rejected ]]
+  if [[ -L $LAUNCH/oneshot/run ]]; then
     exit 1
   fi
   ;;

@@ -12,7 +12,7 @@ exec 2>&1
 
 INSTANCE_DATA="$PWD/data"
 
-if [[ -d $INSTANCE_DATA/recurring ]]; then
+if [[ -d $INSTANCE_DATA/launch/recurring ]]; then
   if ATTEMPT="$(wc -l 2> /dev/null < "$INSTANCE_DATA/attempt")"; then
     DELAY="$S67_ON_UNIT_INACTIVE_SEC"
     if ((ATTEMPT > 0)); then
