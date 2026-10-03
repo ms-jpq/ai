@@ -6,9 +6,23 @@ INSTANCE_DATA="$PWD/data"
 ATTEMPTS="$INSTANCE_DATA/attempt"
 PGID_FILE="$INSTANCE_DATA/.pgid"
 
-exec 2>&1
+MODE="${0##*/}"
+if [[ $MODE == run ]] && [[ $0 -ef ../data/lifecycle.sh ]]; then
+  MODE=log
+fi
 
-case "${0##*/}" in
+case "$MODE" in
+log)
+  SERVICE="${PWD%/log}"
+  JOB="${SERVICE%/instances/*}"
+  LOGS="$JOB/../../log/${JOB##*/}"
+
+  mkdir -p -- "$LOGS"
+  exec -- s6-log -b -l 0 -d "$(< ./notification-fd)" -- T "p${JOB##*/}@${SERVICE##*/}" 1 >> "$LOGS/${SERVICE##*/}.log"
+  ;;
+*)
+  exec 2>&1
+  ;;&
 run)
   printf -- '%s' "$$" > "$PGID_FILE"
   exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"

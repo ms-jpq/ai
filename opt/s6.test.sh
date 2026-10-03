@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' snapshots templates execution queues policy lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' snapshots templates execution queues policy logger lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -22,6 +22,22 @@ mkdir -- "$STATE"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
+logger)
+  for INSTANCE in walk log; do
+    SERVICE="$STATE/dog/instances/$INSTANCE"
+    mkdir -p -- "$SERVICE"
+    cp --archive -- "$ROOT/base/." "$SERVICE/"
+    ln -s -- /usr/bin/true "$SERVICE/data/job"
+    S67_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE"
+    [[ -s $SERVICE/data/.pgid ]]
+    for _ in 1 2; do
+      printf 'hello\n' | env -C "$SERVICE/log" -- ./run 3> "$TEST_DIR/ready"
+      diff --unified -- <(printf '\n') "$TEST_DIR/ready"
+    done
+    COUNT="$(grep --fixed-strings --count "dog@$INSTANCE hello" "$TEST_DIR/log/dog/$INSTANCE.log")"
+    [[ $COUNT == 2 ]]
+  done
+  ;;
 lifecycle)
   STEP="$TEST_DIR/steps/dog"
   JOB="$JOBS/dog"
