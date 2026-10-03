@@ -393,6 +393,11 @@ BASH
   if [[ -e $SERVICE/stale ]]; then exit 1; fi
   [[ -L $TEST_DIR/new/data/launch/walk ]]
   diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/job"
+
+  touch -- "$STATE/dog/data/done/finished"
+  "${RECONCILE[@]}"
+  if [[ -e $STATE/dog/data/done/finished ]]; then exit 1; fi
+  [[ -d $SERVICE ]]
   ;;
 templates)
   cp --archive -- "$DL/examples" "$TEST_DIR/examples"

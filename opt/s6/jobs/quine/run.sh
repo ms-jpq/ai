@@ -77,9 +77,8 @@ job)
   fi
   s6-svwait -U -t "$TIMEOUT" -- "$SUPERVISOR"
 
-  RECUR=cleanup find "$DONE" -mindepth 1 -maxdepth 1 ! -name '.*' -exec "$SELF" "$NAME" '{}' +
   {
-    find "$INSTANCES" -mindepth 1 -maxdepth 1 -type d -printf '%f\0'
+    find "$INSTANCES" "$DONE" -mindepth 1 -maxdepth 1 ! -name '.*' -printf '%f\0'
     for SOURCE in "$JOB" "$SUPERVISOR"; do
       if [[ -d $SOURCE/data/launch ]]; then
         find "$SOURCE/data/launch/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
@@ -88,16 +87,13 @@ job)
   } | sort --zero-terminated --unique | RECUR=instance "${XARGS[@]}" "$SELF" "$NAME" '{}' "$JOB"
   ;;
 cleanup)
-  shift -- 1
-  for INSTANCE in "$@"; do
-    INSTANCE="${INSTANCE##*/}"
-    DELETE=(s6-instance-delete -t "$TIMEOUT")
-    if ! s6-svok "$INSTANCES/$INSTANCE"; then
-      DELETE+=(-X)
-    fi
-    "${DELETE[@]}" -- "$SUPERVISOR" "$INSTANCE"
-    rm -fr -- "${DONE:?}/$INSTANCE"
-  done
+  INSTANCE="$2"
+  DELETE=(s6-instance-delete -t "$TIMEOUT")
+  if ! s6-svok "$INSTANCES/$INSTANCE"; then
+    DELETE+=(-X)
+  fi
+  "${DELETE[@]}" -- "$SUPERVISOR" "$INSTANCE"
+  rm -fr -- "${DONE:?}/$INSTANCE"
   ;;
 instance)
   INSTANCE="${2##*/}"
@@ -109,7 +105,7 @@ instance)
     REQUEST="$SUPERVISOR/data/launch/$INSTANCE"
   fi
 
-  if [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; then
+  if [[ -e $DONE/$INSTANCE ]] || { [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; }; then
     RECUR=cleanup "$0" "$NAME" "$INSTANCE"
   fi
 
