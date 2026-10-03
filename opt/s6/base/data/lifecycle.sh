@@ -65,7 +65,7 @@ lifecycle.sh)
     fi
   fi
 
-  RECUR=attempt exec -- timeout --foreground --kill-after=5s "$S9_RUNTIME_MAX_SEC" "$0" "$@"
+  RECUR=attempt exec -- timeout --foreground --kill-after=5s "$S9_RUNTIME_MAX_SEC" "$0" nice -n 19 -- "$@"
   ;;
 attempt)
   unset -- RECUR
@@ -77,7 +77,10 @@ attempt)
 
   {
     STATUS=0
-    nice -n 19 -- "$INSTANCE_DATA/job" "$@" || STATUS=$?
+    tee <<- EOF
+--- started ---
+EOF
+    "$INSTANCE_DATA/job" "$@" || STATUS=$?
     printf -- '\n'
     exit "$STATUS"
   } 2>&1 | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" | tee --append -- "$LOGS/$INSTANCE.log" > /dev/null || exit "$?"

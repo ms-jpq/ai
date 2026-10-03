@@ -91,6 +91,8 @@ BASH
     ARCHIVES=("$TEST_DIR/dead/dog/$INSTANCE."*/log)
     [[ ${#ARCHIVES[@]} == 2 ]]
     for ARCHIVE in "${ARCHIVES[@]}"; do
+      COUNT="$(grep --count --extended-regexp -- "^[0-9]{4}-[0-9]{2}-[0-9]{2} .*dog@$INSTANCE --- started ---$" "$ARCHIVE")"
+      [[ $COUNT == 1 ]]
       for STREAM in stdout stderr; do
         COUNT="$(grep --fixed-strings --count "dog@$INSTANCE command $STREAM" "$ARCHIVE")"
         [[ $COUNT == 1 ]]
