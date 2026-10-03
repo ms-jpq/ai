@@ -85,18 +85,24 @@ job)
         find "$SOURCE/data/launch/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
       fi
     done
-  } | sort --zero-terminated --unique | RECUR=instance "${XARGS[@]}" "$SELF" "$NAME" '{}'
+  } | sort --zero-terminated --unique | RECUR=instance "${XARGS[@]}" "$SELF" "$NAME" '{}' "$JOB"
   ;;
 cleanup)
   shift -- 1
   for SVC in "$@"; do
     INSTANCE="${SVC##*/}"
-    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
+    if ! [[ -L $SUPERVISOR/instance/$INSTANCE ]]; then
+      if s6-svok "$INSTANCES/$INSTANCE" || s6-svok "$INSTANCES/$INSTANCE/log"; then
+        exit 1
+      fi
+    fi
+    timeout --foreground $((TIMEOUT / 1000)) s6-instance-delete -- "$SUPERVISOR" "$INSTANCE"
     rm -fr -- "$SVC"
   done
   ;;
 instance)
   INSTANCE="${2##*/}"
+  JOB="$3"
   SERVICE="$INSTANCES/$INSTANCE"
   DATA="$SERVICE/data"
   REQUEST="$JOB/data/launch/$INSTANCE"
@@ -112,13 +118,15 @@ instance)
       exit
     fi
     touch -- "$SERVICE/down"
-    s6-instance-control -O -- "$SUPERVISOR" "$INSTANCE"
-    STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
-    if [[ $STATUS != 'false false' ]]; then
-      exit
+    if s6-svok "$SERVICE"; then
+      s6-instance-control -O -- "$SUPERVISOR" "$INSTANCE"
+      STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
+      if [[ $STATUS != 'false false' ]]; then
+        exit
+      fi
+      s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
     fi
-    s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
-    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
+    RECUR=cleanup "$SELF" "$NAME" "$DONE/$INSTANCE"
   fi
   if ! [[ -L $DATA/launch ]]; then
     if ! [[ -d $JOB ]] || ! [[ -L $REQUEST ]]; then
