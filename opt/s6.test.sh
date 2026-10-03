@@ -63,7 +63,7 @@ logger)
     mkdir -p -- "$SERVICE"
     cp --archive -- "$ROOT/base/." "$SERVICE/"
     mkdir -p -- "$STATE/dog/data/done"
-    printf '%s' 0 > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"
+    printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
     cat > "$SERVICE/data/job" << 'BASH'
 #!/usr/bin/env bash
 printf 'ran\n' > "${0%/*}/ran"
@@ -74,7 +74,7 @@ BASH
     chmod +x -- "$SERVICE/data/job"
     for STATUS in 0 67; do
       ACTUAL=0
-      TEST_JOB_STATUS="$STATUS" S67_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output" || ACTUAL=$?
+      TEST_JOB_STATUS="$STATUS" S9_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output" || ACTUAL=$?
       [[ $ACTUAL == "$STATUS" ]]
       [[ -s $SERVICE/data/.pgid ]]
       if [[ -s $TEST_DIR/output ]]; then
@@ -115,7 +115,7 @@ BASH
   [[ -f ${FAILED[1]}/log ]]
 
   rm -- "$SERVICE/data/attempt" "$SERVICE/data/ran"
-  if S67_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
+  if S9_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
     exit 1
   fi
   if [[ -e $SERVICE/data/ran ]]; then
@@ -136,7 +136,7 @@ BASH
   chmod +x -- "$TEST_DIR/bin/tee"
   TEST_TEE="$(command -v -- tee)"
   export TEST_TEE
-  if PATH="$TEST_DIR/bin:$PATH" S67_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
+  if PATH="$TEST_DIR/bin:$PATH" S9_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
     exit 1
   fi
   [[ -f $SERVICE/data/ran ]]
@@ -145,8 +145,8 @@ runtime)
   SERVICE="$STATE/dog/instances/walk"
   mkdir -p -- "$SERVICE" "$STATE/dog/data/done"
   cp --archive -- "$ROOT/base/." "$SERVICE/"
-  printf '%s' "$SERVICE" > "$SERVICE/env/S67_WORKING_DIRECTORY"
-  printf '%s' 1s > "$SERVICE/env/S67_RUNTIME_MAX_SEC"
+  printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
+  printf '%s' 1s > "$SERVICE/env/S9_RUNTIME_MAX_SEC"
   cat > "$SERVICE/data/job" << 'BASH'
 #!/usr/bin/env bash
 if [[ -n ${RECUR:-} ]]; then exit 67; fi
@@ -182,19 +182,19 @@ lifecycle)
   JOB="$JOBS/dog"
   SERVICE="$STATE/dog/instances/walk"
   WAIT=(timeout --foreground 15s bash -c 'until test "$@"; do sleep 0.05; done' --)
-  export S67_WORKING_DIRECTORY="$TEST_DIR"
+  export S9_WORKING_DIRECTORY="$TEST_DIR"
   mkdir -p -- "$STEP/env" "$STEP/data" "$JOBS/keeper/env"
-  printf '%s' 10 > "$TEST_DIR/base/env/S67_RUNTIME_MAX_SEC"
+  printf '%s' 10 > "$TEST_DIR/base/env/S9_RUNTIME_MAX_SEC"
   cat > "$STEP/run.sh" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 CODE=old
-printf '%s:%s:%s\n' "$CODE" "$PAYLOAD" "$(< "${0%/*}/value")" > "$S67_WORKING_DIRECTORY/started-$PAYLOAD"
-while ! [[ -f $S67_WORKING_DIRECTORY/release-$PAYLOAD ]]; do sleep 0.05; done
-printf '%s\n' "$CODE" > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
+printf '%s:%s:%s\n' "$CODE" "$PAYLOAD" "$(< "${0%/*}/value")" > "$S9_WORKING_DIRECTORY/started-$PAYLOAD"
+while ! [[ -f $S9_WORKING_DIRECTORY/release-$PAYLOAD ]]; do sleep 0.05; done
+printf '%s\n' "$CODE" > "$S9_WORKING_DIRECTORY/finished-$PAYLOAD"
 BASH
   chmod +x -- "$STEP/run.sh"
-  printf '%s' 60 | tee "$STEP/env/S67_ON_UNIT_INACTIVE_SEC" > "$JOBS/keeper/env/S67_ON_UNIT_INACTIVE_SEC"
+  printf '%s' 60 | tee "$STEP/env/S9_ON_UNIT_INACTIVE_SEC" > "$JOBS/keeper/env/S9_ON_UNIT_INACTIVE_SEC"
   printf '%s' one > "$STEP/env/PAYLOAD"
   printf '%s' old-data > "$STEP/data/value"
   "$TEMPLATE" "$STEP" "$JOB"
@@ -319,7 +319,7 @@ templates)
     diff --unified -- "$DL/examples/$JOB/run.sh" "$SERVICE/data/command"
     diff --unified -- "$DL/jobs/dispatch/data/step.sh" "$SERVICE/data/job"
     EXPECTED_RECORDS="$(realpath -- "$TEST_DIR/examples/$JOB/records")"
-    [[ $(< "$SERVICE/env/S67_RECORDS_DIR") == "$EXPECTED_RECORDS" ]]
+    [[ $(< "$SERVICE/env/S9_RECORDS_DIR") == "$EXPECTED_RECORDS" ]]
     if [[ -e $JOBS/$JOB/data/records ]] || [[ -L $JOBS/$JOB/data/records ]]; then
       exit 1
     fi
@@ -377,7 +377,7 @@ set -euo pipefail
 ln -s -- /dev/null "$1/launch/walk"
 BASH
   chmod +x -- "$STEP/dispatch.sh"
-  S67_JOBS_DIR="$JOBS" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
+  S9_JOBS_DIR="$JOBS" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
   [[ -L $JOBS/dog/data/launch/walk ]]
   cat > "$STEP/run.sh" << 'BASH'
 exit 99
@@ -493,11 +493,11 @@ BASH
   fi
 
   mkdir -- "$STEP/env"
-  printf '%s' 0 > "$STEP/env/S67_ON_UNIT_INACTIVE_SEC"
+  printf '%s' 0 > "$STEP/env/S9_ON_UNIT_INACTIVE_SEC"
   rm -- "$LAUNCH/rejected"
   "$TEMPLATE" "$STEP" "$JOBS/daemon-dog"
   "${RECONCILE[@]}" daemon-dog
-  [[ $(< "$STATE/daemon-dog/instances/run/env/S67_ON_UNIT_INACTIVE_SEC") == 0 ]]
+  [[ $(< "$STATE/daemon-dog/instances/run/env/S9_ON_UNIT_INACTIVE_SEC") == 0 ]]
   [[ -L $LAUNCH/run ]]
   SERVICE="$STATE/daemon-dog/instances/run"
   "${RECONCILE[@]}" daemon-dog
@@ -526,8 +526,8 @@ policy)
   SERVICE="$STATE/dog/instances/walk"
   mkdir -p -- "$SERVICE" "$STATE/dog/data/done" "$TEST_DIR/bin"
   cp --archive -- "$ROOT/base/." "$SERVICE/"
-  printf '%s' "$SERVICE" > "$SERVICE/env/S67_WORKING_DIRECTORY"
-  printf '%s' 2 > "$SERVICE/env/S67_RESTART_SEC"
+  printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
+  printf '%s' 2 > "$SERVICE/env/S9_RESTART_SEC"
   cat > "$SERVICE/data/job" << 'BASH'
 #!/usr/bin/env bash
 printf '%s' "$1"
@@ -541,8 +541,8 @@ BASH
   ln -s -- /dev/null "$SERVICE/data/launch"
   trap 'printf "policy:%s interval=%s cap=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$CAP" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
   while read -r INTERVAL CAP STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
-    printf '%s' "$INTERVAL" > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"
-    printf '%s' "${CAP#-}" > "$SERVICE/env/S67_RESTART_MAX_DELAY_SEC"
+    printf '%s' "$INTERVAL" > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
+    printf '%s' "${CAP#-}" > "$SERVICE/env/S9_RESTART_MAX_DELAY_SEC"
     rm -f -- "$SERVICE/delay"
     PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
     if [[ -s $TEST_DIR/output ]]; then

@@ -19,7 +19,7 @@ JOBS="$TEST_DIR/jobs"
 case "$1" in
 graph)
   cp --archive -- "$ROOT/examples" "$TEST_DIR/examples"
-  S67_JOBS_DIR="$JOBS" "$ROOT/jobs/dispatch/run.sh" "$TEST_DIR/examples"
+  S9_JOBS_DIR="$JOBS" "$ROOT/jobs/dispatch/run.sh" "$TEST_DIR/examples"
   DOG=(s6-envdir -- "$JOBS/dog/env" "$JOBS/dog/data/step.sh")
   LIL=(s6-envdir -- "$JOBS/lil/env" "$JOBS/lil/data/step.sh")
   DEPENDENCY="$TEST_DIR/examples/lil/records"

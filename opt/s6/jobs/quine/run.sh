@@ -104,7 +104,7 @@ instance)
     REQUEST="$SUPERVISOR/data/launch/$INSTANCE"
   fi
 
-  if [[ -d $SERVICE ]] && (($(< "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC") >= 0)); then
+  if [[ -d $SERVICE ]] && (($(< "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC") >= 0)); then
     if [[ $DATA/job -ef $SELF ]]; then
       exit
     fi
@@ -126,7 +126,7 @@ instance)
     fi
   fi
   if ! [[ -d $SERVICE ]]; then
-    if (($(< "$TEMPLATE/env/S67_ON_UNIT_INACTIVE_SEC") >= 0)); then
+    if (($(< "$TEMPLATE/env/S9_ON_UNIT_INACTIVE_SEC") >= 0)); then
       exec -- s6-instance-create -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
     fi
     s6-instance-create -D -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"

@@ -24,27 +24,27 @@ run)
   exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
   ;;
 lifecycle.sh)
-  : "${S67_ON_UNIT_INACTIVE_SEC?}"
-  : "${S67_WORKING_DIRECTORY?}"
-  : "${S67_RUNTIME_MAX_SEC?}"
-  : "${S67_RESTART_SEC?}"
-  if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then
-    DELAY="$S67_RESTART_SEC"
-    if ((DELAY < S67_ON_UNIT_INACTIVE_SEC)); then
-      DELAY="$S67_ON_UNIT_INACTIVE_SEC"
+  : "${S9_ON_UNIT_INACTIVE_SEC?}"
+  : "${S9_WORKING_DIRECTORY?}"
+  : "${S9_RUNTIME_MAX_SEC?}"
+  : "${S9_RESTART_SEC?}"
+  if ((S9_ON_UNIT_INACTIVE_SEC >= 0)); then
+    DELAY="$S9_RESTART_SEC"
+    if ((DELAY < S9_ON_UNIT_INACTIVE_SEC)); then
+      DELAY="$S9_ON_UNIT_INACTIVE_SEC"
     fi
-    : "${S67_RESTART_MAX_DELAY_SEC:=$((DELAY * 2))}"
+    : "${S9_RESTART_MAX_DELAY_SEC:=$((DELAY * 2))}"
 
     if ATTEMPT="$(wc -l 2> /dev/null < "$ATTEMPTS")"; then
-      DELAY="$S67_ON_UNIT_INACTIVE_SEC"
+      DELAY="$S9_ON_UNIT_INACTIVE_SEC"
       if ((ATTEMPT > 0)); then
-        DELAY="$S67_RESTART_SEC"
-        if ((DELAY > S67_RESTART_MAX_DELAY_SEC)); then
-          DELAY="$S67_RESTART_MAX_DELAY_SEC"
+        DELAY="$S9_RESTART_SEC"
+        if ((DELAY > S9_RESTART_MAX_DELAY_SEC)); then
+          DELAY="$S9_RESTART_MAX_DELAY_SEC"
         fi
-        while ((--ATTEMPT > 0 && DELAY < S67_RESTART_MAX_DELAY_SEC)); do
-          if ((DELAY > S67_RESTART_MAX_DELAY_SEC / 2)); then
-            DELAY="$S67_RESTART_MAX_DELAY_SEC"
+        while ((--ATTEMPT > 0 && DELAY < S9_RESTART_MAX_DELAY_SEC)); do
+          if ((DELAY > S9_RESTART_MAX_DELAY_SEC / 2)); then
+            DELAY="$S9_RESTART_MAX_DELAY_SEC"
           else
             DELAY=$((DELAY * 2))
           fi
@@ -54,7 +54,7 @@ lifecycle.sh)
     fi
   fi
 
-  RECUR=attempt exec -- timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" "$0" "$@"
+  RECUR=attempt exec -- timeout --foreground --kill-after=5s "$S9_RUNTIME_MAX_SEC" "$0" "$@"
   ;;
 attempt)
   unset -- RECUR
@@ -63,7 +63,7 @@ attempt)
   LOGS="$JOB/../../log/${JOB##*/}"
 
   mkdir -p -- "$LOGS"
-  cd -- "$S67_WORKING_DIRECTORY"
+  cd -- "$S9_WORKING_DIRECTORY"
 
   {
     STATUS=0
@@ -80,7 +80,7 @@ finish)
   STATE="$JOB/../.."
   JOB="${JOB##*/}"
   LOG_SRC="$STATE/log/$JOB/$INSTANCE.log"
-  S67_ON_UNIT_INACTIVE_SEC="$(< ./env/S67_ON_UNIT_INACTIVE_SEC)"
+  S9_ON_UNIT_INACTIVE_SEC="$(< ./env/S9_ON_UNIT_INACTIVE_SEC)"
   TIMESTAMP="$(date -u +%Y%m%dT%H%M%S.%N)"
 
   if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
@@ -105,7 +105,7 @@ finish)
   rm -fr -- "$LOG_SRC"
 
   EXIT_STATUS=0
-  if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then
+  if ((S9_ON_UNIT_INACTIVE_SEC >= 0)); then
     if ((STATUS == 0 && SIGNAL == 0)); then
       : > "$ATTEMPTS"
     else

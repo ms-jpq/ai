@@ -4,7 +4,7 @@
 JOBS/watchdog/
 ├── run.sh
 ├── env/
-│   └── S67_ON_UNIT_INACTIVE_SEC
+│   └── S9_ON_UNIT_INACTIVE_SEC
 └── data/launch/.gitignore
 
 STATE/
@@ -18,7 +18,7 @@ STATE/
 │   │   └── <pid> -> ../instances/<pid>
 │   └── instances/
 │       └── <pid>/
-│           ├── env/S67_ON_UNIT_INACTIVE_SEC
+│           ├── env/S9_ON_UNIT_INACTIVE_SEC
 │           └── data/job
 ├── log/
 │   ├── s6.log
