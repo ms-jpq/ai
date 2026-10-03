@@ -90,7 +90,7 @@ finished)
   STATUS="$1"
   SIGNAL="$2"
   INSTANCE="$3"
-  read -r -d '' EXIT_LINES <<- EOF || true
+  IFS= read -r -d '' EXIT_LINES <<- EOF || true
 --- exit_status=$STATUS signal=$SIGNAL ---
 EOF
   STATE="$JOB_DIR/../.."

@@ -501,114 +501,37 @@ BASH
   if [[ -L $TEST_DIR/new/data/launch/mail ]]; then exit 1; fi
   ;;
 templates)
-  cp --archive -- "$DL/examples" "$TEST_DIR/examples"
-  for JOB in dog lil; do
-    SERVICE="$STATE/$JOB/instances/-"
-    "$TEMPLATE" "$TEST_DIR/examples/$JOB" "$JOBS/$JOB"
-    [[ -L $JOBS/$JOB ]]
-    RECUR=seed "${QUINE[@]}" "$JOB" -
-    diff --unified -- "$DL/examples/$JOB/run.sh" "$SERVICE/data/command"
-    diff --unified -- "$DL/jobs/dispatch/data/step.sh" "$SERVICE/data/job"
-    EXPECTED_RECORDS="$(realpath -- "$TEST_DIR/examples/$JOB/records")"
-    [[ $(< "$SERVICE/env/S9_RECORDS_DIR") == "$EXPECTED_RECORDS" ]]
-    if [[ -e $JOBS/$JOB/data/records ]] || [[ -L $JOBS/$JOB/data/records ]]; then
-      exit 1
-    fi
-    for ENV in "$DL/examples/$JOB/env/"*; do
-      diff --unified -- "$ENV" "$SERVICE/env/${ENV##*/}"
-    done
-  done
-  ;;
-
-execution)
-  STEP="$TEST_DIR/steps/dog"
-  mkdir -p -- "$STEP/data/inbox"
-  for DEPENDENCY in dogs rules; do
-    for INSTANCE in other-instance second-instance; do
-      OUTPUT="$TEST_DIR/upstream/$DEPENDENCY/$INSTANCE/revision/output"
-      mkdir -p -- "$OUTPUT"
-      cat > "$OUTPUT/exit_status" << 'EOF'
-0
-EOF
-      cat > "$OUTPUT/stdout" << EOF
-$DEPENDENCY:$INSTANCE
-EOF
-      ln -sTnfr -- "${OUTPUT%/*}" "$TEST_DIR/upstream/$DEPENDENCY/$INSTANCE/latest"
-    done
-    INPUT="$(realpath -- "$TEST_DIR/upstream/$DEPENDENCY")"
-    ln -sTnfr -- "$INPUT" "$STEP/data/inbox/$DEPENDENCY"
-  done
-  cat > "$STEP/run.sh" << 'BASH'
+  JOB="$JOBS/dog"
+  mkdir -p -- "$JOB/env" "$JOB/data/launch"
+  cat > "$JOB/run.sh" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
-for DEPENDENCY in dogs rules; do
-  for INSTANCE in other-instance second-instance; do
-    [[ $(< "input/$DEPENDENCY/$INSTANCE/latest/output/stdout") == "$DEPENDENCY:$INSTANCE" ]]
+printf '%s:%s:%s\n' "$1" "$PAYLOAD" "$(< "${0%/*}/value")"
+BASH
+  chmod +x -- "$JOB/run.sh"
+  printf '%s' first > "$JOB/env/PAYLOAD"
+  printf '%s' original > "$JOB/data/value"
+  ln -sTnfr -- /dev/null "$JOB/data/launch/walk"
+  ln -sTnfr -- "$JOB" "$JOBS/lil"
+  for NAME in dog lil; do
+    RECUR=seed "${QUINE[@]}" "$NAME" walk
+    SERVICE="$STATE/$NAME/instances/walk"
+    diff --unified -- "$JOB/run.sh" "$SERVICE/data/job"
+    diff --unified -- "$JOB/env/PAYLOAD" "$SERVICE/env/PAYLOAD"
+    [[ $SERVICE/run -ef $SERVICE/data/lifecycle.sh ]]
+    if [[ -e $SERVICE/data/launch ]] || [[ -L $SERVICE/data/launch ]]; then exit 1; fi
+    if [[ -L $SERVICE/data/job ]]; then exit 1; fi
+    ACTUAL="$(s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" walk)"
+    [[ $ACTUAL == walk:first:original ]]
   done
-done
-cat << STDOUT
-$1:$PAYLOAD
-STDOUT
-
-cat >&2 << STDERR
-diagnostic
-STDERR
-
-exit "$RESULT"
-BASH
-  chmod +x -- "$STEP/run.sh"
-  cat > "$STEP/dispatch.sh" << 'BASH'
-#!/usr/bin/env bash
-set -euo pipefail
-[[ -d records ]]
-[[ -f $1/command ]]
-[[ -d $1/inbox ]]
-[[ -d $1/launch ]]
-[[ -z ${RECUR:-} ]]
-ln -sTnfr -- /dev/null "$1/launch/walk"
-BASH
-  chmod +x -- "$STEP/dispatch.sh"
-  S9_JOBS_DIR="$JOBS" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
-  [[ -L $JOBS/dog/data/launch/walk ]]
-  cat > "$STEP/run.sh" << 'BASH'
-exit 99
-BASH
-
-  for INSTANCE in walk feed; do
-    RECUR=seed "${QUINE[@]}" dog "$INSTANCE"
-    SERVICE="$STATE/dog/instances/$INSTANCE"
-    PAYLOAD=first RESULT=0 s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" "$INSTANCE" 2> "$TEST_DIR/stderr"
-    [[ $(< "$TEST_DIR/stderr") == diagnostic ]]
-    [[ $(< "$SERVICE/data/outbox/stdout") == "$INSTANCE:first" ]]
-    [[ $(< "$SERVICE/data/outbox/exit_status") == 0 ]]
-    [[ -d $STEP/records/$INSTANCE/latest/input ]]
-  done
-
+  RECUR=seed "${QUINE[@]}" dog walk
+  diff --unified -- "$STATE/dog/template/.sum" "$STATE/dog/instances/walk/.sum"
+  rm -- "$JOB/env/PAYLOAD" "$JOB/data/value"
+  RECUR=seed "${QUINE[@]}" dog walk
+  if [[ -e $STATE/dog/template/env/PAYLOAD ]] || [[ -e $STATE/dog/template/data/value ]]; then exit 1; fi
   SERVICE="$STATE/dog/instances/walk"
-  VERSIONS="$STEP/records/walk"
-  FIRST="$(readlink -- "$VERSIONS/latest")"
-  if PAYLOAD=failed RESULT=67 s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"; then
-    exit 1
-  else
-    [[ $? == 67 ]]
-  fi
-  LATEST="$(readlink -- "$VERSIONS/latest")"
-  [[ $LATEST == "$FIRST" ]]
-  [[ $(< "$SERVICE/data/outbox/stdout") == walk:failed ]]
-  [[ $(< "$SERVICE/data/outbox/exit_status") == 67 ]]
-  if [[ $SERVICE/data/outbox -ef $VERSIONS/latest/output ]]; then
-    exit 1
-  fi
-  FAILED=("$VERSIONS/"*/output/exit_status)
-  grep --quiet --line-regexp 67 "${FAILED[@]}"
-  PAYLOAD=second RESULT=0 s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"
-  LATEST="$(readlink -- "$VERSIONS/latest")"
-  [[ $LATEST != "$FIRST" ]]
-  [[ $(< "$VERSIONS/$FIRST/output/stdout") == walk:first ]]
-  [[ $SERVICE/data/outbox -ef $VERSIONS/latest/output ]]
-  rm -fr -- "$SERVICE"
-  [[ $(< "$STEP/records/walk/latest/output/stdout") == walk:second ]]
-  [[ $(< "$STEP/records/feed/latest/output/stdout") == feed:first ]]
+  ACTUAL="$(s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" walk)"
+  [[ $ACTUAL == walk:first:original ]]
   ;;
 
 queues)
@@ -616,8 +539,13 @@ queues)
   JOB="$JOBS/queue-dog"
   LAUNCH="$JOB/data/launch"
   MANAGER="$STATE/queue-dog"
-  mkdir -p -- "$STEP" "$TEST_DIR/bin"
-  cp --preserve=mode -- "$DL/examples/dog/run.sh" "$STEP/run.sh"
+  mkdir -p -- "$STEP/data/launch" "$TEST_DIR/bin"
+  cat > "$STEP/run.sh" << 'BASH'
+#!/usr/bin/env bash
+exit 0
+BASH
+  chmod +x -- "$STEP/run.sh"
+  ln -sTnfr -- "$STEP" "$JOB"
   cat > "$TEST_DIR/bin/s6-instance-create" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
@@ -647,9 +575,6 @@ BASH
     ln -sTnfr -- "$TEST_DIR/bin/noop" "$TEST_DIR/bin/$COMMAND"
   done
   RECONCILE=(env "PATH=$TEST_DIR/bin:$PATH" RECUR=job "${QUINE[@]}")
-  for _ in 1 2; do
-    "$TEMPLATE" "$STEP" "$JOB"
-  done
   ln -sTnfr -- /missing/inbox "$LAUNCH/run"
   ln -sTnfr -- /dev/null "$LAUNCH/.pending"
   "${RECONCILE[@]}" queue-dog
@@ -665,7 +590,6 @@ BASH
     exit 1
   fi
   [[ -L $LAUNCH/rejected ]]
-  "$TEMPLATE" "$STEP" "$JOB"
   [[ -L $LAUNCH/rejected ]]
   if [[ -L $LAUNCH/run ]]; then
     exit 1
@@ -686,7 +610,7 @@ BASH
   mkdir -- "$STEP/env"
   printf '%s' 0 > "$STEP/env/S9_ON_UNIT_INACTIVE_SEC"
   rm -- "$LAUNCH/rejected"
-  "$TEMPLATE" "$STEP" "$JOBS/daemon-dog"
+  ln -sTnfr -- "$STEP" "$JOBS/daemon-dog"
   "${RECONCILE[@]}" daemon-dog
   [[ $(< "$STATE/daemon-dog/instances/run/env/S9_ON_UNIT_INACTIVE_SEC") == 0 ]]
   [[ -L $LAUNCH/run ]]
@@ -696,7 +620,6 @@ BASH
     exit 1
   fi
   printf '%s' changed > "$STEP/env/PAYLOAD"
-  "$TEMPLATE" "$STEP" "$JOBS/daemon-dog"
   "${RECONCILE[@]}" daemon-dog
   [[ -f $SERVICE/down ]]
   if [[ -f $SERVICE/env/PAYLOAD ]]; then
