@@ -73,14 +73,32 @@ finish)
   SIGNAL="$2"
   INSTANCE="$3"
   JOB="${PWD%/instances/*}"
+  STATE="$JOB/../.."
   JOB="${JOB##*/}"
+  LOG_SRC="$STATE/log/$JOB/$INSTANCE.log"
   S67_ON_UNIT_INACTIVE_SEC="$(< ./env/S67_ON_UNIT_INACTIVE_SEC)"
+  TIMESTAMP="$(date -u +%Y%m%dT%H%M%S.%N)"
 
   if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
     PGID="${4:-$(< "$PGID_FILE")}"
     rm -f -- "$PGID_FILE"
     kill -KILL -- "-$PGID" 2> /dev/null || true
   fi
+
+  if ((STATUS == 0 && SIGNAL == 0)); then
+    LOG_DST="$STATE/log-archive/$JOB/$INSTANCE.$TIMESTAMP.log"
+    mkdir -p -- "${LOG_DST%/*}"
+  else
+    LOG_DST="$STATE/failed/$JOB/$INSTANCE.$TIMESTAMP/log"
+    mkdir -p -- "${LOG_DST%/*}"
+    printf -- '%s' "$STATUS" > "${LOG_DST%/*}/exit_status"
+    printf -- '%s' "$SIGNAL" > "${LOG_DST%/*}/signal"
+  fi
+
+  mkdir -p -- "${LOG_SRC%/*}"
+  touch -- "$LOG_SRC"
+  ln -- "$LOG_SRC" "$LOG_DST"
+  rm -fr -- "$LOG_SRC"
 
   EXIT_STATUS=0
   if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then

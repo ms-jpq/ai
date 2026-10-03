@@ -84,17 +84,34 @@ BASH
       diff --unified -- <(printf '\n') "$TEST_DIR/ready"
       grep --quiet --fixed-strings "dog@$INSTANCE status=$STATUS, signal=0" "$TEST_DIR/log/s6.log"
     done
-    for STREAM in stdout stderr; do
-      COUNT="$(grep --fixed-strings --count "dog@$INSTANCE command $STREAM" "$TEST_DIR/log/dog/$INSTANCE.log")"
-      [[ $COUNT == 2 ]]
-    done
-    if grep --quiet --fixed-strings 'status=' "$TEST_DIR/log/dog/$INSTANCE.log"; then
+    if [[ -e $TEST_DIR/log/dog/$INSTANCE.log ]]; then
       exit 1
     fi
+    ARCHIVES=("$TEST_DIR/log-archive/dog/$INSTANCE."*.log "$TEST_DIR/failed/dog/$INSTANCE."*/log)
+    [[ ${#ARCHIVES[@]} == 2 ]]
+    for ARCHIVE in "${ARCHIVES[@]}"; do
+      for STREAM in stdout stderr; do
+        COUNT="$(grep --fixed-strings --count "dog@$INSTANCE command $STREAM" "$ARCHIVE")"
+        [[ $COUNT == 1 ]]
+      done
+      if grep --quiet --fixed-strings 'status=' "$ARCHIVE"; then
+        exit 1
+      fi
+    done
+    FAILED=("$TEST_DIR/failed/dog/$INSTANCE."*)
+    [[ ${#FAILED[@]} == 1 ]]
+    [[ $(< "${FAILED[0]}/exit_status") == 67 ]]
+    [[ $(< "${FAILED[0]}/signal") == 0 ]]
   done
   if grep --quiet --fixed-strings 'command stdout' "$TEST_DIR/log/s6.log"; then
     exit 1
   fi
+  env -C "$SERVICE" -- ./finish 256 15 "$INSTANCE" > "$TEST_DIR/finish.log"
+  FAILED=("$TEST_DIR/failed/dog/$INSTANCE."*)
+  [[ ${#FAILED[@]} == 2 ]]
+  [[ $(< "${FAILED[1]}/exit_status") == 256 ]]
+  [[ $(< "${FAILED[1]}/signal") == 15 ]]
+  [[ -f ${FAILED[1]}/log ]]
   ;;
 lifecycle)
   STEP="$TEST_DIR/steps/dog"
