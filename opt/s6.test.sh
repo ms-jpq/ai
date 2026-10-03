@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl snapshots prepare publication templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl snapshots pcp publication templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -355,8 +355,8 @@ snapshots)
   diff --recursive --no-dereference --unified --from-file="$STATE/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
   ;;
 
-prepare)
-  PREPARE="$TEST_DIR/libexec/prepare.sh"
+pcp)
+  PCP="$TEST_DIR/libexec/pcp.sh"
   SRC="$TEST_DIR/source"
   DST="$TEST_DIR/output/dog"
   mkdir -p -- "$SRC/nested" "$TEST_DIR/external" "$DST"
@@ -373,7 +373,7 @@ prepare)
   ln -sTnfr -- "$TEST_DIR/missing" "$SRC/dangling"
   ln -sTnfr -- "$SRC" "$TEST_DIR/source-link"
 
-  STAGING="$("$PREPARE" "$TEST_DIR/source-link" "$DST")"
+  STAGING="$("$PCP" "$TEST_DIR/source-link" "$DST")"
   [[ $STAGING == "$TEST_DIR/output/.dog" ]]
   [[ $(< "$DST/value") == existing ]]
   [[ $(< "$STAGING/value") == original ]]
@@ -382,7 +382,7 @@ prepare)
     TARGET="$(readlink -- "$STAGING/$LINK")"
     if [[ $TARGET == /* ]]; then exit 1; fi
   done
-  if "$PREPARE" "$SRC" "$DST" > "$TEST_DIR/output-path" 2> "$TEST_DIR/error"; then exit 1; fi
+  if "$PCP" "$SRC" "$DST" > "$TEST_DIR/output-path" 2> "$TEST_DIR/error"; then exit 1; fi
   [[ $(< "$STAGING/value") == original ]]
 
   mv -- "$DST" "$TEST_DIR/output/.old"

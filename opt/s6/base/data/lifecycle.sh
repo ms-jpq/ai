@@ -87,32 +87,17 @@ finished)
   STATUS="$1"
   SIGNAL="$2"
   INSTANCE="$3"
+  read -r -d '' EXIT_LINES <<- EOF || true
+--- exit_status=$STATUS signal=$SIGNAL ---
+EOF
   STATE="$JOB_DIR/../.."
   LOG_SRC="$STATE/log/$JOB/$INSTANCE.log"
-  TIMESTAMP="$(date -u +%Y%m%dT%H%M%S.%N)"
 
   if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
     PGID="${4:-$(< "$PGID_FILE")}"
     rm -f -- "$PGID_FILE"
     kill -KILL -- "-$PGID" 2> /dev/null || true
   fi
-
-  if ((STATUS == 0 && SIGNAL == 0)); then
-    : "${S9_DEAD_DIR:=$STATE/dead}"
-  else
-    : "${S9_DEAD_DIR:=$STATE/failed}"
-  fi
-  LOG_DST="$S9_DEAD_DIR/$JOB/$INSTANCE.$TIMESTAMP/log"
-  mkdir -p -- "${LOG_DST%/*}"
-  printf -- '%s' "$STATUS" > "${LOG_DST%/*}/exit_status"
-  printf -- '%s' "$SIGNAL" > "${LOG_DST%/*}/signal"
-
-  mkdir -p -- "${LOG_SRC%/*}"
-  tee <<- EOF | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" >> "$LOG_SRC"
---- exit_status=$STATUS signal=$SIGNAL ---
-EOF
-  ln -- "$LOG_SRC" "$LOG_DST"
-  rm -fr -- "$LOG_SRC"
 
   EXIT_STATUS=0
   if ((S9_ON_UNIT_INACTIVE_SEC >= 0)); then
@@ -127,12 +112,27 @@ EOF
     EXIT_STATUS=125
   fi
 
-  tee <<- EOF || exit "$EXIT_STATUS"
-------------------------------
-status=$STATUS, signal=$SIGNAL
-------------------------------
-EOF
+  TIMESTAMP="$(date -u +%Y%m%dT%H%M%S.%N)"
+  : "${S9_DEAD_DIR:=$STATE/dead}"
+  LOG_DST="$S9_DEAD_DIR/$JOB/$INSTANCE.$TIMESTAMP/log"
+  mkdir -p -- "$S9_DEAD_DIR/$JOB"
 
+  STAGING="$(mktemp -d -- "$S9_DEAD_DIR/$JOB/.$INSTANCE.XXXXXX")"
+  trap 'rm -fr -- "$STAGING"' EXIT
+  printf -- '%s' "$STATUS" > "$STAGING/exit_status"
+  printf -- '%s' "$SIGNAL" > "$STAGING/signal"
+
+  mkdir -p -- "${LOG_SRC%/*}"
+  "${LOGGER[@]}" -- T "${LOG_FMT[@]}" <<< "$EXIT_LINES" | tee --append -- "$LOG_SRC" > /dev/null
+  ln -- "$LOG_SRC" "$STAGING/log"
+  mv --no-target-directory -- "$STAGING" "${LOG_DST%/*}"
+  if ((STATUS != 0 || SIGNAL != 0)); then
+    mkdir -p -- "$STATE/failed/$JOB"
+    ln -sTnfr -- "${LOG_DST%/*}" "$STATE/failed/$JOB/$INSTANCE.$TIMESTAMP"
+  fi
+  rm -fr -- "$LOG_SRC"
+
+  printf -- '%s\n' "$EXIT_LINES"
   exit "$EXIT_STATUS"
   ;;
 *)

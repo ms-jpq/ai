@@ -31,30 +31,26 @@ reconcile)
 seed | job)
   if [[ $RECUR == seed ]] || [[ -d $JOB ]]; then
     JOB="$(realpath -- "$JOB")"
+    STAGING="$(mktemp -d -- "$PWD/.$NAME.XXXXXX")"
+    trap 'rm -fr -- "$STAGING"' EXIT
     RUN=("$JOB"/run.*)
     if ((${#RUN[@]} != 1)) || ! [[ -f ${RUN[*]} ]] || ! [[ -x ${RUN[*]} ]]; then
       set -x
       exit 2
     fi
-
-    STAGING="$(mktemp -d -- "$PWD/.$NAME.XXXXXX")"
-    trap 'rm -fr -- "$STAGING"' EXIT
-    BUILD="$STAGING/template"
-
-    rsync --archive -- "$ROOT/base/" "$BUILD/"
+    BUILD="$(RECUR='' "$ROOT/libexec/pcp.sh" "$ROOT/base" "$STAGING/template")"
     rsync --archive --checksum --exclude=/data/launch --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$BUILD/"
     if [[ ${RUN[*]} -ef $SELF ]]; then
       ln -sTnf -- "${RUN[*]}" "$BUILD/data/job"
     else
       cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$BUILD/data/job"
     fi
-    tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$STAGING/.sum"
-    mv -- "$STAGING/.sum" "$BUILD/.sum"
+    tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$BUILD/.sum"
 
     if ! [[ -d $SUPERVISOR ]]; then
       s6-instance-maker -- "$BUILD" "$STAGING/manager"
       mkdir -p -- "$STAGING/manager/data/done"
-      mv -- "$STAGING/manager" "$SUPERVISOR"
+      mv --no-target-directory -- "$STAGING/manager" "$SUPERVISOR"
     else
       rsync --archive --checksum --delete -- "$BUILD/" "$TEMPLATE/"
     fi
@@ -65,7 +61,7 @@ seed)
   INSTANCE="$2"
   if ! [[ -d $INSTANCES/$INSTANCE ]]; then
     rsync --archive -- "$TEMPLATE/" "$STAGING/instance/"
-    mv -- "$STAGING/instance" "$INSTANCES/$INSTANCE"
+    mv --no-target-directory -- "$STAGING/instance" "$INSTANCES/$INSTANCE"
   fi
   if ! [[ -L $SUPERVISOR/instance/$INSTANCE ]]; then
     ln -sTnfr -- "$INSTANCES/$INSTANCE" "$SUPERVISOR/instance/$INSTANCE"
@@ -155,6 +151,13 @@ instance)
 
   s6-svc -wU -T "$TIMEOUT" -U -- "$SERVICE/log"
   if ! [[ -L $DATA/launch ]]; then
+    TARGET="$(readlink -- "$REQUEST")"
+    if [[ $TARGET != /* ]]; then
+      STAGING="$(mktemp -- "${REQUEST%/*}/.launch.XXXXXX")"
+      trap 'rm -f -- "$STAGING"' EXIT
+      ln -sTnf -- "${REQUEST%/*}/$TARGET" "$STAGING"
+      mv --no-target-directory -- "$STAGING" "$REQUEST"
+    fi
     mv --no-target-directory -- "$REQUEST" "$DATA/launch"
   fi
   s6-instance-control -wu -T "$TIMEOUT" -o -- "$SUPERVISOR" "$INSTANCE"
