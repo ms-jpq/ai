@@ -8,26 +8,27 @@ if (($# == 0)); then
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
-ROOT="${0%/*}"
+ROOT="${0%.test.sh}"
 DL="$ROOT/../dl"
 TEMPLATE="$DL/jobs/dispatch/data/service-template.sh"
 mkdir -p -- "$ROOT/../../var/tmp"
-TEST_DIR="$(mktemp -d -- "$ROOT/../../var/tmp/quine-test.XXXXXX")"
+TEST_DIR="$(mktemp -d -- "$ROOT/../../var/tmp/s6-test.XXXXXX")"
+TEST_DIR="$(realpath -- "$TEST_DIR")"
+STATE="$TEST_DIR/snapshot-1"
+JOBS="$TEST_DIR/jobs"
+QUINE=(env -C "$STATE" -- "$JOBS/quine/run.sh")
 trap 'rm -fr -- "$TEST_DIR"' EXIT
-mkdir -- "$TEST_DIR/snapshot-1"
+mkdir -- "$STATE"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
 lifecycle)
-  TEST_DIR="$(realpath -- "$TEST_DIR")"
-  STATE="$TEST_DIR/snapshot-1"
   STEP="$TEST_DIR/steps/dog"
-  JOB="$TEST_DIR/jobs/dog"
+  JOB="$JOBS/dog"
   SERVICE="$STATE/dog/instances/walk"
-  QUINE="$TEST_DIR/jobs/quine/run.sh"
   WAIT=(timeout --foreground 15s bash -c 'until test "$@"; do sleep 0.05; done' --)
   export S67_WORKING_DIRECTORY="$TEST_DIR"
-  mkdir -p -- "$STEP/env" "$STEP/data" "$TEST_DIR/jobs/keeper/env"
+  mkdir -p -- "$STEP/env" "$STEP/data" "$JOBS/keeper/env"
   printf '%s' 10 > "$TEST_DIR/base/env/S67_RUNTIME_MAX_SEC"
   cat > "$STEP/run.sh" << 'EOF'
 #!/usr/bin/env bash
@@ -38,18 +39,18 @@ while ! [[ -f $S67_WORKING_DIRECTORY/release-$PAYLOAD ]]; do sleep 0.05; done
 printf '%s\n' "$CODE" > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
 EOF
   chmod +x -- "$STEP/run.sh"
-  touch -- "$STEP/env/S67_DAEMON" "$TEST_DIR/jobs/keeper/env/S67_DAEMON"
+  touch -- "$STEP/env/S67_DAEMON" "$JOBS/keeper/env/S67_DAEMON"
   printf '%s' one > "$STEP/env/PAYLOAD"
   printf '%s' old-data > "$STEP/data/value"
   "$TEMPLATE" "$STEP" "$JOB"
   ln -s -- /dev/null "$STEP/launch/walk"
-  RECUR=bootstrap env -C "$STATE" -- "$QUINE" quine
-  cat > "$TEST_DIR/jobs/keeper/run.sh" << 'EOF'
+  RECUR=bootstrap "${QUINE[@]}" quine
+  cat > "$JOBS/keeper/run.sh" << 'EOF'
 #!/usr/bin/env bash
 exit 0
 EOF
-  chmod +x -- "$TEST_DIR/jobs/keeper/run.sh"
-  RECUR=seed env -C "$STATE" -- "$QUINE" keeper parent
+  chmod +x -- "$JOBS/keeper/run.sh"
+  RECUR=seed "${QUINE[@]}" keeper parent
   mkdir -p -- "$STATE/keeper/data/launch"
   ln -s -- /dev/null "$STATE/keeper/data/launch/parent"
 
@@ -75,7 +76,7 @@ EOF
   [[ $(< "$TEST_DIR/started-one") == old:one:old-data ]]
   PID="$(s6-svstat -o pid -- "$SERVICE")"
   "$TEMPLATE" "$STEP" "$JOB"
-  RECUR=job env -C "$STATE" -- s6-setlock -- "$STATE/.reconcile.lock" "$QUINE" dog
+  RECUR=job s6-setlock -t 6000 -- "$STATE/.reconcile.lock" "${QUINE[@]}" dog
   if [[ -f $SERVICE/down ]]; then exit 1; fi
   CURRENT_PID="$(s6-svstat -o pid -- "$SERVICE")"
   [[ $CURRENT_PID == "$PID" ]]
@@ -135,10 +136,10 @@ EOF
   ;;
 snapshots)
   mkdir -- "$TEST_DIR/"snapshot-{2,3}
-  ln -sTnfr -- "$TEST_DIR/jobs/quine" "$TEST_DIR/jobs/quine-2"
-  ln -sTnf -- /dev/null "$TEST_DIR/jobs/quine/data/null"
+  ln -sTnfr -- "$JOBS/quine" "$JOBS/quine-2"
+  ln -sTnf -- /dev/null "$JOBS/quine/data/null"
 
-  RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh quine
+  RECUR=bootstrap "${QUINE[@]}" quine
   RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../jobs/quine-2/run.sh quine-2 -
   RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../snapshot-1/quine/instances/-/data/job quine -
 
@@ -146,25 +147,25 @@ snapshots)
   if [[ -L $TEST_DIR/snapshot-2/quine-2/template ]]; then
     exit 1
   fi
-  LINK="$(readlink -- "$TEST_DIR/snapshot-1/quine/template/data/null")"
-  [[ -L $TEST_DIR/snapshot-1/quine/template/data/null ]]
+  LINK="$(readlink -- "$STATE/quine/template/data/null")"
+  [[ -L $STATE/quine/template/data/null ]]
   [[ $LINK == /dev/null ]]
 
-  diff --recursive --no-dereference --unified --from-file="$TEST_DIR/snapshot-1/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
+  diff --recursive --no-dereference --unified --from-file="$STATE/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
   ;;
 
 templates)
   cp --archive -- "$DL/examples" "$TEST_DIR/examples"
   for JOB in dog lil; do
-    SERVICE="$TEST_DIR/snapshot-1/$JOB/instances/-"
-    "$TEMPLATE" "$TEST_DIR/examples/$JOB" "$TEST_DIR/jobs/$JOB"
-    [[ -L $TEST_DIR/jobs/$JOB ]]
-    RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh "$JOB" -
+    SERVICE="$STATE/$JOB/instances/-"
+    "$TEMPLATE" "$TEST_DIR/examples/$JOB" "$JOBS/$JOB"
+    [[ -L $JOBS/$JOB ]]
+    RECUR=seed "${QUINE[@]}" "$JOB" -
     diff --unified -- "$DL/examples/$JOB/run.sh" "$SERVICE/data/command"
     diff --unified -- "$DL/jobs/dispatch/data/step.sh" "$SERVICE/data/job"
     EXPECTED_RECORDS="$(realpath -- "$TEST_DIR/examples/$JOB/records")"
     [[ $(< "$SERVICE/env/S67_RECORDS_DIR") == "$EXPECTED_RECORDS" ]]
-    if [[ -e $TEST_DIR/jobs/$JOB/data/records ]] || [[ -L $TEST_DIR/jobs/$JOB/data/records ]]; then
+    if [[ -e $JOBS/$JOB/data/records ]] || [[ -L $JOBS/$JOB/data/records ]]; then
       exit 1
     fi
     for ENV in "$DL/examples/$JOB/env/"*; do
@@ -247,15 +248,15 @@ set -euo pipefail
 ln -s -- /dev/null "$1/launch/walk"
 EOF
   chmod +x -- "$TEST_DIR/steps/dog/dispatch.sh"
-  S67_JOBS_DIR="$TEST_DIR/jobs" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
-  [[ -L $TEST_DIR/jobs/dog/data/launch/walk ]]
+  S67_JOBS_DIR="$JOBS" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
+  [[ -L $JOBS/dog/data/launch/walk ]]
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 exit 99
 EOF
 
   for INSTANCE in walk feed; do
-    RECUR=seed env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh dog "$INSTANCE"
-    SERVICE="$TEST_DIR/snapshot-1/dog/instances/$INSTANCE"
+    RECUR=seed "${QUINE[@]}" dog "$INSTANCE"
+    SERVICE="$STATE/dog/instances/$INSTANCE"
     PAYLOAD=first RESULT=0 s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" "$INSTANCE" 2> "$TEST_DIR/stderr"
     [[ $(< "$TEST_DIR/stderr") == diagnostic ]]
     [[ $(< "$SERVICE/data/outbox/stdout") == "$INSTANCE:first" ]]
@@ -263,7 +264,7 @@ EOF
     [[ -d $TEST_DIR/steps/dog/records/$INSTANCE/latest/input ]]
   done
 
-  SERVICE="$TEST_DIR/snapshot-1/dog/instances/walk"
+  SERVICE="$STATE/dog/instances/walk"
   VERSIONS="$TEST_DIR/steps/dog/records/walk"
   FIRST="$(readlink -- "$VERSIONS/latest")"
   if PAYLOAD=failed RESULT=67 s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" walk 2> "$TEST_DIR/stderr"; then
@@ -291,9 +292,9 @@ EOF
   ;;
 
 queues)
-  JOB="$TEST_DIR/jobs/queue-dog"
+  JOB="$JOBS/queue-dog"
   LAUNCH="$JOB/data/launch"
-  MANAGER="$TEST_DIR/snapshot-1/queue-dog"
+  MANAGER="$STATE/queue-dog"
   mkdir -p -- "$TEST_DIR/queue-step" "$TEST_DIR/bin"
   cp --preserve=mode -- "$DL/examples/dog/run.sh" "$TEST_DIR/queue-step/run.sh"
   cat > "$TEST_DIR/bin/s6-instance-create" << 'EOF'
@@ -330,7 +331,7 @@ EOF
   done
   ln -s -- /missing/inbox "$LAUNCH/run"
   ln -s -- /dev/null "$LAUNCH/.pending"
-  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog
+  PATH="$TEST_BIN:$PATH" RECUR=job "${QUINE[@]}" queue-dog
   [[ -d $MANAGER/instances/run ]]
   [[ -L $MANAGER/instances/run/data/launch ]]
   if [[ -L $LAUNCH/run ]] || [[ -d $MANAGER/instances/.pending ]]; then
@@ -339,7 +340,7 @@ EOF
   [[ -L $LAUNCH/.pending ]]
 
   ln -s -- /dev/null "$LAUNCH/rejected"
-  if PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog; then
+  if PATH="$TEST_BIN:$PATH" RECUR=job "${QUINE[@]}" queue-dog; then
     exit 1
   fi
   [[ -L $LAUNCH/rejected ]]
@@ -364,38 +365,37 @@ EOF
   mkdir -- "$TEST_DIR/queue-step/env"
   touch -- "$TEST_DIR/queue-step/env/S67_DAEMON"
   rm -- "$LAUNCH/rejected"
-  "$TEMPLATE" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/daemon-dog"
-  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
-  [[ -f $TEST_DIR/snapshot-1/daemon-dog/instances/run/env/S67_DAEMON ]]
+  "$TEMPLATE" "$TEST_DIR/queue-step" "$JOBS/daemon-dog"
+  PATH="$TEST_BIN:$PATH" RECUR=job "${QUINE[@]}" daemon-dog
+  [[ -f $STATE/daemon-dog/instances/run/env/S67_DAEMON ]]
   [[ -L $LAUNCH/run ]]
-  SERVICE="$TEST_DIR/snapshot-1/daemon-dog/instances/run"
-  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  SERVICE="$STATE/daemon-dog/instances/run"
+  PATH="$TEST_BIN:$PATH" RECUR=job "${QUINE[@]}" daemon-dog
   if [[ -f $SERVICE/down ]]; then
     exit 1
   fi
   printf '%s' changed > "$TEST_DIR/queue-step/env/PAYLOAD"
-  "$TEMPLATE" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/daemon-dog"
-  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  "$TEMPLATE" "$TEST_DIR/queue-step" "$JOBS/daemon-dog"
+  PATH="$TEST_BIN:$PATH" RECUR=job "${QUINE[@]}" daemon-dog
   [[ -f $SERVICE/down ]]
   if [[ -f $SERVICE/env/PAYLOAD ]]; then
     exit 1
   fi
-  TEST_STATUS='false false' PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  TEST_STATUS='false false' PATH="$TEST_BIN:$PATH" RECUR=job "${QUINE[@]}" daemon-dog
   [[ $(< "$SERVICE/env/PAYLOAD") == changed ]]
   if [[ -f $SERVICE/down ]]; then
     exit 1
   fi
   rm -- "$LAUNCH/run"
-  TEST_STATUS='false false' PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  TEST_STATUS='false false' PATH="$TEST_BIN:$PATH" RECUR=job "${QUINE[@]}" daemon-dog
   if [[ -d $SERVICE ]]; then
     exit 1
   fi
   ;;
 policy)
-  SERVICE="$TEST_DIR/snapshot-1/dog/instances/walk"
-  mkdir -p -- "$SERVICE" "$TEST_DIR/snapshot-1/dog/data/done" "$TEST_DIR/bin"
+  SERVICE="$STATE/dog/instances/walk"
+  mkdir -p -- "$SERVICE" "$STATE/dog/data/done" "$TEST_DIR/bin"
   cp --archive -- "$ROOT/base/." "$SERVICE/"
-  SERVICE="$(realpath -- "$SERVICE")"
   printf '%s' "$SERVICE" > "$SERVICE/env/S67_WORKING_DIRECTORY"
   cat > "$SERVICE/data/job" << 'EOF'
 #!/usr/bin/env bash
@@ -436,7 +436,7 @@ EOF
   else
     [[ $? == 125 ]]
   fi
-  [[ -f $TEST_DIR/snapshot-1/dog/data/done/walk ]]
+  [[ -f $STATE/dog/data/done/walk ]]
   if [[ -L $SERVICE/data/launch ]]; then
     exit 1
   fi

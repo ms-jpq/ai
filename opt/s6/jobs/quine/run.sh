@@ -38,8 +38,9 @@ seed | job)
     fi
 
     STAGING="$(mktemp -d -- "$PWD/.$NAME.XXXXXX")"
-    BUILD="$STAGING/template"
     trap 'rm -fr -- "$STAGING"' EXIT
+    BUILD="$STAGING/template"
+
     rsync --archive -- "$ROOT/base/" "$BUILD/"
     rsync --archive --checksum --exclude=/data/launch --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$BUILD/"
     if [[ ${RUN[*]} -ef $SELF ]]; then
