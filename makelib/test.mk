@@ -1,6 +1,6 @@
-.PHONY: test test.node test.s6 test.service-template
+.PHONY: test test.node test.s6 test.dl
 
-test: test.node test.s6 test.service-template
+test: test.node test.s6 test.dl
 
 test.node: ./node_modules/.bin
 	npm run test
@@ -8,5 +8,5 @@ test.node: ./node_modules/.bin
 test.s6:
 	./opt/s6.test.sh
 
-test.service-template:
-	./opt/dl/jobs/dispatch/data/service-template.test.sh
+test.dl:
+	./opt/dl.test.sh

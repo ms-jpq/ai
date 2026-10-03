@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' snapshots templates graph execution queues policy lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' snapshots templates execution queues policy lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -172,36 +172,6 @@ templates)
       diff --unified -- "$ENV" "$SERVICE/env/${ENV##*/}"
     done
   done
-  ;;
-
-graph)
-  cp --archive -- "$DL/examples" "$TEST_DIR/examples"
-  S67_JOBS_DIR="$JOBS" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/examples"
-  DOG=(s6-envdir -- "$JOBS/dog/env" "$JOBS/dog/data/step.sh")
-  LIL=(s6-envdir -- "$JOBS/lil/env" "$JOBS/lil/data/step.sh")
-  DEPENDENCY="$TEST_DIR/examples/lil/records"
-  RECORD="$TEST_DIR/examples/dog/records/-/latest"
-  INBOX="$JOBS/dog/data/inbox/lil"
-  if [[ -e $JOBS/dog/data/dependencies ]]; then
-    exit 1
-  fi
-  if "${DOG[@]}" -; then
-    exit 1
-  fi
-  "${LIL[@]}" -
-  [[ $INBOX -ef $DEPENDENCY ]]
-  [[ $(< "$INBOX/-/latest/output/exit_status") == 0 ]]
-  FIRST="$(readlink -- "$DEPENDENCY/-/latest")"
-  "${LIL[@]}" -
-  LATEST="$(readlink -- "$DEPENDENCY/-/latest")"
-  [[ $LATEST != "$FIRST" ]]
-  [[ $INBOX/-/latest -ef $DEPENDENCY/-/$LATEST ]]
-  "${LIL[@]}" other
-  [[ $(< "$DEPENDENCY/other/latest/output/exit_status") == 0 ]]
-  "${DOG[@]}" -
-  [[ $(< "$RECORD/output/exit_status") == 0 ]]
-  [[ $RECORD/input/lil -ef $INBOX ]]
-  [[ $(< "$RECORD/input/lil/other/latest/output/exit_status") == 0 ]]
   ;;
 
 execution)
