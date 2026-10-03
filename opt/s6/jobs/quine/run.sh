@@ -91,7 +91,11 @@ cleanup)
   shift -- 1
   for INSTANCE in "$@"; do
     INSTANCE="${INSTANCE##*/}"
-    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
+    DELETE=(s6-instance-delete -t "$TIMEOUT")
+    if ! s6-svok "$INSTANCES/$INSTANCE"; then
+      DELETE+=(-X)
+    fi
+    "${DELETE[@]}" -- "$SUPERVISOR" "$INSTANCE"
     rm -fr -- "${DONE:?}/$INSTANCE"
   done
   ;;
@@ -103,6 +107,10 @@ instance)
   REQUEST="$JOB/data/launch/$INSTANCE"
   if ! [[ -L $REQUEST ]]; then
     REQUEST="$SUPERVISOR/data/launch/$INSTANCE"
+  fi
+
+  if [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; then
+    RECUR=cleanup "$0" "$NAME" "$INSTANCE"
   fi
 
   if [[ -d $SERVICE ]] && (($(< "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC") >= 0)); then

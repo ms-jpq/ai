@@ -321,6 +321,11 @@ publication)
 #!/usr/bin/env bash
 set -euo pipefail
 case "${0##*/}" in
+s6-svok)
+  if [[ $1 == */instances/* ]]; then
+    exit "${TEST_SUPERVISOR_STATUS:-0}"
+  fi
+  ;;
 s6-svwait)
   ln -sTnf -- "$TEST_ROOT/new" "$TEST_ROOT/jobs/dog"
   ;;
@@ -377,6 +382,17 @@ BASH
   [[ $(< "$TEST_DIR/stops") == stop ]]
   "${RECONCILE[@]}"
   if [[ -d $SERVICE ]]; then exit 1; fi
+
+  mkdir -p -- "$TEST_DIR/new/env"
+  printf '%s' 0 > "$TEST_DIR/new/env/S9_ON_UNIT_INACTIVE_SEC"
+  ln -s -- /new "$TEST_DIR/new/data/launch/walk"
+  "${RECONCILE[@]}"
+  touch -- "$SERVICE/stale"
+  TEST_SUPERVISOR_STATUS=1 "${RECONCILE[@]}"
+  [[ -d $SERVICE ]]
+  if [[ -e $SERVICE/stale ]]; then exit 1; fi
+  [[ -L $TEST_DIR/new/data/launch/walk ]]
+  diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/job"
   ;;
 templates)
   cp --archive -- "$DL/examples" "$TEST_DIR/examples"
