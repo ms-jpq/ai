@@ -91,12 +91,7 @@ cleanup)
   shift -- 1
   for SVC in "$@"; do
     INSTANCE="${SVC##*/}"
-    if ! [[ -L $SUPERVISOR/instance/$INSTANCE ]]; then
-      if s6-svok "$INSTANCES/$INSTANCE" || s6-svok "$INSTANCES/$INSTANCE/log"; then
-        exit 1
-      fi
-    fi
-    timeout --foreground $((TIMEOUT / 1000)) s6-instance-delete -- "$SUPERVISOR" "$INSTANCE"
+    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
     rm -fr -- "$SVC"
   done
   ;;
@@ -118,15 +113,13 @@ instance)
       exit
     fi
     touch -- "$SERVICE/down"
-    if s6-svok "$SERVICE"; then
-      s6-instance-control -O -- "$SUPERVISOR" "$INSTANCE"
-      STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
-      if [[ $STATUS != 'false false' ]]; then
-        exit
-      fi
-      s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
+    s6-instance-control -O -- "$SUPERVISOR" "$INSTANCE"
+    STATUS="$(s6-svstat -o up,wantedup -- "$SERVICE")"
+    if [[ $STATUS != 'false false' ]]; then
+      exit
     fi
-    RECUR=cleanup "$SELF" "$NAME" "$DONE/$INSTANCE"
+    s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
+    s6-instance-delete -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
   fi
   if ! [[ -L $DATA/launch ]]; then
     if ! [[ -d $JOB ]] || ! [[ -L $REQUEST ]]; then

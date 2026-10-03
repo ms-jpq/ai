@@ -321,11 +321,6 @@ publication)
 #!/usr/bin/env bash
 set -euo pipefail
 case "${0##*/}" in
-s6-svok)
-  if [[ $1 == */instances/* ]]; then
-    [[ -f $TEST_ROOT/blocked ]]
-  fi
-  ;;
 s6-svwait)
   ln -sTnf -- "$TEST_ROOT/new" "$TEST_ROOT/jobs/dog"
   ;;
@@ -334,12 +329,10 @@ s6-instance-create)
   ln -s -- "../instances/${@: -1}" "${@: -2:1}/instance/${@: -1}"
   ;;
 s6-instance-delete)
-  if [[ $1 != -- ]]; then exit 67; fi
-  rm -f -- "${@: -2:1}/instance/${@: -1}"
   if [[ ${TEST_DELETE_STATUS:-0} != 0 ]]; then
-    touch -- "$TEST_ROOT/blocked"
     exit "$TEST_DELETE_STATUS"
   fi
+  rm -f -- "${@: -2:1}/instance/${@: -1}"
   rm -fr -- "${@: -2:1}/instances/${@: -1}"
   ;;
 s6-svstat)
@@ -361,14 +354,10 @@ BASH
   if [[ -L $TEST_DIR/old/data/launch/walk ]]; then exit 1; fi
 
   touch -- "$STATE/dog/data/done/walk"
-  if TEST_DELETE_STATUS=99 "${RECONCILE[@]}"; then exit 1; fi
-  [[ -d $SERVICE ]]
-  [[ -f $STATE/dog/data/done/walk ]]
-  if "${RECONCILE[@]}"; then exit 1; fi
+  if TEST_DELETE_STATUS=111 "${RECONCILE[@]}"; then exit 1; fi
   [[ -d $SERVICE ]]
   [[ -f $STATE/dog/data/done/walk ]]
   [[ -L $TEST_DIR/new/data/launch/walk ]]
-  rm -- "$TEST_DIR/blocked"
   "${RECONCILE[@]}"
   diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/job"
   TARGET="$(readlink -- "$SERVICE/data/launch")"
