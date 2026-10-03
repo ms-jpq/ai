@@ -20,14 +20,25 @@ lifecycle.sh)
   : "${S67_RESTART_SEC?}"
 
   if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then
-    : "${S67_RESTART_MAX_DELAY_SEC:=$(((S67_ON_UNIT_INACTIVE_SEC > S67_RESTART_SEC ? S67_ON_UNIT_INACTIVE_SEC : S67_RESTART_SEC) * 2))}"
+    DELAY="$S67_RESTART_SEC"
+    if ((DELAY < S67_ON_UNIT_INACTIVE_SEC)); then
+      DELAY="$S67_ON_UNIT_INACTIVE_SEC"
+    fi
+    : "${S67_RESTART_MAX_DELAY_SEC:=$((DELAY * 2))}"
 
     if ATTEMPT="$(wc -l 2> /dev/null < "$ATTEMPTS")"; then
       DELAY="$S67_ON_UNIT_INACTIVE_SEC"
       if ((ATTEMPT > 0)); then
-        DELAY=$((S67_RESTART_SEC < S67_RESTART_MAX_DELAY_SEC ? S67_RESTART_SEC : S67_RESTART_MAX_DELAY_SEC))
+        DELAY="$S67_RESTART_SEC"
+        if ((DELAY > S67_RESTART_MAX_DELAY_SEC)); then
+          DELAY="$S67_RESTART_MAX_DELAY_SEC"
+        fi
         while ((--ATTEMPT > 0 && DELAY < S67_RESTART_MAX_DELAY_SEC)); do
-          DELAY=$((DELAY >= S67_RESTART_MAX_DELAY_SEC - DELAY ? S67_RESTART_MAX_DELAY_SEC : DELAY * 2))
+          if ((DELAY > S67_RESTART_MAX_DELAY_SEC / 2)); then
+            DELAY="$S67_RESTART_MAX_DELAY_SEC"
+          else
+            DELAY=$((DELAY * 2))
+          fi
         done
       fi
       sleep -- "$DELAY"
