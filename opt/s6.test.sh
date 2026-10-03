@@ -95,9 +95,9 @@ BASH
         COUNT="$(grep --fixed-strings --count "dog@$INSTANCE command $STREAM" "$ARCHIVE")"
         [[ $COUNT == 1 ]]
       done
-      if grep --quiet --fixed-strings 'status=' "$ARCHIVE"; then
-        exit 1
-      fi
+      COUNT="$(grep --fixed-strings --count -- '--- exit_status=' "$ARCHIVE")"
+      [[ $COUNT == 1 ]]
+      grep --quiet --fixed-strings -- "dog@$INSTANCE --- exit_status=$(< "${ARCHIVE%/*}/exit_status") signal=$(< "${ARCHIVE%/*}/signal") ---" "$ARCHIVE"
     done
     DEAD=("$TEST_DIR/dead/dog/$INSTANCE."*)
     [[ ${#DEAD[@]} == 1 ]]

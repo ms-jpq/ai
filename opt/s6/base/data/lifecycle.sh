@@ -9,15 +9,20 @@ ATTEMPTS="$INSTANCE_DATA/attempt"
 PGID_FILE="$INSTANCE_DATA/.pgid"
 
 MODE="${RECUR:-${0##*/}}"
+INSTANCE_DIR="$PWD"
 if [[ $MODE == run ]] && [[ $0 -ef ../data/lifecycle.sh ]]; then
   MODE=log
+  INSTANCE_DIR="${PWD%/log}"
 fi
+JOB_DIR="${INSTANCE_DIR%/instances/*}"
+JOB="${JOB_DIR##*/}"
+
+LOGGER=(s6-log -b -l 0)
+LOG_FMT=("p$JOB@${INSTANCE_DIR##*/}" 1)
 
 case "$MODE" in
 log)
-  SERVICE="${PWD%/log}"
-  JOB="${SERVICE%/instances/*}"
-  exec -- s6-log -b -l 0 -d "$(< ./notification-fd)" -- "p${JOB##*/}@${SERVICE##*/}" 1 >&67
+  exec -- "${LOGGER[@]}" -d "$(< ./notification-fd)" -- "${LOG_FMT[@]}" >&67
   ;;
 run)
   printf -- '%s' "$$" > "$PGID_FILE"
@@ -33,6 +38,7 @@ lifecycle.sh)
   : "${S9_WORKING_DIRECTORY?}"
   : "${S9_RUNTIME_MAX_SEC?}"
   : "${S9_RESTART_SEC?}"
+
   if ((S9_ON_UNIT_INACTIVE_SEC >= 0)); then
     DELAY="$S9_RESTART_SEC"
     if ((DELAY < S9_ON_UNIT_INACTIVE_SEC)); then
@@ -64,8 +70,7 @@ lifecycle.sh)
 attempt)
   unset -- RECUR
   INSTANCE="$1"
-  JOB="${PWD%/instances/*}"
-  LOGS="$JOB/../../log/${JOB##*/}"
+  LOGS="$JOB_DIR/../../log/$JOB"
 
   mkdir -p -- "$LOGS"
   cd -- "$S9_WORKING_DIRECTORY"
@@ -75,16 +80,14 @@ attempt)
     nice -n 19 -- "$INSTANCE_DATA/job" "$@" || STATUS=$?
     printf -- '\n'
     exit "$STATUS"
-  } 2>&1 | s6-log -b -l 0 -- T "p${JOB##*/}@$INSTANCE" 1 | tee --append -- "$LOGS/$INSTANCE.log" > /dev/null || exit "$?"
+  } 2>&1 | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" | tee --append -- "$LOGS/$INSTANCE.log" > /dev/null || exit "$?"
   ;;
 finished)
   : "${S9_ON_UNIT_INACTIVE_SEC?}"
   STATUS="$1"
   SIGNAL="$2"
   INSTANCE="$3"
-  JOB="${PWD%/instances/*}"
-  STATE="$JOB/../.."
-  JOB="${JOB##*/}"
+  STATE="$JOB_DIR/../.."
   LOG_SRC="$STATE/log/$JOB/$INSTANCE.log"
   TIMESTAMP="$(date -u +%Y%m%dT%H%M%S.%N)"
 
@@ -105,7 +108,9 @@ finished)
   printf -- '%s' "$SIGNAL" > "${LOG_DST%/*}/signal"
 
   mkdir -p -- "${LOG_SRC%/*}"
-  touch -- "$LOG_SRC"
+  tee <<- EOF | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" >> "$LOG_SRC"
+--- exit_status=$STATUS signal=$SIGNAL ---
+EOF
   ln -- "$LOG_SRC" "$LOG_DST"
   rm -fr -- "$LOG_SRC"
 
