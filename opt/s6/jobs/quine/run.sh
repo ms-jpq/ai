@@ -45,7 +45,8 @@ seed | job)
     else
       cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$BUILD/data/job"
     fi
-    tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$BUILD/.sum"
+    tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$STAGING/.sum"
+    mv -- "$STAGING/.sum" "$BUILD/.sum"
 
     if ! [[ -d $SUPERVISOR ]]; then
       s6-instance-maker -- "$BUILD" "$STAGING/manager"

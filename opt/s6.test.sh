@@ -3,14 +3,12 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl snapshots pcp publication templates execution queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl snapshots pcp publication templates queues policy logger runtime lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
 ROOT="${0%.test.sh}"
-DL="$ROOT/../dl"
-TEMPLATE="$DL/jobs/dispatch/data/service-template.sh"
 mkdir -p -- "$ROOT/../../var/tmp"
 TEST_DIR="$(mktemp -d -- "$ROOT/../../var/tmp/s6-test.XXXXXX")"
 TEST_DIR="$(realpath -- "$TEST_DIR")"
@@ -231,7 +229,7 @@ lifecycle)
   SERVICE="$STATE/dog/instances/walk"
   WAIT=(timeout --foreground 15s bash -c 'until test "$@"; do sleep 0.05; done' --)
   export S9_WORKING_DIRECTORY="$TEST_DIR"
-  mkdir -p -- "$STEP/env" "$STEP/data" "$JOBS/keeper/env"
+  mkdir -p -- "$STEP/env" "$STEP/data/launch" "$JOBS/keeper/env"
   printf '%s' 10 > "$TEST_DIR/base/env/S9_RUNTIME_MAX_SEC"
   cat > "$STEP/run.sh" << 'BASH'
 #!/usr/bin/env bash
@@ -245,8 +243,8 @@ BASH
   printf '%s' 60 | tee "$STEP/env/S9_ON_UNIT_INACTIVE_SEC" > "$JOBS/keeper/env/S9_ON_UNIT_INACTIVE_SEC"
   printf '%s' one > "$STEP/env/PAYLOAD"
   printf '%s' old-data > "$STEP/data/value"
-  "$TEMPLATE" "$STEP" "$JOB"
-  ln -sTnfr -- /dev/null "$STEP/launch/walk"
+  ln -sTnfr -- "$STEP" "$JOB"
+  ln -sTnfr -- /dev/null "$STEP/data/launch/walk"
   RECUR=bootstrap "${QUINE[@]}" quine
   cat > "$JOBS/keeper/run.sh" << 'BASH'
 #!/usr/bin/env bash
@@ -278,7 +276,6 @@ BASH
   "${WAIT[@]}" -s "$TEST_DIR/started-one"
   [[ $(< "$TEST_DIR/started-one") == old:one:old-data ]]
   PID="$(s6-svstat -o pid -- "$SERVICE")"
-  "$TEMPLATE" "$STEP" "$JOB"
   RECUR=job s6-setlock -t 6000 -- "$STATE/.reconcile.lock" "${QUINE[@]}" dog
   if [[ -f $SERVICE/down ]]; then exit 1; fi
   CURRENT_PID="$(s6-svstat -o pid -- "$SERVICE")"
@@ -287,7 +284,6 @@ BASH
   sed -i -e 's/CODE=old/CODE=new/' -- "$STEP/run.sh"
   printf '%s' two > "$STEP/env/PAYLOAD"
   printf '%s' new-data > "$STEP/data/value"
-  "$TEMPLATE" "$STEP" "$JOB"
   "${WAIT[@]}" -f "$SERVICE/down"
   CURRENT_PID="$(s6-svstat -o pid -- "$SERVICE")"
   [[ $CURRENT_PID == "$PID" ]]
@@ -299,7 +295,7 @@ BASH
 
   for ATTEMPT in two three four; do
     case "$ATTEMPT" in
-    two) rm -- "$STEP/launch/walk" ;;
+    two) rm -- "$STEP/data/launch/walk" ;;
     three) mv -- "$STEP" "$TEST_DIR/removed-step" ;;
     four) rm -- "$JOB" ;;
     *)
@@ -315,14 +311,13 @@ BASH
     case "$ATTEMPT" in
     two)
       printf '%s' three > "$STEP/env/PAYLOAD"
-      "$TEMPLATE" "$STEP" "$JOB"
-      ln -sTnfr -- /dev/null "$STEP/launch/walk"
+      ln -sTnfr -- /dev/null "$STEP/data/launch/walk"
       "${WAIT[@]}" -s "$TEST_DIR/started-three"
       ;;
     three)
       STEP="$TEST_DIR/removed-step"
       printf '%s' four > "$STEP/env/PAYLOAD"
-      "$TEMPLATE" "$STEP" "$JOB"
+      ln -sTnfr -- "$STEP" "$JOB"
       "${WAIT[@]}" -s "$TEST_DIR/started-four"
       ;;
     four) ;;

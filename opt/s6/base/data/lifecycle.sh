@@ -65,7 +65,7 @@ lifecycle.sh)
     fi
   fi
 
-  RECUR=attempt exec -- timeout --foreground --kill-after=5s "$S9_RUNTIME_MAX_SEC" "$0" nice -n 19 -- "$@"
+  RECUR=attempt exec -- timeout --foreground --kill-after=5s "$S9_RUNTIME_MAX_SEC" nice -n 19 -- "$0" "$@"
   ;;
 attempt)
   unset -- RECUR
