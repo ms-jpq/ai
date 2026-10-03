@@ -3,6 +3,7 @@
 set -o pipefail
 
 INSTANCE_DATA="$PWD/data"
+DAEMON="$PWD/env/S67_DAEMON"
 ATTEMPTS="$INSTANCE_DATA/attempt"
 PGID_FILE="$INSTANCE_DATA/.pgid"
 
@@ -20,7 +21,7 @@ lifecycle.sh)
   : "${S67_ON_UNIT_INACTIVE_SEC?}"
   : "${S67_RESTART_MAX_DELAY_SEC:=$((S67_ON_UNIT_INACTIVE_SEC * 2))}"
 
-  if [[ -d $INSTANCE_DATA/launch/recurring ]]; then
+  if [[ -f $DAEMON ]]; then
     if ATTEMPT="$(wc -l 2> /dev/null < "$ATTEMPTS")"; then
       DELAY="$S67_ON_UNIT_INACTIVE_SEC"
       if ((ATTEMPT > 0)); then
@@ -50,7 +51,7 @@ finish)
   fi
 
   EXIT_STATUS=0
-  if [[ -d $INSTANCE_DATA/launch/recurring ]]; then
+  if [[ -f $DAEMON ]]; then
     if ((STATUS == 0 && SIGNAL == 0)); then
       : > "$ATTEMPTS"
     else
@@ -58,13 +59,14 @@ finish)
     fi
   else
     touch -- "../../data/done/$INSTANCE"
+    rm -f -- "$INSTANCE_DATA/launch"
     EXIT_STATUS=125
   fi
 
   tee <<- EOF || exit "$EXIT_STATUS"
-------------------------------------------------------------------
-Service Stopped :: $JOB@$INSTANCE - status=$STATUS, signal=$SIGNAL
-------------------------------------------------------------------
+------------------------------
+status=$STATUS, signal=$SIGNAL
+------------------------------
 EOF
 
   exit "$EXIT_STATUS"

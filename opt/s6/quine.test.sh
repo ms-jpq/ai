@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' snapshots templates graph execution queues | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' snapshots templates graph execution queues policy lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -18,12 +18,127 @@ mkdir -- "$TEST_DIR/snapshot-1"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
+lifecycle)
+  TEST_DIR="$(realpath -- "$TEST_DIR")"
+  STATE="$TEST_DIR/snapshot-1"
+  STEP="$TEST_DIR/steps/dog"
+  JOB="$TEST_DIR/jobs/dog"
+  SERVICE="$STATE/dog/instances/walk"
+  QUINE="$TEST_DIR/jobs/quine/run.sh"
+  WAIT=(timeout --foreground 15s bash -c 'until test "$@"; do sleep 0.05; done' --)
+  export S67_WORKING_DIRECTORY="$TEST_DIR"
+  mkdir -p -- "$STEP/env" "$STEP/data" "$TEST_DIR/jobs/keeper/env"
+  printf '%s' 10 > "$TEST_DIR/base/env/S67_RUNTIME_MAX_SEC"
+  cat > "$STEP/run.sh" << 'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+CODE=old
+printf '%s:%s:%s\n' "$CODE" "$PAYLOAD" "$(< "${0%/*}/value")" > "$S67_WORKING_DIRECTORY/started-$PAYLOAD"
+while ! [[ -f $S67_WORKING_DIRECTORY/release-$PAYLOAD ]]; do sleep 0.05; done
+printf '%s\n' "$CODE" > "$S67_WORKING_DIRECTORY/finished-$PAYLOAD"
+EOF
+  chmod +x -- "$STEP/run.sh"
+  touch -- "$STEP/env/S67_DAEMON" "$TEST_DIR/jobs/keeper/env/S67_DAEMON"
+  printf '%s' one > "$STEP/env/PAYLOAD"
+  printf '%s' old-data > "$STEP/data/value"
+  "$TEMPLATE" "$STEP" "$JOB"
+  ln -s -- /dev/null "$STEP/launch/walk"
+  RECUR=bootstrap env -C "$STATE" -- "$QUINE" quine
+  cat > "$TEST_DIR/jobs/keeper/run.sh" << 'EOF'
+#!/usr/bin/env bash
+exit 0
+EOF
+  chmod +x -- "$TEST_DIR/jobs/keeper/run.sh"
+  RECUR=seed env -C "$STATE" -- "$QUINE" keeper parent
+  mkdir -p -- "$STATE/keeper/data/launch"
+  ln -s -- /dev/null "$STATE/keeper/data/launch/parent"
+
+  s6-svscan -- "$STATE" > "$TEST_DIR/scan.log" 2>&1 &
+  SCAN_PID=$!
+  RESULT=0
+  trap '
+    RESULT=$?
+    if ! s6-svscanctl -t -- "$STATE"; then
+      RESULT=1
+      find "$STATE" -type d -name supervise -exec s6-svc -dx -- "{}/.." \;
+    fi
+    if ! wait "$SCAN_PID"; then RESULT=1; fi
+    if ((RESULT)); then
+      cat -- "$TEST_DIR/scan.log" >&2
+      find "$TEST_DIR/log" -type f -name "*.log" -exec cat -- {} + >&2
+    fi
+    rm -fr -- "$TEST_DIR"
+    exit "$RESULT"
+  ' EXIT
+
+  "${WAIT[@]}" -s "$TEST_DIR/started-one"
+  [[ $(< "$TEST_DIR/started-one") == old:one:old-data ]]
+  PID="$(s6-svstat -o pid -- "$SERVICE")"
+  "$TEMPLATE" "$STEP" "$JOB"
+  RECUR=job env -C "$STATE" -- s6-setlock -- "$STATE/.reconcile.lock" "$QUINE" dog
+  if [[ -f $SERVICE/down ]]; then exit 1; fi
+  CURRENT_PID="$(s6-svstat -o pid -- "$SERVICE")"
+  [[ $CURRENT_PID == "$PID" ]]
+
+  sed -i -e 's/CODE=old/CODE=new/' -- "$STEP/run.sh"
+  printf '%s' two > "$STEP/env/PAYLOAD"
+  printf '%s' new-data > "$STEP/data/value"
+  "$TEMPLATE" "$STEP" "$JOB"
+  "${WAIT[@]}" -f "$SERVICE/down"
+  CURRENT_PID="$(s6-svstat -o pid -- "$SERVICE")"
+  [[ $CURRENT_PID == "$PID" ]]
+  if [[ -f $TEST_DIR/finished-one ]]; then exit 1; fi
+  touch -- "$TEST_DIR/release-one"
+  "${WAIT[@]}" -s "$TEST_DIR/started-two"
+  [[ $(< "$TEST_DIR/finished-one") == old ]]
+  [[ $(< "$TEST_DIR/started-two") == new:two:new-data ]]
+
+  for ATTEMPT in two three four; do
+    case "$ATTEMPT" in
+    two) rm -- "$STEP/launch/walk" ;;
+    three) mv -- "$STEP" "$TEST_DIR/removed-step" ;;
+    four) rm -- "$JOB" ;;
+    *)
+      set -x
+      exit 2
+      ;;
+    esac
+    "${WAIT[@]}" -f "$SERVICE/down"
+    if [[ -f $TEST_DIR/finished-$ATTEMPT ]]; then exit 1; fi
+    touch -- "$TEST_DIR/release-$ATTEMPT"
+    "${WAIT[@]}" ! -d "$SERVICE"
+    [[ $(< "$TEST_DIR/finished-$ATTEMPT") == new ]]
+    case "$ATTEMPT" in
+    two)
+      printf '%s' three > "$STEP/env/PAYLOAD"
+      "$TEMPLATE" "$STEP" "$JOB"
+      ln -s -- /dev/null "$STEP/launch/walk"
+      "${WAIT[@]}" -s "$TEST_DIR/started-three"
+      ;;
+    three)
+      STEP="$TEST_DIR/removed-step"
+      printf '%s' four > "$STEP/env/PAYLOAD"
+      "$TEMPLATE" "$STEP" "$JOB"
+      "${WAIT[@]}" -s "$TEST_DIR/started-four"
+      ;;
+    four) ;;
+    *)
+      set -x
+      exit 2
+      ;;
+    esac
+  done
+  [[ -d $STATE/keeper/instances/parent ]]
+  if [[ -f $STATE/keeper/instances/parent/down ]]; then exit 1; fi
+  STATUS="$(s6-svstat -o wantedup -- "$STATE/quine/instances/-")"
+  [[ $STATUS == true ]]
+  ;;
 snapshots)
   mkdir -- "$TEST_DIR/"snapshot-{2,3}
   ln -sTnfr -- "$TEST_DIR/jobs/quine" "$TEST_DIR/jobs/quine-2"
   ln -sTnf -- /dev/null "$TEST_DIR/jobs/quine/data/null"
 
-  RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh
+  RECUR=bootstrap env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh quine
   RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../jobs/quine-2/run.sh quine-2 -
   RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../snapshot-1/quine/instances/-/data/job quine -
 
@@ -127,14 +242,13 @@ set -euo pipefail
 [[ -d records ]]
 [[ -f $1/command ]]
 [[ -d $1/inbox ]]
-[[ -d $1/launch/recurring ]]
-[[ -d $1/launch/oneshot ]]
+[[ -d $1/launch ]]
 [[ -z ${RECUR:-} ]]
-ln -s -- /dev/null "$1/launch/oneshot/walk"
+ln -s -- /dev/null "$1/launch/walk"
 EOF
   chmod +x -- "$TEST_DIR/steps/dog/dispatch.sh"
   S67_JOBS_DIR="$TEST_DIR/jobs" "$DL/jobs/dispatch/run.sh" "$TEST_DIR/steps"
-  [[ -L $TEST_DIR/jobs/dog/data/launch/oneshot/walk ]]
+  [[ -L $TEST_DIR/jobs/dog/data/launch/walk ]]
   cat > "$TEST_DIR/steps/dog/run.sh" << 'EOF'
 exit 99
 EOF
@@ -197,7 +311,16 @@ EOF
 #!/usr/bin/env bash
 exit 0
 EOF
-  chmod +x -- "$TEST_DIR/bin/"{s6-instance-create,noop}
+  cat > "$TEST_DIR/bin/s6-svstat" << 'EOF'
+#!/usr/bin/env bash
+printf '%s\n' "${TEST_STATUS:-true}"
+EOF
+  cat > "$TEST_DIR/bin/s6-instance-delete" << 'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+rm -fr -- "${@: -2:1}/instances/${@: -1}"
+EOF
+  chmod +x -- "$TEST_DIR/bin/"{s6-instance-create,s6-instance-delete,s6-svstat,noop}
   for COMMAND in s6-svok s6-svwait s6-svc s6-instance-control; do
     ln -s -- noop "$TEST_DIR/bin/$COMMAND"
   done
@@ -205,26 +328,116 @@ EOF
   for _ in 1 2; do
     "$TEMPLATE" "$TEST_DIR/queue-step" "$JOB"
   done
-  ln -s -- /dev/null "$LAUNCH/recurring/keep"
-  ln -s -- /missing/inbox "$LAUNCH/oneshot/run"
-  ln -s -- /dev/null "$LAUNCH/oneshot/.pending"
+  ln -s -- /missing/inbox "$LAUNCH/run"
+  ln -s -- /dev/null "$LAUNCH/.pending"
   PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog
-  [[ -d $MANAGER/instances/keep ]]
   [[ -d $MANAGER/instances/run ]]
-  [[ -L $LAUNCH/recurring/keep ]]
-  if [[ -L $LAUNCH/oneshot/run ]] || [[ -d $MANAGER/instances/.pending ]]; then
+  [[ -L $MANAGER/instances/run/data/launch ]]
+  if [[ -L $LAUNCH/run ]] || [[ -d $MANAGER/instances/.pending ]]; then
     exit 1
   fi
-  [[ -L $LAUNCH/oneshot/.pending ]]
+  [[ -L $LAUNCH/.pending ]]
 
-  ln -s -- /dev/null "$LAUNCH/oneshot/rejected"
+  ln -s -- /dev/null "$LAUNCH/rejected"
   if PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh queue-dog; then
     exit 1
   fi
-  [[ -L $LAUNCH/oneshot/rejected ]]
+  [[ -L $LAUNCH/rejected ]]
   "$TEMPLATE" "$TEST_DIR/queue-step" "$JOB"
-  [[ -L $LAUNCH/oneshot/rejected ]]
-  if [[ -L $LAUNCH/oneshot/run ]]; then
+  [[ -L $LAUNCH/rejected ]]
+  if [[ -L $LAUNCH/run ]]; then
+    exit 1
+  fi
+
+  ln -s -- /dev/null "$LAUNCH/run"
+  if env -C "$MANAGER/instances/run" -- ./finish 0 0 run > "$TEST_DIR/finish.log"; then
+    exit 1
+  else
+    [[ $? == 125 ]]
+  fi
+  [[ -L $LAUNCH/run ]]
+  [[ -f $MANAGER/data/done/run ]]
+  if [[ -L $MANAGER/instances/run/data/launch ]]; then
+    exit 1
+  fi
+
+  mkdir -- "$TEST_DIR/queue-step/env"
+  touch -- "$TEST_DIR/queue-step/env/S67_DAEMON"
+  rm -- "$LAUNCH/rejected"
+  "$TEMPLATE" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/daemon-dog"
+  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  [[ -f $TEST_DIR/snapshot-1/daemon-dog/instances/run/env/S67_DAEMON ]]
+  [[ -L $LAUNCH/run ]]
+  SERVICE="$TEST_DIR/snapshot-1/daemon-dog/instances/run"
+  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  if [[ -f $SERVICE/down ]]; then
+    exit 1
+  fi
+  printf '%s' changed > "$TEST_DIR/queue-step/env/PAYLOAD"
+  "$TEMPLATE" "$TEST_DIR/queue-step" "$TEST_DIR/jobs/daemon-dog"
+  PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  [[ -f $SERVICE/down ]]
+  if [[ -f $SERVICE/env/PAYLOAD ]]; then
+    exit 1
+  fi
+  TEST_STATUS='false false' PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  [[ $(< "$SERVICE/env/PAYLOAD") == changed ]]
+  if [[ -f $SERVICE/down ]]; then
+    exit 1
+  fi
+  rm -- "$LAUNCH/run"
+  TEST_STATUS='false false' PATH="$TEST_BIN:$PATH" RECUR=job env -C "$TEST_DIR/snapshot-1" -- ../jobs/quine/run.sh daemon-dog
+  if [[ -d $SERVICE ]]; then
+    exit 1
+  fi
+  ;;
+policy)
+  SERVICE="$TEST_DIR/snapshot-1/dog/instances/walk"
+  mkdir -p -- "$SERVICE" "$TEST_DIR/snapshot-1/dog/data/done" "$TEST_DIR/bin"
+  cp --archive -- "$ROOT/base/." "$SERVICE/"
+  SERVICE="$(realpath -- "$SERVICE")"
+  printf '%s' "$SERVICE" > "$SERVICE/env/S67_WORKING_DIRECTORY"
+  cat > "$SERVICE/data/job" << 'EOF'
+#!/usr/bin/env bash
+printf '%s' "$1"
+EOF
+  cat > "$TEST_DIR/bin/sleep" << 'EOF'
+#!/usr/bin/env bash
+printf '%s' "${@: -1}" > ./delay
+EOF
+  chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
+  TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
+  touch -- "$SERVICE/env/S67_DAEMON"
+  PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
+  [[ $(< "$TEST_DIR/output") == walk ]]
+  if [[ -f $SERVICE/delay ]]; then
+    exit 1
+  fi
+  rm -- "$SERVICE/data/.pgid"
+  env -C "$SERVICE" -- ./finish 7 0 walk > "$TEST_DIR/finish.log"
+  ATTEMPT="$(wc -l < "$SERVICE/data/attempt")"
+  ((ATTEMPT == 1))
+  printf '%s' 0 > "$SERVICE/env/S67_DAEMON"
+  PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
+  [[ $(< "$SERVICE/delay") == "$(< "$SERVICE/env/S67_RESTART_SEC")" ]]
+  rm -- "$SERVICE/data/.pgid"
+  env -C "$SERVICE" -- ./finish 0 0 walk > "$TEST_DIR/finish.log"
+  ATTEMPT="$(wc -l < "$SERVICE/data/attempt")"
+  ((ATTEMPT == 0))
+  rm -- "$SERVICE/env/S67_DAEMON" "$SERVICE/delay"
+  PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
+  if [[ -f $SERVICE/delay ]]; then
+    exit 1
+  fi
+  rm -- "$SERVICE/data/.pgid"
+  ln -s -- /dev/null "$SERVICE/data/launch"
+  if env -C "$SERVICE" -- ./finish 7 0 walk > "$TEST_DIR/finish.log"; then
+    exit 1
+  else
+    [[ $? == 125 ]]
+  fi
+  [[ -f $TEST_DIR/snapshot-1/dog/data/done/walk ]]
+  if [[ -L $SERVICE/data/launch ]]; then
     exit 1
   fi
   ;;

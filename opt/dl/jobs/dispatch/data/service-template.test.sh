@@ -12,7 +12,7 @@ DST="$TEST_DIR/jobs/dog house"
 LAUNCH="$DST/data/launch"
 SOURCE_LAUNCH="$SRC/launch"
 DEPENDENCY="$TEST_DIR/steps/lil"
-mkdir -p -- "$SOURCE_LAUNCH/"{recurring,oneshot} "$SRC/data/inbox" "$SRC/wants" "$DEPENDENCY"
+mkdir -p -- "$SOURCE_LAUNCH" "$SRC/data/inbox" "$SRC/wants" "$DEPENDENCY"
 ln -s -- ../../lil "$SRC/wants/lil"
 ln -s -- /missing/old-records "$SRC/data/inbox/lil"
 cat > "$SRC/run.sh" << 'EOF'
@@ -20,7 +20,7 @@ cat > "$SRC/run.sh" << 'EOF'
 exit 0
 EOF
 chmod +x -- "$SRC/run.sh"
-ln -s -- ../../data/inbox "$SOURCE_LAUNCH/oneshot/initial"
+ln -s -- ../data/inbox "$SOURCE_LAUNCH/initial"
 
 "$TEMPLATE" "$SRC" "$DST"
 FIRST="$(realpath -- "$DST")"
@@ -32,12 +32,10 @@ ln -s -- revision "$DEPENDENCY/records/walk/latest"
 [[ $DST/data/inbox/lil/walk/latest/output -ef $DEPENDENCY/records/walk/revision/output ]]
 [[ -L $LAUNCH ]]
 [[ $LAUNCH -ef $SOURCE_LAUNCH ]]
-for MODE in recurring oneshot; do
-  ln -s -- ../../data/inbox "$LAUNCH/$MODE/queued request"
-  ln -s -- /missing/inbox "$LAUNCH/$MODE/.pending"
-done
-rm -- "$LAUNCH/oneshot/initial"
-if [[ -L $SOURCE_LAUNCH/oneshot/initial ]]; then
+ln -s -- ../data/inbox "$LAUNCH/queued request"
+ln -s -- /missing/inbox "$LAUNCH/.pending"
+rm -- "$LAUNCH/initial"
+if [[ -L $SOURCE_LAUNCH/initial ]]; then
   exit 1
 fi
 
@@ -52,26 +50,23 @@ for _ in 1 2 3; do
   diff --unified -- "$SRC/run.sh" "$DST/data/command"
   [[ -L $LAUNCH ]]
   [[ $LAUNCH -ef $FIRST/data/launch ]]
-  for MODE in recurring oneshot; do
-    [[ -L $LAUNCH/$MODE/queued\ request ]]
-    [[ $LAUNCH/$MODE/queued\ request -ef $SRC/data/inbox ]]
-    [[ -L $LAUNCH/$MODE/.pending ]]
-  done
-  if [[ -L $LAUNCH/oneshot/initial ]]; then
+  [[ -L $LAUNCH/queued\ request ]]
+  [[ $LAUNCH/queued\ request -ef $SRC/data/inbox ]]
+  [[ -L $LAUNCH/.pending ]]
+  if [[ -L $LAUNCH/initial ]]; then
     exit 1
   fi
 done
 "$FIRST/data/command"
 
-ln -s -- /dev/null "$FIRST/data/launch/oneshot/late"
-[[ -L $LAUNCH/oneshot/late ]]
-rm -- "$LAUNCH/oneshot/queued request"
+ln -s -- /dev/null "$FIRST/data/launch/late"
+[[ -L $LAUNCH/late ]]
+rm -- "$LAUNCH/queued request"
 "$TEMPLATE" "$SRC" "$DST"
-if [[ -L $LAUNCH/oneshot/queued\ request ]]; then
+if [[ -L $LAUNCH/queued\ request ]]; then
   exit 1
 fi
-[[ -L $LAUNCH/recurring/queued\ request ]]
-[[ -L $LAUNCH/oneshot/late ]]
+[[ -L $LAUNCH/late ]]
 
 BEFORE="$(readlink -- "$DST")"
 chmod -x -- "$SRC/run.sh"
@@ -82,7 +77,7 @@ else
 fi
 AFTER="$(readlink -- "$DST")"
 [[ $BEFORE == "$AFTER" ]]
-[[ -L $LAUNCH/oneshot/late ]]
+[[ -L $LAUNCH/late ]]
 
 chmod +x -- "$SRC/run.sh"
 ln -s -- /missing/dependency "$SRC/wants/missing"

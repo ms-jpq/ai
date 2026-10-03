@@ -2,4 +2,4 @@
 
 set -o pipefail
 
-exec -- ln -sTnf -- "$1/inbox" "$1/launch/recurring/-"
+exec -- ln -sTnf -- "$1/inbox" "$1/launch/-"

@@ -9,9 +9,7 @@ STEPS/
     ├── dispatch.sh
     ├── env/
     ├── launch/
-    │   ├── recurring/
-    │   │   └── <instance> -> /…/JOBS/<step>/data/inbox/
-    │   └── oneshot/
+    │   └── <instance> -> /…/JOBS/<step>/data/inbox/
     ├── wants/
     │   └── <dependency> -> ../../<dependency>/
     └── records/
@@ -30,6 +28,7 @@ JOBS/
 │   └── dog.<revision>/
 │       ├── run.sh -> data/step.sh
 │       ├── env/
+│       │   ├── S67_DAEMON
 │       │   └── S67_RECORDS_DIR          /…/STEPS/dog/records
 │       └── data/
 │           ├── command
@@ -38,8 +37,7 @@ JOBS/
 │           │   └── <dependency> -> /…/STEPS/<dependency>/records/
 │           │       └── <instance>/latest -> <revision>/
 │           └── launch -> ../../../../STEPS/dog/launch/
-│               ├── recurring/
-│               └── oneshot/
+│               └── <instance> -> /…/JOBS/dog/data/inbox/
 └── dog -> .versions/dog.<revision>/
 
 STATE/
@@ -47,12 +45,11 @@ STATE/
     ├── template/
     ├── instance/<instance> -> ../instances/<instance>/
     └── instances/<instance>/
-        ├── env/
+        ├── env/S67_DAEMON
         └── data/
             ├── command
             ├── step.sh
             ├── job
-            ├── launch/recurring/
             ├── inbox/
             └── outbox -> /…/STEPS/dog/records/<instance>/<revision>/output/
                 ├── stdout

@@ -3,7 +3,7 @@
 set -o pipefail
 
 P_PID="$1"
-P_STARTED="$(< "${0%/*}/../../../data/launch/recurring/$P_PID")"
+P_STARTED="$(< "${0%/*}/../../../data/launch/$P_PID")"
 
 if ! STARTED="$(LC_ALL=C.UTF-8 ps -p "$P_PID" -o lstart=)" || [[ $STARTED != "$P_STARTED" ]]; then
   exec -- s6-svscanctl -t -- "${0%/*}/../../../.."
