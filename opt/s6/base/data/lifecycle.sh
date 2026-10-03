@@ -2,10 +2,11 @@
 
 set -o pipefail
 
+exec 2>&1
+
 INSTANCE_DATA="$PWD/data"
 ATTEMPTS="$INSTANCE_DATA/attempt"
 PGID_FILE="$INSTANCE_DATA/.pgid"
-TIMEOUT=99
 
 MODE="${0##*/}"
 if [[ $MODE == run ]] && [[ $0 -ef ../data/lifecycle.sh ]]; then
@@ -16,14 +17,8 @@ case "$MODE" in
 log)
   SERVICE="${PWD%/log}"
   JOB="${SERVICE%/instances/*}"
-  LOGS="$JOB/../../log/${JOB##*/}"
-
-  mkdir -p -- "$LOGS"
-  exec -- s6-log -b -l 0 -d "$(< ./notification-fd)" -- T "p${JOB##*/}@${SERVICE##*/}" 1 >> "$LOGS/${SERVICE##*/}.log"
+  exec -- s6-log -b -l 0 -d "$(< ./notification-fd)" -- "p${JOB##*/}@${SERVICE##*/}" 1 >&67
   ;;
-*)
-  exec 2>&1
-  ;;&
 run)
   printf -- '%s' "$$" > "$PGID_FILE"
   exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
@@ -33,6 +28,9 @@ lifecycle.sh)
   : "${S67_WORKING_DIRECTORY?}"
   : "${S67_RUNTIME_MAX_SEC?}"
   : "${S67_RESTART_SEC?}"
+  INSTANCE="$1"
+  JOB="${PWD%/instances/*}"
+  LOGS="$JOB/../../log/${JOB##*/}"
 
   if ((S67_ON_UNIT_INACTIVE_SEC >= 0)); then
     DELAY="$S67_RESTART_SEC"
@@ -60,9 +58,15 @@ lifecycle.sh)
     fi
   fi
 
-  s6-svwait -U -t "$TIMEOUT" -- ./log
-  cd -- "$S67_WORKING_DIRECTORY"
-  exec -- timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" nice -n 19 -- "$INSTANCE_DATA/job" "$@"
+  mkdir -p -- "$LOGS"
+
+  {
+    cd -- "$S67_WORKING_DIRECTORY"
+    STATUS=0
+    timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" nice -n 19 -- "$INSTANCE_DATA/job" "$@" || STATUS=$?
+    printf -- '\n'
+    exit "$STATUS"
+  } 2>&1 | s6-log -b -l 0 -- T "p${JOB##*/}@$INSTANCE" 1 >> "$LOGS/$INSTANCE.log" || exit "$?"
   ;;
 finish)
   STATUS="$1"

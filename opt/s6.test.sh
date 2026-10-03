@@ -34,6 +34,7 @@ BASH
   cat > "$TEST_DIR/bin/s6-svscan" << 'BASH'
 #!/usr/bin/env bash
 printf '%s\n' "${@: -1}"
+printf 'inherited descriptor\n' >&67
 BASH
   chmod +x -- "$TEST_DIR/bin/"{ps,s6-svscan}
   for _ in 1 2; do
@@ -49,35 +50,51 @@ BASH
   done
   COUNT="$(grep --fixed-strings --count "$RUNTIME/services" "$RUNTIME/log/s6.log")"
   [[ $COUNT == 2 ]]
+  COUNT="$(grep --fixed-strings --count 'inherited descriptor' "$RUNTIME/log/s6.log")"
+  [[ $COUNT == 2 ]]
   "$TEST_DIR/ctl.sh" stop "$TEST_DIR/absent"
   if [[ -e $TEST_DIR/absent ]]; then
     exit 1
   fi
   ;;
-logger | policy)
-  mkdir -p -- "$TEST_DIR/bin"
-  cat > "$TEST_DIR/bin/s6-svwait" << 'BASH'
-#!/usr/bin/env bash
-exit "${TEST_LOGGER_STATUS:-0}"
-BASH
-  chmod +x -- "$TEST_DIR/bin/s6-svwait"
-  export PATH="$TEST_DIR/bin:$PATH"
-  ;;&
 logger)
   for INSTANCE in walk log; do
     SERVICE="$STATE/dog/instances/$INSTANCE"
     mkdir -p -- "$SERVICE"
     cp --archive -- "$ROOT/base/." "$SERVICE/"
-    ln -s -- /usr/bin/true "$SERVICE/data/job"
-    S67_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE"
-    [[ -s $SERVICE/data/.pgid ]]
-    for _ in 1 2; do
-      printf 'hello\n' | env -C "$SERVICE/log" -- ./run 3> "$TEST_DIR/ready"
+    mkdir -p -- "$STATE/dog/data/done"
+    printf '%s' 0 > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"
+    cat > "$SERVICE/data/job" << 'BASH'
+#!/usr/bin/env bash
+printf 'command stdout\n'
+printf 'command stderr\n' >&2
+exit "${TEST_JOB_STATUS:-0}"
+BASH
+    chmod +x -- "$SERVICE/data/job"
+    for STATUS in 0 67; do
+      ACTUAL=0
+      TEST_JOB_STATUS="$STATUS" S67_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output" || ACTUAL=$?
+      [[ $ACTUAL == "$STATUS" ]]
+      [[ -s $SERVICE/data/.pgid ]]
+      if [[ -s $TEST_DIR/output ]]; then
+        exit 1
+      fi
+      rm -- "$SERVICE/data/.pgid"
+      env -C "$SERVICE" -- ./finish "$STATUS" 0 "$INSTANCE" | env -C "$SERVICE/log" -- ./run 3> "$TEST_DIR/ready" 67>&1 | s6-log -b -l 0 -- T 1 >> "$TEST_DIR/log/s6.log"
       diff --unified -- <(printf '\n') "$TEST_DIR/ready"
+      grep --quiet --fixed-strings "dog@$INSTANCE status=$STATUS, signal=0" "$TEST_DIR/log/s6.log"
     done
-    COUNT="$(grep --fixed-strings --count "dog@$INSTANCE hello" "$TEST_DIR/log/dog/$INSTANCE.log")"
-    [[ $COUNT == 2 ]]
+    for STREAM in stdout stderr; do
+      COUNT="$(grep --fixed-strings --count "dog@$INSTANCE command $STREAM" "$TEST_DIR/log/dog/$INSTANCE.log")"
+      [[ $COUNT == 2 ]]
+    done
+    if grep --quiet --fixed-strings 'status=' "$TEST_DIR/log/dog/$INSTANCE.log"; then
+      exit 1
+    fi
   done
+  if grep --quiet --fixed-strings 'command stdout' "$TEST_DIR/log/s6.log"; then
+    exit 1
+  fi
   ;;
 lifecycle)
   STEP="$TEST_DIR/steps/dog"
@@ -111,7 +128,7 @@ BASH
   mkdir -p -- "$STATE/keeper/data/launch"
   ln -s -- /dev/null "$STATE/keeper/data/launch/parent"
 
-  s6-svscan -- "$STATE" > "$TEST_DIR/scan.log" 2>&1 &
+  s6-svscan -- "$STATE" > "$TEST_DIR/scan.log" 67>&1 2>&1 &
   SCAN_PID=$!
   RESULT=0
   trap '
@@ -441,21 +458,16 @@ BASH
   chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
   ln -s -- /dev/null "$SERVICE/data/launch"
-  if TEST_LOGGER_STATUS=67 env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"; then
-    exit 1
-  else
-    [[ $? == 67 ]]
-  fi
-  if [[ -s $TEST_DIR/output ]]; then
-    exit 1
-  fi
   trap 'printf "policy:%s interval=%s cap=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$CAP" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
   while read -r INTERVAL CAP STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
     printf '%s' "$INTERVAL" > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"
     printf '%s' "${CAP#-}" > "$SERVICE/env/S67_RESTART_MAX_DELAY_SEC"
     rm -f -- "$SERVICE/delay"
     PATH="$TEST_BIN:$PATH" env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"
-    [[ $(< "$TEST_DIR/output") == walk ]]
+    if [[ -s $TEST_DIR/output ]]; then
+      exit 1
+    fi
+    grep --quiet --fixed-strings 'dog@walk walk' "$TEST_DIR/log/dog/walk.log"
     ACTUAL_DELAY=none
     if [[ -f $SERVICE/delay ]]; then ACTUAL_DELAY="$(< "$SERVICE/delay")"; fi
     [[ $ACTUAL_DELAY == "$DELAY" ]]
