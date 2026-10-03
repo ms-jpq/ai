@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' snapshots templates execution queues policy logger lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl snapshots templates execution queues policy logger lifecycle | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -22,6 +22,47 @@ mkdir -- "$STATE"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
+ctl)
+  RUNTIME="$TEST_DIR/runtime"
+  mkdir -p -- "$TEST_DIR/bin" "$RUNTIME/log-archive" "$RUNTIME/failed"
+  printf '%s' retained > "$RUNTIME/log-archive/existing.log"
+  printf '%s' retained > "$RUNTIME/failed/existing"
+  cat > "$TEST_DIR/bin/ps" << 'BASH'
+#!/usr/bin/env bash
+printf 'parent start time\n'
+BASH
+  cat > "$TEST_DIR/bin/s6-svscan" << 'BASH'
+#!/usr/bin/env bash
+printf '%s\n' "${@: -1}"
+BASH
+  chmod +x -- "$TEST_DIR/bin/"{ps,s6-svscan}
+  for _ in 1 2; do
+    PATH="$TEST_DIR/bin:$PATH" "$TEST_DIR/ctl.sh" start "$RUNTIME" "$TEST_DIR" 67
+    for DIR in services log log-archive failed; do
+      [[ -d $RUNTIME/$DIR ]]
+    done
+    [[ -d $RUNTIME/services/quine/instances/- ]]
+    [[ -d $RUNTIME/services/watchdog/instances/67 ]]
+    [[ $(< "$RUNTIME/services/watchdog/data/launch/67") == 'parent start time' ]]
+    [[ $(< "$RUNTIME/log-archive/existing.log") == retained ]]
+    [[ $(< "$RUNTIME/failed/existing") == retained ]]
+  done
+  COUNT="$(grep --fixed-strings --count "$RUNTIME/services" "$RUNTIME/log/s6.log")"
+  [[ $COUNT == 2 ]]
+  "$TEST_DIR/ctl.sh" stop "$TEST_DIR/absent"
+  if [[ -e $TEST_DIR/absent ]]; then
+    exit 1
+  fi
+  ;;
+logger | policy)
+  mkdir -p -- "$TEST_DIR/bin"
+  cat > "$TEST_DIR/bin/s6-svwait" << 'BASH'
+#!/usr/bin/env bash
+exit "${TEST_LOGGER_STATUS:-0}"
+BASH
+  chmod +x -- "$TEST_DIR/bin/s6-svwait"
+  export PATH="$TEST_DIR/bin:$PATH"
+  ;;&
 logger)
   for INSTANCE in walk log; do
     SERVICE="$STATE/dog/instances/$INSTANCE"
@@ -400,6 +441,14 @@ BASH
   chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
   ln -s -- /dev/null "$SERVICE/data/launch"
+  if TEST_LOGGER_STATUS=67 env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output"; then
+    exit 1
+  else
+    [[ $? == 67 ]]
+  fi
+  if [[ -s $TEST_DIR/output ]]; then
+    exit 1
+  fi
   trap 'printf "policy:%s interval=%s cap=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$CAP" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
   while read -r INTERVAL CAP STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
     printf '%s' "$INTERVAL" > "$SERVICE/env/S67_ON_UNIT_INACTIVE_SEC"

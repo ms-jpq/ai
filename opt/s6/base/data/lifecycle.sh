@@ -5,6 +5,7 @@ set -o pipefail
 INSTANCE_DATA="$PWD/data"
 ATTEMPTS="$INSTANCE_DATA/attempt"
 PGID_FILE="$INSTANCE_DATA/.pgid"
+TIMEOUT=99
 
 MODE="${0##*/}"
 if [[ $MODE == run ]] && [[ $0 -ef ../data/lifecycle.sh ]]; then
@@ -59,6 +60,7 @@ lifecycle.sh)
     fi
   fi
 
+  s6-svwait -U -t "$TIMEOUT" -- ./log
   cd -- "$S67_WORKING_DIRECTORY"
   exec -- timeout --foreground --kill-after=5s "$S67_RUNTIME_MAX_SEC" nice -n 19 -- "$INSTANCE_DATA/job" "$@"
   ;;

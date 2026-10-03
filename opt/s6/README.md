@@ -7,7 +7,7 @@ JOBS/watchdog/
 │   └── S67_ON_UNIT_INACTIVE_SEC
 └── data/launch/.gitignore
 
-STATE/watchdog/
+STATE/services/watchdog/
 ├── data/
 │   ├── lstart
 │   └── launch/
