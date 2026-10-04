@@ -28,14 +28,15 @@ log)
   ;;
 run)
   printf -- '%s' "$$" > "$PGID_FILE"
+  export -- RECUR=running
   ;;&
 finish)
   export -- RECUR=finished
   ;;&
 run | finish)
-  exec -- s6-envdir -- ./env ./data/lifecycle.sh "$@"
+  exec -- s6-envdir -- ./env "$0" "$@"
   ;;
-lifecycle.sh)
+running)
   : "${S9_ON_UNIT_INACTIVE_SEC?}"
   : "${S9_WORKING_DIRECTORY?}"
   : "${S9_RUNTIME_MAX_SEC?}"
