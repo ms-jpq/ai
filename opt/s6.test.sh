@@ -284,13 +284,8 @@ BASH
   sed -i -e 's/CODE=old/CODE=new/' -- "$STEP/run.sh"
   printf '%s' two > "$STEP/env/PAYLOAD"
   printf '%s' new-data > "$STEP/data/value"
-  "${WAIT[@]}" -f "$SERVICE/down"
-  CURRENT_PID="$(s6-svstat -o pid -- "$SERVICE")"
-  [[ $CURRENT_PID == "$PID" ]]
-  if [[ -f $TEST_DIR/finished-one ]]; then exit 1; fi
-  touch -- "$TEST_DIR/release-one"
   "${WAIT[@]}" -s "$TEST_DIR/started-two"
-  [[ $(< "$TEST_DIR/finished-one") == old ]]
+  if [[ -f $TEST_DIR/finished-one ]]; then exit 1; fi
   [[ $(< "$TEST_DIR/started-two") == new:two:new-data ]]
 
   for ATTEMPT in two three four; do
@@ -303,11 +298,8 @@ BASH
       exit 2
       ;;
     esac
-    "${WAIT[@]}" -f "$SERVICE/down"
-    if [[ -f $TEST_DIR/finished-$ATTEMPT ]]; then exit 1; fi
-    touch -- "$TEST_DIR/release-$ATTEMPT"
     "${WAIT[@]}" ! -d "$SERVICE"
-    [[ $(< "$TEST_DIR/finished-$ATTEMPT") == new ]]
+    if [[ -f $TEST_DIR/finished-$ATTEMPT ]]; then exit 1; fi
     case "$ATTEMPT" in
     two)
       printf '%s' three > "$STEP/env/PAYLOAD"
@@ -326,6 +318,12 @@ BASH
       exit 2
       ;;
     esac
+  done
+  RECORDS=("$TEST_DIR/dead/dog/"*)
+  [[ ${#RECORDS[@]} == 4 ]]
+  for RECORD in "${RECORDS[@]}"; do
+    [[ -f $RECORD/log ]]
+    [[ $(< "$RECORD/exit_status") != 0 ]] || [[ $(< "$RECORD/signal") != 0 ]]
   done
   [[ -d $STATE/keeper/instances/parent ]]
   if [[ -f $STATE/keeper/instances/parent/down ]]; then exit 1; fi
