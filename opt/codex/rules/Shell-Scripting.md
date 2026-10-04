@@ -207,7 +207,7 @@
 - Embed short, non-trivial programs with heredocs, especially for jq and awk.
 
   ```bash
-  read -r -d '' -- JQ <<- 'JQ' || true
+  IFS= read -r -d '' -- JQ <<- 'JQ' || true
   .[] | to_entries[] | [.key] + .value | join("\n")
   JQ
 
