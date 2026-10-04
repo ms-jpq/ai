@@ -37,7 +37,7 @@ BASH
   chmod +x -- "$TEST_DIR/bin/"{ps,s6-svscan}
   for _ in 1 2; do
     PATH="$TEST_DIR/bin:$PATH" "$TEST_DIR/ctl.sh" start "$RUNTIME" "$TEST_DIR" 67
-    for DIR in services log dead failed; do
+    for DIR in services live dead failed; do
       [[ -d $RUNTIME/$DIR ]]
     done
     [[ -d $RUNTIME/services/quine/instances/- ]]
@@ -46,9 +46,9 @@ BASH
     [[ $(< "$RUNTIME/dead/existing.log") == retained ]]
     [[ $(< "$RUNTIME/failed/existing") == retained ]]
   done
-  COUNT="$(grep --fixed-strings --count "$RUNTIME/services" "$RUNTIME/log/s6.log")"
+  COUNT="$(grep --fixed-strings --count "$RUNTIME/services" "$RUNTIME/live/s6.log")"
   [[ $COUNT == 2 ]]
-  COUNT="$(grep --fixed-strings --count 'inherited descriptor' "$RUNTIME/log/s6.log")"
+  COUNT="$(grep --fixed-strings --count 'inherited descriptor' "$RUNTIME/live/s6.log")"
   [[ $COUNT == 2 ]]
   "$TEST_DIR/ctl.sh" stop "$TEST_DIR/absent"
   if [[ -e $TEST_DIR/absent ]]; then
@@ -79,11 +79,11 @@ BASH
         exit 1
       fi
       rm -- "$SERVICE/data/.pgid"
-      env -C "$SERVICE" -- ./finish "$STATUS" 0 "$INSTANCE" | env -C "$SERVICE/log" -- ./run 3> "$TEST_DIR/ready" 67>&1 | s6-log -b -l 0 -- T 1 >> "$TEST_DIR/log/s6.log"
+      env -C "$SERVICE" -- ./finish "$STATUS" 0 "$INSTANCE" | env -C "$SERVICE/log" -- ./run 3> "$TEST_DIR/ready" 67>&1 | s6-log -b -l 0 -- T 1 >> "$TEST_DIR/live/s6.log"
       diff --unified -- <(printf '\n') "$TEST_DIR/ready"
-      grep --quiet --fixed-strings -- "dog@$INSTANCE --- exit_status=$STATUS signal=0 ---" "$TEST_DIR/log/s6.log"
+      grep --quiet --fixed-strings -- "dog@$INSTANCE --- exit_status=$STATUS signal=0 ---" "$TEST_DIR/live/s6.log"
     done
-    if [[ -e $TEST_DIR/log/dog/$INSTANCE.log ]]; then
+    if [[ -e $TEST_DIR/live/dog@$INSTANCE/log ]]; then
       exit 1
     fi
     ARCHIVES=("$TEST_DIR/dead/dog/$INSTANCE."*/log)
@@ -112,7 +112,7 @@ BASH
     [[ $(< "${FAILED[0]}/exit_status") == 67 ]]
     [[ $(< "${FAILED[0]}/signal") == 0 ]]
   done
-  if grep --quiet --fixed-strings 'command stdout' "$TEST_DIR/log/s6.log"; then
+  if grep --quiet --fixed-strings 'command stdout' "$TEST_DIR/live/s6.log"; then
     exit 1
   fi
   env -C "$SERVICE" -- ./finish 256 15 "$INSTANCE" > "$TEST_DIR/finish.log"
@@ -144,7 +144,7 @@ BASH
     exit 1
   fi
   [[ -s $TEST_DIR/output ]]
-  if [[ -e $TEST_DIR/log/dog/$INSTANCE.log ]]; then
+  if [[ -e $TEST_DIR/live/dog@$INSTANCE/log ]]; then
     exit 1
   fi
 
@@ -181,7 +181,7 @@ BASH
     fi
     [[ -f $STATE/dog/data/done/$INSTANCE ]]
     if [[ -L $SERVICE/data/launch ]]; then exit 1; fi
-    [[ -f $TEST_DIR/log/dog/$INSTANCE.log ]]
+    [[ -f $TEST_DIR/live/dog@$INSTANCE/log ]]
     rm -- "$STATE/dog/data/done/$INSTANCE"
   done
   REMAINING="$(find "$TEST_DIR/footer-records/dog" -mindepth 1 -maxdepth 1 -print -quit)"
@@ -267,7 +267,7 @@ BASH
     if ! wait "$SCAN_PID"; then RESULT=1; fi
     if ((RESULT)); then
       cat -- "$TEST_DIR/scan.log" >&2
-      find "$TEST_DIR/log" -type f -name "*.log" -exec cat -- {} + >&2
+      find "$TEST_DIR/live" -type f -exec cat -- {} + >&2
     fi
     rm -fr -- "$TEST_DIR"
     exit "$RESULT"
@@ -660,7 +660,7 @@ BASH
     if [[ -s $TEST_DIR/output ]]; then
       exit 1
     fi
-    grep --quiet --fixed-strings 'dog@walk walk' "$TEST_DIR/log/dog/walk.log"
+    grep --quiet --fixed-strings 'dog@walk walk' "$TEST_DIR/live/dog@walk/log"
     ACTUAL_DELAY=none
     if [[ -f $SERVICE/delay ]]; then ACTUAL_DELAY="$(< "$SERVICE/delay")"; fi
     [[ $ACTUAL_DELAY == "$DELAY" ]]

@@ -8,7 +8,7 @@ STATE="$1"
 
 BASE="$(realpath -- "${0%/*}")"
 SVCS="$STATE/services"
-LOGS="$STATE/log"
+LIVE="$STATE/live"
 TIMEOUT=6000
 
 case "$ACTION" in
@@ -28,7 +28,7 @@ start)
   printf -- '%s' "$P_STARTED" > "$DATA/lstart"
   ln -sTnfr -- "$DATA/lstart" "$DATA/launch/$P_PID"
 
-  S9_WORKING_DIRECTORY="$WS" s6-svscan -- "$SVCS" 67>&1 2>&1 | s6-log -b -l 0 -- T 1 2>&1 | tee --append -- "$LOGS/s6.log" > /dev/null
+  S9_WORKING_DIRECTORY="$WS" s6-svscan -- "$SVCS" 67>&1 2>&1 | s6-log -b -l 0 -- T 1 2>&1 | tee --append -- "$LIVE/s6.log" > /dev/null
   ;;
 stop)
   SCAN="$SVCS/.s6-svscan"

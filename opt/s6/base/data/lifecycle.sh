@@ -16,6 +16,8 @@ if [[ $MODE == run ]] && [[ $0 -ef ../data/lifecycle.sh ]]; then
 fi
 JOB_DIR="${INSTANCE_DIR%/instances/*}"
 JOB="${JOB_DIR##*/}"
+STATE="$JOB_DIR/../.."
+LIVE="$STATE/live/$JOB@${INSTANCE_DIR##*/}"
 
 LOGGER=(s6-log -b -l 0)
 LOG_FMT=("p$JOB@${INSTANCE_DIR##*/}" 1)
@@ -70,9 +72,7 @@ lifecycle.sh)
 attempt)
   unset -- RECUR
   INSTANCE="$1"
-  LOGS="$JOB_DIR/../../log/$JOB"
-
-  mkdir -p -- "$LOGS"
+  mkdir -p -- "$LIVE"
   cd -- "$S9_WORKING_DIRECTORY"
 
   {
@@ -83,18 +83,17 @@ EOF
     "$INSTANCE_DATA/job" "$@" || STATUS=$?
     printf -- '\n'
     exit "$STATUS"
-  } 2>&1 | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" | tee --append -- "$LOGS/$INSTANCE.log" > /dev/null || exit "$?"
+  } 2>&1 | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" | tee --append -- "$LIVE/log" > /dev/null || exit "$?"
   ;;
 finished)
   : "${S9_ON_UNIT_INACTIVE_SEC?}"
   STATUS="$1"
   SIGNAL="$2"
   INSTANCE="$3"
+  LOG_SRC="$LIVE/log"
   IFS= read -r -d '' EXIT_LINES <<- EOF || true
 --- exit_status=$STATUS signal=$SIGNAL ---
 EOF
-  STATE="$JOB_DIR/../.."
-  LOG_SRC="$STATE/log/$JOB/$INSTANCE.log"
 
   if [[ -n ${4:-} ]] || [[ -f $PGID_FILE ]]; then
     PGID="${4:-$(< "$PGID_FILE")}"
