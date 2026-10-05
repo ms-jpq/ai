@@ -58,6 +58,10 @@ STATE/
 
 ## Dataflow
 
+- **`wants/=producer` — keyed join:** all `=` dependencies must supply the same output row name. Unmatched keys produce no execution.
+
+- **`wants/producer` — Cartesian product:** every row combines with every eligible row from the other dependencies, including any matched groups.
+
 ```tree
 JOBS/
 ├── <producer-1>/
@@ -67,8 +71,8 @@ JOBS/
 └── <consumer>/
     ├── run.sh
     └── data/wants/
-        ├── <producer-1> -> ../../../<producer-1>/
-        └── <producer-2> -> ../../../<producer-2>/
+        ├── =<producer-1> -> ../../../<producer-1>/
+        └── =<producer-2> -> ../../../<producer-2>/
 ```
 
 ```tree
@@ -81,8 +85,8 @@ STATE/
 └── live/<consumer>/<hash(def, rows)>/
     ├── inputs/
     │   ├── .s9/defs.sum
-    │   ├── <producer-1> -> ../telemetry/<producer-1>@<instance>.<timestamp>/outputs/<row-1>/
-    │   └── <producer-2> -> ../telemetry/<producer-2>@<instance>.<timestamp>/outputs/<row-2>/
+    │   ├── <producer-1> -> ../telemetry/<producer-1>@<instance>.<timestamp>/outputs/<key>/
+    │   └── <producer-2> -> ../telemetry/<producer-2>@<instance>.<timestamp>/outputs/<key>/
     ├── outputs/<row>/
     │   └── .s9/defs.sum
     ├── telemetry/
@@ -96,12 +100,12 @@ STATE/graph/
 ├── topology/
 │   ├── wants/<consumer>/
 │   │   ├── .s9/defs.sum
-│   │   ├── <producer-1> -> ../<producer-1>/
-│   │   └── <producer-2> -> ../<producer-2>/
+│   │   ├── =<producer-1> -> ../<producer-1>/
+│   │   └── =<producer-2> -> ../<producer-2>/
 │   └── wanted-by/
 │       ├── <producer-1>/<consumer> -> ../<consumer>/
 │       └── <producer-2>/<consumer> -> ../<consumer>/
-└── cartesian-inputs/<consumer>/<hash(def, rows)>/
-    ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<row-1>/
-    └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<row-2>/
+└── inputs/<consumer>/<hash(def, rows)>/
+    ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<key>/
+    └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<key>/
 ```

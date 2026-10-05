@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow contention | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow contention joins | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -22,6 +22,95 @@ mkdir -- "$STATE"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
+joins)
+  shopt -u failglob dotglob
+  TOPOLOGY="$TEST_DIR/base/data/topology.sh"
+  for JOB in dogs rules settings vacant matched mixed product missing empty single; do
+    mkdir -p -- "$JOBS/$JOB/data/wants" "$STATE/$JOB/template/data/"{.s9,wants}
+    ln -sTnf -- "$JOBS/$JOB" "$STATE/$JOB/template/data/.s9/source"
+    printf '%s' "$JOB" > "$STATE/$JOB/template/data/.s9/defs.sum"
+  done
+  while read -r CONSUMER PRODUCER SIGIL; do
+    for WANTS in "$JOBS/$CONSUMER/data/wants" "$STATE/$CONSUMER/template/data/wants"; do
+      ln -sTnfr -- "$JOBS/$PRODUCER" "$WANTS/${SIGIL#-}$PRODUCER"
+    done
+  done << 'EOF'
+matched dogs =
+matched rules =
+mixed dogs =
+mixed rules =
+mixed settings -
+product dogs -
+product rules -
+missing dogs =
+missing absent =
+empty dogs =
+empty vacant =
+single dogs =
+EOF
+  cat > "$JOBS/matched/run.sh" << 'BASH'
+#!/usr/bin/env bash
+exit 0
+BASH
+  chmod +x -- "$JOBS/matched/run.sh"
+  mkdir -- "$STATE/matched/instances" "$STATE/matched/instance"
+  RECUR=seed "${QUINE[@]}" matched -
+  [[ -L $STATE/matched/template/data/wants/=dogs ]]
+  while IFS='|' read -r PRODUCER INSTANCE KEY VALUE; do
+    RECORD="$TEST_DIR/dead/$PRODUCER/$INSTANCE/20261005T000000.000000000"
+    mkdir -p -- "$RECORD/outputs/$KEY/.s9"
+    printf '%s' "$VALUE" > "$RECORD/outputs/$KEY/value"
+    cp -- "$STATE/$PRODUCER/template/data/.s9/defs.sum" "$RECORD/outputs/$KEY/.s9/defs.sum"
+    printf '%s' 0 | tee "$RECORD/exit_status" > "$RECORD/signal"
+    ln -sTnfr -- "$RECORD" "${RECORD%/*}/latest-succ"
+  done << 'EOF'
+dogs|one|shared|dog-one
+dogs|one|left only|left
+dogs|one|key[*]|literal-dog
+dogs|two|shared|dog-two
+rules|one|shared|rules
+rules|one|right only|right
+rules|one|key[*]|literal-rules
+settings|one|x|x
+settings|one|y|y
+EOF
+  "$TOPOLOGY" compile "$TEST_DIR" "$JOBS" > "$TEST_DIR/compile.log" 2>&1
+  while read -r JOB EXPECTED; do
+    REQUESTS=("$STATE/$JOB/data/launch/"*)
+    if [[ ${#REQUESTS[@]} != "$EXPECTED" ]]; then
+      printf 'join: job=%s expected=%s actual=%s\n' "$JOB" "$EXPECTED" "${#REQUESTS[@]}" >&2
+      exit 1
+    fi
+  done << 'EOF'
+matched 3
+mixed 6
+product 12
+missing 0
+empty 0
+single 4
+EOF
+  for JOB in matched mixed; do
+    for REQUEST in "$STATE/$JOB/data/launch/"*; do
+      DOG="$(realpath -- "$REQUEST/dogs")"
+      RULE="$(realpath -- "$REQUEST/rules")"
+      [[ ${DOG##*/} == "${RULE##*/}" ]]
+      [[ ${DOG##*/} == shared ]] || [[ ${DOG##*/} == 'key[*]' ]]
+      if [[ -e $REQUEST/=dogs ]] || [[ -e $REQUEST/=rules ]]; then exit 1; fi
+      [[ $REQUEST -ef $TEST_DIR/graph/inputs/$JOB/${REQUEST##*/} ]]
+    done
+  done
+  [[ -L $TEST_DIR/graph/topology/wants/matched/=dogs ]]
+  [[ -L $TEST_DIR/graph/topology/wanted-by/dogs/matched ]]
+  REQUESTS=("$STATE/matched/data/launch/"*)
+  "$TEST_DIR/base/data/dataflow.sh" prepare "$TEST_DIR" matched "${REQUESTS[0]##*/}" "${REQUESTS[0]}"
+  [[ -d $TEST_DIR/live/matched/${REQUESTS[0]##*/}/inputs/dogs ]]
+  if [[ -e $TEST_DIR/graph/cartesian-inputs ]]; then exit 1; fi
+  printf '%s\n' "${REQUESTS[@]}" > "$TEST_DIR/before"
+  "$TOPOLOGY" projection "$TEST_DIR"
+  REQUESTS=("$STATE/matched/data/launch/"*)
+  printf '%s\n' "${REQUESTS[@]}" > "$TEST_DIR/after"
+  diff --unified -- "$TEST_DIR/before" "$TEST_DIR/after"
+  ;;
 contention)
   FLOW="$TEST_DIR/base/data/dataflow.sh"
   TOPOLOGY="$TEST_DIR/base/data/topology.sh"
@@ -186,7 +275,7 @@ BASH
   printf '%s\n' producer-1 producer-2 consumer sink > "$TEST_DIR/expected-order"
   diff --unified -- "$TEST_DIR/expected-order" "$TEST_DIR/visit/order"
   HASH="${REQUEST##*/}"
-  INPUTS="$RUNTIME/graph/cartesian-inputs/consumer/$HASH"
+  INPUTS="$RUNTIME/graph/inputs/consumer/$HASH"
   [[ $REQUEST -ef $INPUTS ]]
   STAGING="${INPUTS%/*}/.$HASH"
   rm -- "$REQUEST"
@@ -269,7 +358,7 @@ BASH
     if [[ -L $RECORD/outputs/result/.s9/defs.sum ]]; then exit 1; fi
     [[ $(< "$RECORD/inputs/.s9/defs.sum") == consumer-v1 ]]
     if [[ -L $RECORD/inputs ]]; then exit 1; fi
-    rm -fr -- "$RUNTIME/graph/cartesian-inputs/consumer/$HASH"
+    rm -fr -- "$RUNTIME/graph/inputs/consumer/$HASH"
     [[ -d $RECORD/inputs/producer-1 ]]
     [[ -d $RECORD/inputs/producer-2 ]]
     TARGET="$(readlink -- "$RECORD/inputs/producer-1")"

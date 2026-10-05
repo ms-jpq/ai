@@ -18,7 +18,7 @@ fi
 GRAPH="$STATE/graph"
 SERVICES="$STATE/services"
 TOPOLOGY="$GRAPH/topology"
-CARTESIAN="$GRAPH/cartesian-inputs"
+INPUTS_ROOT="$GRAPH/inputs"
 DEAD="$STATE/dead"
 
 case "$ACTION" in
@@ -72,7 +72,11 @@ Unknown dependency: $WANT
 EOF
         continue
       fi
-      ln -sTnfr -- "$BUILD/wants/$PRODUCER" "$BUILD/wants/$CONSUMER/$PRODUCER"
+      INPUT="$PRODUCER"
+      if [[ ${WANT##*/} == =* ]]; then
+        INPUT="=$PRODUCER"
+      fi
+      ln -sTnfr -- "$BUILD/wants/$PRODUCER" "$BUILD/wants/$CONSUMER/$INPUT"
       ln -sTnfr -- "$BUILD/wanted-by/$CONSUMER" "$BUILD/wanted-by/$PRODUCER/$CONSUMER"
     done
   done
@@ -154,16 +158,36 @@ combine)
   fi
   INDEX=$(($# / 2))
   if ((INDEX < ${#WANTS[@]})); then
-    PRODUCER="${WANTS[$INDEX]}"
-    if ! [[ -L $PRODUCER ]]; then
-      exec -- "$SELF" combine "$STATE" "$PWD" "$PASS" "$@" "$PRODUCER" ''
+    WANT="${WANTS[$INDEX]}"
+    PRODUCER="${WANT#=}"
+    if ! [[ -L $WANT ]]; then
+      if [[ $WANT == =* ]]; then
+        exit
+      fi
+      exec -- "$SELF" combine "$STATE" "$PWD" "$PASS" "$@" "$WANT" ''
     fi
-    for OUTPUT in "$PASS"/"$PRODUCER"/records/*/outputs/*; do
+    KEY=''
+    if [[ $WANT == =* ]]; then
+      for ((ARG = 1; ARG <= $#; ARG += 2)); do
+        if [[ ${!ARG} == =* ]]; then
+          ARG=$((ARG + 1))
+          KEY="${!ARG}"
+          KEY="${KEY##*/}"
+          break
+        fi
+      done
+    fi
+    if [[ -n $KEY ]]; then
+      ROWS=("$PASS"/"$PRODUCER"/records/*/outputs/"$KEY")
+    else
+      ROWS=("$PASS"/"$PRODUCER"/records/*/outputs/*)
+    fi
+    for OUTPUT in "${ROWS[@]}"; do
       if ! [[ -d $OUTPUT ]]; then
         continue
       fi
       OUTPUT="$(realpath -- "$OUTPUT")"
-      "$SELF" combine "$STATE" "$PWD" "$PASS" "$@" "$PRODUCER" "$OUTPUT"
+      "$SELF" combine "$STATE" "$PWD" "$PASS" "$@" "$WANT" "$OUTPUT"
     done
     exit
   fi
@@ -190,17 +214,17 @@ combine)
   if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -f $STATE/live/$JOB/$INSTANCE/.s9/record ]] || ((${#COMPLETED[@]})); then
     exit
   fi
-  INPUTS="$CARTESIAN/$JOB/$INSTANCE"
-  mkdir -p -- "$CARTESIAN/$JOB" "$LAUNCH"
+  INPUTS="$INPUTS_ROOT/$JOB/$INSTANCE"
+  mkdir -p -- "$INPUTS_ROOT/$JOB" "$LAUNCH"
   if ! [[ -d $INPUTS ]]; then
-    STAGING="$CARTESIAN/$JOB/.$INSTANCE"
+    STAGING="$INPUTS_ROOT/$JOB/.$INSTANCE"
     rm -fr -- "$STAGING"
     mkdir -p -- "$STAGING/.s9"
     trap 'rm -fr -- "$STAGING"' EXIT
     cp -- .s9/defs.sum "$STAGING/.s9/defs.sum"
     while (($#)); do
       if [[ -n $2 ]]; then
-        ln -sTnfr -- "$2" "$STAGING/$1"
+        ln -sTnfr -- "$2" "$STAGING/${1#=}"
       fi
       shift -- 2
     done
