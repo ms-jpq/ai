@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow contention | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -22,6 +22,74 @@ mkdir -- "$STATE"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
+contention)
+  FLOW="$TEST_DIR/base/data/dataflow.sh"
+  TOPOLOGY="$TEST_DIR/base/data/topology.sh"
+  mkdir -- "$TEST_DIR/input"
+  for JOB in dog report; do
+    mkdir -p -- "$JOBS/$JOB" "$STATE/$JOB/template/data/.s9"
+    ln -sTnf -- "$JOBS/$JOB" "$STATE/$JOB/template/data/.s9/source"
+    printf '%s' "$JOB" > "$STATE/$JOB/template/data/.s9/defs.sum"
+  done
+  mkdir -p -- "$STATE/report/template/data/wants"
+  ln -sTnfr -- "$JOBS/dog" "$STATE/report/template/data/wants/dog"
+  "$TOPOLOGY" compile "$TEST_DIR" "$JOBS"
+  for INSTANCE in walk trot; do
+    SERVICE="$STATE/dog/instances/$INSTANCE"
+    mkdir -p -- "$SERVICE/data/.s9" "$SERVICE/env"
+    printf '%s' dog > "$SERVICE/data/.s9/defs.sum"
+    printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
+    "$FLOW" prepare "$TEST_DIR" dog "$INSTANCE" "$TEST_DIR/input"
+    mkdir -- "$TEST_DIR/live/dog/$INSTANCE/outputs/row"
+    printf '%s' "$INSTANCE" > "$TEST_DIR/live/dog/$INSTANCE/outputs/row/value"
+  done
+  LIVE="$TEST_DIR/live/dog/walk"
+  RECORD="$TEST_DIR/dead/dog/walk/20260101T000000.000000000"
+  mkdir -p -- "$LIVE/.s9"
+  printf '%s' 0 | tee "$LIVE/exit_status" > "$LIVE/signal"
+  printf '%s' "$RECORD" > "$LIVE/.s9/record"
+  s6-setlock -- "$TEST_DIR/graph/.lock" s6-setlock -- "$STATE/.reconcile.lock" s6-setlock -- "$TEST_DIR/dead/dog/walk/.lock" timeout 10 bash -s -- "$TEST_DIR" << 'BASH' &
+set -eu
+touch -- "$1/locked"
+while ! [[ -f $1/release ]]; do sleep 0.02; done
+BASH
+  HOLDER=$!
+  trap 'STATUS=$?; touch -- "$TEST_DIR/release"; wait "$HOLDER"; rm -fr -- "$TEST_DIR"; exit "$STATUS"' EXIT
+  timeout 3 bash -s -- "$TEST_DIR" << 'BASH'
+until [[ -f $1/locked ]]; do sleep 0.02; done
+BASH
+  S9_GRAPH_TIMEOUT=1 "$FLOW" deliver "$TEST_DIR" dog trot 0 0
+  [[ $(< "$TEST_DIR/dead/dog/trot/latest-succ/outputs/row/value") == trot ]]
+  if [[ -d $STATE/report/data/launch ]]; then exit 1; fi
+  "$FLOW" deliver "$TEST_DIR" absent stale
+  if [[ -e $TEST_DIR/dead/absent ]]; then exit 1; fi
+  TARGET="$(readlink -- "$TEST_DIR/graph/topology")"
+  ACTUAL=0
+  S9_GRAPH_TIMEOUT=1 "$TOPOLOGY" compile "$TEST_DIR" "$JOBS" > "$TEST_DIR/compile.log" 2>&1 || ACTUAL=$?
+  [[ $ACTUAL == 1 ]]
+  grep --quiet --fixed-strings 'timed out' "$TEST_DIR/compile.log"
+  CURRENT="$(readlink -- "$TEST_DIR/graph/topology")"
+  [[ $CURRENT == "$TARGET" ]]
+  ACTUAL=0
+  S9_GRAPH_TIMEOUT=1 "$FLOW" deliver "$TEST_DIR" dog walk > "$TEST_DIR/recovery.log" 2>&1 || ACTUAL=$?
+  [[ $ACTUAL == 1 ]]
+  grep --quiet --fixed-strings 'busy' "$TEST_DIR/recovery.log"
+  ACTUAL=0
+  S9_GRAPH_TIMEOUT=1 "$FLOW" prepare "$TEST_DIR" dog walk "$TEST_DIR/input" > "$TEST_DIR/prepare.log" 2>&1 || ACTUAL=$?
+  [[ $ACTUAL == 1 ]]
+  grep --quiet --fixed-strings 'timed out' "$TEST_DIR/prepare.log"
+  [[ -f $LIVE/.s9/record ]]
+  if [[ -d $RECORD ]]; then exit 1; fi
+  touch -- "$TEST_DIR/release"
+  wait "$HOLDER"
+  trap 'rm -fr -- "$TEST_DIR"' EXIT
+  "$FLOW" prepare "$TEST_DIR" dog walk "$TEST_DIR/input"
+  [[ $(< "$RECORD/outputs/row/value") == walk ]]
+  if [[ -e $LIVE/.s9/record ]] || [[ -d $LIVE/outputs/row ]]; then exit 1; fi
+  "$TOPOLOGY" projection "$TEST_DIR"
+  REQUESTS=("$STATE/report/data/launch/"*)
+  [[ ${#REQUESTS[@]} == 2 ]]
+  ;;
 dataflow)
   shopt -u failglob dotglob
   FLOW="$TEST_DIR/base/data/dataflow.sh"
@@ -41,6 +109,7 @@ rsync --archive --copy-unsafe-links -- "$ROOT/base/" "$SERVICE/"
 printf '%s' "${TEST_DEFINITION:-$1-v1}" > "$SERVICE/data/.s9/defs.sum"
 printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
 env -C "$SERVICE" -- ./finish "$3" "$4" "$2" > "$ROOT/finish.log"
+"$ROOT/base/data/topology.sh" projection "$ROOT/runtime"
 BASH
   chmod +x -- "$FINISH"
   for JOB in producer-1 producer-2 consumer sink bystander; do
@@ -185,6 +254,7 @@ BASH
     STATUS=0
     env -C "$SERVICE" -- ./finish 0 0 "$HASH" > "$TEST_DIR/output" || STATUS=$?
     [[ $STATUS == 125 ]]
+    "$TOPOLOGY" projection "$RUNTIME" consumer
     printf '%s' consumer-v1 > "$SERVICES/consumer/template/data/.s9/defs.sum"
     BYSTANDER_REQUESTS=("$SERVICES/bystander/data/launch/"*)
     [[ ${#BYSTANDER_REQUESTS[@]} == 0 ]]
@@ -316,11 +386,13 @@ BASH
   "$FLOW" prepare "$RUNTIME" archive-failure record "$INPUT"
   mkdir -- "$RUNTIME/live/archive-failure/record/outputs/row"
   printf '%s' retained > "$RUNTIME/live/archive-failure/record/outputs/row/value"
+  mv -- "$RUNTIME/dead/archive-failure" "$RUNTIME/dead/archive-saved"
   printf '%s' blocked > "$RUNTIME/dead/archive-failure"
   if "$FINISH" archive-failure record 67 0; then exit 1; fi
   [[ -f $RUNTIME/live/archive-failure/record/.s9/record ]]
   [[ $(< "$RUNTIME/live/archive-failure/record/exit_status") == 67 ]]
   rm -- "$RUNTIME/dead/archive-failure"
+  mv -- "$RUNTIME/dead/archive-saved" "$RUNTIME/dead/archive-failure"
   "$FLOW" deliver "$RUNTIME" archive-failure record
   [[ $(< "$RUNTIME/fail/archive-failure/record/latest/outputs/row/value") == retained ]]
   [[ $(< "$RUNTIME/fail/archive-failure/record/latest/exit_status") == 67 ]]
@@ -337,7 +409,7 @@ BASH
   cat > "$TEST_DIR/recover-first.sh" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
-RECUR=dataflow "$TEST_FLOW" deliver "$TEST_RUNTIME" recovery-race record
+RECUR=record "$TEST_FLOW" deliver "$TEST_RUNTIME" recovery-race record
 exec "$@"
 BASH
   chmod +x -- "$TEST_DIR/lock-bin/s6-setlock"
@@ -956,7 +1028,8 @@ BASH
   printf '%s' "$RECORD" > "$LIVE/.s9/record"
   DEFINITION="$(< "$STATE/dog/instances/mail/data/.s9/defs.sum")"
   printf '%s' blocked > "$RECORD"
-  if TEST_SUPERVISOR_STATUS=1 "${RECONCILE[@]}" > "$TEST_DIR/output" 2>&1; then exit 1; fi
+  TEST_SUPERVISOR_STATUS=1 "${RECONCILE[@]}" > "$TEST_DIR/output" 2>&1
+  [[ -s $TEST_DIR/output ]]
   [[ -f $STATE/dog/instances/mail/data/.s9/defs.sum ]]
   [[ -L $STATE/dog/instances/mail/data/launch ]]
   [[ -f $LIVE/.s9/record ]]

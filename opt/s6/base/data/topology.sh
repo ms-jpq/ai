@@ -23,17 +23,18 @@ DEAD="$STATE/dead"
 
 case "$ACTION" in
 compile | projection)
-  mkdir -p -- "$GRAPH"
-  if [[ ${RECUR:-} != dataflow ]]; then
-    RECUR=dataflow exec -- s6-setlock -t "$((S9_GRAPH_TIMEOUT * 1000))" -- "$GRAPH/.lock" "$SELF" "$ACTION" "$STATE" "$@"
+  mkdir -p -- "$SERVICES"
+  if [[ ${RECUR:-} != reconcile ]]; then
+    RECUR=reconcile exec -- s6-setlock -t "$((S9_GRAPH_TIMEOUT * 1000))" -- "$SERVICES/.reconcile.lock" "$SELF" "$ACTION" "$STATE" "$@"
   fi
+  mkdir -p -- "$GRAPH"
   ;;&
 compile)
   JOBS="$1"
   for RECORD in "$STATE"/live/*/*/.s9/record; do
     LIVE="${RECORD%/.s9/record}"
     PRODUCER="${LIVE%/*}"
-    "${SELF%/*}/dataflow.sh" deliver "$STATE" "${PRODUCER##*/}" "${LIVE##*/}"
+    "${SELF%/*}/dataflow.sh" deliver "$STATE" "${PRODUCER##*/}" "${LIVE##*/}" || continue
   done
 
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"

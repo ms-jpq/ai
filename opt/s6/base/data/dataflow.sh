@@ -12,7 +12,6 @@ JOB="$3"
 INSTANCE="$4"
 shift -- 4
 
-GRAPH="$STATE/graph"
 SERVICES="$STATE/services"
 LIVE="$STATE/live/$JOB/$INSTANCE"
 INPUTS="$LIVE/inputs"
@@ -20,9 +19,31 @@ TELEMETRY="$LIVE/telemetry"
 DEAD="$STATE/dead/$JOB/$INSTANCE"
 RECORD_FILE="$LIVE/.s9/record"
 PCP="${SELF%/*}/p-cp.sh"
-mkdir -p -- "$GRAPH"
 
 case "$ACTION" in
+deliver)
+  if [[ ${RECUR:-} != record ]] && (($#)) && ! [[ -f $RECORD_FILE ]]; then
+    mkdir -p -- "$LIVE/.s9"
+    RECORD="$DEAD/$(date -u +%Y%m%dT%H%M%S.%N)"
+    printf -- '%s' "$1" > "$LIVE/exit_status"
+    printf -- '%s' "$2" > "$LIVE/signal"
+    printf -- '%s' "$RECORD" > "$RECORD_FILE-next"
+    mv --no-target-directory -- "$RECORD_FILE-next" "$RECORD_FILE"
+  fi
+  if ! [[ -f $RECORD_FILE ]]; then
+    exit
+  fi
+  ;;&
+prepare | deliver)
+  if [[ ${RECUR:-} != record ]]; then
+    LOCK=(-n)
+    if [[ $ACTION == prepare ]] || (($#)); then
+      LOCK=(-t "$((S9_GRAPH_TIMEOUT * 1000))")
+    fi
+    mkdir -p -- "$DEAD"
+    RECUR=record exec -- s6-setlock "${LOCK[@]}" -- "$DEAD/.lock" "$SELF" "$ACTION" "$STATE" "$JOB" "$INSTANCE" "$@"
+  fi
+  ;;&
 prepare)
   if [[ -f $RECORD_FILE ]]; then
     "$SELF" deliver "$STATE" "$JOB" "$INSTANCE"
@@ -57,22 +78,6 @@ prepare)
   done
   ;;
 deliver)
-  if [[ ${RECUR:-} != dataflow ]]; then
-    if (($#)) && ! [[ -f $RECORD_FILE ]]; then
-      mkdir -p -- "$LIVE/.s9"
-      RECORD="$DEAD/$(date -u +%Y%m%dT%H%M%S.%N)"
-      printf -- '%s' "$1" > "$LIVE/exit_status"
-      printf -- '%s' "$2" > "$LIVE/signal"
-      printf -- '%s' "$RECORD" > "$RECORD_FILE-next"
-      mv --no-target-directory -- "$RECORD_FILE-next" "$RECORD_FILE"
-    fi
-    RECUR=dataflow exec -- s6-setlock -t "$((S9_GRAPH_TIMEOUT * 1000))" -- "$GRAPH/.lock" "$SELF" "$ACTION" "$STATE" "$JOB" "$INSTANCE"
-  fi
-  if ! [[ -f $RECORD_FILE ]]; then
-    exit
-  fi
-
-  mkdir -p -- "$DEAD"
   RECORD="$(< "$RECORD_FILE")"
   SERVICE="$SERVICES/$JOB/instances/$INSTANCE"
   if ! [[ -d $RECORD ]]; then
@@ -103,10 +108,9 @@ deliver)
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi
 
-  SUCCESS=0
   if [[ $(< "$RECORD/exit_status") == 0 ]] && [[ $(< "$RECORD/signal") == 0 ]]; then
-    ln -sTnfr -- "$RECORD" "$DEAD/latest-succ"
-    SUCCESS=1
+    ln -sTnf -- "${RECORD##*/}" "$DEAD/.latest-succ"
+    mv --no-target-directory -- "$DEAD/.latest-succ" "$DEAD/latest-succ"
   else
     FAILED="$STATE/fail/$JOB/$INSTANCE"
     mkdir -p -- "$FAILED"
@@ -120,9 +124,6 @@ deliver)
   fi
 
   rm -fr -- "$LIVE"
-  if ((SUCCESS)) && ! "${SELF%/*}/topology.sh" projection "$STATE" "$JOB"; then
-    printf -- 'Dataflow projection deferred: %s@%s\n' "$JOB" "$INSTANCE" >&2
-  fi
   ;;
 *)
   set -x

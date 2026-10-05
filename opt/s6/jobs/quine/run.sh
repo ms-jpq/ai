@@ -108,7 +108,9 @@ instance)
   fi
 
   if [[ -f ../live/$NAME/$INSTANCE/.s9/record ]]; then
-    "$ROOT/base/data/dataflow.sh" deliver "$PWD/.." "$NAME" "$INSTANCE"
+    if ! "$ROOT/base/data/dataflow.sh" deliver "$PWD/.." "$NAME" "$INSTANCE"; then
+      exit
+    fi
   fi
 
   if [[ -L $DIED ]] || { [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; }; then
