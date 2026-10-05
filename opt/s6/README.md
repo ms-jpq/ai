@@ -75,6 +75,7 @@ STATE/
     │   ├── <producer-1> -> ../telemetry/1-<producer-1>@<instance>/outputs/<row-1>/
     │   └── <producer-2> -> ../telemetry/2-<producer-2>@<instance>/outputs/<row-2>/
     ├── outputs/<row>/
+    │   └── .job.sum
     ├── telemetry/
     │   ├── 1-<producer-1>@<instance> -> ../../../dead/<producer-1>/<instance>.<timestamp>/
     │   └── 2-<producer-2>@<instance> -> ../../../dead/<producer-2>/<instance>.<timestamp>/
@@ -83,21 +84,19 @@ STATE/
 
 ```tree
 STATE/graph/
-├── indices/
-│   ├── sources/
-│   │   ├── <producer-1>/<instance> -> <source-inputs-1>/
-│   │   └── <producer-2>/<instance> -> <source-inputs-2>/
-│   └── dead/<consumer>/<hash(def, inputs)> -> ../../../../dead/<consumer>/<hash(def, inputs)>.<timestamp>/
-├── topology -> .topology.<revision>/
-├── .topology.<revision>/
-│   ├── jobs/<consumer> -> JOBS/<consumer>/
+├── indices/dead/<consumer>/<hash(def, inputs)> -> ../../../../dead/<consumer>/<hash(def, inputs)>.<timestamp>/
+├── topology/
 │   ├── wants/<consumer>/
 │   │   ├── .job.sum
 │   │   ├── <producer-1>
 │   │   └── <producer-2>
-│   └── services -> ../../services/
-└── cartesian/<consumer>/<hash(def, inputs)>/
+│   └── wanted-by/
+│       ├── <producer-1>/<consumer> -> ../../wants/<consumer>/
+│       └── <producer-2>/<consumer> -> ../../wants/<consumer>/
+└── cartesian-inputs/<consumer>/<hash(def, inputs)>/
     ├── .job.sum
     ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>.<timestamp>/outputs/<row-1>/
+    │   └── .job.sum
     └── <producer-2> -> ../../../../dead/<producer-2>/<instance>.<timestamp>/outputs/<row-2>/
+        └── .job.sum
 ```

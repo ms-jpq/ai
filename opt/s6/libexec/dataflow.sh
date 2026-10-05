@@ -9,6 +9,7 @@ STATE="$(realpath -- "$1")"
 shift -- 1
 SELF="$(realpath -- "$0")"
 GRAPH="$STATE/graph"
+SERVICES="$STATE/services"
 mkdir -p -- "$GRAPH"
 export LC_ALL=C.UTF-8
 
@@ -28,7 +29,7 @@ if [[ $ACTION == deliver ]]; then
 fi
 
 case "$ACTION" in
-compile | project | deliver | register)
+compile | projection | deliver)
   if [[ ${RECUR:-} != dataflow ]]; then
     RECUR=dataflow exec -- s6-setlock -t 6000 -- "$GRAPH/.lock" "$SELF" "$ACTION" "$STATE" "$@"
   fi
@@ -38,17 +39,6 @@ compile | project | deliver | register)
 esac
 
 case "$ACTION" in
-register)
-  JOB="$1"
-  INSTANCE="$2"
-  REQUEST="$3"
-  DEFINITION="$4"
-  WANTS=("$DEFINITION"/data/wants/*)
-  if ((${#WANTS[@]} == 0)) && [[ -L $REQUEST ]] && [[ -d $REQUEST ]]; then
-    mkdir -p -- "$GRAPH/indices/sources/$JOB"
-    ln -sTnfr -- "$REQUEST" "$GRAPH/indices/sources/$JOB/$INSTANCE"
-  fi
-  ;;
 prepare)
   JOB="$1"
   INSTANCE="$2"
@@ -107,7 +97,6 @@ prepare)
   ;;
 compile)
   JOBS="$(realpath -- "$1")"
-  SERVICES="$(realpath -- "${2:-$STATE/services}")"
   for RECORD in "$STATE"/live/*/.record; do
     LIVE="${RECORD%/*}"
     SERVICE="$(< "$LIVE/.service")"
@@ -116,13 +105,12 @@ compile)
   done
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
   trap 'rm -fr -- "$BUILD"' EXIT
-  mkdir -- "$BUILD/jobs" "$BUILD/wants"
-  ln -sTnfr -- "$SERVICES" "$BUILD/services"
+  mkdir -- "$BUILD/jobs" "$BUILD/wants" "$BUILD/wanted-by"
   for JOB in "$JOBS"/*; do
     if [[ -d $JOB ]]; then
       NAME="${JOB##*/}"
       ln -sTnfr -- "$JOB" "$BUILD/jobs/$NAME"
-      mkdir -p -- "$BUILD/wants/$NAME"
+      mkdir -p -- "$BUILD/wants/$NAME" "$BUILD/wanted-by/$NAME"
       if [[ -f $SERVICES/$NAME/template/.sum ]]; then
         cp -- "$SERVICES/$NAME/template/.sum" "$BUILD/wants/$NAME/.job.sum"
       fi
@@ -130,9 +118,6 @@ compile)
   done
   for JOB in "$BUILD"/jobs/*; do
     CONSUMER="${JOB##*/}"
-    for REQUEST in "$JOB"/data/launch/* "$SERVICES"/"$CONSUMER"/data/launch/*; do
-      "$SELF" register "$STATE" "$CONSUMER" "${REQUEST##*/}" "$REQUEST" "$JOB"
-    done
     for WANT in "$SERVICES"/"$CONSUMER"/template/data/wants/*; do
       PRODUCER=''
       for CANDIDATE in "$BUILD"/jobs/*; do
@@ -146,13 +131,14 @@ compile)
         exit 2
       fi
       printf -- '%s' "$PRODUCER" > "$BUILD/wants/$CONSUMER/$PRODUCER"
+      ln -sTnfr -- "$BUILD/wants/$CONSUMER" "$BUILD/wanted-by/$PRODUCER/$CONSUMER"
     done
   done
   mkdir -- "$BUILD/check"
   for JOB in "$BUILD"/jobs/*; do
     "$SELF" visit "$STATE" "$BUILD" "$BUILD/check" "${JOB##*/}" check
   done
-  rm -fr -- "$BUILD/check"
+  rm -fr -- "$BUILD/check" "$BUILD/jobs"
   PREVIOUS=''
   if [[ -L $GRAPH/topology ]]; then
     PREVIOUS="$(realpath -- "$GRAPH/topology")"
@@ -163,17 +149,34 @@ compile)
   if [[ -n $PREVIOUS ]]; then
     rm -fr -- "$PREVIOUS"
   fi
-  "$SELF" project "$STATE"
+  "$SELF" projection "$STATE"
   ;;
-project)
+projection)
   if ! [[ -L $GRAPH/topology ]]; then
     exit
   fi
   TOPOLOGY="$(realpath -- "$GRAPH/topology")"
   PASS="$(mktemp -d -- "$GRAPH/.projection.XXXXXX")"
   trap 'rm -fr -- "$PASS"' EXIT
-  for JOB in "$TOPOLOGY"/jobs/*; do
-    "$SELF" visit "$STATE" "$TOPOLOGY" "$PASS" "${JOB##*/}" project
+  mkdir -- "$PASS/.selected"
+  if (($#)); then
+    PRODUCERS=("$1")
+    for ((INDEX = 0; INDEX < ${#PRODUCERS[@]}; INDEX++)); do
+      for CONSUMER in "$TOPOLOGY"/wanted-by/"${PRODUCERS[$INDEX]}"/*; do
+        CONSUMER="${CONSUMER##*/}"
+        if ! [[ -f $PASS/.selected/$CONSUMER ]]; then
+          touch -- "$PASS/.selected/$CONSUMER"
+          PRODUCERS+=("$CONSUMER")
+        fi
+      done
+    done
+  else
+    for JOB in "$TOPOLOGY"/wants/*; do
+      touch -- "$PASS/.selected/${JOB##*/}"
+    done
+  fi
+  for JOB in "$PASS"/.selected/*; do
+    "$SELF" visit "$STATE" "$TOPOLOGY" "$PASS" "${JOB##*/}" projection
   done
   ;;
 visit)
@@ -193,12 +196,13 @@ visit)
   for WANT in "${WANTS[@]}"; do
     "$SELF" visit "$STATE" "$TOPOLOGY" "$PASS" "$(< "$WANT")" "$MODE"
   done
-  if [[ $MODE == project ]] && [[ -f $TOPOLOGY/wants/$JOB/.job.sum ]]; then
+  if [[ $MODE == projection ]] && [[ -f $TOPOLOGY/wants/$JOB/.job.sum ]]; then
     if ((${#WANTS[@]})); then
       "$SELF" combine "$STATE" "$TOPOLOGY" "$PASS" "$JOB" 0
     else
-      for SOURCE in "$GRAPH"/indices/sources/"$JOB"/*; do
-        "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "${SOURCE##*/}"
+      for SOURCE in "$STATE"/dead/"$JOB"/*.latest-succ; do
+        INSTANCE="${SOURCE##*/}"
+        "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "${INSTANCE%.latest-succ}"
       done
     fi
   fi
@@ -224,7 +228,9 @@ combine)
     done
     HASH="$(printf -- '%s\0' "$(< "$TOPOLOGY/wants/$JOB/.job.sum")" "${IDENTITIES[@]}" | b3sum)"
     HASH="${HASH%% *}"
-    "$SELF" ensure "$STATE" "$TOPOLOGY" "$JOB" "$HASH" "$@"
+    if [[ -f $PASS/.selected/$JOB ]]; then
+      "$SELF" ensure "$STATE" "$TOPOLOGY" "$JOB" "$HASH" "$@"
+    fi
     "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "$HASH"
   fi
   ;;
@@ -248,15 +254,16 @@ ensure)
   JOB="$2"
   INSTANCE="$3"
   shift -- 3
-  SERVICES="$(realpath -- "$TOPOLOGY/services")"
   LAUNCH="$SERVICES/$JOB/data/launch"
   if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -f $STATE/live/$JOB@$INSTANCE/.record ]] || [[ -L $GRAPH/indices/dead/$JOB/$INSTANCE ]]; then
     exit
   fi
-  INPUTS="$GRAPH/cartesian/$JOB/$INSTANCE"
-  mkdir -p -- "$GRAPH/cartesian/$JOB" "$LAUNCH"
+  INPUTS="$GRAPH/cartesian-inputs/$JOB/$INSTANCE"
+  mkdir -p -- "$GRAPH/cartesian-inputs/$JOB" "$LAUNCH"
   if ! [[ -d $INPUTS ]]; then
-    STAGING="$(mktemp -d -- "$GRAPH/cartesian/$JOB/.inputs.XXXXXX")"
+    STAGING="$GRAPH/cartesian-inputs/$JOB/.$INSTANCE"
+    rm -fr -- "$STAGING"
+    mkdir -- "$STAGING"
     trap 'rm -fr -- "$STAGING"' EXIT
     cp -- "$TOPOLOGY/wants/$JOB/.job.sum" "$STAGING/.job.sum"
     while (($#)); do
@@ -289,6 +296,18 @@ deliver)
         ln -sTnfr -- "$TARGET" "$STAGING/${LINK#"$LIVE"/}"
       fi
     done
+    for OUTPUT in "$STAGING/outputs" "$STAGING"/outputs/*; do
+      if [[ -d $OUTPUT ]]; then
+        if [[ -L $OUTPUT ]]; then
+          COPY="$(RECUR='' "${SELF%/*}/p-cp.sh" "$OUTPUT" "$OUTPUT")"
+          rm -- "$OUTPUT"
+          mv --no-target-directory -- "$COPY" "$OUTPUT"
+        fi
+        if [[ $OUTPUT != "$STAGING/outputs" ]]; then
+          cp --remove-destination -- "$SERVICE/.sum" "$OUTPUT/.job.sum"
+        fi
+      fi
+    done
     rm -- "$STAGING/"{.record,.service}
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi
@@ -306,11 +325,6 @@ deliver)
     rm -f -- "$SERVICE/data/launch"
   fi
   rm -fr -- "$LIVE"
-  if "$SELF" project "$STATE"; then
-    :
-  else
-    printf -- 'Dataflow projection deferred after publishing %s\n' "$RECORD" >&2
-  fi
   ;;
 *)
   set -x

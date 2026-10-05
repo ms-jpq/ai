@@ -27,7 +27,7 @@ bootstrap)
 reconcile)
   trap 's6-svscanctl -h -- "$PWD"' EXIT
   find "$ROOT/jobs" "$PWD" -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -printf '%f\0' | sort --zero-terminated --unique | RECUR=job "${XARGS[@]}" "$SELF" '{}'
-  "$ROOT/libexec/dataflow.sh" compile "$PWD/.." "$ROOT/jobs" "$PWD"
+  "$ROOT/libexec/dataflow.sh" compile "$PWD/.." "$ROOT/jobs"
   ;;
 seed | job)
   if [[ $RECUR == seed ]] || [[ -d $JOB ]]; then
@@ -108,7 +108,6 @@ instance)
     REQUEST="$SUPERVISOR/data/launch/$INSTANCE"
   fi
 
-  "$ROOT/libexec/dataflow.sh" register "$PWD/.." "$NAME" "$INSTANCE" "$REQUEST" "$JOB"
   if [[ -e $EXITED/$INSTANCE ]] || { [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; }; then
     RECUR=cleanup "$0" "$NAME" "$INSTANCE"
   fi

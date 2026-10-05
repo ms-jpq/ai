@@ -121,6 +121,11 @@ EOF
   "$DATAFLOW" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL" "$S9_DEAD_DIR" "$INSTANCE_DIR"
   if ((STATUS == 0 && SIGNAL == 0)); then
     ln -sTnfr -- "$STATE/graph/indices/dead/$JOB/$INSTANCE" "$STATE/dead/$JOB/$INSTANCE.latest-succ"
+    if "$DATAFLOW" projection "$STATE" "$JOB"; then
+      :
+    else
+      printf -- 'Dataflow projection deferred: %s@%s\n' "$JOB" "$INSTANCE" >&2
+    fi
   fi
 
   if ((EXIT_STATUS == 125)); then

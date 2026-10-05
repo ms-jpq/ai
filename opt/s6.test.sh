@@ -35,20 +35,21 @@ ROOT="${0%/*}"
 SERVICE="$ROOT/runtime/services/$1/instances/$2"
 mkdir -p -- "$SERVICE"
 rsync --archive --copy-unsafe-links -- "$ROOT/base/" "$SERVICE/"
+printf '%s' "$1-v1" > "$SERVICE/.sum"
 printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
 env -C "$SERVICE" -- ./finish "$3" "$4" "$2" > "$ROOT/finish.log"
-"$ROOT/libexec/dataflow.sh" project "$ROOT/runtime"
 BASH
   chmod +x -- "$FINISH"
-  for JOB in producer-1 producer-2 consumer sink; do
+  for JOB in producer-1 producer-2 consumer sink bystander; do
     mkdir -p -- "$JOBS/$JOB/data/launch" "$SERVICES/$JOB/template" "$SERVICES/$JOB/instances"
     printf '%s' "$JOB-v1" > "$SERVICES/$JOB/template/.sum"
   done
-  mkdir -p -- "$JOBS/consumer/data/wants" "$JOBS/sink/data/wants"
+  mkdir -p -- "$JOBS/consumer/data/wants" "$JOBS/sink/data/wants" "$JOBS/bystander/data/wants"
   ln -sTnfr -- "$JOBS/producer-1" "$JOBS/consumer/data/wants/first"
   ln -sTnfr -- "$JOBS/producer-2" "$JOBS/consumer/data/wants/second"
   ln -sTnfr -- "$JOBS/consumer" "$JOBS/sink/data/wants/result"
-  for JOB in consumer sink; do
+  ln -sTnfr -- "$JOBS/producer-2" "$JOBS/bystander/data/wants/other"
+  for JOB in consumer sink bystander; do
     mkdir -p -- "$SERVICES/$JOB/template/data/wants"
     for WANT in "$JOBS"/"$JOB"/data/wants/*; do
       ln -sTnfr -- "$WANT" "$SERVICES/$JOB/template/data/wants/${WANT##*/}"
@@ -59,13 +60,43 @@ BASH
     HASH="${HASH%% *}"
     ln -sTnfr -- "$INPUT" "$JOBS/$JOB/data/launch/$HASH"
     "$FLOW" prepare "$RUNTIME" "$JOB" "$HASH" "$INPUT"
-    mkdir -- "$RUNTIME/live/$JOB@$HASH/outputs/"{A,B}
+    if [[ $JOB == producer-2 ]]; then
+      mkdir -- "$TEST_DIR/$JOB-outputs"
+      rmdir -- "$RUNTIME/live/$JOB@$HASH/outputs"
+      ln -sTnfr -- "$TEST_DIR/$JOB-outputs" "$RUNTIME/live/$JOB@$HASH/outputs"
+    fi
+    mkdir -- "$RUNTIME/live/$JOB@$HASH/outputs/A" "$TEST_DIR/$JOB-row"
+    ln -sTnfr -- "$TEST_DIR/$JOB-row" "$RUNTIME/live/$JOB@$HASH/outputs/B"
     printf '%s' "$JOB" > "$RUNTIME/live/$JOB@$HASH/log"
     "$FINISH" "$JOB" "$HASH" 0 0
+    rm -- "$JOBS/$JOB/data/launch/$HASH"
+    RECORD="$(realpath -- "$RUNTIME/dead/$JOB/$HASH.latest-succ")"
+    for ROW in A B; do
+      [[ $(< "$RECORD/outputs/$ROW/.job.sum") == "$JOB-v1" ]]
+    done
+    if [[ -f $TEST_DIR/$JOB-row/.job.sum ]]; then exit 1; fi
+    if [[ -f $TEST_DIR/$JOB-outputs/A/.job.sum ]]; then exit 1; fi
   done
-  "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
+  "$FLOW" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 4 ]]
+  for PRODUCER in producer-1 producer-2; do
+    [[ $RUNTIME/graph/topology/wanted-by/$PRODUCER/consumer -ef $RUNTIME/graph/topology/wants/consumer ]]
+  done
+  REQUEST="${REQUESTS[0]}"
+  HASH="${REQUEST##*/}"
+  INPUTS="$RUNTIME/graph/cartesian-inputs/consumer/$HASH"
+  [[ $REQUEST -ef $INPUTS ]]
+  STAGING="${INPUTS%/*}/.$HASH"
+  rm -- "$REQUEST"
+  mv -- "$INPUTS" "$STAGING"
+  printf '%s' incomplete > "$STAGING/.job.sum"
+  rm -- "$STAGING/producer-1"
+  "$FLOW" projection "$RUNTIME"
+  [[ $REQUEST -ef $INPUTS ]]
+  [[ $(< "$INPUTS/.job.sum") == consumer-v1 ]]
+  [[ -d $INPUTS/producer-1 ]]
+  if [[ -d $STAGING ]]; then exit 1; fi
   mkdir -p -- "$SERVICES/consumer/data/.exited"
   for REQUEST in "${REQUESTS[@]}"; do
     HASH="${REQUEST##*/}"
@@ -80,12 +111,14 @@ BASH
     SERVICE="$SERVICES/consumer/instances/$HASH"
     mkdir -p -- "$SERVICE"
     rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
+    cp -- "$SERVICES/consumer/template/.sum" "$SERVICE/.sum"
     cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 test -d ./inputs/producer-1
 test -d ./inputs/producer-2
 mkdir -- ./outputs/result
+ln -sTnfr -- /dev/null ./outputs/result/.job.sum
 printf '%s' "$1" > ./outputs/result/value
 BASH
     chmod +x -- "$SERVICE/data/.run"
@@ -100,21 +133,31 @@ BASH
     TARGET="$(readlink -- "$RUNTIME/live/consumer@$HASH/inputs/producer-1")"
     [[ $TARGET == ../telemetry/1-producer-1@*/outputs/* ]]
     if [[ -e $RUNTIME/live/consumer@$HASH/inputs/first ]]; then exit 1; fi
-    "$FLOW" project "$RUNTIME"
+    "$FLOW" projection "$RUNTIME"
     if [[ -L $REQUEST ]]; then exit 1; fi
     S9_WORKING_DIRECTORY="$RUNTIME/live/consumer@$HASH" env -C "$SERVICE" -- ./run "$HASH" > "$TEST_DIR/output"
     rm -- "$SERVICE/data/.pgid"
+    printf '%s' consumer-newer > "$SERVICES/consumer/template/.sum"
+    BYSTANDER_REQUESTS=("$SERVICES/bystander/data/launch/"*)
+    [[ ${#BYSTANDER_REQUESTS[@]} == 2 ]]
+    rm -- "${BYSTANDER_REQUESTS[@]}"
     STATUS=0
     env -C "$SERVICE" -- ./finish 0 0 "$HASH" > "$TEST_DIR/output" || STATUS=$?
     [[ $STATUS == 125 ]]
-    "$FLOW" project "$RUNTIME"
+    printf '%s' consumer-v1 > "$SERVICES/consumer/template/.sum"
+    BYSTANDER_REQUESTS=("$SERVICES/bystander/data/launch/"*)
+    [[ ${#BYSTANDER_REQUESTS[@]} == 0 ]]
+    SINK_REQUESTS=("$SERVICES/sink/data/launch/"*)
+    ((${#SINK_REQUESTS[@]} > 0))
     RECORD="$(realpath -- "$RUNTIME/dead/consumer/$HASH.latest-succ")"
     TARGET="$(readlink -- "$RUNTIME/dead/consumer/$HASH.latest-succ")"
     [[ $TARGET == "${RECORD##*/}" ]]
     [[ $(< "$RECORD/outputs/result/value") == "$HASH" ]]
+    [[ $(< "$RECORD/outputs/result/.job.sum") == consumer-v1 ]]
+    if [[ -L $RECORD/outputs/result/.job.sum ]]; then exit 1; fi
     [[ $(< "$RECORD/inputs/.job.sum") == consumer-v1 ]]
     if [[ -L $RECORD/inputs ]]; then exit 1; fi
-    rm -fr -- "$RUNTIME/graph/cartesian/consumer/$HASH"
+    rm -fr -- "$RUNTIME/graph/cartesian-inputs/consumer/$HASH"
     [[ -d $RECORD/inputs/producer-1 ]]
     [[ -d $RECORD/inputs/producer-2 ]]
     TARGET="$(readlink -- "$RECORD/inputs/producer-1")"
@@ -127,21 +170,23 @@ BASH
   for REQUEST in "${REQUESTS[@]}"; do
     HASH="${REQUEST##*/}"
     "$FLOW" prepare "$RUNTIME" sink "$HASH" "$REQUEST"
+    mkdir -- "$RUNTIME/live/sink@$HASH/outputs/partial"
     TELEMETRY=("$RUNTIME/live/sink@$HASH/telemetry/"*)
     [[ ${#TELEMETRY[@]} == 3 ]]
     "$FINISH" sink "$HASH" 67 0
+    [[ $(< "$RUNTIME/graph/indices/dead/sink/$HASH/outputs/partial/.job.sum") == sink-v1 ]]
     rm -- "$REQUEST"
   done
-  printf '%s\0' project project project | xargs --null --max-procs=0 -I '{}' -- "$FLOW" '{}' "$RUNTIME"
+  printf '%s\0' projection projection projection | xargs --null --max-procs=0 -I '{}' -- "$FLOW" '{}' "$RUNTIME"
   REQUESTS=("$SERVICES/sink/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   printf '%s' consumer-v2 > "$SERVICES/consumer/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
+  "$FLOW" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 4 ]]
   rm -- "${REQUESTS[@]}"
   printf '%s' consumer-v1 > "$SERVICES/consumer/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
+  "$FLOW" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   HASH="$(printf '%s' producer-1 | b3sum)"
@@ -161,7 +206,7 @@ BASH
   done
   rm -- "${REQUESTS[@]}"
   printf '%s' consumer-v3 > "$SERVICES/consumer/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
+  "$FLOW" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 2 ]]
   CURRENT="$(realpath -- "$RUNTIME/dead/producer-1/$HASH.latest-succ")"
@@ -170,14 +215,14 @@ BASH
   done
   rm -- "${REQUESTS[@]}"
   printf '%s' sink-v2 > "$SERVICES/sink/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
+  "$FLOW" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/sink/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
   "$FINISH" producer-1 "$HASH" 0 0
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   for REQUEST in "${REQUESTS[@]}"; do rm -- "$REQUEST"; done
-  "$FLOW" project "$RUNTIME"
+  "$FLOW" projection "$RUNTIME"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   "$FLOW" prepare "$RUNTIME" recovery record "$INPUT"
@@ -191,7 +236,7 @@ BASH
   printf '%s' "$SERVICES/recovery/instances/record" > "$RUNTIME/live/recovery@record/.service"
   mkdir -- "$RUNTIME/live/incomplete@record"
   printf '%s' partial > "$RUNTIME/live/incomplete@record/.record-next"
-  "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
+  "$FLOW" compile "$RUNTIME" "$JOBS"
   [[ $(< "$RUNTIME/live/incomplete@record/.record-next") == partial ]]
   [[ $RUNTIME/graph/indices/dead/recovery/record -ef $RECORD ]]
   [[ -d $RUNTIME/dead/recovery/record.latest-succ/outputs/row ]]
@@ -200,7 +245,7 @@ BASH
   ln -sTnfr -- "$JOBS/sink" "$JOBS/producer-1/data/wants/cycle"
   mkdir -p -- "$SERVICES/producer-1/template/data/wants"
   ln -sTnfr -- "$JOBS/sink" "$SERVICES/producer-1/template/data/wants/cycle"
-  if "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES" > "$TEST_DIR/output" 2>&1; then exit 1; fi
+  if "$FLOW" compile "$RUNTIME" "$JOBS" > "$TEST_DIR/output" 2>&1; then exit 1; fi
   grep --quiet 'Dependency cycle' "$TEST_DIR/output"
   ;;
 ctl)
