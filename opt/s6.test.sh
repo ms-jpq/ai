@@ -21,7 +21,7 @@ cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
 dataflow)
-  shopt -u failglob
+  shopt -u failglob dotglob
   FLOW="$TEST_DIR/libexec/dataflow.sh"
   RUNTIME="$TEST_DIR/runtime"
   SERVICES="$RUNTIME/services"
@@ -66,10 +66,10 @@ BASH
   "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 4 ]]
-  [[ -L $RUNTIME/graph/wanted-by/producer-1/consumer ]]
   mkdir -p -- "$SERVICES/consumer/data/.exited"
   for REQUEST in "${REQUESTS[@]}"; do
     HASH="${REQUEST##*/}"
+    [[ $(< "$REQUEST/.job.sum") == consumer-v1 ]]
     IDENTITIES=()
     for INPUT_LINK in "$REQUEST"/*; do
       TARGET="$(realpath -- "$INPUT_LINK")"
@@ -112,6 +112,7 @@ BASH
     TARGET="$(readlink -- "$RUNTIME/dead/consumer/$HASH.latest-succ")"
     [[ $TARGET == "${RECORD##*/}" ]]
     [[ $(< "$RECORD/outputs/result/value") == "$HASH" ]]
+    [[ $(< "$RECORD/inputs/.job.sum") == consumer-v1 ]]
     if [[ -L $RECORD/inputs ]]; then exit 1; fi
     rm -fr -- "$RUNTIME/graph/cartesian/consumer/$HASH"
     [[ -d $RECORD/inputs/producer-1 ]]
@@ -183,17 +184,18 @@ BASH
   mkdir -- "$RUNTIME/live/recovery@record/outputs/row"
   "$FINISH" recovery record 0 0
   RECORD="$(realpath -- "$RUNTIME/dead/recovery/record.latest-succ")"
-  rm -- "$RUNTIME/graph/completed/recovery/record"
+  rm -- "$RUNTIME/graph/indices/dead/recovery/record"
   mkdir -- "$RUNTIME/live/recovery@record"
   cp -- "$RECORD/"{exit_status,signal} "$RUNTIME/live/recovery@record/"
   printf '%s' "$RECORD" > "$RUNTIME/live/recovery@record/.record"
   printf '%s' "$SERVICES/recovery/instances/record" > "$RUNTIME/live/recovery@record/.service"
-  ln -sTnfr -- "$RUNTIME/live/recovery@record" "$RUNTIME/graph/pending/recovery/record"
-  [[ -L $RUNTIME/graph/pending/recovery/record ]]
+  mkdir -- "$RUNTIME/live/incomplete@record"
+  printf '%s' partial > "$RUNTIME/live/incomplete@record/.record-next"
   "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
-  [[ $RUNTIME/graph/completed/recovery/record -ef $RECORD ]]
+  [[ $(< "$RUNTIME/live/incomplete@record/.record-next") == partial ]]
+  [[ $RUNTIME/graph/indices/dead/recovery/record -ef $RECORD ]]
   [[ -d $RUNTIME/dead/recovery/record.latest-succ/outputs/row ]]
-  if [[ -L $RUNTIME/graph/pending/recovery/record ]]; then exit 1; fi
+  if [[ -d $RUNTIME/live/recovery@record ]]; then exit 1; fi
   mkdir -p -- "$JOBS/producer-1/data/wants"
   ln -sTnfr -- "$JOBS/sink" "$JOBS/producer-1/data/wants/cycle"
   mkdir -p -- "$SERVICES/producer-1/template/data/wants"
@@ -762,6 +764,15 @@ BASH
     exit 1
   fi
   [[ -L $LAUNCH/.pending ]]
+
+  mkdir -- "$TEST_DIR/stale" "$TEST_DIR/current"
+  printf '%s' stale > "$TEST_DIR/stale/.job.sum"
+  cp -- "$MANAGER/template/.sum" "$TEST_DIR/current/.job.sum"
+  ln -sTnfr -- "$TEST_DIR/stale" "$LAUNCH/stale"
+  ln -sTnfr -- "$TEST_DIR/current" "$LAUNCH/current"
+  "${RECONCILE[@]}" queue-dog
+  if [[ -L $LAUNCH/stale ]] || [[ -d $MANAGER/instances/stale ]]; then exit 1; fi
+  [[ -L $MANAGER/instances/current/data/launch ]]
 
   ln -sTnfr -- /dev/null "$LAUNCH/rejected"
   if "${RECONCILE[@]}" queue-dog; then

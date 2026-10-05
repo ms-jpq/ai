@@ -142,7 +142,7 @@ instance)
     fi
   fi
   if ! [[ -d $SERVICE ]]; then
-    DEFINITION="$PWD/../graph/definitions/$NAME/$INSTANCE"
+    DEFINITION="$REQUEST/.job.sum"
     if [[ -f $DEFINITION ]] && ! cmp --silent -- "$DEFINITION" "$TEMPLATE/.sum"; then
       rm -fr -- "$REQUEST"
       exit

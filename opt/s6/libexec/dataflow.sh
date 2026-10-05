@@ -14,7 +14,7 @@ export LC_ALL=C.UTF-8
 
 if [[ $ACTION == deliver ]]; then
   LIVE="$STATE/live/$1@$2"
-  mkdir -p -- "$LIVE" "$GRAPH/pending/$1" "$STATE/dead/$1"
+  mkdir -p -- "$LIVE" "$STATE/dead/$1"
   if ! [[ -f $LIVE/.record ]]; then
     mkdir -p -- "${5:-$STATE/dead}/$1"
     RECORD="$(realpath -- "${5:-$STATE/dead}/$1")"
@@ -22,9 +22,9 @@ if [[ $ACTION == deliver ]]; then
     printf -- '%s' "$3" > "$LIVE/exit_status"
     printf -- '%s' "$4" > "$LIVE/signal"
     printf -- '%s' "${6:-$STATE/services/$1/instances/$2}" > "$LIVE/.service"
-    printf -- '%s' "$RECORD" > "$LIVE/.record"
+    printf -- '%s' "$RECORD" > "$LIVE/.record-next"
+    mv --no-target-directory -- "$LIVE/.record-next" "$LIVE/.record"
   fi
-  ln -sTnfr -- "$LIVE" "$GRAPH/pending/$1/$2"
 fi
 
 case "$ACTION" in
@@ -45,8 +45,8 @@ register)
   DEFINITION="$4"
   WANTS=("$DEFINITION"/data/wants/*)
   if ((${#WANTS[@]} == 0)) && [[ -L $REQUEST ]] && [[ -d $REQUEST ]]; then
-    mkdir -p -- "$GRAPH/sources/$JOB"
-    ln -sTnfr -- "$REQUEST" "$GRAPH/sources/$JOB/$INSTANCE"
+    mkdir -p -- "$GRAPH/indices/sources/$JOB"
+    ln -sTnfr -- "$REQUEST" "$GRAPH/indices/sources/$JOB/$INSTANCE"
   fi
   ;;
 prepare)
@@ -108,25 +108,23 @@ prepare)
 compile)
   JOBS="$(realpath -- "$1")"
   SERVICES="$(realpath -- "${2:-$STATE/services}")"
-  for PENDING in "$GRAPH"/pending/*/*; do
-    PRODUCER="${PENDING%/*}"
-    if [[ -d $PENDING ]]; then
-      "$SELF" deliver "$STATE" "${PRODUCER##*/}" "${PENDING##*/}" "$(< "$PENDING/exit_status")" "$(< "$PENDING/signal")"
-    else
-      rm -f -- "$PENDING"
-    fi
+  for RECORD in "$STATE"/live/*/.record; do
+    LIVE="${RECORD%/*}"
+    SERVICE="$(< "$LIVE/.service")"
+    PRODUCER="${SERVICE%/instances/*}"
+    "$SELF" deliver "$STATE" "${PRODUCER##*/}" "${SERVICE##*/}" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")"
   done
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
   trap 'rm -fr -- "$BUILD"' EXIT
-  mkdir -- "$BUILD/jobs" "$BUILD/wants" "$BUILD/wanted-by" "$BUILD/definitions"
+  mkdir -- "$BUILD/jobs" "$BUILD/wants"
   ln -sTnfr -- "$SERVICES" "$BUILD/services"
   for JOB in "$JOBS"/*; do
     if [[ -d $JOB ]]; then
       NAME="${JOB##*/}"
       ln -sTnfr -- "$JOB" "$BUILD/jobs/$NAME"
-      mkdir -p -- "$BUILD/wants/$NAME" "$BUILD/wanted-by/$NAME"
+      mkdir -p -- "$BUILD/wants/$NAME"
       if [[ -f $SERVICES/$NAME/template/.sum ]]; then
-        cp -- "$SERVICES/$NAME/template/.sum" "$BUILD/definitions/$NAME"
+        cp -- "$SERVICES/$NAME/template/.sum" "$BUILD/wants/$NAME/.job.sum"
       fi
     fi
   done
@@ -148,7 +146,6 @@ compile)
         exit 2
       fi
       printf -- '%s' "$PRODUCER" > "$BUILD/wants/$CONSUMER/$PRODUCER"
-      ln -sTnfr -- "$JOB" "$BUILD/wanted-by/$PRODUCER/$CONSUMER"
     done
   done
   mkdir -- "$BUILD/check"
@@ -163,7 +160,6 @@ compile)
   ln -sTnfr -- "$BUILD" "$GRAPH/.topology-next"
   mv --no-target-directory -- "$GRAPH/.topology-next" "$GRAPH/topology"
   trap - EXIT
-  ln -sTnf -- topology/wanted-by "$GRAPH/wanted-by"
   if [[ -n $PREVIOUS ]]; then
     rm -fr -- "$PREVIOUS"
   fi
@@ -197,11 +193,11 @@ visit)
   for WANT in "${WANTS[@]}"; do
     "$SELF" visit "$STATE" "$TOPOLOGY" "$PASS" "$(< "$WANT")" "$MODE"
   done
-  if [[ $MODE == project ]] && [[ -f $TOPOLOGY/definitions/$JOB ]]; then
+  if [[ $MODE == project ]] && [[ -f $TOPOLOGY/wants/$JOB/.job.sum ]]; then
     if ((${#WANTS[@]})); then
       "$SELF" combine "$STATE" "$TOPOLOGY" "$PASS" "$JOB" 0
     else
-      for SOURCE in "$GRAPH"/sources/"$JOB"/*; do
+      for SOURCE in "$GRAPH"/indices/sources/"$JOB"/*; do
         "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "${SOURCE##*/}"
       done
     fi
@@ -226,7 +222,7 @@ combine)
     for IDENTITY in "$@"; do
       IDENTITIES+=("${IDENTITY#"$STATE"/}")
     done
-    HASH="$(printf -- '%s\0' "$(< "$TOPOLOGY/definitions/$JOB")" "${IDENTITIES[@]}" | b3sum)"
+    HASH="$(printf -- '%s\0' "$(< "$TOPOLOGY/wants/$JOB/.job.sum")" "${IDENTITIES[@]}" | b3sum)"
     HASH="${HASH%% *}"
     "$SELF" ensure "$STATE" "$TOPOLOGY" "$JOB" "$HASH" "$@"
     "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "$HASH"
@@ -254,21 +250,21 @@ ensure)
   shift -- 3
   SERVICES="$(realpath -- "$TOPOLOGY/services")"
   LAUNCH="$SERVICES/$JOB/data/launch"
-  if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -L $GRAPH/pending/$JOB/$INSTANCE ]] || [[ -L $GRAPH/completed/$JOB/$INSTANCE ]]; then
+  if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -f $STATE/live/$JOB@$INSTANCE/.record ]] || [[ -L $GRAPH/indices/dead/$JOB/$INSTANCE ]]; then
     exit
   fi
   INPUTS="$GRAPH/cartesian/$JOB/$INSTANCE"
-  mkdir -p -- "$GRAPH/cartesian/$JOB" "$GRAPH/definitions/$JOB" "$LAUNCH"
+  mkdir -p -- "$GRAPH/cartesian/$JOB" "$LAUNCH"
   if ! [[ -d $INPUTS ]]; then
     STAGING="$(mktemp -d -- "$GRAPH/cartesian/$JOB/.inputs.XXXXXX")"
     trap 'rm -fr -- "$STAGING"' EXIT
+    cp -- "$TOPOLOGY/wants/$JOB/.job.sum" "$STAGING/.job.sum"
     while (($#)); do
       ln -sTnfr -- "$2" "$STAGING/$1"
       shift -- 2
     done
     mv --no-target-directory -- "$STAGING" "$INPUTS"
   fi
-  cp -- "$TOPOLOGY/definitions/$JOB" "$GRAPH/definitions/$JOB/$INSTANCE"
   LINK="$(mktemp -- "$LAUNCH/.launch.XXXXXX")"
   trap 'rm -f -- "$LINK"' EXIT
   ln -sTnfr -- "$INPUTS" "$LINK"
@@ -278,7 +274,7 @@ deliver)
   JOB="$1"
   INSTANCE="$2"
   LIVE="$STATE/live/$JOB@$INSTANCE"
-  if ! [[ -f $LIVE/.record ]] && [[ -L $GRAPH/completed/$JOB/$INSTANCE ]]; then
+  if ! [[ -f $LIVE/.record ]] && [[ -L $GRAPH/indices/dead/$JOB/$INSTANCE ]]; then
     exit
   fi
   RECORD="$(< "$LIVE/.record")"
@@ -296,11 +292,11 @@ deliver)
     rm -- "$STAGING/"{.record,.service}
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi
-  mkdir -p -- "$GRAPH/completed/$JOB"
-  LINK="$(mktemp -- "$GRAPH/completed/$JOB/.completed.XXXXXX")"
+  mkdir -p -- "$GRAPH/indices/dead/$JOB"
+  LINK="$(mktemp -- "$GRAPH/indices/dead/$JOB/.dead.XXXXXX")"
   trap 'rm -f -- "$LINK"' EXIT
   ln -sTnfr -- "$RECORD" "$LINK"
-  mv --no-target-directory -- "$LINK" "$GRAPH/completed/$JOB/$INSTANCE"
+  mv --no-target-directory -- "$LINK" "$GRAPH/indices/dead/$JOB/$INSTANCE"
   if [[ $(< "$RECORD/exit_status") != 0 ]] || [[ $(< "$RECORD/signal") != 0 ]]; then
     mkdir -p -- "$STATE/failed/$JOB"
     ln -sTnfr -- "$RECORD" "$STATE/failed/$JOB/${RECORD##*/}"
@@ -310,7 +306,6 @@ deliver)
     rm -f -- "$SERVICE/data/launch"
   fi
   rm -fr -- "$LIVE"
-  rm -f -- "$GRAPH/pending/$JOB/$INSTANCE"
   if "$SELF" project "$STATE"; then
     :
   else
