@@ -226,10 +226,7 @@ combine)
     for IDENTITY in "$@"; do
       IDENTITIES+=("${IDENTITY#"$STATE"/}")
     done
-    HASH="$({
-      cat -- "$TOPOLOGY/definitions/$JOB"
-      printf -- '%s\0' "$JOB" "${IDENTITIES[@]}"
-    } | b3sum)"
+    HASH="$(printf -- '%s\0' "$(< "$TOPOLOGY/definitions/$JOB")" "${IDENTITIES[@]}" | b3sum)"
     HASH="${HASH%% *}"
     "$SELF" ensure "$STATE" "$TOPOLOGY" "$JOB" "$HASH" "$@"
     "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "$HASH"

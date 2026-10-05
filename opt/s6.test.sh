@@ -70,6 +70,13 @@ BASH
   mkdir -p -- "$SERVICES/consumer/data/.exited"
   for REQUEST in "${REQUESTS[@]}"; do
     HASH="${REQUEST##*/}"
+    IDENTITIES=()
+    for INPUT_LINK in "$REQUEST"/*; do
+      TARGET="$(realpath -- "$INPUT_LINK")"
+      IDENTITIES+=("${INPUT_LINK##*/}" "${TARGET#"$RUNTIME"/}")
+    done
+    EXPECTED="$(printf '%s\0' consumer-v1 "${IDENTITIES[@]}" | b3sum)"
+    [[ $HASH == "${EXPECTED%% *}" ]]
     SERVICE="$SERVICES/consumer/instances/$HASH"
     mkdir -p -- "$SERVICE"
     rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
@@ -150,6 +157,15 @@ BASH
   for REQUEST in "${REQUESTS[@]}"; do
     [[ -d $REQUEST/producer-1 ]]
     [[ ${REQUEST##*/} != "${PREVIOUS##*/}" ]]
+  done
+  rm -- "${REQUESTS[@]}"
+  printf '%s' consumer-v3 > "$SERVICES/consumer/template/.sum"
+  "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
+  REQUESTS=("$SERVICES/consumer/data/launch/"*)
+  [[ ${#REQUESTS[@]} == 2 ]]
+  CURRENT="$(realpath -- "$RUNTIME/dead/producer-1/$HASH.latest-succ")"
+  for REQUEST in "${REQUESTS[@]}"; do
+    [[ $REQUEST/producer-1 -ef $CURRENT/outputs/A ]]
   done
   rm -- "${REQUESTS[@]}"
   printf '%s' sink-v2 > "$SERVICES/sink/template/.sum"

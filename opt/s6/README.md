@@ -65,27 +65,27 @@ JOBS/
 ```tree
 STATE/
 ├── services/<consumer>/
-│   ├── data/launch/<hash> -> <source-inputs>/
+│   ├── data/launch/<hash(def, inputs)> -> <inputs>/
 │   ├── template/
-│   ├── instance/<hash> -> ../instances/<hash>/
-│   └── instances/<hash>/data/launch -> <source-inputs>/
-└── live/<consumer>@<hash>/
+│   ├── instance/<hash(def, inputs)> -> ../instances/<hash(def, inputs)>/
+│   └── instances/<hash(def, inputs)>/data/launch -> <inputs>/
+└── live/<consumer>@<hash(def, inputs)>/
     ├── inputs/
-    │   ├── <producer-1> -> ../telemetry/1-<producer-1>@<hash>/outputs/<row-1>/
-    │   └── <producer-2> -> ../telemetry/2-<producer-2>@<hash>/outputs/<row-2>/
+    │   ├── <producer-1> -> ../telemetry/1-<producer-1>@<instance>/outputs/<row-1>/
+    │   └── <producer-2> -> ../telemetry/2-<producer-2>@<instance>/outputs/<row-2>/
     ├── outputs/<row>/
     ├── telemetry/
-    │   ├── 1-<producer-1>@<hash> -> ../../../dead/<producer-1>/<hash>.<timestamp>/
-    │   └── 2-<producer-2>@<hash> -> ../../../dead/<producer-2>/<hash>.<timestamp>/
+    │   ├── 1-<producer-1>@<instance> -> ../../../dead/<producer-1>/<instance>.<timestamp>/
+    │   └── 2-<producer-2>@<instance> -> ../../../dead/<producer-2>/<instance>.<timestamp>/
     └── log
 ```
 
 ```tree
 STATE/graph/
 ├── sources/
-│   ├── <producer-1>/<hash> -> <source-inputs-1>/
-│   └── <producer-2>/<hash> -> <source-inputs-2>/
-├── completed/<consumer>/<hash> -> ../../../dead/<consumer>/<hash>.<timestamp>/
+│   ├── <producer-1>/<instance> -> <source-inputs-1>/
+│   └── <producer-2>/<instance> -> <source-inputs-2>/
+├── completed/<consumer>/<hash(def, inputs)> -> ../../../dead/<consumer>/<hash(def, inputs)>.<timestamp>/
 ├── pending/<service>/<instance> -> ../../../live/<service>@<instance>/
 ├── wanted-by -> topology/wanted-by/
 ├── topology -> .topology.<revision>/
@@ -99,8 +99,8 @@ STATE/graph/
 │   │   └── <producer-2>/<consumer> -> JOBS/<consumer>/
 │   ├── definitions/<consumer>
 │   └── services -> ../../services/
-├── definitions/<consumer>/<hash>
-└── cartesian/<consumer>/<hash>/
-    ├── <producer-1> -> ../../../../dead/<producer-1>/<hash>.<timestamp>/outputs/<row-1>/
-    └── <producer-2> -> ../../../../dead/<producer-2>/<hash>.<timestamp>/outputs/<row-2>/
+├── definitions/<consumer>/<hash(def, inputs)>
+└── cartesian/<consumer>/<hash(def, inputs)>/
+    ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>.<timestamp>/outputs/<row-1>/
+    └── <producer-2> -> ../../../../dead/<producer-2>/<instance>.<timestamp>/outputs/<row-2>/
 ```
