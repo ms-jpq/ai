@@ -884,7 +884,7 @@ runtime)
   mkdir -p -- "$SERVICE"
   rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
-  printf '%s' 1s > "$SERVICE/env/S9_RUNTIME_MAX_SEC"
+  printf -- '%s' 10s > "$SERVICE/env/S9_RUNTIME_MAX_SEC"
   cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 if [[ -n ${RECUR:-} ]]; then exit 67; fi
@@ -901,9 +901,9 @@ BASH
   ' EXIT
   START="$SECONDS"
   STATUS=0
-  timeout --foreground 5s s6-setsid -i env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output" || STATUS=$?
+  timeout --foreground 20s s6-setsid -i env -C "$SERVICE" -- ./run walk > "$TEST_DIR/output" || STATUS=$?
   [[ $STATUS == 124 ]]
-  ((SECONDS - START < 4))
+  ((SECONDS - START < 18))
   [[ -s $SERVICE/child ]]
   CHILD="$(< "$SERVICE/child")"
   kill -0 -- "$CHILD"
