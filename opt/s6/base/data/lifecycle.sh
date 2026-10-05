@@ -18,7 +18,7 @@ fi
 JOB_DIR="${INSTANCE_DIR%/instances/*}"
 JOB="${JOB_DIR##*/}"
 STATE="$JOB_DIR/../.."
-LIVE="$STATE/live/$JOB@${INSTANCE_DIR##*/}"
+LIVE="$STATE/live/$JOB/${INSTANCE_DIR##*/}"
 
 LOGGER=(s6-log -b -l 0)
 LOG_FMT=("p$JOB@${INSTANCE_DIR##*/}" 1)
@@ -117,9 +117,9 @@ EOF
   mkdir -p -- "${LOG_SRC%/*}"
   "${LOGGER[@]}" -- T "${LOG_FMT[@]}" <<< "$EXIT_LINES" | tee --append -- "$LOG_SRC" > /dev/null
 
-  "$DATAFLOW" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL" "$INSTANCE_DIR"
+  RECORD="$("$DATAFLOW" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL" "$INSTANCE_DIR")"
   if ((STATUS == 0 && SIGNAL == 0)); then
-    ln -sTnfr -- "$STATE/graph/indices/dead/$JOB/$INSTANCE" "$STATE/dead/$JOB/$INSTANCE.latest-succ"
+    ln -sTnfr -- "$RECORD" "$STATE/dead/$JOB/$INSTANCE/latest-succ"
     if "$DATAFLOW" projection "$STATE" "$JOB"; then
       :
     else

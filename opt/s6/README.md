@@ -28,21 +28,23 @@ STATE/
 │               └── launch -> <request>/
 ├── live/
 │   ├── s6.log
-│   └── <service>@<instance>/
+│   └── <service>/<instance>/
 │       ├── inputs/
 │       ├── outputs/
 │       ├── telemetry/
 │       └── log
-├── dead/<service>/
-│   ├── <instance>.latest-succ -> <instance>.<timestamp>/
-│   └── <instance>.<timestamp>/
+├── dead/<service>/<instance>/
+│   ├── latest-succ -> <timestamp>/
+│   └── <timestamp>/
 │       ├── inputs/
 │       ├── outputs/
 │       ├── telemetry/
 │       ├── log
 │       ├── exit_status
 │       └── signal
-└── failed/<service>/<instance>.<timestamp> -> ../../dead/<service>/<instance>.<timestamp>/
+└── failed/<service>/<instance>/
+    ├── latest -> <timestamp>/
+    └── <timestamp> -> ../../../dead/<service>/<instance>/<timestamp>/
 ```
 
 ---
@@ -69,7 +71,7 @@ STATE/
 │   ├── template/
 │   ├── instance/<hash(def, inputs)> -> ../instances/<hash(def, inputs)>/
 │   └── instances/<hash(def, inputs)>/data/launch -> <inputs>/
-└── live/<consumer>@<hash(def, inputs)>/
+└── live/<consumer>/<hash(def, inputs)>/
     ├── inputs/
     │   ├── .job.sum
     │   ├── <producer-1> -> ../telemetry/1-<producer-1>@<instance>/outputs/<row-1>/
@@ -77,14 +79,13 @@ STATE/
     ├── outputs/<row>/
     │   └── .job.sum
     ├── telemetry/
-    │   ├── 1-<producer-1>@<instance> -> ../../../dead/<producer-1>/<instance>.<timestamp>/
-    │   └── 2-<producer-2>@<instance> -> ../../../dead/<producer-2>/<instance>.<timestamp>/
+    │   ├── 1-<producer-1>@<instance> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/
+    │   └── 2-<producer-2>@<instance> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/
     └── log
 ```
 
 ```tree
 STATE/graph/
-├── indices/dead/<consumer>/<hash(def, inputs)> -> ../../../../dead/<consumer>/<hash(def, inputs)>.<timestamp>/
 ├── topology/
 │   ├── wants/<consumer>/
 │   │   ├── .job.sum
@@ -95,8 +96,8 @@ STATE/graph/
 │       └── <producer-2>/<consumer> -> ../../wants/<consumer>/
 └── cartesian-inputs/<consumer>/<hash(def, inputs)>/
     ├── .job.sum
-    ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>.<timestamp>/outputs/<row-1>/
+    ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<row-1>/
     │   └── .job.sum
-    └── <producer-2> -> ../../../../dead/<producer-2>/<instance>.<timestamp>/outputs/<row-2>/
+    └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<row-2>/
         └── .job.sum
 ```

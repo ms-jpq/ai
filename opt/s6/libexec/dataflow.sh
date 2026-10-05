@@ -3,46 +3,41 @@
 set -o pipefail
 shopt -u failglob dotglob
 
+SELF="$(realpath -- "$0")"
 ACTION="$1"
 shift -- 1
 STATE="$(realpath -- "$1")"
 shift -- 1
-SELF="$(realpath -- "$0")"
 GRAPH="$STATE/graph"
 SERVICES="$STATE/services"
 mkdir -p -- "$GRAPH"
 export LC_ALL=C.UTF-8
 
-if [[ $ACTION == deliver ]]; then
-  LIVE="$STATE/live/$1@$2"
-  mkdir -p -- "$LIVE" "$STATE/dead/$1"
+case "$ACTION" in
+prepare | deliver)
+  JOB="$1"
+  INSTANCE="$2"
+  LIVE="$STATE/live/$JOB/$INSTANCE"
+  ;;&
+deliver)
+  mkdir -p -- "$LIVE" "$STATE/dead/$JOB/$INSTANCE"
   if ! [[ -f $LIVE/.record ]]; then
-    RECORD="$STATE/dead/$1/$2.$(date -u +%Y%m%dT%H%M%S.%N)"
+    RECORD="$STATE/dead/$JOB/$INSTANCE/$(date -u +%Y%m%dT%H%M%S.%N)"
     printf -- '%s' "$3" > "$LIVE/exit_status"
     printf -- '%s' "$4" > "$LIVE/signal"
-    printf -- '%s' "${5:-$STATE/services/$1/instances/$2}" > "$LIVE/.service"
+    printf -- '%s' "${5:-$SERVICES/$JOB/instances/$INSTANCE}" > "$LIVE/.service"
     printf -- '%s' "$RECORD" > "$LIVE/.record-next"
     mv --no-target-directory -- "$LIVE/.record-next" "$LIVE/.record"
   fi
-fi
-
-case "$ACTION" in
+  ;;&
 compile | projection | deliver)
   if [[ ${RECUR:-} != dataflow ]]; then
     RECUR=dataflow exec -- s6-setlock -t 6000 -- "$GRAPH/.lock" "$SELF" "$ACTION" "$STATE" "$@"
   fi
-  ;;
-*)
-  ;;
-esac
-
-case "$ACTION" in
+  ;;&
 prepare)
-  JOB="$1"
-  INSTANCE="$2"
-  LIVE="$STATE/live/$JOB@$INSTANCE"
   if [[ -f $LIVE/.record ]]; then
-    "$SELF" deliver "$STATE" "$JOB" "$INSTANCE" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")"
+    "$SELF" deliver "$STATE" "$JOB" "$INSTANCE" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")" > /dev/null
   fi
   mkdir -p -- "$LIVE/outputs" "$LIVE/telemetry"
   if ! [[ -d $LIVE/inputs ]]; then
@@ -77,9 +72,9 @@ prepare)
   NUMBER=0
   for RECORD in "${RECORDS[@]}"; do
     NUMBER=$((NUMBER + 1))
-    PRODUCER="${RECORD%/*}"
-    ATTEMPT="${RECORD##*/}"
-    printf -v LABEL -- '%0*d-%s@%s' "$WIDTH" "$NUMBER" "${PRODUCER##*/}" "${ATTEMPT%%.*}"
+    PARENT="${RECORD%/*}"
+    PRODUCER="${PARENT%/*}"
+    printf -v LABEL -- '%0*d-%s@%s' "$WIDTH" "$NUMBER" "${PRODUCER##*/}" "${PARENT##*/}"
     ln -sTnfr -- "$RECORD" "$LIVE/telemetry/$LABEL"
     SEEN[$RECORD]="$LABEL"
   done
@@ -95,11 +90,11 @@ prepare)
   ;;
 compile)
   JOBS="$(realpath -- "$1")"
-  for RECORD in "$STATE"/live/*/.record; do
+  for RECORD in "$STATE"/live/*/*/.record; do
     LIVE="${RECORD%/*}"
     SERVICE="$(< "$LIVE/.service")"
     PRODUCER="${SERVICE%/instances/*}"
-    "$SELF" deliver "$STATE" "${PRODUCER##*/}" "${SERVICE##*/}" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")"
+    "$SELF" deliver "$STATE" "${PRODUCER##*/}" "${SERVICE##*/}" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")" > /dev/null
   done
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
   trap 'rm -fr -- "$BUILD"' EXIT
@@ -174,11 +169,15 @@ projection)
     "$SELF" visit "$STATE" "$TOPOLOGY" "$PASS" "${JOB##*/}" projection
   done
   ;;
-visit)
+visit | combine)
   TOPOLOGY="$1"
   PASS="$2"
   JOB="$3"
-  MODE="$4"
+  shift -- 3
+  WANTS=("$TOPOLOGY"/wants/"$JOB"/*)
+  ;;&
+visit)
+  MODE="$1"
   if [[ -f $PASS/$JOB/done ]]; then
     exit
   fi
@@ -187,29 +186,23 @@ visit)
     exit 2
   fi
   mkdir -p -- "$PASS/$JOB/records"
-  WANTS=("$TOPOLOGY"/wants/"$JOB"/*)
   for WANT in "${WANTS[@]}"; do
     "$SELF" visit "$STATE" "$TOPOLOGY" "$PASS" "$(< "$WANT")" "$MODE"
   done
   if [[ $MODE == projection ]] && [[ -f $TOPOLOGY/wants/$JOB/.job.sum ]]; then
     if ((${#WANTS[@]})); then
-      "$SELF" combine "$STATE" "$TOPOLOGY" "$PASS" "$JOB" 0
+      "$SELF" combine "$STATE" "$TOPOLOGY" "$PASS" "$JOB"
     else
-      for SOURCE in "$STATE"/dead/"$JOB"/*.latest-succ; do
-        INSTANCE="${SOURCE##*/}"
-        ln -sTnfr -- "$SOURCE" "$PASS/$JOB/records/${INSTANCE%.latest-succ}"
+      for SOURCE in "$STATE"/dead/"$JOB"/*/latest-succ; do
+        PARENT="${SOURCE%/*}"
+        ln -sTnfr -- "$SOURCE" "$PASS/$JOB/records/${PARENT##*/}"
       done
     fi
   fi
   touch -- "$PASS/$JOB/done"
   ;;
 combine)
-  TOPOLOGY="$1"
-  PASS="$2"
-  JOB="$3"
-  INDEX="$4"
-  shift -- 4
-  WANTS=("$TOPOLOGY"/wants/"$JOB"/*)
+  INDEX=$(($# / 2))
   if ((INDEX < ${#WANTS[@]})); then
     PRODUCER="$(< "${WANTS[$INDEX]}")"
     for OUTPUT in "$PASS"/"$PRODUCER"/records/*/outputs/*; do
@@ -217,30 +210,25 @@ combine)
         continue
       fi
       OUTPUT="$(realpath -- "$OUTPUT")"
-      "$SELF" combine "$STATE" "$TOPOLOGY" "$PASS" "$JOB" "$((INDEX + 1))" "$@" "${WANTS[$INDEX]##*/}" "$OUTPUT"
+      "$SELF" combine "$STATE" "$TOPOLOGY" "$PASS" "$JOB" "$@" "$PRODUCER" "$OUTPUT"
     done
-  else
-    IDENTITIES=()
-    for IDENTITY in "$@"; do
-      IDENTITIES+=("${IDENTITY#"$STATE"/}")
-    done
-    HASH="$(printf -- '%s\0' "$(< "$TOPOLOGY/wants/$JOB/.job.sum")" "${IDENTITIES[@]}" | b3sum)"
-    HASH="${HASH%% *}"
-    if [[ -f $PASS/.selected/$JOB ]]; then
-      "$SELF" ensure "$STATE" "$TOPOLOGY" "$JOB" "$HASH" "$@"
-    fi
-    if [[ -L $STATE/dead/$JOB/$HASH.latest-succ ]]; then
-      ln -sTnfr -- "$STATE/dead/$JOB/$HASH.latest-succ" "$PASS/$JOB/records/$HASH"
-    fi
+    exit
   fi
-  ;;
-ensure)
-  TOPOLOGY="$1"
-  JOB="$2"
-  INSTANCE="$3"
-  shift -- 3
+  IDENTITIES=()
+  for IDENTITY in "$@"; do
+    IDENTITIES+=("${IDENTITY#"$STATE"/}")
+  done
+  INSTANCE="$(printf -- '%s\0' "$(< "$TOPOLOGY/wants/$JOB/.job.sum")" "${IDENTITIES[@]}" | b3sum)"
+  INSTANCE="${INSTANCE%% *}"
+  if [[ -L $STATE/dead/$JOB/$INSTANCE/latest-succ ]]; then
+    ln -sTnfr -- "$STATE/dead/$JOB/$INSTANCE/latest-succ" "$PASS/$JOB/records/$INSTANCE"
+  fi
+  if ! [[ -f $PASS/.selected/$JOB ]]; then
+    exit
+  fi
   LAUNCH="$SERVICES/$JOB/data/launch"
-  if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -f $STATE/live/$JOB@$INSTANCE/.record ]] || [[ -L $GRAPH/indices/dead/$JOB/$INSTANCE ]]; then
+  COMPLETED=("$STATE/dead/$JOB/$INSTANCE/"[0-9]*/exit_status)
+  if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -f $STATE/live/$JOB/$INSTANCE/.record ]] || ((${#COMPLETED[@]})); then
     exit
   fi
   INPUTS="$GRAPH/cartesian-inputs/$JOB/$INSTANCE"
@@ -263,12 +251,6 @@ ensure)
   mv --no-target-directory -- "$LINK" "$LAUNCH/$INSTANCE"
   ;;
 deliver)
-  JOB="$1"
-  INSTANCE="$2"
-  LIVE="$STATE/live/$JOB@$INSTANCE"
-  if ! [[ -f $LIVE/.record ]] && [[ -L $GRAPH/indices/dead/$JOB/$INSTANCE ]]; then
-    exit
-  fi
   RECORD="$(< "$LIVE/.record")"
   SERVICE="$(< "$LIVE/.service")"
   if ! [[ -d $RECORD ]]; then
@@ -296,20 +278,18 @@ deliver)
     rm -- "$STAGING/"{.record,.service}
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi
-  mkdir -p -- "$GRAPH/indices/dead/$JOB"
-  LINK="$(mktemp -- "$GRAPH/indices/dead/$JOB/.dead.XXXXXX")"
-  trap 'rm -f -- "$LINK"' EXIT
-  ln -sTnfr -- "$RECORD" "$LINK"
-  mv --no-target-directory -- "$LINK" "$GRAPH/indices/dead/$JOB/$INSTANCE"
   if [[ $(< "$RECORD/exit_status") != 0 ]] || [[ $(< "$RECORD/signal") != 0 ]]; then
-    mkdir -p -- "$STATE/failed/$JOB"
-    ln -sTnfr -- "$RECORD" "$STATE/failed/$JOB/${RECORD##*/}"
+    FAILED="$STATE/failed/$JOB/$INSTANCE"
+    mkdir -p -- "$FAILED"
+    ln -sTnfr -- "$RECORD" "$FAILED/${RECORD##*/}"
+    ln -sTnf -- "${RECORD##*/}" "$FAILED/latest"
   fi
   if [[ -f $SERVICE/env/S9_ON_UNIT_INACTIVE_SEC ]] && (($(< "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC") < 0)); then
     touch -- "$SERVICE/../../data/.exited/$INSTANCE"
     rm -f -- "$SERVICE/data/launch"
   fi
   rm -fr -- "$LIVE"
+  printf -- '%s\n' "$RECORD"
   ;;
 *)
   set -x
