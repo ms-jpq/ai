@@ -1,32 +1,114 @@
 # S6
 
-```text
-JOBS/watchdog/
+## Jobs
+
+```tree
+JOBS/<service>/
 ├── run.sh
 ├── env/
 │   └── S9_ON_UNIT_INACTIVE_SEC
-└── data/launch/.gitignore
+└── data/launch/
+    └── <instance> -> <request>/
+```
 
+```tree
 STATE/
-├── services/watchdog/
+├── services/<service>/
 │   ├── data/
-│   │   ├── lstart
-│   │   └── launch/
-│   │       └── <pid> -> ../lstart
+│   │   ├── launch/
+│   │   └── .exited/
 │   ├── template/
 │   ├── instance/
-│   │   └── <pid> -> ../instances/<pid>
+│   │   └── <instance> -> ../instances/<instance>/
 │   └── instances/
-│       └── <pid>/
+│       └── <instance>/
 │           ├── env/S9_ON_UNIT_INACTIVE_SEC
-│           └── data/job
+│           └── data/
+│               ├── .run
+│               └── launch -> <request>/
 ├── live/
 │   ├── s6.log
-│   └── watchdog@<pid>/
+│   └── <service>@<instance>/
+│       ├── inputs/
+│       ├── outputs/
+│       ├── telemetry/
 │       └── log
-├── dead/watchdog/<pid>.<timestamp>/
+├── dead/<service>/<instance>.<timestamp>/
+│   ├── inputs/
+│   ├── outputs/
+│   ├── telemetry/
 │   ├── log
 │   ├── exit_status
 │   └── signal
-└── failed/watchdog/<pid>.<timestamp> -> ../../dead/watchdog/<pid>.<timestamp>
+└── failed/<service>/<instance>.<timestamp> -> ../../dead/<service>/<instance>.<timestamp>/
+```
+
+---
+
+## Dataflow
+
+```tree
+JOBS/
+├── <producer-1>/
+│   ├── run.sh
+│   └── data/launch/<hash-1> -> <source-inputs-1>/
+├── <producer-2>/
+│   ├── run.sh
+│   └── data/launch/<hash-2> -> <source-inputs-2>/
+└── <consumer>/
+    ├── run.sh
+    └── data/wants/
+        ├── input-1 -> ../../../<producer-1>/
+        └── input-2 -> ../../../<producer-2>/
+```
+
+```tree
+STATE/
+├── graph/
+│   ├── sources/
+│   │   ├── <producer-1>/<hash-1> -> <source-inputs-1>/
+│   │   └── <producer-2>/<hash-2> -> <source-inputs-2>/
+│   ├── latest/
+│   │   ├── <producer-1>/<hash-1> -> ../../../dead/<producer-1>/<hash-1>.<timestamp>/
+│   │   ├── <producer-2>/<hash-2> -> ../../../dead/<producer-2>/<hash-2>.<timestamp>/
+│   │   └── <consumer>/<hash> -> ../../../dead/<consumer>/<hash>.<timestamp>/
+│   ├── completed/<consumer>/<hash> -> ../../../dead/<consumer>/<hash>.<timestamp>/
+│   ├── pending/<service>/<instance> -> ../../../live/<service>@<instance>/
+│   ├── wanted-by -> topology/wanted-by/
+│   ├── topology -> .topology.<revision>/
+│   ├── .topology.<revision>/
+│   │   ├── jobs/<consumer> -> JOBS/<consumer>/
+│   │   ├── wants/<consumer>/
+│   │   │   ├── input-1
+│   │   │   └── input-2
+│   │   ├── wanted-by/
+│   │   │   ├── <producer-1>/<consumer> -> JOBS/<consumer>/
+│   │   │   └── <producer-2>/<consumer> -> JOBS/<consumer>/
+│   │   ├── definitions/<consumer>
+│   │   └── services -> ../../services/
+│   ├── definitions/<consumer>/<hash>
+│   └── cartesian/<consumer>/<hash>/
+│       ├── input-1 -> ../../../../dead/<producer-1>/<hash-1>.<timestamp>/outputs/<item-1>/
+│       └── input-2 -> ../../../../dead/<producer-2>/<hash-2>.<timestamp>/outputs/<item-2>/
+├── services/<consumer>/
+│   ├── data/launch/<hash> -> ../../../../graph/cartesian/<consumer>/<hash>/
+│   ├── template/
+│   ├── instance/<hash> -> ../instances/<hash>/
+│   └── instances/<hash>/data/launch -> <the same input directory>/
+├── live/<consumer>@<hash>/
+│   ├── inputs -> ../../graph/cartesian/<consumer>/<hash>/
+│   ├── outputs/<item>/
+│   ├── telemetry/
+│   │   ├── 1-<producer-1>@<hash-1> -> <completed producer record>/
+│   │   └── 2-<producer-2>@<hash-2> -> <completed producer record>/
+│   └── log
+└── dead/<consumer>/<hash>.<timestamp>/
+    ├── inputs -> ../../../graph/cartesian/<consumer>/<hash>/
+    ├── outputs/<item>/
+    ├── telemetry/
+    │   ├── 1-<producer-1>@<hash-1> -> <completed producer record>/
+    │   └── 2-<producer-2>@<hash-2> -> <completed producer record>/
+    ├── log
+    ├── exit_status
+    └── signal
 ```
