@@ -136,8 +136,8 @@ compile)
   if [[ -n $PREVIOUS ]]; then
     rm -fr -- "$PREVIOUS"
   fi
-  exec -- "$SELF" projection "$STATE"
-  ;;
+  shift -- 1
+  ;&
 projection)
   if ! [[ -L $GRAPH/topology ]]; then
     exit
@@ -211,11 +211,7 @@ combine)
     done
     exit
   fi
-  IDENTITIES=()
-  for IDENTITY in "$@"; do
-    IDENTITIES+=("${IDENTITY#"$STATE"/}")
-  done
-  INSTANCE="$(printf -- '%s\0' "$(< "$TOPOLOGY/wants/$JOB/.job.sum")" "${IDENTITIES[@]}" | b3sum)"
+  INSTANCE="$(printf -- '%s\0' "$(< "$TOPOLOGY/wants/$JOB/.job.sum")" "${@#"$STATE"/}" | b3sum)"
   INSTANCE="${INSTANCE%% *}"
   if [[ -L $STATE/dead/$JOB/$INSTANCE/latest-succ ]]; then
     ln -sTnfr -- "$STATE/dead/$JOB/$INSTANCE/latest-succ" "$PASS/$JOB/records/$INSTANCE"
