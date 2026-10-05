@@ -148,7 +148,7 @@ test "$5" = ''
 test -d "$2/producer-1"
 test -d "$2/producer-2"
 mkdir -p -- "$3/result/.s9"
-ln -sTnfr -- /dev/null "$3/result/.s9/defs.sum"
+ln -sTnfr -- "$0" "$3/result/.s9/defs.sum"
 printf '%s' "$1" > "$3/result/value"
 BASH
     chmod +x -- "$SERVICE/data/.run"
@@ -613,7 +613,7 @@ BASH
       exit 2
       ;;
     esac
-    ln -sTnfr -- /dev/null "$SERVICE/data/launch"
+    ln -sTnfr -- "$SERVICE/data/.run" "$SERVICE/data/launch"
     if PATH="$TEST_PATH" env -C "$SERVICE" -- ./finish 67 0 "$INSTANCE" > "$TEST_DIR/finish.log"; then
       exit 1
     fi
@@ -684,7 +684,7 @@ BASH
   printf '%s' one > "$STEP/env/PAYLOAD"
   printf '%s' old-data > "$STEP/data/value"
   ln -sTnfr -- "$STEP" "$JOB"
-  ln -sTnfr -- /dev/null "$STEP/data/launch/walk"
+  ln -sTnfr -- "$STEP/run.sh" "$STEP/data/launch/walk"
   RECUR=bootstrap "${QUINE[@]}" quine
   cat > "$JOBS/keeper/run.sh" << 'BASH'
 #!/usr/bin/env bash
@@ -693,7 +693,7 @@ BASH
   chmod +x -- "$JOBS/keeper/run.sh"
   RECUR=seed "${QUINE[@]}" keeper parent
   mkdir -p -- "$STATE/keeper/data/launch"
-  ln -sTnfr -- /dev/null "$STATE/keeper/data/launch/parent"
+  ln -sTnfr -- "$JOBS/keeper/run.sh" "$STATE/keeper/data/launch/parent"
 
   s6-svscan -- "$STATE" > "$TEST_DIR/scan.log" 67>&1 2>&1 &
   SCAN_PID=$!
@@ -743,7 +743,7 @@ BASH
     case "$ATTEMPT" in
     two)
       printf '%s' three > "$STEP/env/PAYLOAD"
-      ln -sTnfr -- /dev/null "$STEP/data/launch/walk"
+      ln -sTnfr -- "$STEP/run.sh" "$STEP/data/launch/walk"
       "${WAIT[@]}" -s "$TEST_DIR/started-three"
       ;;
     three)
@@ -773,7 +773,7 @@ BASH
 snapshots)
   mkdir -- "$TEST_DIR/"snapshot-{2,3}
   ln -sTnfr -- "$JOBS/quine" "$JOBS/quine-2"
-  ln -sTnf -- /dev/null "$JOBS/quine/data/null"
+  ln -sTnfr -- "$JOBS/quine/run.sh" "$JOBS/quine/data/link"
 
   RECUR=bootstrap "${QUINE[@]}" quine
   RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../jobs/quine-2/run.sh quine-2 -
@@ -783,9 +783,9 @@ snapshots)
   if [[ -L $TEST_DIR/snapshot-2/quine-2/template ]]; then
     exit 1
   fi
-  LINK="$(readlink -- "$STATE/quine/template/data/null")"
-  [[ -L $STATE/quine/template/data/null ]]
-  [[ $LINK == /dev/null ]]
+  LINK="$(readlink -- "$STATE/quine/template/data/link")"
+  [[ -L $STATE/quine/template/data/link ]]
+  [[ $LINK == ../run.sh ]]
 
   diff --recursive --no-dereference --unified --from-file="$STATE/quine" -- "$TEST_DIR/snapshot-2/quine-2" "$TEST_DIR/snapshot-3/quine"
   ;;
@@ -978,7 +978,7 @@ BASH
   chmod +x -- "$JOB/run.sh"
   printf '%s' first > "$JOB/env/PAYLOAD"
   printf '%s' original > "$JOB/data/value"
-  ln -sTnfr -- /dev/null "$JOB/data/launch/walk"
+  ln -sTnfr -- "$JOB/run.sh" "$JOB/data/launch/walk"
   ln -sTnfr -- "$JOB" "$JOBS/lil"
   for NAME in dog lil; do
     RECUR=seed "${QUINE[@]}" "$NAME" walk
@@ -1049,7 +1049,7 @@ BASH
   done
   RECONCILE=(env "PATH=$TEST_DIR/bin:$PATH" RECUR=job "${QUINE[@]}")
   ln -sTnfr -- /missing/inbox "$LAUNCH/run"
-  ln -sTnfr -- /dev/null "$LAUNCH/.pending"
+  ln -sTnfr -- "$STEP/run.sh" "$LAUNCH/.pending"
   "${RECONCILE[@]}" queue-dog
   [[ -d $MANAGER/instances/run ]]
   [[ -L $MANAGER/instances/run/data/launch ]]
@@ -1068,7 +1068,7 @@ BASH
   if [[ -L $LAUNCH/stale ]] || [[ -d $MANAGER/instances/stale ]]; then exit 1; fi
   [[ -L $MANAGER/instances/current/data/launch ]]
 
-  ln -sTnfr -- /dev/null "$LAUNCH/rejected"
+  ln -sTnfr -- "$STEP/run.sh" "$LAUNCH/rejected"
   if "${RECONCILE[@]}" queue-dog; then
     exit 1
   fi
@@ -1077,7 +1077,7 @@ BASH
     exit 1
   fi
 
-  ln -sTnfr -- /dev/null "$LAUNCH/run"
+  ln -sTnfr -- "$STEP/run.sh" "$LAUNCH/run"
   if env -C "$MANAGER/instances/run" -- ./finish 0 0 run > "$TEST_DIR/finish.log"; then
     exit 1
   else
@@ -1135,7 +1135,7 @@ printf '%s' "${@: -1}" > ./delay
 BASH
   chmod +x -- "$SERVICE/data/.run" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
-  ln -sTnfr -- /dev/null "$SERVICE/data/launch"
+  ln -sTnfr -- "$SERVICE/data/.run" "$SERVICE/data/launch"
   trap 'printf "policy:%s interval=%s cap=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$CAP" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
   while read -r INTERVAL CAP STATUS DELAY EXPECTED_EXIT EXPECTED_ATTEMPTS; do
     printf '%s' "$INTERVAL" > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
