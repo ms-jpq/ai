@@ -81,7 +81,7 @@ attempt)
     tee <<- EOF
 --- started ---
 EOF
-    "$INSTANCE_DATA/job" "$@" || STATUS=$?
+    "$INSTANCE_DATA/.run" "$@" || STATUS=$?
     printf -- '\n'
     exit "$STATUS"
   } 2>&1 | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" | tee --append -- "$LIVE/log" > /dev/null || exit "$?"
@@ -118,7 +118,7 @@ EOF
   "${LOGGER[@]}" -- T "${LOG_FMT[@]}" <<< "$EXIT_LINES" | tee --append -- "$LOG_SRC" > /dev/null
   "$INSTANCE_DATA/dataflow.sh" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL" "$S9_DEAD_DIR" "$INSTANCE_DIR"
   if ((EXIT_STATUS == 125)); then
-    touch -- "../../data/done/$INSTANCE"
+    touch -- "../../data/.exited/$INSTANCE"
     rm -f -- "$INSTANCE_DATA/launch"
   fi
   printf -- '%s' "$EXIT_LINES"

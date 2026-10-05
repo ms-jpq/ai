@@ -291,7 +291,7 @@ deliver)
   fi
   "$SELF" index "$STATE" "$JOB" "$INSTANCE" "$RECORD"
   if [[ -f $SERVICE/env/S9_ON_UNIT_INACTIVE_SEC ]] && (($(< "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC") < 0)); then
-    touch -- "$SERVICE/../../data/done/$INSTANCE"
+    touch -- "$SERVICE/../../data/.exited/$INSTANCE"
     rm -f -- "$SERVICE/data/launch"
   fi
   rm -fr -- "$LIVE"

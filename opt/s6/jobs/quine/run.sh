@@ -12,7 +12,7 @@ JOB="$ROOT/jobs/$NAME"
 SUPERVISOR="$PWD/$NAME"
 TEMPLATE="$SUPERVISOR/template"
 INSTANCES="$SUPERVISOR/instances"
-DONE="$SUPERVISOR/data/done"
+EXITED="$SUPERVISOR/data/.exited"
 TIMEOUT=6000
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 -I '{}' --)
 
@@ -47,16 +47,16 @@ seed | job)
       ln -sTnf -- "$PRODUCER" "$BUILD/data/wants/${WANT##*/}"
     done
     if [[ ${RUN[*]} -ef $SELF ]]; then
-      ln -sTnf -- "${RUN[*]}" "$BUILD/data/job"
+      ln -sTnf -- "${RUN[*]}" "$BUILD/data/.run"
     else
-      cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$BUILD/data/job"
+      cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$BUILD/data/.run"
     fi
     tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$STAGING/.sum"
     mv -- "$STAGING/.sum" "$BUILD/.sum"
 
     if ! [[ -d $SUPERVISOR ]]; then
       s6-instance-maker -- "$BUILD" "$STAGING/manager"
-      mkdir -p -- "$STAGING/manager/data/done"
+      mkdir -p -- "$STAGING/manager/data/.exited"
       mv --no-target-directory -- "$STAGING/manager" "$SUPERVISOR"
     else
       rsync --archive --checksum --delete -- "$BUILD/" "$TEMPLATE/"
@@ -81,7 +81,7 @@ job)
   s6-svwait -U -t "$TIMEOUT" -- "$SUPERVISOR"
 
   {
-    find "$INSTANCES" "$DONE" -mindepth 1 -maxdepth 1 ! -name '.*' -printf '%f\0'
+    find "$INSTANCES" "$EXITED" -mindepth 1 -maxdepth 1 ! -name '.*' -printf '%f\0'
     for SOURCE in "$JOB" "$SUPERVISOR"; do
       if [[ -d $SOURCE/data/launch ]]; then
         find "$SOURCE/data/launch/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
@@ -96,7 +96,7 @@ cleanup)
     DELETE+=(-X)
   fi
   "${DELETE[@]}" -- "$SUPERVISOR" "$INSTANCE"
-  rm -fr -- "${DONE:?}/$INSTANCE"
+  rm -fr -- "${EXITED:?}/$INSTANCE"
   ;;
 instance)
   INSTANCE="${2##*/}"
@@ -109,12 +109,12 @@ instance)
   fi
 
   "$ROOT/libexec/dataflow.sh" register "$PWD/.." "$NAME" "$INSTANCE" "$REQUEST" "$JOB"
-  if [[ -e $DONE/$INSTANCE ]] || { [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; }; then
+  if [[ -e $EXITED/$INSTANCE ]] || { [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; }; then
     RECUR=cleanup "$0" "$NAME" "$INSTANCE"
   fi
 
   if [[ -d $SERVICE ]] && (($(< "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC") >= 0)); then
-    if [[ $DATA/job -ef $SELF ]]; then
+    if [[ $DATA/.run -ef $SELF ]]; then
       exit
     fi
     if [[ -d $JOB ]] && [[ -L $REQUEST ]] && ! [[ -f $SERVICE/down ]] && cmp --silent -- "$TEMPLATE/.sum" "$SERVICE/.sum"; then
@@ -157,7 +157,7 @@ instance)
       exit
     fi
     s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
-    if [[ -f $DONE/$INSTANCE ]]; then
+    if [[ -f $EXITED/$INSTANCE ]]; then
       exit
     fi
   fi

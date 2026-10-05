@@ -54,20 +54,20 @@ dataflow)
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 4 ]]
   [[ -L $RUNTIME/graph/wanted-by/producer-1/consumer ]]
-  mkdir -p -- "$SERVICES/consumer/data/done"
+  mkdir -p -- "$SERVICES/consumer/data/.exited"
   for REQUEST in "${REQUESTS[@]}"; do
     HASH="${REQUEST##*/}"
     SERVICE="$SERVICES/consumer/instances/$HASH"
     mkdir -p -- "$SERVICE"
     rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
-    cat > "$SERVICE/data/job" << 'BASH'
+    cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
 test -d ./inputs/first
 mkdir -- ./outputs/result
 printf '%s' "$1" > ./outputs/result/value
 BASH
-    chmod +x -- "$SERVICE/data/job"
+    chmod +x -- "$SERVICE/data/.run"
     TARGET="$(realpath -- "$REQUEST")"
     ln -sTnf -- "$TARGET" "$REQUEST"
     mv -- "$REQUEST" "$SERVICES/consumer/instances/$HASH/data/launch"
@@ -85,7 +85,7 @@ BASH
     RECORD="$(realpath -- "$RUNTIME/graph/latest/consumer/$HASH")"
     [[ $(< "$RECORD/outputs/result/value") == "$HASH" ]]
     [[ -d $RECORD/inputs/first ]]
-    [[ -f $SERVICES/consumer/data/done/$HASH ]]
+    [[ -f $SERVICES/consumer/data/.exited/$HASH ]]
     rm -fr -- "$SERVICES/consumer/instances/$HASH"
   done
   REQUESTS=("$SERVICES/sink/data/launch/"*)
@@ -203,16 +203,16 @@ logger)
     SERVICE="$STATE/dog/instances/$INSTANCE"
     mkdir -p -- "$SERVICE"
     rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
-    mkdir -p -- "$STATE/dog/data/done"
+    mkdir -p -- "$STATE/dog/data/.exited"
     printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
-    cat > "$SERVICE/data/job" << 'BASH'
+    cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 printf 'ran\n' > "${0%/*}/ran"
 printf 'command stdout\n'
 printf 'command stderr\n' >&2
 exit "${TEST_JOB_STATUS:-0}"
 BASH
-    chmod +x -- "$SERVICE/data/job"
+    chmod +x -- "$SERVICE/data/.run"
     for STATUS in 0 67; do
       ACTUAL=0
       TEST_JOB_STATUS="$STATUS" S9_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output" || ACTUAL=$?
@@ -322,7 +322,7 @@ BASH
     if PATH="$TEST_DIR/bin:$PATH" env -C "$SERVICE" -- ./finish 67 0 "$INSTANCE" > "$TEST_DIR/finish.log"; then
       exit 1
     fi
-    if [[ -f $STATE/dog/data/done/$INSTANCE ]]; then exit 1; fi
+    if [[ -f $STATE/dog/data/.exited/$INSTANCE ]]; then exit 1; fi
     [[ -L $SERVICE/data/launch ]]
     [[ -f $TEST_DIR/live/dog@$INSTANCE/log ]]
   done
@@ -330,18 +330,18 @@ BASH
   ;;
 runtime)
   SERVICE="$STATE/dog/instances/walk"
-  mkdir -p -- "$SERVICE" "$STATE/dog/data/done"
+  mkdir -p -- "$SERVICE" "$STATE/dog/data/.exited"
   rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
   printf '%s' 1s > "$SERVICE/env/S9_RUNTIME_MAX_SEC"
-  cat > "$SERVICE/data/job" << 'BASH'
+  cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 if [[ -n ${RECUR:-} ]]; then exit 67; fi
 sleep 30 &
 printf '%s' "$!" > child
 exit 0
 BASH
-  chmod +x -- "$SERVICE/data/job"
+  chmod +x -- "$SERVICE/data/.run"
   trap '
     if [[ -f $SERVICE/data/.pgid ]]; then
       kill -KILL -- "-$(< "$SERVICE/data/.pgid")" 2> /dev/null || true
@@ -362,7 +362,7 @@ BASH
   timeout --foreground 2s bash -s -- "$CHILD" << 'BASH'
 while kill -0 "$1" 2>/dev/null; do sleep 0.02; done
 BASH
-  [[ -f $STATE/dog/data/done/walk ]]
+  [[ -f $STATE/dog/data/.exited/walk ]]
   ;;
 lifecycle)
   STEP="$TEST_DIR/steps/dog"
@@ -478,7 +478,7 @@ snapshots)
 
   RECUR=bootstrap "${QUINE[@]}" quine
   RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../jobs/quine-2/run.sh quine-2 -
-  RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../snapshot-1/quine/instances/-/data/job quine -
+  RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../snapshot-1/quine/instances/-/data/.run quine -
 
   [[ -d $TEST_DIR/snapshot-2/quine-2/template ]]
   if [[ -L $TEST_DIR/snapshot-2/quine-2/template ]]; then
@@ -590,22 +590,22 @@ BASH
   RECONCILE=(env "PATH=$TEST_DIR/bin:$PATH" "TEST_ROOT=$TEST_DIR" RECUR=job "${QUINE[@]}" dog)
   "${RECONCILE[@]}"
   SERVICE="$STATE/dog/instances/walk"
-  diff --unified -- "$TEST_DIR/old/run.sh" "$SERVICE/data/job"
+  diff --unified -- "$TEST_DIR/old/run.sh" "$SERVICE/data/.run"
   TARGET="$(readlink -- "$SERVICE/data/launch")"
   [[ $TARGET == /old ]]
   [[ -L $TEST_DIR/new/data/launch/walk ]]
   if [[ -L $TEST_DIR/old/data/launch/walk ]]; then exit 1; fi
 
-  touch -- "$STATE/dog/data/done/walk"
+  touch -- "$STATE/dog/data/.exited/walk"
   if TEST_DELETE_STATUS=111 "${RECONCILE[@]}"; then exit 1; fi
   [[ -d $SERVICE ]]
-  [[ -f $STATE/dog/data/done/walk ]]
+  [[ -f $STATE/dog/data/.exited/walk ]]
   [[ -L $TEST_DIR/new/data/launch/walk ]]
   "${RECONCILE[@]}"
-  diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/job"
+  diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/.run"
   TARGET="$(readlink -- "$SERVICE/data/launch")"
   [[ $TARGET == /new ]]
-  if [[ -f $STATE/dog/data/done/walk ]]; then exit 1; fi
+  if [[ -f $STATE/dog/data/.exited/walk ]]; then exit 1; fi
 
   printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
   TEST_SERVICE_STATUS='true true' "${RECONCILE[@]}"
@@ -625,11 +625,11 @@ BASH
   [[ -d $SERVICE ]]
   if [[ -e $SERVICE/stale ]]; then exit 1; fi
   [[ -L $TEST_DIR/new/data/launch/walk ]]
-  diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/job"
+  diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/.run"
 
-  touch -- "$STATE/dog/data/done/finished"
+  touch -- "$STATE/dog/data/.exited/finished"
   "${RECONCILE[@]}"
-  if [[ -e $STATE/dog/data/done/finished ]]; then exit 1; fi
+  if [[ -e $STATE/dog/data/.exited/finished ]]; then exit 1; fi
   [[ -d $SERVICE ]]
 
   printf '%s' payload > "$TEST_DIR/new/data/payload"
@@ -655,12 +655,12 @@ BASH
   for NAME in dog lil; do
     RECUR=seed "${QUINE[@]}" "$NAME" walk
     SERVICE="$STATE/$NAME/instances/walk"
-    diff --unified -- "$JOB/run.sh" "$SERVICE/data/job"
+    diff --unified -- "$JOB/run.sh" "$SERVICE/data/.run"
     diff --unified -- "$JOB/env/PAYLOAD" "$SERVICE/env/PAYLOAD"
     [[ $SERVICE/run -ef $SERVICE/data/lifecycle.sh ]]
     if [[ -e $SERVICE/data/launch ]] || [[ -L $SERVICE/data/launch ]]; then exit 1; fi
-    if [[ -L $SERVICE/data/job ]]; then exit 1; fi
-    ACTUAL="$(s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" walk)"
+    if [[ -L $SERVICE/data/.run ]]; then exit 1; fi
+    ACTUAL="$(s6-envdir -- "$SERVICE/env" "$SERVICE/data/.run" walk)"
     [[ $ACTUAL == walk:first:original ]]
   done
   RECUR=seed "${QUINE[@]}" dog walk
@@ -669,7 +669,7 @@ BASH
   RECUR=seed "${QUINE[@]}" dog walk
   if [[ -e $STATE/dog/template/env/PAYLOAD ]] || [[ -e $STATE/dog/template/data/value ]]; then exit 1; fi
   SERVICE="$STATE/dog/instances/walk"
-  ACTUAL="$(s6-envdir -- "$SERVICE/env" "$SERVICE/data/job" walk)"
+  ACTUAL="$(s6-envdir -- "$SERVICE/env" "$SERVICE/data/.run" walk)"
   [[ $ACTUAL == walk:first:original ]]
   ;;
 
@@ -741,7 +741,7 @@ BASH
     [[ $? == 125 ]]
   fi
   [[ -L $LAUNCH/run ]]
-  [[ -f $MANAGER/data/done/run ]]
+  [[ -f $MANAGER/data/.exited/run ]]
   if [[ -L $MANAGER/instances/run/data/launch ]]; then
     exit 1
   fi
@@ -777,11 +777,11 @@ BASH
   ;;
 policy)
   SERVICE="$STATE/dog/instances/walk"
-  mkdir -p -- "$SERVICE" "$STATE/dog/data/done" "$TEST_DIR/bin"
+  mkdir -p -- "$SERVICE" "$STATE/dog/data/.exited" "$TEST_DIR/bin"
   rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
   printf '%s' 2 > "$SERVICE/env/S9_RESTART_SEC"
-  cat > "$SERVICE/data/job" << 'BASH'
+  cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 printf '%s' "$1"
 BASH
@@ -789,7 +789,7 @@ BASH
 #!/usr/bin/env bash
 printf '%s' "${@: -1}" > ./delay
 BASH
-  chmod +x -- "$SERVICE/data/job" "$TEST_DIR/bin/sleep"
+  chmod +x -- "$SERVICE/data/.run" "$TEST_DIR/bin/sleep"
   TEST_BIN="$(realpath -- "$TEST_DIR/bin")"
   ln -sTnfr -- /dev/null "$SERVICE/data/launch"
   trap 'printf "policy:%s interval=%s cap=%s status=%s delay=%s exit=%s attempts=%s: %s\n" "$LINENO" "$INTERVAL" "$CAP" "$STATUS" "$DELAY" "$EXPECTED_EXIT" "$EXPECTED_ATTEMPTS" "$BASH_COMMAND" >&2' ERR
@@ -832,7 +832,7 @@ BASH
 -1 - 7 none 125 0
 -1 - 0 none 125 0
 EOF
-  [[ -f $STATE/dog/data/done/walk ]]
+  [[ -f $STATE/dog/data/.exited/walk ]]
   if [[ -L $SERVICE/data/launch ]]; then
     exit 1
   fi
