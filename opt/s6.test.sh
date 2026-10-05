@@ -3,16 +3,18 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl snapshots p-cp publication templates queues policy logger runtime lifecycle dataflow | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
 
 ROOT="${0%.test.sh}"
+S9_GRAPH_TIMEOUT="$(< "$ROOT/base/env/S9_GRAPH_TIMEOUT")"
+export -- S9_GRAPH_TIMEOUT
 mkdir -p -- "$ROOT/../../var/tmp"
 TEST_DIR="$(mktemp -d -- "$ROOT/../../var/tmp/s6-test.XXXXXX")"
 TEST_DIR="$(realpath -- "$TEST_DIR")"
-STATE="$TEST_DIR/snapshot-1"
+STATE="$TEST_DIR/services"
 JOBS="$TEST_DIR/jobs"
 QUINE=(env -C "$STATE" -- "$JOBS/quine/run.sh")
 trap 'rm -fr -- "$TEST_DIR"' EXIT
@@ -22,7 +24,8 @@ cp --archive -- "$ROOT/." "$TEST_DIR/"
 case "$1" in
 dataflow)
   shopt -u failglob dotglob
-  FLOW="$TEST_DIR/libexec/dataflow.sh"
+  FLOW="$TEST_DIR/base/data/dataflow.sh"
+  TOPOLOGY="$TEST_DIR/base/data/topology.sh"
   RUNTIME="$TEST_DIR/runtime"
   SERVICES="$RUNTIME/services"
   INPUT="$TEST_DIR/input"
@@ -35,17 +38,21 @@ ROOT="${0%/*}"
 SERVICE="$ROOT/runtime/services/$1/instances/$2"
 mkdir -p -- "$SERVICE"
 rsync --archive --copy-unsafe-links -- "$ROOT/base/" "$SERVICE/"
-printf '%s' "$1-v1" > "$SERVICE/.sum"
+printf '%s' "${TEST_DEFINITION:-$1-v1}" > "$SERVICE/data/.s9/defs.sum"
 printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
 env -C "$SERVICE" -- ./finish "$3" "$4" "$2" > "$ROOT/finish.log"
 BASH
   chmod +x -- "$FINISH"
   for JOB in producer-1 producer-2 consumer sink bystander; do
-    mkdir -p -- "$JOBS/$JOB/data/launch" "$SERVICES/$JOB/template" "$SERVICES/$JOB/instances"
-    printf '%s' "$JOB-v1" > "$SERVICES/$JOB/template/.sum"
+    mkdir -p -- "$JOBS/$JOB/data/launch" "$SERVICES/$JOB/template/data/.s9" "$SERVICES/$JOB/instances"
+    printf '%s' "$JOB-v1" > "$SERVICES/$JOB/template/data/.s9/defs.sum"
   done
   mv -- "$JOBS/producer-1" "$TEST_DIR/producer-snapshot"
   ln -sTnfr -- "$TEST_DIR/producer-snapshot" "$JOBS/producer-1"
+  for JOB in producer-1 producer-2 consumer sink bystander; do
+    TARGET="$(realpath -- "$JOBS/$JOB")"
+    ln -sTnf -- "$TARGET" "$SERVICES/$JOB/template/data/.s9/source"
+  done
   mkdir -p -- "$JOBS/consumer/data/wants" "$JOBS/sink/data/wants" "$JOBS/bystander/data/wants"
   ln -sTnfr -- "$JOBS/producer-1" "$JOBS/consumer/data/wants/first"
   ln -sTnfr -- "$JOBS/producer-2" "$JOBS/consumer/data/wants/second"
@@ -69,24 +76,46 @@ BASH
     fi
     mkdir -- "$RUNTIME/live/$JOB/$HASH/outputs/A" "$TEST_DIR/$JOB-row"
     ln -sTnfr -- "$TEST_DIR/$JOB-row" "$RUNTIME/live/$JOB/$HASH/outputs/B"
+    for ROW in A B; do
+      OUTPUT="$RUNTIME/live/$JOB/$HASH/outputs/$ROW"
+      mkdir -- "$OUTPUT/nested"
+      printf '%s' payload > "$OUTPUT/nested/value"
+      printf '%s' hidden > "$OUTPUT/.hidden"
+      ln -sTnfr -- "$OUTPUT/nested/value" "$OUTPUT/alias"
+    done
     printf '%s' "$JOB" > "$RUNTIME/live/$JOB/$HASH/log"
     "$FINISH" "$JOB" "$HASH" 0 0
     rm -- "$JOBS/$JOB/data/launch/$HASH"
     RECORD="$(realpath -- "$RUNTIME/dead/$JOB/$HASH/latest-succ")"
     for ROW in A B; do
-      [[ $(< "$RECORD/outputs/$ROW/.job.sum") == "$JOB-v1" ]]
+      [[ $(< "$RECORD/outputs/$ROW/.s9/defs.sum") == "$JOB-v1" ]]
     done
-    if [[ -f $TEST_DIR/$JOB-row/.job.sum ]]; then exit 1; fi
-    if [[ -f $TEST_DIR/$JOB-outputs/A/.job.sum ]]; then exit 1; fi
+    if [[ -f $TEST_DIR/$JOB-row/.s9/defs.sum ]]; then exit 1; fi
+    if [[ -f $TEST_DIR/$JOB-outputs/A/.s9/defs.sum ]]; then exit 1; fi
   done
-  "$FLOW" compile "$RUNTIME" "$JOBS"
+  "$TOPOLOGY" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 4 ]]
+  if "$TOPOLOGY" combine "$RUNTIME" "$RUNTIME/graph/topology/wants/consumer" "$TEST_DIR/pass" producer-1 "$TEST_DIR/missing-row" producer-2 '' > "$TEST_DIR/output" 2>&1; then exit 1; fi
   for PRODUCER in producer-1 producer-2; do
-    [[ $RUNTIME/graph/topology/wanted-by/$PRODUCER/consumer -ef $RUNTIME/graph/topology/wants/consumer ]]
-    [[ $(< "$RUNTIME/graph/topology/wants/consumer/$PRODUCER") == "$PRODUCER" ]]
+    [[ $RUNTIME/graph/topology/wanted-by/$PRODUCER/consumer -ef $RUNTIME/graph/topology/wanted-by/consumer ]]
+    TARGET="$(readlink -- "$RUNTIME/graph/topology/wanted-by/$PRODUCER/consumer")"
+    [[ $TARGET == ../consumer ]]
+    TARGET="$(readlink -- "$RUNTIME/graph/topology/wants/consumer/$PRODUCER")"
+    [[ $TARGET == "../$PRODUCER" ]]
+    [[ $RUNTIME/graph/topology/wants/consumer/$PRODUCER -ef $RUNTIME/graph/topology/wants/$PRODUCER ]]
   done
   REQUEST="${REQUESTS[0]}"
+  cat > "$TEST_DIR/visit.sh" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "${1##*/}" >> "$2/order"
+BASH
+  for JOB in sink sink; do
+    "$TOPOLOGY" visit "$RUNTIME" "$RUNTIME/graph/topology/wants/$JOB" "$TEST_DIR/visit" bash "$TEST_DIR/visit.sh"
+  done
+  printf '%s\n' producer-1 producer-2 consumer sink > "$TEST_DIR/expected-order"
+  diff --unified -- "$TEST_DIR/expected-order" "$TEST_DIR/visit/order"
   HASH="${REQUEST##*/}"
   INPUTS="$RUNTIME/graph/cartesian-inputs/consumer/$HASH"
   [[ $REQUEST -ef $INPUTS ]]
@@ -95,66 +124,68 @@ BASH
   mkdir -p -- "$RUNTIME/dead/consumer/$HASH/.unfinished"
   printf '%s' 0 > "$RUNTIME/dead/consumer/$HASH/.unfinished/exit_status"
   mv -- "$INPUTS" "$STAGING"
-  printf '%s' incomplete > "$STAGING/.job.sum"
+  printf '%s' incomplete > "$STAGING/.s9/defs.sum"
   rm -- "$STAGING/producer-1"
-  "$FLOW" projection "$RUNTIME"
+  "$TOPOLOGY" projection "$RUNTIME"
   [[ $REQUEST -ef $INPUTS ]]
-  [[ $(< "$INPUTS/.job.sum") == consumer-v1 ]]
+  [[ $(< "$INPUTS/.s9/defs.sum") == consumer-v1 ]]
   [[ -d $INPUTS/producer-1 ]]
   if [[ -d $STAGING ]]; then exit 1; fi
-  mkdir -p -- "$SERVICES/consumer/data/.exited"
   for REQUEST in "${REQUESTS[@]}"; do
     HASH="${REQUEST##*/}"
-    [[ $(< "$REQUEST/.job.sum") == consumer-v1 ]]
-    IDENTITIES=()
-    for INPUT_LINK in "$REQUEST"/*; do
-      TARGET="$(realpath -- "$INPUT_LINK")"
-      IDENTITIES+=("${INPUT_LINK##*/}" "${TARGET#"$RUNTIME"/}")
-    done
-    EXPECTED="$(printf '%s\0' consumer-v1 "${IDENTITIES[@]}" | b3sum)"
-    [[ $HASH == "${EXPECTED%% *}" ]]
+    [[ $(< "$REQUEST/.s9/defs.sum") == consumer-v1 ]]
     SERVICE="$SERVICES/consumer/instances/$HASH"
     mkdir -p -- "$SERVICE"
     rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
-    cp -- "$SERVICES/consumer/template/.sum" "$SERVICE/.sum"
+    cp -- "$SERVICES/consumer/template/data/.s9/defs.sum" "$SERVICE/data/.s9/defs.sum"
     cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
-test -d ./inputs/producer-1
-test -d ./inputs/producer-2
-mkdir -- ./outputs/result
-ln -sTnfr -- /dev/null ./outputs/result/.job.sum
-printf '%s' "$1" > ./outputs/result/value
+test "$#" -eq 5
+test "$4" = 'extra argument'
+test "$5" = ''
+[[ $2 == /* ]] && [[ $3 == /* ]]
+test -d "$2/producer-1"
+test -d "$2/producer-2"
+mkdir -p -- "$3/result/.s9"
+ln -sTnfr -- /dev/null "$3/result/.s9/defs.sum"
+printf '%s' "$1" > "$3/result/value"
 BASH
     chmod +x -- "$SERVICE/data/.run"
     TARGET="$(realpath -- "$REQUEST")"
     ln -sTnf -- "$TARGET" "$REQUEST"
     mv -- "$REQUEST" "$SERVICES/consumer/instances/$HASH/data/launch"
     "$FLOW" prepare "$RUNTIME" consumer "$HASH" "$SERVICES/consumer/instances/$HASH/data/launch"
+    ln -sTnfr -- "$RUNTIME/live/consumer/$HASH/inputs/producer-1" "$RUNTIME/live/consumer/$HASH/inputs/shared"
+    "$FLOW" prepare "$RUNTIME" consumer "$HASH" "$SERVICES/consumer/instances/$HASH/data/launch"
+    [[ $RUNTIME/live/consumer/$HASH/inputs/shared -ef $RUNTIME/live/consumer/$HASH/inputs/producer-1 ]]
     TELEMETRY=("$RUNTIME/live/consumer/$HASH/telemetry/"*)
     [[ ${#TELEMETRY[@]} == 2 ]]
     for LINK in "${TELEMETRY[@]}"; do
       TARGET="$(readlink -- "$LINK")"
       [[ $TARGET == ../../../../dead/*/*/* ]]
       [[ -f $LINK/exit_status ]]
+      ID="${LINK##*/}"
+      ATTEMPT="${ID#*@}"
+      [[ $LINK -ef $RUNTIME/dead/${ID%%@*}/${ATTEMPT%%.*}/${ATTEMPT#*.} ]]
     done
     if [[ -L $RUNTIME/live/consumer/$HASH/inputs ]]; then exit 1; fi
     [[ -d $RUNTIME/live/consumer/$HASH/inputs/producer-1 ]]
     TARGET="$(readlink -- "$RUNTIME/live/consumer/$HASH/inputs/producer-1")"
-    [[ $TARGET == ../telemetry/1-producer-1/outputs/* ]]
+    [[ $TARGET == ../telemetry/producer-1@*/outputs/* ]]
     if [[ -e $RUNTIME/live/consumer/$HASH/inputs/first ]]; then exit 1; fi
-    "$FLOW" projection "$RUNTIME"
+    "$TOPOLOGY" projection "$RUNTIME"
     if [[ -L $REQUEST ]]; then exit 1; fi
-    S9_WORKING_DIRECTORY="$RUNTIME/live/consumer/$HASH" env -C "$SERVICE" -- ./run "$HASH" > "$TEST_DIR/output"
-    rm -- "$SERVICE/data/.pgid"
-    printf '%s' consumer-newer > "$SERVICES/consumer/template/.sum"
+    S9_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$HASH" 'extra argument' '' > "$TEST_DIR/output"
+    rm -- "$SERVICE/data/.s9/pgid"
+    printf '%s' consumer-newer > "$SERVICES/consumer/template/data/.s9/defs.sum"
     BYSTANDER_REQUESTS=("$SERVICES/bystander/data/launch/"*)
     [[ ${#BYSTANDER_REQUESTS[@]} == 2 ]]
     rm -- "${BYSTANDER_REQUESTS[@]}"
     STATUS=0
     env -C "$SERVICE" -- ./finish 0 0 "$HASH" > "$TEST_DIR/output" || STATUS=$?
     [[ $STATUS == 125 ]]
-    printf '%s' consumer-v1 > "$SERVICES/consumer/template/.sum"
+    printf '%s' consumer-v1 > "$SERVICES/consumer/template/data/.s9/defs.sum"
     BYSTANDER_REQUESTS=("$SERVICES/bystander/data/launch/"*)
     [[ ${#BYSTANDER_REQUESTS[@]} == 0 ]]
     SINK_REQUESTS=("$SERVICES/sink/data/launch/"*)
@@ -164,16 +195,19 @@ BASH
     TARGET="$(readlink -- "$RUNTIME/dead/consumer/$HASH/latest-succ")"
     [[ $TARGET == "${RECORD##*/}" ]]
     [[ $(< "$RECORD/outputs/result/value") == "$HASH" ]]
-    [[ $(< "$RECORD/outputs/result/.job.sum") == consumer-v1 ]]
-    if [[ -L $RECORD/outputs/result/.job.sum ]]; then exit 1; fi
-    [[ $(< "$RECORD/inputs/.job.sum") == consumer-v1 ]]
+    [[ $(< "$RECORD/outputs/result/.s9/defs.sum") == consumer-v1 ]]
+    if [[ -L $RECORD/outputs/result/.s9/defs.sum ]]; then exit 1; fi
+    [[ $(< "$RECORD/inputs/.s9/defs.sum") == consumer-v1 ]]
     if [[ -L $RECORD/inputs ]]; then exit 1; fi
     rm -fr -- "$RUNTIME/graph/cartesian-inputs/consumer/$HASH"
     [[ -d $RECORD/inputs/producer-1 ]]
     [[ -d $RECORD/inputs/producer-2 ]]
     TARGET="$(readlink -- "$RECORD/inputs/producer-1")"
-    [[ $TARGET == ../telemetry/1-producer-1/outputs/* ]]
-    [[ -f $SERVICES/consumer/data/.exited/$HASH ]]
+    [[ $TARGET == ../telemetry/producer-1@*/outputs/* ]]
+    [[ -L $SERVICE/data/.s9/died ]]
+    [[ $SERVICE/data/.s9/died -ef $RECORD ]]
+    TARGET="$(readlink -- "$SERVICE/data/.s9/died")"
+    [[ $TARGET == ../../../../../../dead/consumer/$HASH/* ]]
     rm -fr -- "$SERVICES/consumer/instances/$HASH"
   done
   REQUESTS=("$SERVICES/sink/data/launch/"*)
@@ -185,19 +219,43 @@ BASH
     TELEMETRY=("$RUNTIME/live/sink/$HASH/telemetry/"*)
     [[ ${#TELEMETRY[@]} == 3 ]]
     "$FINISH" sink "$HASH" 67 0
-    [[ $(< "$RUNTIME/fail/sink/$HASH/latest/outputs/partial/.job.sum") == sink-v1 ]]
+    [[ $(< "$RUNTIME/fail/sink/$HASH/latest/outputs/partial/.s9/defs.sum") == sink-v1 ]]
     rm -- "$REQUEST"
   done
-  printf '%s\0' projection projection projection | xargs --null --max-procs=0 -I '{}' -- "$FLOW" '{}' "$RUNTIME"
+  printf '%s\0' projection projection projection | xargs --null --max-procs=0 -I '{}' -- "$TOPOLOGY" '{}' "$RUNTIME"
   REQUESTS=("$SERVICES/sink/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
-  printf '%s' consumer-v2 > "$SERVICES/consumer/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS"
+  HASH="$(printf '%s' producer-1 | b3sum)"
+  HASH="${HASH%% *}"
+  PREVIOUS="$(realpath -- "$RUNTIME/dead/producer-1/$HASH/latest-succ")"
+  "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
+  rsync --archive -- "$PREVIOUS/outputs/" "$RUNTIME/live/producer-1/$HASH/outputs/"
+  find "$RUNTIME/live/producer-1/$HASH/outputs" -type f -exec touch --date=20000101 -- {} +
+  "$FINISH" producer-1 "$HASH" 0 0
+  CURRENT="$(realpath -- "$RUNTIME/dead/producer-1/$HASH/latest-succ")"
+  [[ $CURRENT != "$PREVIOUS" ]]
+  [[ $(< "$CURRENT/outputs/A/.s9/defs.sum") == producer-1-v1 ]]
+  "$TOPOLOGY" projection "$RUNTIME"
+  REQUESTS=("$SERVICES/consumer/data/launch/"* "$SERVICES/sink/data/launch/"*)
+  [[ ${#REQUESTS[@]} == 0 ]]
+  "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
+  rsync --archive -- "$CURRENT/outputs/" "$RUNTIME/live/producer-1/$HASH/outputs/"
+  TEST_DEFINITION=producer-1-v2 "$FINISH" producer-1 "$HASH" 0 0
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 4 ]]
   rm -- "${REQUESTS[@]}"
-  printf '%s' consumer-v1 > "$SERVICES/consumer/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS"
+  "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
+  rsync --archive -- "$CURRENT/outputs/" "$RUNTIME/live/producer-1/$HASH/outputs/"
+  "$FINISH" producer-1 "$HASH" 0 0
+  REQUESTS=("$SERVICES/consumer/data/launch/"*)
+  [[ ${#REQUESTS[@]} == 0 ]]
+  printf '%s' consumer-v2 > "$SERVICES/consumer/template/data/.s9/defs.sum"
+  "$TOPOLOGY" compile "$RUNTIME" "$JOBS"
+  REQUESTS=("$SERVICES/consumer/data/launch/"*)
+  [[ ${#REQUESTS[@]} == 4 ]]
+  rm -- "${REQUESTS[@]}"
+  printf '%s' consumer-v1 > "$SERVICES/consumer/template/data/.s9/defs.sum"
+  "$TOPOLOGY" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   HASH="$(printf '%s' producer-1 | b3sum)"
@@ -208,6 +266,7 @@ BASH
   [[ $RUNTIME/dead/producer-1/$HASH/latest-succ -ef $PREVIOUS ]]
   "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
   mkdir -- "$RUNTIME/live/producer-1/$HASH/outputs/A"
+  printf '%s' changed > "$RUNTIME/live/producer-1/$HASH/outputs/A/value"
   "$FINISH" producer-1 "$HASH" 0 0
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 2 ]]
@@ -216,8 +275,8 @@ BASH
     [[ ${REQUEST##*/} != "${PREVIOUS##*/}" ]]
   done
   rm -- "${REQUESTS[@]}"
-  printf '%s' consumer-v3 > "$SERVICES/consumer/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS"
+  printf '%s' consumer-v3 > "$SERVICES/consumer/template/data/.s9/defs.sum"
+  "$TOPOLOGY" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 2 ]]
   CURRENT="$(realpath -- "$RUNTIME/dead/producer-1/$HASH/latest-succ")"
@@ -225,37 +284,101 @@ BASH
     [[ $REQUEST/producer-1 -ef $CURRENT/outputs/A ]]
   done
   rm -- "${REQUESTS[@]}"
-  printf '%s' sink-v2 > "$SERVICES/sink/template/.sum"
-  "$FLOW" compile "$RUNTIME" "$JOBS"
+  printf '%s' sink-v2 > "$SERVICES/sink/template/data/.s9/defs.sum"
+  "$TOPOLOGY" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/sink/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
   "$FINISH" producer-1 "$HASH" 0 0
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   for REQUEST in "${REQUESTS[@]}"; do rm -- "$REQUEST"; done
-  "$FLOW" projection "$RUNTIME"
+  "$TOPOLOGY" projection "$RUNTIME"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   "$FLOW" prepare "$RUNTIME" recovery record "$INPUT"
   mkdir -- "$RUNTIME/live/recovery/record/outputs/row"
   "$FINISH" recovery record 0 0
   RECORD="$(realpath -- "$RUNTIME/dead/recovery/record/latest-succ")"
-  mkdir -- "$RUNTIME/live/recovery/record"
+  rm -- "$RUNTIME/dead/recovery/record/latest-succ"
+  mkdir -p -- "$RUNTIME/live/recovery/record/.s9"
   cp -- "$RECORD/"{exit_status,signal} "$RUNTIME/live/recovery/record/"
-  printf '%s' "$RECORD" > "$RUNTIME/live/recovery/record/.record"
-  printf '%s' "$SERVICES/recovery/instances/record" > "$RUNTIME/live/recovery/record/.service"
-  mkdir -p -- "$RUNTIME/live/incomplete/record"
-  printf '%s' partial > "$RUNTIME/live/incomplete/record/.record-next"
-  "$FLOW" compile "$RUNTIME" "$JOBS"
-  [[ $(< "$RUNTIME/live/incomplete/record/.record-next") == partial ]]
+  printf '%s' "$RECORD" > "$RUNTIME/live/recovery/record/.s9/record"
+  mkdir -p -- "$RUNTIME/live/incomplete/record/.s9"
+  printf '%s' partial > "$RUNTIME/live/incomplete/record/.s9/record-next"
+  "$TOPOLOGY" compile "$RUNTIME" "$JOBS"
+  [[ $(< "$RUNTIME/live/incomplete/record/.s9/record-next") == partial ]]
   [[ -d $RUNTIME/dead/recovery/record/latest-succ/outputs/row ]]
   if [[ -d $RUNTIME/live/recovery/record ]]; then exit 1; fi
+  "$FLOW" deliver "$RUNTIME" recovery record
+  if [[ -d $RUNTIME/live/recovery/record ]]; then exit 1; fi
   if [[ -e $RUNTIME/graph/indices ]]; then exit 1; fi
+
+  "$FLOW" prepare "$RUNTIME" archive-failure record "$INPUT"
+  mkdir -- "$RUNTIME/live/archive-failure/record/outputs/row"
+  printf '%s' retained > "$RUNTIME/live/archive-failure/record/outputs/row/value"
+  printf '%s' blocked > "$RUNTIME/dead/archive-failure"
+  if "$FINISH" archive-failure record 67 0; then exit 1; fi
+  [[ -f $RUNTIME/live/archive-failure/record/.s9/record ]]
+  [[ $(< "$RUNTIME/live/archive-failure/record/exit_status") == 67 ]]
+  rm -- "$RUNTIME/dead/archive-failure"
+  "$FLOW" deliver "$RUNTIME" archive-failure record
+  [[ $(< "$RUNTIME/fail/archive-failure/record/latest/outputs/row/value") == retained ]]
+  [[ $(< "$RUNTIME/fail/archive-failure/record/latest/exit_status") == 67 ]]
+  if [[ -d $RUNTIME/live/archive-failure/record ]]; then exit 1; fi
+
+  mkdir -- "$TEST_DIR/lock-bin"
+  cat > "$TEST_DIR/lock-bin/s6-setlock" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+LOCK_ARGS=("${@:1:4}")
+shift 4
+exec "$TEST_SETLOCK" "${LOCK_ARGS[@]}" bash "$TEST_RECOVER" "$@"
+BASH
+  cat > "$TEST_DIR/recover-first.sh" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+RECUR=dataflow "$TEST_FLOW" deliver "$TEST_RUNTIME" recovery-race record
+exec "$@"
+BASH
+  chmod +x -- "$TEST_DIR/lock-bin/s6-setlock"
+  "$FLOW" prepare "$RUNTIME" recovery-race record "$INPUT"
+  mkdir -- "$RUNTIME/live/recovery-race/record/outputs/row"
+  TEST_SETLOCK="$(command -v -- s6-setlock)"
+  TEST_SETLOCK="$TEST_SETLOCK" TEST_RECOVER="$TEST_DIR/recover-first.sh" TEST_FLOW="$FLOW" TEST_RUNTIME="$RUNTIME" PATH="$TEST_DIR/lock-bin:$PATH" "$FINISH" recovery-race record 0 0
+  RECORDS=("$RUNTIME/dead/recovery-race/record/"[0-9]*)
+  [[ ${#RECORDS[@]} == 1 ]]
+  [[ -d $RUNTIME/dead/recovery-race/record/latest-succ/outputs/row ]]
+  if [[ -d $RUNTIME/live/recovery-race/record ]]; then exit 1; fi
+
+  mkdir -p -- "$JOBS/recovery" "$SERVICES/recovery/template/data/.s9"
+  printf '%s' recovery-v1 > "$SERVICES/recovery/template/data/.s9/defs.sum"
+  ln -sTnf -- "$JOBS/recovery" "$SERVICES/recovery/template/data/.s9/source"
+  for JOB in missing-only missing-partial healthy; do
+    mkdir -p -- "$JOBS/$JOB" "$SERVICES/$JOB/template/data/wants" "$SERVICES/$JOB/template/data/.s9"
+    printf '%s' "$JOB-v1" > "$SERVICES/$JOB/template/data/.s9/defs.sum"
+    ln -sTnf -- "$JOBS/$JOB" "$SERVICES/$JOB/template/data/.s9/source"
+    if [[ $JOB != healthy ]]; then
+      ln -sTnfr -- "$TEST_DIR/absent/producer" "$SERVICES/$JOB/template/data/wants/missing"
+    fi
+    if [[ $JOB != missing-only ]]; then
+      ln -sTnfr -- "$JOBS/recovery" "$SERVICES/$JOB/template/data/wants/recovery"
+    fi
+  done
+  "$TOPOLOGY" compile "$RUNTIME" "$JOBS" > "$TEST_DIR/output" 2>&1
+  grep --quiet 'Unknown dependency:' "$TEST_DIR/output"
+  for JOB in missing-only missing-partial healthy; do
+    REQUESTS=("$SERVICES/$JOB/data/launch/"*)
+    [[ ${#REQUESTS[@]} == 1 ]]
+    if [[ -e ${REQUESTS[0]}/missing ]] || [[ -L ${REQUESTS[0]}/missing ]]; then exit 1; fi
+    if [[ $JOB != missing-only ]]; then
+      [[ -d ${REQUESTS[0]}/recovery ]]
+    fi
+  done
   mkdir -p -- "$JOBS/producer-1/data/wants"
   ln -sTnfr -- "$JOBS/sink" "$JOBS/producer-1/data/wants/cycle"
   mkdir -p -- "$SERVICES/producer-1/template/data/wants"
   ln -sTnfr -- "$JOBS/sink" "$SERVICES/producer-1/template/data/wants/cycle"
-  if "$FLOW" compile "$RUNTIME" "$JOBS" > "$TEST_DIR/output" 2>&1; then exit 1; fi
+  if "$TOPOLOGY" compile "$RUNTIME" "$JOBS" > "$TEST_DIR/output" 2>&1; then exit 1; fi
   grep --quiet 'Dependency cycle' "$TEST_DIR/output"
   ;;
 ctl)
@@ -293,12 +416,95 @@ BASH
     exit 1
   fi
   ;;
+watchdog)
+  mkdir -- "$TEST_DIR/bin"
+  cat > "$TEST_DIR/bin/ps" << 'BASH'
+#!/usr/bin/env bash
+printf '%s\n' "$TEST_STARTED"
+exit "$TEST_PS_STATUS"
+BASH
+  cat > "$TEST_DIR/bin/s6-svscanctl" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+[[ $1 == -t ]]
+realpath -- "${@: -1}" > "$TEST_STOP"
+BASH
+  chmod +x -- "$TEST_DIR/bin/"{ps,s6-svscanctl}
+  RECUR=seed "${QUINE[@]}" watchdog 67
+  mkdir -p -- "$STATE/watchdog/data/launch"
+  printf '%s' 'parent start time' > "$STATE/watchdog/data/lstart"
+  ln -sTnfr -- "$STATE/watchdog/data/lstart" "$STATE/watchdog/data/launch/67"
+  while IFS='|' read -r STATUS STARTED EXPECTED; do
+    rm -f -- "$TEST_DIR/stopped"
+    TEST_PS_STATUS="$STATUS" TEST_STARTED="$STARTED" TEST_STOP="$TEST_DIR/stopped" PATH="$TEST_DIR/bin:$PATH" "$STATE/watchdog/instances/67/data/.run" 67
+    case "$EXPECTED" in
+    keep) if [[ -e $TEST_DIR/stopped ]]; then exit 1; fi ;;
+    stop) [[ $(< "$TEST_DIR/stopped") == "$STATE" ]] ;;
+    *)
+      set -x
+      exit 2
+      ;;
+    esac
+  done << 'EOF'
+0|parent start time|keep
+0|different start time|stop
+1||stop
+EOF
+  ;;
+finish-timeout)
+  SERVICE="$STATE/dog/instances/walk"
+  mkdir -p -- "$SERVICE" "$TEST_DIR/bin"
+  rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
+  printf '%s' 7 > "$SERVICE/env/S9_GRAPH_TIMEOUT"
+  REAL_TIMEOUT="$(command -v -- timeout)"
+  cat > "$TEST_DIR/bin/timeout" << 'BASH'
+#!/usr/bin/env bash
+set -eu
+[[ $1 == --signal=KILL ]]
+[[ $2 == 14 ]]
+shift -- 2
+exec -- "$REAL_TIMEOUT" --signal=KILL 0.2 "$@"
+BASH
+  cat > "$TEST_DIR/stall" << 'BASH'
+#!/usr/bin/env bash
+set -eu
+trap '' TERM
+(
+  sleep 1
+  printf 'survived\n' > "$TEST_DIR/survived"
+) &
+wait
+BASH
+  chmod +x -- "$TEST_DIR/bin/timeout" "$TEST_DIR/stall"
+  for STALLED in logger delivery; do
+    case "$STALLED" in
+    logger) ln -sTnfr -- "$TEST_DIR/stall" "$TEST_DIR/bin/s6-log" ;;
+    delivery)
+      rm -- "$TEST_DIR/bin/s6-log"
+      cp -- "$TEST_DIR/stall" "$SERVICE/data/dataflow.sh"
+      ;;
+    *)
+      set -x
+      exit 2
+      ;;
+    esac
+    ACTUAL=0
+    {
+      env -C "$SERVICE" -- "TEST_DIR=$TEST_DIR" "REAL_TIMEOUT=$REAL_TIMEOUT" "PATH=$TEST_DIR/bin:$PATH" ./finish 0 0 walk || ACTUAL=$?
+    } > "$TEST_DIR/output" 2>&1
+    [[ $ACTUAL == 137 ]]
+    sleep 1
+    if [[ -e $TEST_DIR/survived ]]; then
+      exit 1
+    fi
+  done
+  [[ $(< "$SERVICE/timeout-finish") == 15000 ]]
+  ;;
 logger)
   for INSTANCE in walk log; do
     SERVICE="$STATE/dog/instances/$INSTANCE"
     mkdir -p -- "$SERVICE"
     rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
-    mkdir -p -- "$STATE/dog/data/.exited"
     printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
     cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
@@ -312,11 +518,11 @@ BASH
       ACTUAL=0
       TEST_JOB_STATUS="$STATUS" S9_WORKING_DIRECTORY="$TEST_DIR" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output" || ACTUAL=$?
       [[ $ACTUAL == "$STATUS" ]]
-      [[ -s $SERVICE/data/.pgid ]]
+      [[ -s $SERVICE/data/.s9/pgid ]]
       if [[ -s $TEST_DIR/output ]]; then
         exit 1
       fi
-      rm -- "$SERVICE/data/.pgid"
+      rm -- "$SERVICE/data/.s9/pgid"
       env -C "$SERVICE" -- ./finish "$STATUS" 0 "$INSTANCE" | env -C "$SERVICE/log" -- ./run 3> "$TEST_DIR/ready" 67>&1 | s6-log -b -l 0 -- T 1 >> "$TEST_DIR/live/s6.log"
       diff --unified -- <(printf '\n') "$TEST_DIR/ready"
       grep --quiet --fixed-strings -- "dog@$INSTANCE --- exit_status=$STATUS signal=0 ---" "$TEST_DIR/live/s6.log"
@@ -365,7 +571,7 @@ BASH
   [[ -f ${FAILED[1]}/log ]]
   [[ $TEST_DIR/fail/dog/$INSTANCE/latest -ef ${FAILED[1]} ]]
 
-  rm -- "$SERVICE/data/attempt" "$SERVICE/data/ran"
+  rm -- "$SERVICE/data/.s9/attempt" "$SERVICE/data/ran"
   if S9_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
     exit 1
   fi
@@ -392,9 +598,9 @@ BASH
   fi
   [[ -f $SERVICE/data/ran ]]
 
-  rm -- "$SERVICE/data/.pgid"
+  rm -- "$SERVICE/data/.s9/pgid"
   printf '%s' -1 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
-  for FAILURE in archive footer; do
+  for FAILURE in footer archive; do
     TEST_PATH="$PATH"
     case "$FAILURE" in
     archive)
@@ -411,7 +617,7 @@ BASH
     if PATH="$TEST_PATH" env -C "$SERVICE" -- ./finish 67 0 "$INSTANCE" > "$TEST_DIR/finish.log"; then
       exit 1
     fi
-    if [[ -f $STATE/dog/data/.exited/$INSTANCE ]]; then exit 1; fi
+    if [[ -L $SERVICE/data/.s9/died ]]; then exit 1; fi
     [[ -L $SERVICE/data/launch ]]
     [[ -f $TEST_DIR/live/dog/$INSTANCE/log ]]
     if [[ $FAILURE == archive ]]; then
@@ -419,11 +625,11 @@ BASH
       mv -- "$TEST_DIR/dead/saved" "$TEST_DIR/dead/dog"
     fi
   done
-  if [[ -f $TEST_DIR/live/dog/$INSTANCE/.record ]]; then exit 1; fi
+  [[ -f $TEST_DIR/live/dog/$INSTANCE/.s9/record ]]
   ;;
 runtime)
   SERVICE="$STATE/dog/instances/walk"
-  mkdir -p -- "$SERVICE" "$STATE/dog/data/.exited"
+  mkdir -p -- "$SERVICE"
   rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
   printf '%s' 1s > "$SERVICE/env/S9_RUNTIME_MAX_SEC"
@@ -436,8 +642,8 @@ exit 0
 BASH
   chmod +x -- "$SERVICE/data/.run"
   trap '
-    if [[ -f $SERVICE/data/.pgid ]]; then
-      kill -KILL -- "-$(< "$SERVICE/data/.pgid")" 2> /dev/null || true
+    if [[ -f $SERVICE/data/.s9/pgid ]]; then
+      kill -KILL -- "-$(< "$SERVICE/data/.s9/pgid")" 2> /dev/null || true
     fi
     rm -fr -- "$TEST_DIR"
   ' EXIT
@@ -455,7 +661,7 @@ BASH
   timeout --foreground 2s bash -s -- "$CHILD" << 'BASH'
 while kill -0 "$1" 2>/dev/null; do sleep 0.02; done
 BASH
-  [[ -f $STATE/dog/data/.exited/walk ]]
+  [[ -L $SERVICE/data/.s9/died ]]
   ;;
 lifecycle)
   STEP="$TEST_DIR/steps/dog"
@@ -571,7 +777,7 @@ snapshots)
 
   RECUR=bootstrap "${QUINE[@]}" quine
   RECUR=seed env -C "$TEST_DIR/snapshot-2" -- ../jobs/quine-2/run.sh quine-2 -
-  RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../snapshot-1/quine/instances/-/data/.run quine -
+  RECUR=seed env -C "$TEST_DIR/snapshot-3" -- ../services/quine/instances/-/data/.run quine -
 
   [[ -d $TEST_DIR/snapshot-2/quine-2/template ]]
   if [[ -L $TEST_DIR/snapshot-2/quine-2/template ]]; then
@@ -684,21 +890,35 @@ BASH
   "${RECONCILE[@]}"
   SERVICE="$STATE/dog/instances/walk"
   diff --unified -- "$TEST_DIR/old/run.sh" "$SERVICE/data/.run"
+  [[ -L $STATE/dog/template/data/.s9/source ]]
+  TARGET="$(readlink -- "$STATE/dog/template/data/.s9/source")"
+  [[ $TARGET == "$TEST_DIR/old" ]]
+  TARGET="$(readlink -- "$SERVICE/data/.s9/source")"
+  [[ $TARGET == "$TEST_DIR/old" ]]
   TARGET="$(readlink -- "$SERVICE/data/launch")"
   [[ $TARGET == /old ]]
   [[ -L $TEST_DIR/new/data/launch/walk ]]
   if [[ -L $TEST_DIR/old/data/launch/walk ]]; then exit 1; fi
 
-  touch -- "$STATE/dog/data/.exited/walk"
+  mkdir -p -- "$JOBS/consumer/data/wants"
+  cp -- "$TEST_DIR/old/run.sh" "$JOBS/consumer/run.sh"
+  ln -sTnfr -- "$TEST_DIR/old" "$JOBS/consumer/data/wants/dog"
+  RECUR=seed "${QUINE[@]}" consumer -
+  "$TEST_DIR/base/data/topology.sh" compile "$TEST_DIR" "$JOBS"
+  [[ -L $TEST_DIR/graph/topology/wants/consumer/dog ]]
+  [[ $TEST_DIR/graph/topology/wants/consumer/dog -ef $TEST_DIR/graph/topology/wants/dog ]]
+  if [[ -d $STATE/consumer/data/launch ]]; then exit 1; fi
+
+  ln -sTnfr -- "$TEST_DIR/dead/dog/walk/removed" "$SERVICE/data/.s9/died"
   if TEST_DELETE_STATUS=111 "${RECONCILE[@]}"; then exit 1; fi
   [[ -d $SERVICE ]]
-  [[ -f $STATE/dog/data/.exited/walk ]]
+  [[ -L $SERVICE/data/.s9/died ]]
   [[ -L $TEST_DIR/new/data/launch/walk ]]
   "${RECONCILE[@]}"
   diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/.run"
   TARGET="$(readlink -- "$SERVICE/data/launch")"
   [[ $TARGET == /new ]]
-  if [[ -f $STATE/dog/data/.exited/walk ]]; then exit 1; fi
+  if [[ -L $SERVICE/data/.s9/died ]]; then exit 1; fi
 
   printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
   TEST_SERVICE_STATUS='true true' "${RECONCILE[@]}"
@@ -720,17 +940,32 @@ BASH
   [[ -L $TEST_DIR/new/data/launch/walk ]]
   diff --unified -- "$TEST_DIR/new/run.sh" "$SERVICE/data/.run"
 
-  touch -- "$STATE/dog/data/.exited/finished"
-  "${RECONCILE[@]}"
-  if [[ -e $STATE/dog/data/.exited/finished ]]; then exit 1; fi
-  [[ -d $SERVICE ]]
-
   printf '%s' payload > "$TEST_DIR/new/data/payload"
   ln -sTnfr -- "$TEST_DIR/new/data/payload" "$TEST_DIR/new/data/launch/mail"
   printf '%s' -1 > "$TEST_DIR/new/env/S9_ON_UNIT_INACTIVE_SEC"
   "${RECONCILE[@]}"
   [[ $(< "$STATE/dog/instances/mail/data/launch") == payload ]]
   if [[ -L $TEST_DIR/new/data/launch/mail ]]; then exit 1; fi
+
+  LIVE="$TEST_DIR/live/dog/mail"
+  RECORD="$TEST_DIR/dead/dog/mail/20261005T000000.000000000"
+  mkdir -p -- "$LIVE/outputs/row" "$LIVE/.s9" "${RECORD%/*}"
+  printf '%s' payload > "$LIVE/outputs/row/value"
+  printf '%s' 0 > "$LIVE/exit_status"
+  printf '%s' 0 > "$LIVE/signal"
+  printf '%s' "$RECORD" > "$LIVE/.s9/record"
+  DEFINITION="$(< "$STATE/dog/instances/mail/data/.s9/defs.sum")"
+  printf '%s' blocked > "$RECORD"
+  if TEST_SUPERVISOR_STATUS=1 "${RECONCILE[@]}" > "$TEST_DIR/output" 2>&1; then exit 1; fi
+  [[ -f $STATE/dog/instances/mail/data/.s9/defs.sum ]]
+  [[ -L $STATE/dog/instances/mail/data/launch ]]
+  [[ -f $LIVE/.s9/record ]]
+  rm -- "$RECORD"
+  TEST_SUPERVISOR_STATUS=1 "${RECONCILE[@]}"
+  [[ $(< "$RECORD/outputs/row/value") == payload ]]
+  [[ $(< "$RECORD/outputs/row/.s9/defs.sum") == "$DEFINITION" ]]
+  [[ $TEST_DIR/dead/dog/mail/latest-succ -ef $RECORD ]]
+  if [[ -d $STATE/dog/instances/mail ]] || [[ -d $LIVE ]]; then exit 1; fi
   ;;
 templates)
   JOB="$JOBS/dog"
@@ -757,13 +992,19 @@ BASH
     [[ $ACTUAL == walk:first:original ]]
   done
   RECUR=seed "${QUINE[@]}" dog walk
-  diff --unified -- "$STATE/dog/template/.sum" "$STATE/dog/instances/walk/.sum"
+  diff --unified -- "$STATE/dog/template/data/.s9/defs.sum" "$STATE/dog/instances/walk/data/.s9/defs.sum"
   rm -- "$JOB/env/PAYLOAD" "$JOB/data/value"
   RECUR=seed "${QUINE[@]}" dog walk
   if [[ -e $STATE/dog/template/env/PAYLOAD ]] || [[ -e $STATE/dog/template/data/value ]]; then exit 1; fi
   SERVICE="$STATE/dog/instances/walk"
   ACTUAL="$(s6-envdir -- "$SERVICE/env" "$SERVICE/data/.run" walk)"
   [[ $ACTUAL == walk:first:original ]]
+
+  mkdir -p -- "$JOB/data/wants"
+  ln -sTnfr -- "$JOBS/absent/producer" "$JOB/data/wants/unknown"
+  RECUR=seed "${QUINE[@]}" dog missing
+  TARGET="$(readlink -- "$STATE/dog/instances/missing/data/wants/unknown")"
+  [[ $TARGET == "$JOBS/absent/producer" ]]
   ;;
 
 queues)
@@ -818,8 +1059,9 @@ BASH
   [[ -L $LAUNCH/.pending ]]
 
   mkdir -- "$TEST_DIR/stale" "$TEST_DIR/current"
-  printf '%s' stale > "$TEST_DIR/stale/.job.sum"
-  cp -- "$MANAGER/template/.sum" "$TEST_DIR/current/.job.sum"
+  mkdir -p -- "$TEST_DIR/stale/.s9" "$TEST_DIR/current/.s9"
+  printf '%s' stale > "$TEST_DIR/stale/.s9/defs.sum"
+  cp -- "$MANAGER/template/data/.s9/defs.sum" "$TEST_DIR/current/.s9/defs.sum"
   ln -sTnfr -- "$TEST_DIR/stale" "$LAUNCH/stale"
   ln -sTnfr -- "$TEST_DIR/current" "$LAUNCH/current"
   "${RECONCILE[@]}" queue-dog
@@ -830,7 +1072,6 @@ BASH
   if "${RECONCILE[@]}" queue-dog; then
     exit 1
   fi
-  [[ -L $LAUNCH/rejected ]]
   [[ -L $LAUNCH/rejected ]]
   if [[ -L $LAUNCH/run ]]; then
     exit 1
@@ -843,7 +1084,8 @@ BASH
     [[ $? == 125 ]]
   fi
   [[ -L $LAUNCH/run ]]
-  [[ -f $MANAGER/data/.exited/run ]]
+  [[ -L $MANAGER/instances/run/data/.s9/died ]]
+  [[ $(< "$MANAGER/instances/run/data/.s9/died/exit_status") == 0 ]]
   if [[ -L $MANAGER/instances/run/data/launch ]]; then
     exit 1
   fi
@@ -879,7 +1121,7 @@ BASH
   ;;
 policy)
   SERVICE="$STATE/dog/instances/walk"
-  mkdir -p -- "$SERVICE" "$STATE/dog/data/.exited" "$TEST_DIR/bin"
+  mkdir -p -- "$SERVICE" "$TEST_DIR/bin"
   rsync --archive --copy-unsafe-links -- "$TEST_DIR/base/" "$SERVICE/"
   printf '%s' "$SERVICE" > "$SERVICE/env/S9_WORKING_DIRECTORY"
   printf '%s' 2 > "$SERVICE/env/S9_RESTART_SEC"
@@ -907,11 +1149,11 @@ BASH
     ACTUAL_DELAY=none
     if [[ -f $SERVICE/delay ]]; then ACTUAL_DELAY="$(< "$SERVICE/delay")"; fi
     [[ $ACTUAL_DELAY == "$DELAY" ]]
-    rm -- "$SERVICE/data/.pgid"
+    rm -- "$SERVICE/data/.s9/pgid"
     EXIT_STATUS=0
     env -C "$SERVICE" -- ./finish "$STATUS" 0 walk > "$TEST_DIR/finish.log" || EXIT_STATUS=$?
     ((EXIT_STATUS == EXPECTED_EXIT))
-    ATTEMPT="$(wc -l < "$SERVICE/data/attempt")"
+    ATTEMPT="$(wc -l < "$SERVICE/data/.s9/attempt")"
     ((ATTEMPT == EXPECTED_ATTEMPTS))
     if ((EXIT_STATUS == 0)); then [[ -L $SERVICE/data/launch ]]; fi
   done << 'EOF'
@@ -934,7 +1176,8 @@ BASH
 -1 - 7 none 125 0
 -1 - 0 none 125 0
 EOF
-  [[ -f $STATE/dog/data/.exited/walk ]]
+  [[ -L $SERVICE/data/.s9/died ]]
+  [[ $(< "$SERVICE/data/.s9/died/exit_status") == 0 ]]
   if [[ -L $SERVICE/data/launch ]]; then
     exit 1
   fi

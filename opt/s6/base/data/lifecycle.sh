@@ -5,8 +5,8 @@ set -o pipefail
 exec 2>&1
 
 INSTANCE_DATA="$PWD/data"
-ATTEMPTS="$INSTANCE_DATA/attempt"
-PGID_FILE="$INSTANCE_DATA/.pgid"
+ATTEMPTS="$INSTANCE_DATA/.s9/attempt"
+PGID_FILE="$INSTANCE_DATA/.s9/pgid"
 DATAFLOW="$INSTANCE_DATA/dataflow.sh"
 
 MODE="${RECUR:-${0##*/}}"
@@ -29,13 +29,14 @@ log)
   ;;
 run)
   printf -- '%s' "$$" > "$PGID_FILE"
-  export -- RECUR=running
-  ;;&
+  RECUR=running exec -- s6-envdir -- ./env "$0" "$@"
+  ;;
 finish)
-  export -- RECUR=finished
-  ;;&
-run | finish)
-  exec -- s6-envdir -- ./env "$0" "$@"
+  RECUR=finishing exec -- s6-envdir -- ./env "$0" "$@"
+  ;;
+finishing)
+  : "${S9_GRAPH_TIMEOUT?}"
+  RECUR=finished exec -- timeout --signal=KILL "$((S9_GRAPH_TIMEOUT * 2))" "$0" "$@"
   ;;
 running)
   : "${S9_ON_UNIT_INACTIVE_SEC?}"
@@ -74,6 +75,7 @@ running)
 attempt)
   unset -- RECUR
   INSTANCE="$1"
+  shift -- 1
   "$DATAFLOW" prepare "$STATE" "$JOB" "$INSTANCE" "$INSTANCE_DATA/launch"
   cd -- "$S9_WORKING_DIRECTORY"
 
@@ -82,7 +84,7 @@ attempt)
     tee <<- EOF
 --- started ---
 EOF
-    "$INSTANCE_DATA/.run" "$@" || STATUS=$?
+    "$INSTANCE_DATA/.run" "$INSTANCE" "$LIVE/inputs" "$LIVE/outputs" "$@" || STATUS=$?
     printf -- '\n'
     exit "$STATUS"
   } 2>&1 | "${LOGGER[@]}" -- T "${LOG_FMT[@]}" | tee --append -- "$LIVE/log" > /dev/null || exit "$?"
@@ -117,20 +119,8 @@ EOF
   mkdir -p -- "${LOG_SRC%/*}"
   "${LOGGER[@]}" -- T "${LOG_FMT[@]}" <<< "$EXIT_LINES" | tee --append -- "$LOG_SRC" > /dev/null
 
-  RECORD="$("$DATAFLOW" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL" "$INSTANCE_DIR")"
-  if ((STATUS == 0 && SIGNAL == 0)); then
-    ln -sTnfr -- "$RECORD" "$STATE/dead/$JOB/$INSTANCE/latest-succ"
-    if "$DATAFLOW" projection "$STATE" "$JOB"; then
-      :
-    else
-      printf -- 'Dataflow projection deferred: %s@%s\n' "$JOB" "$INSTANCE" >&2
-    fi
-  fi
+  "$DATAFLOW" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL"
 
-  if ((EXIT_STATUS == 125)); then
-    touch -- "../../data/.exited/$INSTANCE"
-    rm -f -- "$INSTANCE_DATA/launch"
-  fi
   printf -- '%s' "$EXIT_LINES"
   exit "$EXIT_STATUS"
   ;;

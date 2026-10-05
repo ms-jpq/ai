@@ -38,8 +38,8 @@ case "${RECUR:-}" in
     TARGET="$(realpath --canonicalize-missing --no-symlinks --relative-to="${SRC%/*}" -- "$RESOLVED")"
     exec -- ln -sTnf -- "$TARGET" "$DST"
   fi
-  PREFIX="$(realpath --canonicalize-missing --no-symlinks --relative-to="${DST%/*}" -- "$ORIGIN")"
-  ln -sTnf -- "$PREFIX/$TARGET" "$DST"
+  PARENT="$(realpath --canonicalize-missing --no-symlinks --relative-to="${DST%/*}" -- "$ORIGIN")"
+  ln -sTnf -- "$PARENT/$TARGET" "$DST"
   ;;
 *)
   set -x

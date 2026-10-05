@@ -8,27 +8,34 @@ JOBS/<service>/
 ├── env/
 │   └── S9_ON_UNIT_INACTIVE_SEC
 └── data/launch/
-    └── <instance> -> <request>/
+    └── <instance> -> <arg1>/
 ```
 
 ```tree
 STATE/
 ├── services/<service>/
-│   ├── data/
-│   │   ├── launch/
-│   │   └── .exited/
-│   ├── template/
+│   ├── data/launch/
+│   ├── template/data/.s9/
+│   │   ├── source -> <pinned-job>/
+│   │   └── defs.sum
 │   ├── instance/
 │   │   └── <instance> -> ../instances/<instance>/
 │   └── instances/
 │       └── <instance>/
 │           ├── env/S9_ON_UNIT_INACTIVE_SEC
 │           └── data/
+│               ├── .s9/
+│               │   ├── source -> <pinned-job>/
+│               │   ├── defs.sum
+│               │   ├── pgid
+│               │   ├── attempt
+│               │   └── died -> ../../../../../../dead/<service>/<instance>/<timestamp>/
 │               ├── .run
-│               └── launch -> <request>/
+│               └── launch -> <arg1>/
 ├── live/
 │   ├── s6.log
 │   └── <service>/<instance>/
+│       ├── .s9/record
 │       ├── inputs/
 │       ├── outputs/
 │       ├── telemetry/
@@ -67,20 +74,20 @@ JOBS/
 ```tree
 STATE/
 ├── services/<consumer>/
-│   ├── data/launch/<hash(def, inputs)> -> <inputs>/
+│   ├── data/launch/<hash(def, rows)> -> <inputs>/
 │   ├── template/
-│   ├── instance/<hash(def, inputs)> -> ../instances/<hash(def, inputs)>/
-│   └── instances/<hash(def, inputs)>/data/launch -> <inputs>/
-└── live/<consumer>/<hash(def, inputs)>/
+│   ├── instance/<hash(def, rows)> -> ../instances/<hash(def, rows)>/
+│   └── instances/<hash(def, rows)>/data/launch -> <inputs>/
+└── live/<consumer>/<hash(def, rows)>/
     ├── inputs/
-    │   ├── .job.sum
-    │   ├── <producer-1> -> ../telemetry/1-<producer-1>/outputs/<row-1>/
-    │   └── <producer-2> -> ../telemetry/2-<producer-2>/outputs/<row-2>/
+    │   ├── .s9/defs.sum
+    │   ├── <producer-1> -> ../telemetry/<producer-1>@<instance>.<timestamp>/outputs/<row-1>/
+    │   └── <producer-2> -> ../telemetry/<producer-2>@<instance>.<timestamp>/outputs/<row-2>/
     ├── outputs/<row>/
-    │   └── .job.sum
+    │   └── .s9/defs.sum
     ├── telemetry/
-    │   ├── 1-<producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/
-    │   └── 2-<producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/
+    │   ├── <producer-1>@<instance>.<timestamp> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/
+    │   └── <producer-2>@<instance>.<timestamp> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/
     └── log
 ```
 
@@ -88,13 +95,13 @@ STATE/
 STATE/graph/
 ├── topology/
 │   ├── wants/<consumer>/
-│   │   ├── .job.sum
-│   │   ├── <producer-1>
-│   │   └── <producer-2>
+│   │   ├── .s9/defs.sum
+│   │   ├── <producer-1> -> ../<producer-1>/
+│   │   └── <producer-2> -> ../<producer-2>/
 │   └── wanted-by/
-│       ├── <producer-1>/<consumer> -> ../../wants/<consumer>/
-│       └── <producer-2>/<consumer> -> ../../wants/<consumer>/
-└── cartesian-inputs/<consumer>/<hash(def, inputs)>/
+│       ├── <producer-1>/<consumer> -> ../<consumer>/
+│       └── <producer-2>/<consumer> -> ../<consumer>/
+└── cartesian-inputs/<consumer>/<hash(def, rows)>/
     ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<row-1>/
     └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<row-2>/
 ```
