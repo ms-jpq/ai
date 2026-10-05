@@ -95,9 +95,6 @@ STATE/graph/
 │       ├── <producer-1>/<consumer> -> ../../wants/<consumer>/
 │       └── <producer-2>/<consumer> -> ../../wants/<consumer>/
 └── cartesian-inputs/<consumer>/<hash(def, inputs)>/
-    ├── .job.sum
     ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<row-1>/
-    │   └── .job.sum
     └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<row-2>/
-        └── .job.sum
 ```

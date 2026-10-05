@@ -37,7 +37,7 @@ compile | projection | deliver)
   ;;&
 prepare)
   if [[ -f $LIVE/.record ]]; then
-    "$SELF" deliver "$STATE" "$JOB" "$INSTANCE" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")" > /dev/null
+    "$SELF" deliver "$STATE" "$JOB" "$INSTANCE" > /dev/null
   fi
   mkdir -p -- "$LIVE/outputs" "$LIVE/telemetry"
   if ! [[ -d $LIVE/inputs ]]; then
@@ -50,6 +50,7 @@ prepare)
   fi
   RECORDS=()
   declare -A -- SEEN=()
+  declare -A -- INPUT_ROWS=()
   for INPUT in "$LIVE"/inputs/*; do
     if ! [[ -L $INPUT ]]; then
       continue
@@ -59,6 +60,7 @@ prepare)
     if [[ $RECORD == "$OUTPUT" ]] || ! [[ -f $RECORD/exit_status ]]; then
       continue
     fi
+    INPUT_ROWS[$INPUT]="$OUTPUT"
     for PREVIOUS in "$RECORD"/telemetry/* "$RECORD"; do
       PREVIOUS="$(realpath -- "$PREVIOUS")"
       if [[ -z ${SEEN[$PREVIOUS]:-} ]]; then
@@ -78,23 +80,18 @@ prepare)
     ln -sTnfr -- "$RECORD" "$LIVE/telemetry/$LABEL"
     SEEN[$RECORD]="$LABEL"
   done
-  for INPUT in "$LIVE"/inputs/*; do
-    if [[ -L $INPUT ]]; then
-      OUTPUT="$(realpath -- "$INPUT")"
-      RECORD="${OUTPUT%/outputs/*}"
-      if [[ -n ${SEEN[$RECORD]:-} ]]; then
-        ln -sTnf -- "../telemetry/${SEEN[$RECORD]}/${OUTPUT#"$RECORD"/}" "$INPUT"
-      fi
-    fi
+  for INPUT in "${!INPUT_ROWS[@]}"; do
+    OUTPUT="${INPUT_ROWS[$INPUT]}"
+    RECORD="${OUTPUT%/outputs/*}"
+    ln -sTnf -- "../telemetry/${SEEN[$RECORD]}/${OUTPUT#"$RECORD"/}" "$INPUT"
   done
   ;;
 compile)
   JOBS="$(realpath -- "$1")"
   for RECORD in "$STATE"/live/*/*/.record; do
     LIVE="${RECORD%/*}"
-    SERVICE="$(< "$LIVE/.service")"
-    PRODUCER="${SERVICE%/instances/*}"
-    "$SELF" deliver "$STATE" "${PRODUCER##*/}" "${SERVICE##*/}" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")" > /dev/null
+    PRODUCER="${LIVE%/*}"
+    "$SELF" deliver "$STATE" "${PRODUCER##*/}" "${LIVE##*/}" > /dev/null
   done
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
   trap 'rm -fr -- "$BUILD"' EXIT
@@ -139,7 +136,7 @@ compile)
   if [[ -n $PREVIOUS ]]; then
     rm -fr -- "$PREVIOUS"
   fi
-  "$SELF" projection "$STATE"
+  exec -- "$SELF" projection "$STATE"
   ;;
 projection)
   if ! [[ -L $GRAPH/topology ]]; then
