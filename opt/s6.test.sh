@@ -185,7 +185,7 @@ BASH
     TELEMETRY=("$RUNTIME/live/sink/$HASH/telemetry/"*)
     [[ ${#TELEMETRY[@]} == 3 ]]
     "$FINISH" sink "$HASH" 67 0
-    [[ $(< "$RUNTIME/failed/sink/$HASH/latest/outputs/partial/.job.sum") == sink-v1 ]]
+    [[ $(< "$RUNTIME/fail/sink/$HASH/latest/outputs/partial/.job.sum") == sink-v1 ]]
     rm -- "$REQUEST"
   done
   printf '%s\0' projection projection projection | xargs --null --max-procs=0 -I '{}' -- "$FLOW" '{}' "$RUNTIME"
@@ -260,9 +260,9 @@ BASH
   ;;
 ctl)
   RUNTIME="$TEST_DIR/runtime"
-  mkdir -p -- "$TEST_DIR/bin" "$RUNTIME/dead" "$RUNTIME/failed"
+  mkdir -p -- "$TEST_DIR/bin" "$RUNTIME/dead" "$RUNTIME/fail"
   printf '%s' retained > "$RUNTIME/dead/existing.log"
-  printf '%s' retained > "$RUNTIME/failed/existing"
+  printf '%s' retained > "$RUNTIME/fail/existing"
   cat > "$TEST_DIR/bin/ps" << 'BASH'
 #!/usr/bin/env bash
 printf 'parent start time\n'
@@ -275,14 +275,14 @@ BASH
   chmod +x -- "$TEST_DIR/bin/"{ps,s6-svscan}
   for _ in 1 2; do
     PATH="$TEST_DIR/bin:$PATH" "$TEST_DIR/ctl.sh" start "$RUNTIME" "$TEST_DIR" 67
-    for DIR in services live dead failed; do
+    for DIR in services live dead fail; do
       [[ -d $RUNTIME/$DIR ]]
     done
     [[ -d $RUNTIME/services/quine/instances/- ]]
     [[ -d $RUNTIME/services/watchdog/instances/67 ]]
     [[ $(< "$RUNTIME/services/watchdog/data/launch/67") == 'parent start time' ]]
     [[ $(< "$RUNTIME/dead/existing.log") == retained ]]
-    [[ $(< "$RUNTIME/failed/existing") == retained ]]
+    [[ $(< "$RUNTIME/fail/existing") == retained ]]
   done
   COUNT="$(grep --fixed-strings --count "$RUNTIME/services" "$RUNTIME/live/s6.log")"
   [[ $COUNT == 2 ]]
@@ -342,12 +342,12 @@ BASH
     [[ $TEST_DIR/dead/dog/$INSTANCE/latest-succ -ef ${DEAD[0]} ]]
     [[ $(< "${DEAD[0]}/exit_status") == 0 ]]
     [[ $(< "${DEAD[0]}/signal") == 0 ]]
-    FAILED=("$TEST_DIR/failed/dog/$INSTANCE/"[0-9]*)
+    FAILED=("$TEST_DIR/fail/dog/$INSTANCE/"[0-9]*)
     [[ ${#FAILED[@]} == 1 ]]
     [[ -L ${FAILED[0]} ]]
     [[ ${FAILED[0]} -ef ${DEAD[1]} ]]
-    [[ $TEST_DIR/failed/dog/$INSTANCE/latest -ef ${FAILED[0]} ]]
-    TARGET="$(readlink -- "$TEST_DIR/failed/dog/$INSTANCE/latest")"
+    [[ $TEST_DIR/fail/dog/$INSTANCE/latest -ef ${FAILED[0]} ]]
+    TARGET="$(readlink -- "$TEST_DIR/fail/dog/$INSTANCE/latest")"
     [[ $TARGET == "${FAILED[0]##*/}" ]]
     TARGET="$(readlink -- "${FAILED[0]}")"
     [[ $TARGET == "../../../dead/dog/$INSTANCE/${DEAD[1]##*/}" ]]
@@ -358,12 +358,12 @@ BASH
     exit 1
   fi
   env -C "$SERVICE" -- ./finish 256 15 "$INSTANCE" > "$TEST_DIR/finish.log"
-  FAILED=("$TEST_DIR/failed/dog/$INSTANCE/"[0-9]*)
+  FAILED=("$TEST_DIR/fail/dog/$INSTANCE/"[0-9]*)
   [[ ${#FAILED[@]} == 2 ]]
   [[ $(< "${FAILED[1]}/exit_status") == 256 ]]
   [[ $(< "${FAILED[1]}/signal") == 15 ]]
   [[ -f ${FAILED[1]}/log ]]
-  [[ $TEST_DIR/failed/dog/$INSTANCE/latest -ef ${FAILED[1]} ]]
+  [[ $TEST_DIR/fail/dog/$INSTANCE/latest -ef ${FAILED[1]} ]]
 
   rm -- "$SERVICE/data/attempt" "$SERVICE/data/ran"
   if S9_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then

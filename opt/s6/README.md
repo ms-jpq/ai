@@ -42,7 +42,7 @@ STATE/
 │       ├── log
 │       ├── exit_status
 │       └── signal
-└── failed/<service>/<instance>/
+└── fail/<service>/<instance>/
     ├── latest -> <timestamp>/
     └── <timestamp> -> ../../../dead/<service>/<instance>/<timestamp>/
 ```

@@ -272,7 +272,7 @@ deliver)
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi
   if [[ $(< "$RECORD/exit_status") != 0 ]] || [[ $(< "$RECORD/signal") != 0 ]]; then
-    FAILED="$STATE/failed/$JOB/$INSTANCE"
+    FAILED="$STATE/fail/$JOB/$INSTANCE"
     mkdir -p -- "$FAILED"
     ln -sTnfr -- "$RECORD" "$FAILED/${RECORD##*/}"
     ln -sTnf -- "${RECORD##*/}" "$FAILED/latest"
