@@ -14,6 +14,9 @@ FNR == 1 {
 }
 
 {
+  if ($0 ~ /^[[:blank:]]*printf([[:blank:]]|$)/ && $0 !~ /^[[:blank:]]*printf[[:blank:]]+(-v[[:blank:]]+("([^"\\]|\\.)*"|'[^']*'|[^[:blank:]]+)[[:blank:]]+|--?[[:alnum:]_-]+[[:blank:]]+)*--([[:blank:]]|$)/) {
+    report("Use -- before the printf format; options such as -v NAME may precede it.")
+  }
   if ($0 ~ /\[\[[[:space:]]+-v([[:space:]]|\])/) {
     report("Do not use unsafe [[ -v ... ]]; use [[ -n ${NAME:-} ]].")
   }
