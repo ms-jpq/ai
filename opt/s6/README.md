@@ -98,13 +98,10 @@ STATE/
 ```tree
 STATE/graph/
 ├── topology/
-│   ├── wants/<consumer>/
-│   │   ├── .s9/defs.sum
-│   │   ├── =<producer-1> -> ../<producer-1>/
-│   │   └── =<producer-2> -> ../<producer-2>/
-│   └── wanted-by/
-│       ├── <producer-1>/<consumer> -> ../<consumer>/
-│       └── <producer-2>/<consumer> -> ../<consumer>/
+│   └── wants/<consumer>/
+│       ├── .s9/defs.sum
+│       ├── =<producer-1> -> ../<producer-1>/
+│       └── =<producer-2> -> ../<producer-2>/
 └── inputs/<consumer>/<hash(def, rows)>/
     ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<key>/
     └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<key>/

@@ -20,6 +20,7 @@ SERVICES="$STATE/services"
 TOPOLOGY="$GRAPH/topology"
 INPUTS_ROOT="$GRAPH/inputs"
 DEAD="$STATE/dead"
+XARGS=(xargs --null --no-run-if-empty --max-procs=0 --max-args=1 --)
 
 case "$ACTION" in
 compile | projection)
@@ -30,60 +31,32 @@ compile | projection)
   mkdir -p -- "$GRAPH"
   ;;&
 compile)
-  JOBS="$1"
   for RECORD in "$STATE"/live/*/*/.s9/record; do
-    LIVE="${RECORD%/.s9/record}"
-    PRODUCER="${LIVE%/*}"
-    "${SELF%/*}/dataflow.sh" deliver "$STATE" "${PRODUCER##*/}" "${LIVE##*/}" || continue
-  done
+    printf -- '%s\0' "$RECORD"
+  done | "${XARGS[@]}" "$SELF" recover "$STATE"
 
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
   trap 'rm -fr -- "$BUILD"' EXIT
-  mkdir -- "$BUILD/wants" "$BUILD/wanted-by"
+  mkdir -- "$BUILD/wants"
 
-  declare -A -- JOB_NAMES=()
-  for JOB in "$JOBS"/*; do
-    if [[ -d $JOB ]]; then
-      NAME="${JOB##*/}"
-      SOURCE="$SERVICES/$NAME/template/data/.s9/source"
-      if ! [[ -L $SOURCE ]]; then
-        continue
-      fi
-      TARGET="$(readlink -- "$SOURCE")"
-      JOB_NAMES[$TARGET]="${JOB_NAMES[$TARGET]:-$NAME}"
-      mkdir -p -- "$BUILD/wants/$NAME/.s9" "$BUILD/wanted-by/$NAME"
-      if [[ -f $SERVICES/$NAME/template/data/.s9/defs.sum ]]; then
-        cp -- "$SERVICES/$NAME/template/data/.s9/defs.sum" "$BUILD/wants/$NAME/.s9/defs.sum"
-      fi
+  SOURCES=()
+  for JOB in "$1"/*; do
+    NAME="${JOB##*/}"
+    SOURCE="$SERVICES/$NAME/template/data/.s9/source"
+    if ! [[ -d $JOB ]] || ! [[ -L $SOURCE ]]; then
+      continue
+    fi
+    TARGET="$(readlink -- "$SOURCE")"
+    SOURCES+=("$TARGET" "$NAME")
+    mkdir -p -- "$BUILD/wants/$NAME/.s9"
+    if [[ -f $SERVICES/$NAME/template/data/.s9/defs.sum ]]; then
+      cp -- "$SERVICES/$NAME/template/data/.s9/defs.sum" "$BUILD/wants/$NAME/.s9/defs.sum"
     fi
   done
 
+  find "$BUILD/wants" -mindepth 1 -maxdepth 1 -printf '%f\0' | "${XARGS[@]}" "$SELF" edges "$STATE" "$BUILD" "${SOURCES[@]}"
   for JOB in "$BUILD"/wants/*; do
-    CONSUMER="${JOB##*/}"
-    for WANT in "$SERVICES"/"$CONSUMER"/template/data/wants/*; do
-      PRODUCER=''
-      if TARGET="$(realpath -- "$WANT")"; then
-        PRODUCER="${JOB_NAMES[$TARGET]:-}"
-      fi
-      if [[ -z $PRODUCER ]]; then
-        touch -- "$BUILD/wants/$CONSUMER/${WANT##*/}"
-        tee >&2 <<- EOF
-Unknown dependency: $WANT
-EOF
-        continue
-      fi
-      INPUT="$PRODUCER"
-      if [[ ${WANT##*/} == =* ]]; then
-        INPUT="=$PRODUCER"
-      fi
-      ln -sTnfr -- "$BUILD/wants/$PRODUCER" "$BUILD/wants/$CONSUMER/$INPUT"
-      ln -sTnfr -- "$BUILD/wanted-by/$CONSUMER" "$BUILD/wanted-by/$PRODUCER/$CONSUMER"
-    done
-  done
-
-  mkdir -- "$BUILD/check"
-  for JOB in "$BUILD"/wants/*; do
-    "$SELF" visit "$STATE" "$JOB" "$BUILD/check" :
+    "$SELF" visit "$STATE" "$JOB" "$BUILD/check"
   done
   rm -fr -- "$BUILD/check"
   PREVIOUS=''
@@ -96,7 +69,6 @@ EOF
   if [[ -n $PREVIOUS ]]; then
     rm -fr -- "$PREVIOUS"
   fi
-  shift -- 1
   ;&
 projection)
   if ! [[ -L $TOPOLOGY ]]; then
@@ -105,21 +77,56 @@ projection)
   PASS="$(mktemp -d -- "$GRAPH/.projection.XXXXXX")"
   trap 'rm -fr -- "$PASS"' EXIT
 
-  if (($#)); then
-    mkdir -- "$PASS/.selected"
-    for PRODUCER in "$@"; do
-      for CONSUMER in "$TOPOLOGY"/wanted-by/"$PRODUCER"/*; do
-        "$SELF" visit "$STATE" "$CONSUMER" "$PASS/.selected" :
-      done
-    done
-  else
-    ln -sTnfr -- "$TOPOLOGY/wants" "$PASS/.selected"
-  fi
-  for JOB in "$PASS"/.selected/*; do
-    "$SELF" visit "$STATE" "$TOPOLOGY/wants/${JOB##*/}" "$PASS" "$SELF" combine "$STATE"
+  for JOB in "$TOPOLOGY"/wants/*; do
+    "$SELF" visit "$STATE" "$JOB" "$PASS"
+  done
+  for JOB in "$PASS"/*; do
+    printf '%s\n' "$(< "$JOB/level")"
+  done | sort --numeric-sort --unique | while read -r LEVEL; do
+    for JOB in "$PASS"/*; do
+      if [[ $(< "$JOB/level") == "$LEVEL" ]]; then
+        printf '%s\0' "${JOB##*/}"
+      fi
+    done | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
   done
   ;;
-visit | combine)
+recover)
+  LIVE="${1%/.s9/record}"
+  PRODUCER="${LIVE%/*}"
+  if "${SELF%/*}/dataflow.sh" deliver "$STATE" "${PRODUCER##*/}" "${LIVE##*/}"; then :; fi
+  ;;
+edges)
+  BUILD="$1"
+  CONSUMER="${!#}"
+  shift -- 1
+  declare -A -- JOB_NAMES=()
+  while (($# > 1)); do
+    JOB_NAMES[$1]="${JOB_NAMES[$1]:-$2}"
+    shift -- 2
+  done
+  for WANT in "$SERVICES/$CONSUMER/template/data/wants/"*; do
+    PRODUCER=''
+    if TARGET="$(realpath -- "$WANT")"; then
+      PRODUCER="${JOB_NAMES[$TARGET]:-}"
+    fi
+    if [[ -z $PRODUCER ]]; then
+      touch -- "$BUILD/wants/$CONSUMER/${WANT##*/}"
+      tee >&2 <<- EOF
+Unknown dependency: $WANT
+EOF
+      continue
+    fi
+    INPUT="$PRODUCER"
+    if [[ ${WANT##*/} == =* ]]; then INPUT="=$PRODUCER"; fi
+    ln -sTnfr -- "$BUILD/wants/$PRODUCER" "$BUILD/wants/$CONSUMER/$INPUT"
+  done
+  ;;
+evaluate)
+  PASS="$1"
+  JOB="$2"
+  "$SELF" combine "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS" '' | sort --zero-terminated --unique --key=1,1 | "${XARGS[@]}" "$SELF" publish "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS"
+  ;;
+visit | combine | publish)
   cd -P -- "$1"
   PASS="$2"
   JOB="${PWD##*/}"
@@ -127,7 +134,7 @@ visit | combine)
   WANTS=(*)
   ;;&
 visit)
-  if [[ -f $PASS/$JOB/done ]]; then
+  if [[ -f $PASS/$JOB/level ]]; then
     exit
   fi
   if [[ -d $PASS/$JOB ]]; then
@@ -137,15 +144,20 @@ EOF
     exit 2
   fi
   mkdir -p -- "$PASS/$JOB/records"
+  LEVEL=0
   for WANT in "${WANTS[@]}"; do
     if [[ -L $WANT ]]; then
-      "$SELF" visit "$STATE" "$PWD/$WANT" "$PASS" "$@"
+      "$SELF" visit "$STATE" "$PWD/$WANT" "$PASS"
+      PRODUCER="$(realpath -- "$WANT")"
+      DEPTH="$(< "$PASS/${PRODUCER##*/}/level")"
+      LEVEL=$((LEVEL > DEPTH ? LEVEL : DEPTH + 1))
     fi
   done
-  "$@" "$PWD" "$PASS"
-  touch -- "$PASS/$JOB/done"
+  printf '%s' "$LEVEL" > "$PASS/$JOB/level"
   ;;
 combine)
+  KEY="$1"
+  shift -- 1
   if ! [[ -f .s9/defs.sum ]]; then
     exit
   fi
@@ -157,6 +169,10 @@ combine)
     exit
   fi
   INDEX=$(($# / 2))
+  if (($#)) && [[ ${*: -2:1} == =* ]]; then
+    KEY="${!#}"
+    KEY="${KEY##*/}"
+  fi
   if ((INDEX < ${#WANTS[@]})); then
     WANT="${WANTS[$INDEX]}"
     PRODUCER="${WANT#=}"
@@ -164,31 +180,18 @@ combine)
       if [[ $WANT == =* ]]; then
         exit
       fi
-      exec -- "$SELF" combine "$STATE" "$PWD" "$PASS" "$@" "$WANT" ''
+      exec -- "$SELF" combine "$STATE" "$PWD" "$PASS" "$KEY" "$@" "$WANT" ''
     fi
-    KEY=''
-    if [[ $WANT == =* ]]; then
-      for ((ARG = 1; ARG <= $#; ARG += 2)); do
-        if [[ ${!ARG} == =* ]]; then
-          ARG=$((ARG + 1))
-          KEY="${!ARG}"
-          KEY="${KEY##*/}"
-          break
-        fi
-      done
-    fi
-    if [[ -n $KEY ]]; then
+    if [[ $WANT == =* ]] && [[ -n $KEY ]]; then
       ROWS=("$PASS"/"$PRODUCER"/records/*/outputs/"$KEY")
     else
       ROWS=("$PASS"/"$PRODUCER"/records/*/outputs/*)
     fi
     for OUTPUT in "${ROWS[@]}"; do
-      if ! [[ -d $OUTPUT ]]; then
-        continue
+      if [[ -d $OUTPUT ]]; then
+        realpath --zero -- "$OUTPUT"
       fi
-      OUTPUT="$(realpath -- "$OUTPUT")"
-      "$SELF" combine "$STATE" "$PWD" "$PASS" "$@" "$WANT" "$OUTPUT"
-    done
+    done | "${XARGS[@]}" "$SELF" combine "$STATE" "$PWD" "$PASS" "$KEY" "$@" "$WANT"
     exit
   fi
   INSTANCE="$(
@@ -203,11 +206,16 @@ combine)
       done
     } | b3sum | cut --delimiter=' ' --fields=1
   )"
+  INPUTS="$(mktemp -- "$PASS/$JOB/input.XXXXXX")"
+  printf '%s\0' "$@" > "$INPUTS"
+  printf '%s %s\0' "$INSTANCE" "${INPUTS##*/}"
+  ;;
+publish)
+  INSTANCE="${1%% *}"
+  mapfile -d '' -t ARGS < "$PASS/$JOB/${1#* }"
+  set -- "${ARGS[@]}"
   if [[ -L $DEAD/$JOB/$INSTANCE/latest-succ ]]; then
     ln -sTnfr -- "$DEAD/$JOB/$INSTANCE/latest-succ" "$PASS/$JOB/records/$INSTANCE"
-  fi
-  if ! [[ -d $PASS/.selected/$JOB ]]; then
-    exit
   fi
   LAUNCH="$SERVICES/$JOB/data/launch"
   COMPLETED=("$DEAD/$JOB/$INSTANCE/"[0-9]*/exit_status)

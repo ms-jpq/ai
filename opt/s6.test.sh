@@ -67,14 +67,43 @@ BASH
 dogs|one|shared|dog-one
 dogs|one|left only|left
 dogs|one|key[*]|literal-dog
+dogs|one|brace{}key|brace-dog
 dogs|two|shared|dog-two
+dogs|three|shared|dog-one
 rules|one|shared|rules
 rules|one|right only|right
 rules|one|key[*]|literal-rules
+rules|one|brace{}key|brace-rules
 settings|one|x|x
 settings|one|y|y
 EOF
-  "$TOPOLOGY" compile "$TEST_DIR" "$JOBS" > "$TEST_DIR/compile.log" 2>&1
+  mkdir -- "$TEST_DIR/bin" "$TEST_DIR/parallel"
+  cat > "$TEST_DIR/bin/tar" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${0%/bin/tar}"
+JOB="${PWD##*/}"
+case "$JOB" in
+matched | mixed | product | single)
+  touch -- "$ROOT/parallel/$JOB"
+  timeout 10 bash -c 'until [[ -f $1/matched ]] && [[ -f $1/mixed ]] && [[ -f $1/product ]] && [[ -f $1/single ]]; do sleep 0.01; done' -- "$ROOT/parallel"
+  ;;
+esac
+if [[ $JOB == matched ]]; then
+  for ARG in "$@"; do
+    if [[ $ARG == --directory=* ]]; then
+      touch -- "$ROOT/parallel/row-${ARG##*/}"
+    fi
+  done
+  timeout 10 bash -c 'until [[ -f $1/row-shared ]] && [[ -f $1/row-key\[\*\] ]]; do sleep 0.01; done' -- "$ROOT/parallel"
+fi
+if [[ $JOB == "${FAIL_JOB:-}" ]]; then exit 67; fi
+exec -- "$REAL_TAR" "$@"
+BASH
+  chmod +x -- "$TEST_DIR/bin/tar"
+  REAL_TAR="$(command -v tar)"
+  export -- REAL_TAR
+  PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" compile "$TEST_DIR" "$JOBS" > "$TEST_DIR/compile.log" 2>&1
   while read -r JOB EXPECTED; do
     REQUESTS=("$STATE/$JOB/data/launch/"*)
     if [[ ${#REQUESTS[@]} != "$EXPECTED" ]]; then
@@ -82,25 +111,25 @@ EOF
       exit 1
     fi
   done << 'EOF'
-matched 3
-mixed 6
-product 12
+matched 4
+mixed 8
+product 20
 missing 0
 empty 0
-single 4
+single 5
 EOF
   for JOB in matched mixed; do
     for REQUEST in "$STATE/$JOB/data/launch/"*; do
       DOG="$(realpath -- "$REQUEST/dogs")"
       RULE="$(realpath -- "$REQUEST/rules")"
       [[ ${DOG##*/} == "${RULE##*/}" ]]
-      [[ ${DOG##*/} == shared ]] || [[ ${DOG##*/} == 'key[*]' ]]
+      [[ ${DOG##*/} == shared ]] || [[ ${DOG##*/} == 'key[*]' ]] || [[ ${DOG##*/} == 'brace{}key' ]]
       if [[ -e $REQUEST/=dogs ]] || [[ -e $REQUEST/=rules ]]; then exit 1; fi
       [[ $REQUEST -ef $TEST_DIR/graph/inputs/$JOB/${REQUEST##*/} ]]
     done
   done
   [[ -L $TEST_DIR/graph/topology/wants/matched/=dogs ]]
-  [[ -L $TEST_DIR/graph/topology/wanted-by/dogs/matched ]]
+  if [[ -e $TEST_DIR/graph/topology/wanted-by ]]; then exit 1; fi
   REQUESTS=("$STATE/matched/data/launch/"*)
   "$TEST_DIR/base/data/dataflow.sh" prepare "$TEST_DIR" matched "${REQUESTS[0]##*/}" "${REQUESTS[0]}"
   [[ -d $TEST_DIR/live/matched/${REQUESTS[0]##*/}/inputs/dogs ]]
@@ -110,6 +139,11 @@ EOF
   REQUESTS=("$STATE/matched/data/launch/"*)
   printf '%s\n' "${REQUESTS[@]}" > "$TEST_DIR/after"
   diff --unified -- "$TEST_DIR/before" "$TEST_DIR/after"
+  STATUS=0
+  FAIL_JOB=product PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" projection "$TEST_DIR" > "$TEST_DIR/failure.log" 2>&1 || STATUS=$?
+  ((STATUS != 0))
+  PASSES=("$TEST_DIR/graph/".projection.*)
+  ((${#PASSES[@]} == 0))
   ;;
 contention)
   FLOW="$TEST_DIR/base/data/dataflow.sh"
@@ -254,26 +288,24 @@ BASH
   "$TOPOLOGY" compile "$RUNTIME" "$JOBS"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 4 ]]
-  if "$TOPOLOGY" combine "$RUNTIME" "$RUNTIME/graph/topology/wants/consumer" "$TEST_DIR/pass" producer-1 "$TEST_DIR/missing-row" producer-2 '' > "$TEST_DIR/output" 2>&1; then exit 1; fi
+  if "$TOPOLOGY" combine "$RUNTIME" "$RUNTIME/graph/topology/wants/consumer" "$TEST_DIR/pass" '' producer-1 "$TEST_DIR/missing-row" producer-2 '' > "$TEST_DIR/output" 2>&1; then exit 1; fi
   for PRODUCER in producer-1 producer-2; do
-    [[ $RUNTIME/graph/topology/wanted-by/$PRODUCER/consumer -ef $RUNTIME/graph/topology/wanted-by/consumer ]]
-    TARGET="$(readlink -- "$RUNTIME/graph/topology/wanted-by/$PRODUCER/consumer")"
-    [[ $TARGET == ../consumer ]]
     TARGET="$(readlink -- "$RUNTIME/graph/topology/wants/consumer/$PRODUCER")"
     [[ $TARGET == "../$PRODUCER" ]]
     [[ $RUNTIME/graph/topology/wants/consumer/$PRODUCER -ef $RUNTIME/graph/topology/wants/$PRODUCER ]]
   done
   REQUEST="${REQUESTS[0]}"
-  cat > "$TEST_DIR/visit.sh" << 'BASH'
-#!/usr/bin/env bash
-set -euo pipefail
-printf '%s\n' "${1##*/}" >> "$2/order"
-BASH
   for JOB in sink sink; do
-    "$TOPOLOGY" visit "$RUNTIME" "$RUNTIME/graph/topology/wants/$JOB" "$TEST_DIR/visit" bash "$TEST_DIR/visit.sh"
+    "$TOPOLOGY" visit "$RUNTIME" "$RUNTIME/graph/topology/wants/$JOB" "$TEST_DIR/visit"
   done
-  printf '%s\n' producer-1 producer-2 consumer sink > "$TEST_DIR/expected-order"
-  diff --unified -- "$TEST_DIR/expected-order" "$TEST_DIR/visit/order"
+  while read -r JOB LEVEL; do
+    [[ $(< "$TEST_DIR/visit/$JOB/level") == "$LEVEL" ]]
+  done << 'EOF'
+producer-1 0
+producer-2 0
+consumer 1
+sink 2
+EOF
   HASH="${REQUEST##*/}"
   INPUTS="$RUNTIME/graph/inputs/consumer/$HASH"
   [[ $REQUEST -ef $INPUTS ]]
@@ -343,10 +375,10 @@ BASH
     STATUS=0
     env -C "$SERVICE" -- ./finish 0 0 "$HASH" > "$TEST_DIR/output" || STATUS=$?
     [[ $STATUS == 125 ]]
-    "$TOPOLOGY" projection "$RUNTIME" consumer
+    "$TOPOLOGY" projection "$RUNTIME"
     printf '%s' consumer-v1 > "$SERVICES/consumer/template/data/.s9/defs.sum"
     BYSTANDER_REQUESTS=("$SERVICES/bystander/data/launch/"*)
-    [[ ${#BYSTANDER_REQUESTS[@]} == 0 ]]
+    [[ ${#BYSTANDER_REQUESTS[@]} == 2 ]]
     SINK_REQUESTS=("$SERVICES/sink/data/launch/"*)
     ((${#SINK_REQUESTS[@]} > 0))
     RECORD="$(realpath -- "$RUNTIME/dead/consumer/$HASH/latest-succ")"
