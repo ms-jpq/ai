@@ -17,12 +17,10 @@ if [[ $ACTION == deliver ]]; then
   LIVE="$STATE/live/$1@$2"
   mkdir -p -- "$LIVE" "$STATE/dead/$1"
   if ! [[ -f $LIVE/.record ]]; then
-    mkdir -p -- "${5:-$STATE/dead}/$1"
-    RECORD="$(realpath -- "${5:-$STATE/dead}/$1")"
-    RECORD="$RECORD/$2.$(date -u +%Y%m%dT%H%M%S.%N)"
+    RECORD="$STATE/dead/$1/$2.$(date -u +%Y%m%dT%H%M%S.%N)"
     printf -- '%s' "$3" > "$LIVE/exit_status"
     printf -- '%s' "$4" > "$LIVE/signal"
-    printf -- '%s' "${6:-$STATE/services/$1/instances/$2}" > "$LIVE/.service"
+    printf -- '%s' "${5:-$STATE/services/$1/instances/$2}" > "$LIVE/.service"
     printf -- '%s' "$RECORD" > "$LIVE/.record-next"
     mv --no-target-directory -- "$LIVE/.record-next" "$LIVE/.record"
   fi
@@ -105,27 +103,24 @@ compile)
   done
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
   trap 'rm -fr -- "$BUILD"' EXIT
-  mkdir -- "$BUILD/jobs" "$BUILD/wants" "$BUILD/wanted-by"
+  mkdir -- "$BUILD/wants" "$BUILD/wanted-by"
+  declare -A -- JOB_NAMES=()
   for JOB in "$JOBS"/*; do
     if [[ -d $JOB ]]; then
       NAME="${JOB##*/}"
-      ln -sTnfr -- "$JOB" "$BUILD/jobs/$NAME"
+      TARGET="$(realpath -- "$JOB")"
+      JOB_NAMES[$TARGET]="${JOB_NAMES[$TARGET]:-$NAME}"
       mkdir -p -- "$BUILD/wants/$NAME" "$BUILD/wanted-by/$NAME"
       if [[ -f $SERVICES/$NAME/template/.sum ]]; then
         cp -- "$SERVICES/$NAME/template/.sum" "$BUILD/wants/$NAME/.job.sum"
       fi
     fi
   done
-  for JOB in "$BUILD"/jobs/*; do
+  for JOB in "$BUILD"/wants/*; do
     CONSUMER="${JOB##*/}"
     for WANT in "$SERVICES"/"$CONSUMER"/template/data/wants/*; do
-      PRODUCER=''
-      for CANDIDATE in "$BUILD"/jobs/*; do
-        if [[ $WANT -ef $CANDIDATE ]]; then
-          PRODUCER="${CANDIDATE##*/}"
-          break
-        fi
-      done
+      TARGET="$(realpath -- "$WANT")"
+      PRODUCER="${JOB_NAMES[$TARGET]:-}"
       if [[ -z $PRODUCER ]]; then
         printf -- 'Unknown dependency: %s\n' "$WANT" >&2
         exit 2
@@ -135,10 +130,10 @@ compile)
     done
   done
   mkdir -- "$BUILD/check"
-  for JOB in "$BUILD"/jobs/*; do
+  for JOB in "$BUILD"/wants/*; do
     "$SELF" visit "$STATE" "$BUILD" "$BUILD/check" "${JOB##*/}" check
   done
-  rm -fr -- "$BUILD/check" "$BUILD/jobs"
+  rm -fr -- "$BUILD/check"
   PREVIOUS=''
   if [[ -L $GRAPH/topology ]]; then
     PREVIOUS="$(realpath -- "$GRAPH/topology")"
@@ -191,7 +186,7 @@ visit)
     printf -- 'Dependency cycle at %s\n' "$JOB" >&2
     exit 2
   fi
-  mkdir -p -- "$PASS/$JOB/outputs"
+  mkdir -p -- "$PASS/$JOB/records"
   WANTS=("$TOPOLOGY"/wants/"$JOB"/*)
   for WANT in "${WANTS[@]}"; do
     "$SELF" visit "$STATE" "$TOPOLOGY" "$PASS" "$(< "$WANT")" "$MODE"
@@ -202,7 +197,7 @@ visit)
     else
       for SOURCE in "$STATE"/dead/"$JOB"/*.latest-succ; do
         INSTANCE="${SOURCE##*/}"
-        "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "${INSTANCE%.latest-succ}"
+        ln -sTnfr -- "$SOURCE" "$PASS/$JOB/records/${INSTANCE%.latest-succ}"
       done
     fi
   fi
@@ -217,7 +212,10 @@ combine)
   WANTS=("$TOPOLOGY"/wants/"$JOB"/*)
   if ((INDEX < ${#WANTS[@]})); then
     PRODUCER="$(< "${WANTS[$INDEX]}")"
-    for OUTPUT in "$PASS"/"$PRODUCER"/outputs/*; do
+    for OUTPUT in "$PASS"/"$PRODUCER"/records/*/outputs/*; do
+      if ! [[ -d $OUTPUT ]]; then
+        continue
+      fi
       OUTPUT="$(realpath -- "$OUTPUT")"
       "$SELF" combine "$STATE" "$TOPOLOGY" "$PASS" "$JOB" "$((INDEX + 1))" "$@" "${WANTS[$INDEX]##*/}" "$OUTPUT"
     done
@@ -231,23 +229,10 @@ combine)
     if [[ -f $PASS/.selected/$JOB ]]; then
       "$SELF" ensure "$STATE" "$TOPOLOGY" "$JOB" "$HASH" "$@"
     fi
-    "$SELF" outputs "$STATE" "$PASS/$JOB/outputs" "$JOB" "$HASH"
-  fi
-  ;;
-outputs)
-  DESTINATION="$1"
-  JOB="$2"
-  INSTANCE="$3"
-  if ! [[ -L $STATE/dead/$JOB/$INSTANCE.latest-succ ]]; then
-    exit
-  fi
-  RECORD="$(realpath -- "$STATE/dead/$JOB/$INSTANCE.latest-succ")"
-  for OUTPUT in "$RECORD"/outputs/*; do
-    if [[ -d $OUTPUT ]]; then
-      HASH="$(printf -- '%s\0' "${OUTPUT#"$STATE"/}" | b3sum)"
-      ln -sTnfr -- "$OUTPUT" "$DESTINATION/${HASH%% *}"
+    if [[ -L $STATE/dead/$JOB/$HASH.latest-succ ]]; then
+      ln -sTnfr -- "$STATE/dead/$JOB/$HASH.latest-succ" "$PASS/$JOB/records/$HASH"
     fi
-  done
+  fi
   ;;
 ensure)
   TOPOLOGY="$1"

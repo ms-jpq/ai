@@ -44,6 +44,8 @@ BASH
     mkdir -p -- "$JOBS/$JOB/data/launch" "$SERVICES/$JOB/template" "$SERVICES/$JOB/instances"
     printf '%s' "$JOB-v1" > "$SERVICES/$JOB/template/.sum"
   done
+  mv -- "$JOBS/producer-1" "$TEST_DIR/producer-snapshot"
+  ln -sTnfr -- "$TEST_DIR/producer-snapshot" "$JOBS/producer-1"
   mkdir -p -- "$JOBS/consumer/data/wants" "$JOBS/sink/data/wants" "$JOBS/bystander/data/wants"
   ln -sTnfr -- "$JOBS/producer-1" "$JOBS/consumer/data/wants/first"
   ln -sTnfr -- "$JOBS/producer-2" "$JOBS/consumer/data/wants/second"
@@ -82,6 +84,7 @@ BASH
   [[ ${#REQUESTS[@]} == 4 ]]
   for PRODUCER in producer-1 producer-2; do
     [[ $RUNTIME/graph/topology/wanted-by/$PRODUCER/consumer -ef $RUNTIME/graph/topology/wants/consumer ]]
+    [[ $(< "$RUNTIME/graph/topology/wants/consumer/$PRODUCER") == "$PRODUCER" ]]
   done
   REQUEST="${REQUESTS[0]}"
   HASH="${REQUEST##*/}"
@@ -351,20 +354,6 @@ BASH
   [[ $(< "${FAILED[1]}/signal") == 15 ]]
   [[ -f ${FAILED[1]}/log ]]
 
-  printf '%s' "$TEST_DIR/telemetry" > "$SERVICE/env/S9_DEAD_DIR"
-  for STATUS in 0 67; do
-    env -C "$SERVICE" -- ./finish "$STATUS" 0 "$INSTANCE" > "$TEST_DIR/finish.log"
-  done
-  RECORDS=("$TEST_DIR/telemetry/dog/"*)
-  [[ ${#RECORDS[@]} == 2 ]]
-  for RECORD in "${RECORDS[@]}"; do
-    [[ -f $RECORD/log ]]
-    [[ $(< "$RECORD/signal") == 0 ]]
-  done
-  [[ $(< "${RECORDS[0]}/exit_status") == 0 ]]
-  [[ $(< "${RECORDS[1]}/exit_status") == 67 ]]
-  [[ $TEST_DIR/failed/dog/${RECORDS[1]##*/} -ef ${RECORDS[1]} ]]
-
   rm -- "$SERVICE/data/attempt" "$SERVICE/data/ran"
   if S9_WORKING_DIRECTORY="$TEST_DIR/missing" env -C "$SERVICE" -- ./run "$INSTANCE" > "$TEST_DIR/output"; then
     exit 1
@@ -394,25 +383,32 @@ BASH
 
   rm -- "$SERVICE/data/.pgid"
   printf '%s' -1 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
-  printf '%s' blocked > "$TEST_DIR/blocked"
   for FAILURE in archive footer; do
+    TEST_PATH="$PATH"
     case "$FAILURE" in
-    archive) printf '%s' "$TEST_DIR/blocked" > "$SERVICE/env/S9_DEAD_DIR" ;;
-    footer) printf '%s' "$TEST_DIR/footer-records" > "$SERVICE/env/S9_DEAD_DIR" ;;
+    archive)
+      mv -- "$TEST_DIR/dead/dog" "$TEST_DIR/dead/saved"
+      printf '%s' blocked > "$TEST_DIR/dead/dog"
+      ;;
+    footer) TEST_PATH="$TEST_DIR/bin:$PATH" ;;
     *)
       set -x
       exit 2
       ;;
     esac
     ln -sTnfr -- /dev/null "$SERVICE/data/launch"
-    if PATH="$TEST_DIR/bin:$PATH" env -C "$SERVICE" -- ./finish 67 0 "$INSTANCE" > "$TEST_DIR/finish.log"; then
+    if PATH="$TEST_PATH" env -C "$SERVICE" -- ./finish 67 0 "$INSTANCE" > "$TEST_DIR/finish.log"; then
       exit 1
     fi
     if [[ -f $STATE/dog/data/.exited/$INSTANCE ]]; then exit 1; fi
     [[ -L $SERVICE/data/launch ]]
     [[ -f $TEST_DIR/live/dog@$INSTANCE/log ]]
+    if [[ $FAILURE == archive ]]; then
+      rm -- "$TEST_DIR/dead/dog"
+      mv -- "$TEST_DIR/dead/saved" "$TEST_DIR/dead/dog"
+    fi
   done
-  if [[ -d $TEST_DIR/footer-records ]]; then exit 1; fi
+  if [[ -f $TEST_DIR/live/dog@$INSTANCE/.record ]]; then exit 1; fi
   ;;
 runtime)
   SERVICE="$STATE/dog/instances/walk"
