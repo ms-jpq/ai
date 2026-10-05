@@ -8,6 +8,8 @@
 
 - Expect the user to git stage and commit between tool calls.
 
+- User strongly prefers Canadian english.
+
 - User takes issue with reading large Markdown tables.
 
   - Break down into H2-6 sections and bullet points.
