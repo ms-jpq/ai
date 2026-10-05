@@ -73,7 +73,7 @@ running)
 attempt)
   unset -- RECUR
   INSTANCE="$1"
-  mkdir -p -- "$LIVE"
+  "$INSTANCE_DATA/dataflow.sh" prepare "$STATE" "$JOB" "$INSTANCE" "$INSTANCE_DATA/launch"
   cd -- "$S9_WORKING_DIRECTORY"
 
   {
@@ -110,31 +110,17 @@ EOF
       printf -- '\n' >> "$ATTEMPTS"
     fi
   else
-    touch -- "../../data/done/$INSTANCE"
-    rm -f -- "$INSTANCE_DATA/launch"
     EXIT_STATUS=125
   fi
 
-  TIMESTAMP="$(date -u +%Y%m%dT%H%M%S.%N)"
   : "${S9_DEAD_DIR:=$STATE/dead}"
-  LOG_DST="$S9_DEAD_DIR/$JOB/$INSTANCE.$TIMESTAMP/log"
-  mkdir -p -- "$S9_DEAD_DIR/$JOB"
-
-  STAGING="$(mktemp -d -- "$S9_DEAD_DIR/$JOB/.$INSTANCE.XXXXXX")"
-  trap 'rm -fr -- "$STAGING"' EXIT
-  printf -- '%s' "$STATUS" > "$STAGING/exit_status"
-  printf -- '%s' "$SIGNAL" > "$STAGING/signal"
-
   mkdir -p -- "${LOG_SRC%/*}"
   "${LOGGER[@]}" -- T "${LOG_FMT[@]}" <<< "$EXIT_LINES" | tee --append -- "$LOG_SRC" > /dev/null
-  ln -- "$LOG_SRC" "$STAGING/log"
-  mv --no-target-directory -- "$STAGING" "${LOG_DST%/*}"
-  if ((STATUS != 0 || SIGNAL != 0)); then
-    mkdir -p -- "$STATE/failed/$JOB"
-    ln -sTnfr -- "${LOG_DST%/*}" "$STATE/failed/$JOB/$INSTANCE.$TIMESTAMP"
+  "$INSTANCE_DATA/dataflow.sh" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL" "$S9_DEAD_DIR" "$INSTANCE_DIR"
+  if ((EXIT_STATUS == 125)); then
+    touch -- "../../data/done/$INSTANCE"
+    rm -f -- "$INSTANCE_DATA/launch"
   fi
-  rm -fr -- "$LOG_SRC"
-
   printf -- '%s' "$EXIT_LINES"
   exit "$EXIT_STATUS"
   ;;

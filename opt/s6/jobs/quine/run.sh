@@ -27,6 +27,7 @@ bootstrap)
 reconcile)
   trap 's6-svscanctl -h -- "$PWD"' EXIT
   find "$ROOT/jobs" "$PWD" -mindepth 1 -maxdepth 1 '(' -type d -o -type l ')' ! -name '.*' -printf '%f\0' | sort --zero-terminated --unique | RECUR=job "${XARGS[@]}" "$SELF" '{}'
+  "$ROOT/libexec/dataflow.sh" compile "$PWD/.." "$ROOT/jobs" "$PWD"
   ;;
 seed | job)
   if [[ $RECUR == seed ]] || [[ -d $JOB ]]; then
@@ -39,7 +40,12 @@ seed | job)
       exit 2
     fi
     BUILD="$(RECUR='' "$ROOT/libexec/p-cp.sh" "$ROOT/base" "$STAGING/template")"
+    cp --remove-destination --dereference --preserve=mode,timestamps -- "$ROOT/libexec/"{dataflow,p-cp}.sh "$BUILD/data/"
     rsync --archive --checksum --exclude=/data/launch --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$BUILD/"
+    for WANT in "$JOB"/data/wants/*; do
+      PRODUCER="$(realpath -- "$WANT")"
+      ln -sTnf -- "$PRODUCER" "$BUILD/data/wants/${WANT##*/}"
+    done
     if [[ ${RUN[*]} -ef $SELF ]]; then
       ln -sTnf -- "${RUN[*]}" "$BUILD/data/job"
     else
@@ -102,6 +108,7 @@ instance)
     REQUEST="$SUPERVISOR/data/launch/$INSTANCE"
   fi
 
+  "$ROOT/libexec/dataflow.sh" register "$PWD/.." "$NAME" "$INSTANCE" "$REQUEST" "$JOB"
   if [[ -e $DONE/$INSTANCE ]] || { [[ -d $SERVICE ]] && ! s6-svok "$SERVICE"; }; then
     RECUR=cleanup "$0" "$NAME" "$INSTANCE"
   fi
@@ -135,6 +142,11 @@ instance)
     fi
   fi
   if ! [[ -d $SERVICE ]]; then
+    DEFINITION="$PWD/../graph/definitions/$NAME/$INSTANCE"
+    if [[ -f $DEFINITION ]] && ! cmp --silent -- "$DEFINITION" "$TEMPLATE/.sum"; then
+      rm -fr -- "$REQUEST"
+      exit
+    fi
     if (($(< "$TEMPLATE/env/S9_ON_UNIT_INACTIVE_SEC") >= 0)); then
       exec -- s6-instance-create -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
     fi
