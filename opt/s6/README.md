@@ -74,13 +74,13 @@ STATE/
 └── live/<consumer>/<hash(def, inputs)>/
     ├── inputs/
     │   ├── .job.sum
-    │   ├── <producer-1> -> ../telemetry/1-<producer-1>@<instance>/outputs/<row-1>/
-    │   └── <producer-2> -> ../telemetry/2-<producer-2>@<instance>/outputs/<row-2>/
+    │   ├── <producer-1> -> ../telemetry/1-<producer-1>/outputs/<row-1>/
+    │   └── <producer-2> -> ../telemetry/2-<producer-2>/outputs/<row-2>/
     ├── outputs/<row>/
     │   └── .job.sum
     ├── telemetry/
-    │   ├── 1-<producer-1>@<instance> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/
-    │   └── 2-<producer-2>@<instance> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/
+    │   ├── 1-<producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/
+    │   └── 2-<producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/
     └── log
 ```
 

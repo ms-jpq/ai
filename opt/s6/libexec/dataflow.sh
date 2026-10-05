@@ -74,7 +74,7 @@ prepare)
     NUMBER=$((NUMBER + 1))
     PARENT="${RECORD%/*}"
     PRODUCER="${PARENT%/*}"
-    printf -v LABEL -- '%0*d-%s@%s' "$WIDTH" "$NUMBER" "${PRODUCER##*/}" "${PARENT##*/}"
+    printf -v LABEL -- '%0*d-%s' "$WIDTH" "$NUMBER" "${PRODUCER##*/}"
     ln -sTnfr -- "$RECORD" "$LIVE/telemetry/$LABEL"
     SEEN[$RECORD]="$LABEL"
   done

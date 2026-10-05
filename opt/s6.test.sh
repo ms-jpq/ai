@@ -141,7 +141,7 @@ BASH
     if [[ -L $RUNTIME/live/consumer/$HASH/inputs ]]; then exit 1; fi
     [[ -d $RUNTIME/live/consumer/$HASH/inputs/producer-1 ]]
     TARGET="$(readlink -- "$RUNTIME/live/consumer/$HASH/inputs/producer-1")"
-    [[ $TARGET == ../telemetry/1-producer-1@*/outputs/* ]]
+    [[ $TARGET == ../telemetry/1-producer-1/outputs/* ]]
     if [[ -e $RUNTIME/live/consumer/$HASH/inputs/first ]]; then exit 1; fi
     "$FLOW" projection "$RUNTIME"
     if [[ -L $REQUEST ]]; then exit 1; fi
@@ -172,7 +172,7 @@ BASH
     [[ -d $RECORD/inputs/producer-1 ]]
     [[ -d $RECORD/inputs/producer-2 ]]
     TARGET="$(readlink -- "$RECORD/inputs/producer-1")"
-    [[ $TARGET == ../telemetry/1-producer-1@*/outputs/* ]]
+    [[ $TARGET == ../telemetry/1-producer-1/outputs/* ]]
     [[ -f $SERVICES/consumer/data/.exited/$HASH ]]
     rm -fr -- "$SERVICES/consumer/instances/$HASH"
   done
