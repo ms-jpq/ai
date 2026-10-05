@@ -1,6 +1,6 @@
 # S6
 
-## Jobs
+## Job Definition
 
 ```tree
 JOBS/<service>/
@@ -58,8 +58,8 @@ JOBS/
 └── <consumer>/
     ├── run.sh
     └── data/wants/
-        ├── input-1 -> ../../../<producer-1>/
-        └── input-2 -> ../../../<producer-2>/
+        ├── <producer-1> -> ../../../<producer-1>/
+        └── <producer-2> -> ../../../<producer-2>/
 ```
 
 ```tree
@@ -79,8 +79,8 @@ STATE/
 │   ├── .topology.<revision>/
 │   │   ├── jobs/<consumer> -> JOBS/<consumer>/
 │   │   ├── wants/<consumer>/
-│   │   │   ├── input-1
-│   │   │   └── input-2
+│   │   │   ├── <producer-1>
+│   │   │   └── <producer-2>
 │   │   ├── wanted-by/
 │   │   │   ├── <producer-1>/<consumer> -> JOBS/<consumer>/
 │   │   │   └── <producer-2>/<consumer> -> JOBS/<consumer>/
@@ -88,8 +88,8 @@ STATE/
 │   │   └── services -> ../../services/
 │   ├── definitions/<consumer>/<hash>
 │   └── cartesian/<consumer>/<hash>/
-│       ├── input-1 -> ../../../../dead/<producer-1>/<hash-1>.<timestamp>/outputs/<item-1>/
-│       └── input-2 -> ../../../../dead/<producer-2>/<hash-2>.<timestamp>/outputs/<item-2>/
+│       ├── <producer-1> -> ../../../../dead/<producer-1>/<hash-1>.<timestamp>/outputs/<item-1>/
+│       └── <producer-2> -> ../../../../dead/<producer-2>/<hash-2>.<timestamp>/outputs/<item-2>/
 ├── services/<consumer>/
 │   ├── data/launch/<hash> -> ../../../../graph/cartesian/<consumer>/<hash>/
 │   ├── template/

@@ -134,7 +134,7 @@ compile)
         printf -- 'Unknown dependency: %s\n' "$WANT" >&2
         exit 2
       fi
-      printf -- '%s' "$PRODUCER" > "$BUILD/wants/$CONSUMER/${WANT##*/}"
+      printf -- '%s' "$PRODUCER" > "$BUILD/wants/$CONSUMER/$PRODUCER"
       ln -sTnfr -- "$JOB" "$BUILD/wanted-by/$PRODUCER/$CONSUMER"
     done
   done

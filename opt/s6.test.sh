@@ -63,7 +63,8 @@ dataflow)
     cat > "$SERVICE/data/.run" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
-test -d ./inputs/first
+test -d ./inputs/producer-1
+test -d ./inputs/producer-2
 mkdir -- ./outputs/result
 printf '%s' "$1" > ./outputs/result/value
 BASH
@@ -74,7 +75,8 @@ BASH
     "$FLOW" prepare "$RUNTIME" consumer "$HASH" "$SERVICES/consumer/instances/$HASH/data/launch"
     TELEMETRY=("$RUNTIME/live/consumer@$HASH/telemetry/"*)
     [[ ${#TELEMETRY[@]} == 2 ]]
-    [[ -d $RUNTIME/live/consumer@$HASH/inputs/first ]]
+    [[ -d $RUNTIME/live/consumer@$HASH/inputs/producer-1 ]]
+    if [[ -e $RUNTIME/live/consumer@$HASH/inputs/first ]]; then exit 1; fi
     "$FLOW" project "$RUNTIME"
     if [[ -L $REQUEST ]]; then exit 1; fi
     S9_WORKING_DIRECTORY="$RUNTIME/live/consumer@$HASH" env -C "$SERVICE" -- ./run "$HASH" > "$TEST_DIR/output"
@@ -84,7 +86,7 @@ BASH
     [[ $STATUS == 125 ]]
     RECORD="$(realpath -- "$RUNTIME/graph/latest/consumer/$HASH")"
     [[ $(< "$RECORD/outputs/result/value") == "$HASH" ]]
-    [[ -d $RECORD/inputs/first ]]
+    [[ -d $RECORD/inputs/producer-1 ]]
     [[ -f $SERVICES/consumer/data/.exited/$HASH ]]
     rm -fr -- "$SERVICES/consumer/instances/$HASH"
   done
@@ -122,7 +124,7 @@ BASH
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 2 ]]
   for REQUEST in "${REQUESTS[@]}"; do
-    [[ -d $REQUEST/first ]]
+    [[ -d $REQUEST/producer-1 ]]
     [[ ${REQUEST##*/} != "${PREVIOUS##*/}" ]]
   done
   rm -- "${REQUESTS[@]}"
