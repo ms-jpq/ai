@@ -80,15 +80,7 @@ projection)
   for JOB in "$TOPOLOGY"/wants/*; do
     "$SELF" visit "$STATE" "$JOB" "$PASS"
   done
-  for JOB in "$PASS"/*; do
-    printf '%s\n' "$(< "$JOB/level")"
-  done | sort --numeric-sort --unique | while read -r LEVEL; do
-    for JOB in "$PASS"/*; do
-      if [[ $(< "$JOB/level") == "$LEVEL" ]]; then
-        printf '%s\0' "${JOB##*/}"
-      fi
-    done | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
-  done
+  find "$PASS" -mindepth 1 -maxdepth 1 -type d -printf '%f\0' | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
   ;;
 recover)
   LIVE="${1%/.s9/record}"
@@ -121,9 +113,23 @@ EOF
     ln -sTnfr -- "$BUILD/wants/$PRODUCER" "$BUILD/wants/$CONSUMER/$INPUT"
   done
   ;;
-evaluate)
+evaluate | evaluated)
   PASS="$1"
   JOB="$2"
+  ;;&
+evaluate)
+  exec -- s6-setlock -- "$PASS/$JOB/lock" "$SELF" evaluated "$STATE" "$PASS" "$JOB"
+  ;;
+evaluated)
+  STATUS="$PASS/$JOB/status"
+  if [[ -f $STATUS ]]; then exit "$(< "$STATUS")"; fi
+  trap 'printf -- "%s" "$?" > "$STATUS"' EXIT
+  for WANT in "$TOPOLOGY/wants/$JOB/"*; do
+    if [[ -L $WANT ]]; then
+      PRODUCER="${WANT##*/}"
+      printf -- '%s\0' "${PRODUCER#=}"
+    fi
+  done | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
   "$SELF" combine "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS" '' | sort --zero-terminated --unique --key=1,1 | "${XARGS[@]}" "$SELF" publish "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS"
   ;;
 visit | combine | publish)
@@ -134,7 +140,7 @@ visit | combine | publish)
   WANTS=(*)
   ;;&
 visit)
-  if [[ -f $PASS/$JOB/level ]]; then
+  if [[ -f $PASS/$JOB/visited ]]; then
     exit
   fi
   if [[ -d $PASS/$JOB ]]; then
@@ -144,16 +150,12 @@ EOF
     exit 2
   fi
   mkdir -p -- "$PASS/$JOB/records"
-  LEVEL=0
   for WANT in "${WANTS[@]}"; do
     if [[ -L $WANT ]]; then
       "$SELF" visit "$STATE" "$PWD/$WANT" "$PASS"
-      PRODUCER="$(realpath -- "$WANT")"
-      DEPTH="$(< "$PASS/${PRODUCER##*/}/level")"
-      LEVEL=$((LEVEL > DEPTH ? LEVEL : DEPTH + 1))
     fi
   done
-  printf '%s' "$LEVEL" > "$PASS/$JOB/level"
+  touch -- "$PASS/$JOB/visited"
   ;;
 combine)
   KEY="$1"

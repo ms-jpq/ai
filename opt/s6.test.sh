@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow contention joins | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow contention joins scheduling | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -22,6 +22,67 @@ mkdir -- "$STATE"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
+scheduling)
+  shopt -u failglob dotglob
+  TOPOLOGY="$TEST_DIR/base/data/topology.sh"
+  for JOB in dog slow report sibling; do
+    mkdir -p -- "$JOBS/$JOB" "$STATE/$JOB/template/data/"{.s9,wants}
+    ln -sTnf -- "$JOBS/$JOB" "$STATE/$JOB/template/data/.s9/source"
+    printf '%s' "$JOB" > "$STATE/$JOB/template/data/.s9/defs.sum"
+  done
+  for JOB in report sibling; do
+    ln -sTnfr -- "$JOBS/dog" "$STATE/$JOB/template/data/wants/dog"
+  done
+  for JOB in dog slow; do
+    RECORD="$TEST_DIR/dead/$JOB/seed/20261005T000000.000000000"
+    mkdir -p -- "$RECORD/outputs/row/.s9"
+    printf '%s' "$JOB" > "$RECORD/outputs/row/value"
+    cp -- "$STATE/$JOB/template/data/.s9/defs.sum" "$RECORD/outputs/row/.s9/defs.sum"
+    ln -sTnfr -- "$RECORD" "${RECORD%/*}/latest-succ"
+  done
+  mkdir -- "$TEST_DIR/bin"
+  cat > "$TEST_DIR/bin/ln" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${0%/bin/ln}"
+DST="${!#}"
+case "$DST" in
+"$ROOT/graph/".projection.*/dog/records/seed)
+  printf '%s\n' dog >> "$ROOT/evaluations"
+  if [[ ${FAIL_DOG:-} == 1 ]]; then exit 67; fi
+  ;;
+"$ROOT/graph/".projection.*/slow/records/seed)
+  if [[ ${BARRIER:-} == 1 ]]; then
+    timeout 10 bash -c 'shopt -s nullglob; LAUNCH="$1"; while :; do REQUESTS=("$LAUNCH"/*); if ((${#REQUESTS[@]})); then exit; fi; sleep 0.01; done' -- "$ROOT/services/report/data/launch"
+  fi
+  printf '%s\n' slow >> "$ROOT/evaluations"
+  ;;
+esac
+exec -- "$REAL_LN" "$@"
+BASH
+  chmod +x -- "$TEST_DIR/bin/ln"
+  REAL_LN="$(command -v ln)"
+  export -- REAL_LN
+  BARRIER=1 PATH="$TEST_DIR/bin:$PATH" timeout 20 "$TOPOLOGY" compile "$TEST_DIR" "$JOBS" > "$TEST_DIR/output" 2>&1
+  for JOB in dog slow; do
+    COUNT="$(grep --count "^$JOB$" "$TEST_DIR/evaluations")"
+    [[ $COUNT == 1 ]]
+  done
+  for JOB in report sibling; do
+    REQUESTS=("$STATE/$JOB/data/launch/"*)
+    ((${#REQUESTS[@]} == 1))
+    rm -- "${REQUESTS[@]}"
+  done
+  STATUS=0
+  FAIL_DOG=1 PATH="$TEST_DIR/bin:$PATH" timeout 20 "$TOPOLOGY" projection "$TEST_DIR" > "$TEST_DIR/output" 2>&1 || STATUS=$?
+  [[ $STATUS == 123 ]]
+  for JOB in dog slow; do
+    COUNT="$(grep --count "^$JOB$" "$TEST_DIR/evaluations")"
+    [[ $COUNT == 2 ]]
+  done
+  REQUESTS=("$STATE/report/data/launch/"* "$STATE/sibling/data/launch/"*)
+  ((${#REQUESTS[@]} == 0))
+  ;;
 joins)
   shopt -u failglob dotglob
   TOPOLOGY="$TEST_DIR/base/data/topology.sh"
@@ -298,14 +359,9 @@ BASH
   for JOB in sink sink; do
     "$TOPOLOGY" visit "$RUNTIME" "$RUNTIME/graph/topology/wants/$JOB" "$TEST_DIR/visit"
   done
-  while read -r JOB LEVEL; do
-    [[ $(< "$TEST_DIR/visit/$JOB/level") == "$LEVEL" ]]
-  done << 'EOF'
-producer-1 0
-producer-2 0
-consumer 1
-sink 2
-EOF
+  for JOB in producer-1 producer-2 consumer sink; do
+    [[ -f $TEST_DIR/visit/$JOB/visited ]]
+  done
   HASH="${REQUEST##*/}"
   INPUTS="$RUNTIME/graph/inputs/consumer/$HASH"
   [[ $REQUEST -ef $INPUTS ]]
@@ -523,6 +579,9 @@ BASH
   cat > "$TEST_DIR/lock-bin/s6-setlock" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ ${4:-} != "$TEST_RUNTIME/dead/recovery-race/record/.lock" ]]; then
+  exec "$TEST_SETLOCK" "$@"
+fi
 LOCK_ARGS=("${@:1:4}")
 shift 4
 exec "$TEST_SETLOCK" "${LOCK_ARGS[@]}" bash "$TEST_RECOVER" "$@"
