@@ -27,6 +27,19 @@ dataflow)
   SERVICES="$RUNTIME/services"
   INPUT="$TEST_DIR/input"
   mkdir -p -- "$RUNTIME" "$INPUT"
+  FINISH="$TEST_DIR/finish.sh"
+  cat > "$FINISH" << 'BASH'
+#!/usr/bin/env bash
+set -euo pipefail
+ROOT="${0%/*}"
+SERVICE="$ROOT/runtime/services/$1/instances/$2"
+mkdir -p -- "$SERVICE"
+rsync --archive --copy-unsafe-links -- "$ROOT/base/" "$SERVICE/"
+printf '%s' 0 > "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC"
+env -C "$SERVICE" -- ./finish "$3" "$4" "$2" > "$ROOT/finish.log"
+"$ROOT/libexec/dataflow.sh" project "$ROOT/runtime"
+BASH
+  chmod +x -- "$FINISH"
   for JOB in producer-1 producer-2 consumer sink; do
     mkdir -p -- "$JOBS/$JOB/data/launch" "$SERVICES/$JOB/template" "$SERVICES/$JOB/instances"
     printf '%s' "$JOB-v1" > "$SERVICES/$JOB/template/.sum"
@@ -48,7 +61,7 @@ dataflow)
     "$FLOW" prepare "$RUNTIME" "$JOB" "$HASH" "$INPUT"
     mkdir -- "$RUNTIME/live/$JOB@$HASH/outputs/"{A,B}
     printf '%s' "$JOB" > "$RUNTIME/live/$JOB@$HASH/log"
-    "$FLOW" deliver "$RUNTIME" "$JOB" "$HASH" 0 0
+    "$FINISH" "$JOB" "$HASH" 0 0
   done
   "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
@@ -75,7 +88,10 @@ BASH
     "$FLOW" prepare "$RUNTIME" consumer "$HASH" "$SERVICES/consumer/instances/$HASH/data/launch"
     TELEMETRY=("$RUNTIME/live/consumer@$HASH/telemetry/"*)
     [[ ${#TELEMETRY[@]} == 2 ]]
+    if [[ -L $RUNTIME/live/consumer@$HASH/inputs ]]; then exit 1; fi
     [[ -d $RUNTIME/live/consumer@$HASH/inputs/producer-1 ]]
+    TARGET="$(readlink -- "$RUNTIME/live/consumer@$HASH/inputs/producer-1")"
+    [[ $TARGET == ../telemetry/1-producer-1@*/outputs/* ]]
     if [[ -e $RUNTIME/live/consumer@$HASH/inputs/first ]]; then exit 1; fi
     "$FLOW" project "$RUNTIME"
     if [[ -L $REQUEST ]]; then exit 1; fi
@@ -84,9 +100,17 @@ BASH
     STATUS=0
     env -C "$SERVICE" -- ./finish 0 0 "$HASH" > "$TEST_DIR/output" || STATUS=$?
     [[ $STATUS == 125 ]]
-    RECORD="$(realpath -- "$RUNTIME/graph/latest/consumer/$HASH")"
+    "$FLOW" project "$RUNTIME"
+    RECORD="$(realpath -- "$RUNTIME/dead/consumer/$HASH.latest-succ")"
+    TARGET="$(readlink -- "$RUNTIME/dead/consumer/$HASH.latest-succ")"
+    [[ $TARGET == "${RECORD##*/}" ]]
     [[ $(< "$RECORD/outputs/result/value") == "$HASH" ]]
+    if [[ -L $RECORD/inputs ]]; then exit 1; fi
+    rm -fr -- "$RUNTIME/graph/cartesian/consumer/$HASH"
     [[ -d $RECORD/inputs/producer-1 ]]
+    [[ -d $RECORD/inputs/producer-2 ]]
+    TARGET="$(readlink -- "$RECORD/inputs/producer-1")"
+    [[ $TARGET == ../telemetry/1-producer-1@*/outputs/* ]]
     [[ -f $SERVICES/consumer/data/.exited/$HASH ]]
     rm -fr -- "$SERVICES/consumer/instances/$HASH"
   done
@@ -97,7 +121,7 @@ BASH
     "$FLOW" prepare "$RUNTIME" sink "$HASH" "$REQUEST"
     TELEMETRY=("$RUNTIME/live/sink@$HASH/telemetry/"*)
     [[ ${#TELEMETRY[@]} == 3 ]]
-    "$FLOW" deliver "$RUNTIME" sink "$HASH" 67 0
+    "$FINISH" sink "$HASH" 67 0
     rm -- "$REQUEST"
   done
   printf '%s\0' project project project | xargs --null --max-procs=0 -I '{}' -- "$FLOW" '{}' "$RUNTIME"
@@ -114,13 +138,13 @@ BASH
   [[ ${#REQUESTS[@]} == 0 ]]
   HASH="$(printf '%s' producer-1 | b3sum)"
   HASH="${HASH%% *}"
-  PREVIOUS="$(realpath -- "$RUNTIME/graph/latest/producer-1/$HASH")"
+  PREVIOUS="$(realpath -- "$RUNTIME/dead/producer-1/$HASH.latest-succ")"
   "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
-  "$FLOW" deliver "$RUNTIME" producer-1 "$HASH" 67 0
-  [[ $RUNTIME/graph/latest/producer-1/$HASH -ef $PREVIOUS ]]
+  "$FINISH" producer-1 "$HASH" 67 0
+  [[ $RUNTIME/dead/producer-1/$HASH.latest-succ -ef $PREVIOUS ]]
   "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
   mkdir -- "$RUNTIME/live/producer-1@$HASH/outputs/A"
-  "$FLOW" deliver "$RUNTIME" producer-1 "$HASH" 0 0
+  "$FINISH" producer-1 "$HASH" 0 0
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 2 ]]
   for REQUEST in "${REQUESTS[@]}"; do
@@ -133,30 +157,26 @@ BASH
   REQUESTS=("$SERVICES/sink/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
   "$FLOW" prepare "$RUNTIME" producer-1 "$HASH" "$INPUT"
-  "$FLOW" deliver "$RUNTIME" producer-1 "$HASH" 0 0
+  "$FINISH" producer-1 "$HASH" 0 0
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   for REQUEST in "${REQUESTS[@]}"; do rm -- "$REQUEST"; done
   "$FLOW" project "$RUNTIME"
   REQUESTS=("$SERVICES/consumer/data/launch/"*)
   [[ ${#REQUESTS[@]} == 0 ]]
-  mkdir -p -- "$TEST_DIR/bin"
-  cat > "$TEST_DIR/bin/mv" << 'BASH'
-#!/usr/bin/env bash
-case "${@: -1}" in
-*/graph/latest/recovery/*) exit 67 ;;
-*) exec -- "${TEST_MV?}" "$@" ;;
-esac
-BASH
-  chmod +x -- "$TEST_DIR/bin/mv"
   "$FLOW" prepare "$RUNTIME" recovery record "$INPUT"
-  mkdir -- "$RUNTIME/live/recovery@record/outputs/item"
-  STATUS=0
-  TEST_MV="$(command -v -- mv)"
-  TEST_MV="$TEST_MV" PATH="$TEST_DIR/bin:$PATH" "$FLOW" deliver "$RUNTIME" recovery record 0 0 > "$TEST_DIR/output" 2>&1 || STATUS=$?
-  [[ $STATUS == 67 ]]
+  mkdir -- "$RUNTIME/live/recovery@record/outputs/row"
+  "$FINISH" recovery record 0 0
+  RECORD="$(realpath -- "$RUNTIME/dead/recovery/record.latest-succ")"
+  rm -- "$RUNTIME/graph/completed/recovery/record"
+  mkdir -- "$RUNTIME/live/recovery@record"
+  cp -- "$RECORD/"{exit_status,signal} "$RUNTIME/live/recovery@record/"
+  printf '%s' "$RECORD" > "$RUNTIME/live/recovery@record/.record"
+  printf '%s' "$SERVICES/recovery/instances/record" > "$RUNTIME/live/recovery@record/.service"
+  ln -sTnfr -- "$RUNTIME/live/recovery@record" "$RUNTIME/graph/pending/recovery/record"
   [[ -L $RUNTIME/graph/pending/recovery/record ]]
   "$FLOW" compile "$RUNTIME" "$JOBS" "$SERVICES"
-  [[ -d $RUNTIME/graph/latest/recovery/record/outputs/item ]]
+  [[ $RUNTIME/graph/completed/recovery/record -ef $RECORD ]]
+  [[ -d $RUNTIME/dead/recovery/record.latest-succ/outputs/row ]]
   if [[ -L $RUNTIME/graph/pending/recovery/record ]]; then exit 1; fi
   mkdir -p -- "$JOBS/producer-1/data/wants"
   ln -sTnfr -- "$JOBS/sink" "$JOBS/producer-1/data/wants/cycle"
@@ -231,7 +251,7 @@ BASH
     if [[ -e $TEST_DIR/live/dog@$INSTANCE/log ]]; then
       exit 1
     fi
-    ARCHIVES=("$TEST_DIR/dead/dog/$INSTANCE."*/log)
+    ARCHIVES=("$TEST_DIR/dead/dog/$INSTANCE."[0-9]*/log)
     [[ ${#ARCHIVES[@]} == 2 ]]
     for ARCHIVE in "${ARCHIVES[@]}"; do
       COUNT="$(grep --count --extended-regexp -- "^[0-9]{4}-[0-9]{2}-[0-9]{2} .*dog@$INSTANCE --- started ---$" "$ARCHIVE")"
@@ -244,8 +264,9 @@ BASH
       [[ $COUNT == 1 ]]
       grep --quiet --fixed-strings -- "dog@$INSTANCE --- exit_status=$(< "${ARCHIVE%/*}/exit_status") signal=$(< "${ARCHIVE%/*}/signal") ---" "$ARCHIVE"
     done
-    DEAD=("$TEST_DIR/dead/dog/$INSTANCE."*)
+    DEAD=("$TEST_DIR/dead/dog/$INSTANCE."[0-9]*)
     [[ ${#DEAD[@]} == 2 ]]
+    [[ $TEST_DIR/dead/dog/$INSTANCE.latest-succ -ef ${DEAD[0]} ]]
     [[ $(< "${DEAD[0]}/exit_status") == 0 ]]
     [[ $(< "${DEAD[0]}/signal") == 0 ]]
     FAILED=("$TEST_DIR/failed/dog/$INSTANCE."*)

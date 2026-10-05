@@ -14,20 +14,21 @@ export LC_ALL=C.UTF-8
 
 if [[ $ACTION == deliver ]]; then
   LIVE="$STATE/live/$1@$2"
-  mkdir -p -- "$LIVE" "$GRAPH/pending/$1"
+  mkdir -p -- "$LIVE" "$GRAPH/pending/$1" "$STATE/dead/$1"
   if ! [[ -f $LIVE/.record ]]; then
-    ARCHIVE="$(realpath --canonicalize-missing -- "${5:-$STATE/dead}")"
-    printf -- '%s' "$ARCHIVE" > "$LIVE/.archive"
-    printf -- '%s' "${6:-$STATE/services/$1/instances/$2}" > "$LIVE/.service"
+    mkdir -p -- "${5:-$STATE/dead}/$1"
+    RECORD="$(realpath -- "${5:-$STATE/dead}/$1")"
+    RECORD="$RECORD/$2.$(date -u +%Y%m%dT%H%M%S.%N)"
     printf -- '%s' "$3" > "$LIVE/exit_status"
     printf -- '%s' "$4" > "$LIVE/signal"
-    date -u +%Y%m%dT%H%M%S.%N > "$LIVE/.record"
+    printf -- '%s' "${6:-$STATE/services/$1/instances/$2}" > "$LIVE/.service"
+    printf -- '%s' "$RECORD" > "$LIVE/.record"
   fi
   ln -sTnfr -- "$LIVE" "$GRAPH/pending/$1/$2"
 fi
 
 case "$ACTION" in
-compile | project | deliver | index | register)
+compile | project | deliver | register)
   if [[ ${RECUR:-} != dataflow ]]; then
     RECUR=dataflow exec -- s6-setlock -t 6000 -- "$GRAPH/.lock" "$SELF" "$ACTION" "$STATE" "$@"
   fi
@@ -56,11 +57,13 @@ prepare)
     "$SELF" deliver "$STATE" "$JOB" "$INSTANCE" "$(< "$LIVE/exit_status")" "$(< "$LIVE/signal")"
   fi
   mkdir -p -- "$LIVE/outputs" "$LIVE/telemetry"
-  if [[ -d $3 ]]; then
-    INPUTS="$(realpath -- "$3")"
-    ln -sTnfr -- "$INPUTS" "$LIVE/inputs"
-  else
-    mkdir -p -- "$LIVE/inputs"
+  if ! [[ -d $LIVE/inputs ]]; then
+    if [[ -d $3 ]]; then
+      INPUTS="$(RECUR='' "${SELF%/*}/p-cp.sh" "$3" "$LIVE/inputs")"
+      mv --no-target-directory -- "$INPUTS" "$LIVE/inputs"
+    else
+      mkdir -- "$LIVE/inputs"
+    fi
   fi
   RECORDS=()
   declare -A -- SEEN=()
@@ -90,6 +93,16 @@ prepare)
     ATTEMPT="${RECORD##*/}"
     printf -v LABEL -- '%0*d-%s@%s' "$WIDTH" "$NUMBER" "${PRODUCER##*/}" "${ATTEMPT%%.*}"
     ln -sTnfr -- "$RECORD" "$LIVE/telemetry/$LABEL"
+    SEEN[$RECORD]="$LABEL"
+  done
+  for INPUT in "$LIVE"/inputs/*; do
+    if [[ -L $INPUT ]]; then
+      OUTPUT="$(realpath -- "$INPUT")"
+      RECORD="${OUTPUT%/outputs/*}"
+      if [[ -n ${SEEN[$RECORD]:-} ]]; then
+        ln -sTnf -- "../telemetry/${SEEN[$RECORD]}/${OUTPUT#"$RECORD"/}" "$INPUT"
+      fi
+    fi
   done
   ;;
 compile)
@@ -226,10 +239,10 @@ outputs)
   DESTINATION="$1"
   JOB="$2"
   INSTANCE="$3"
-  if ! [[ -L $GRAPH/latest/$JOB/$INSTANCE ]]; then
+  if ! [[ -L $STATE/dead/$JOB/$INSTANCE.latest-succ ]]; then
     exit
   fi
-  RECORD="$(realpath -- "$GRAPH/latest/$JOB/$INSTANCE")"
+  RECORD="$(realpath -- "$STATE/dead/$JOB/$INSTANCE.latest-succ")"
   for OUTPUT in "$RECORD"/outputs/*; do
     if [[ -d $OUTPUT ]]; then
       HASH="$(printf -- '%s\0' "${OUTPUT#"$STATE"/}" | b3sum)"
@@ -244,7 +257,7 @@ ensure)
   shift -- 3
   SERVICES="$(realpath -- "$TOPOLOGY/services")"
   LAUNCH="$SERVICES/$JOB/data/launch"
-  if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -L $GRAPH/completed/$JOB/$INSTANCE ]]; then
+  if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -L $GRAPH/pending/$JOB/$INSTANCE ]] || [[ -L $GRAPH/completed/$JOB/$INSTANCE ]]; then
     exit
   fi
   INPUTS="$GRAPH/cartesian/$JOB/$INSTANCE"
@@ -271,11 +284,8 @@ deliver)
   if ! [[ -f $LIVE/.record ]] && [[ -L $GRAPH/completed/$JOB/$INSTANCE ]]; then
     exit
   fi
-  DEAD="$(< "$LIVE/.archive")"
+  RECORD="$(< "$LIVE/.record")"
   SERVICE="$(< "$LIVE/.service")"
-  mkdir -p -- "$LIVE" "$DEAD/$JOB"
-  DEAD="$(realpath -- "$DEAD")"
-  RECORD="$DEAD/$JOB/$INSTANCE.$(< "$LIVE/.record")"
   if ! [[ -d $RECORD ]]; then
     STAGING="${RECORD%/*}/.${RECORD##*/}"
     rm -fr -- "$STAGING"
@@ -286,10 +296,18 @@ deliver)
         ln -sTnfr -- "$TARGET" "$STAGING/${LINK#"$LIVE"/}"
       fi
     done
-    rm -- "$STAGING/"{.record,.archive,.service}
+    rm -- "$STAGING/"{.record,.service}
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi
-  "$SELF" index "$STATE" "$JOB" "$INSTANCE" "$RECORD"
+  mkdir -p -- "$GRAPH/completed/$JOB"
+  LINK="$(mktemp -- "$GRAPH/completed/$JOB/.completed.XXXXXX")"
+  trap 'rm -f -- "$LINK"' EXIT
+  ln -sTnfr -- "$RECORD" "$LINK"
+  mv --no-target-directory -- "$LINK" "$GRAPH/completed/$JOB/$INSTANCE"
+  if [[ $(< "$RECORD/exit_status") != 0 ]] || [[ $(< "$RECORD/signal") != 0 ]]; then
+    mkdir -p -- "$STATE/failed/$JOB"
+    ln -sTnfr -- "$RECORD" "$STATE/failed/$JOB/${RECORD##*/}"
+  fi
   if [[ -f $SERVICE/env/S9_ON_UNIT_INACTIVE_SEC ]] && (($(< "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC") < 0)); then
     touch -- "$SERVICE/../../data/.exited/$INSTANCE"
     rm -f -- "$SERVICE/data/launch"
@@ -300,33 +318,6 @@ deliver)
     :
   else
     printf -- 'Dataflow projection deferred after publishing %s\n' "$RECORD" >&2
-  fi
-  ;;
-index)
-  JOB="$1"
-  INSTANCE="$2"
-  RECORD="$(realpath -- "$3")"
-  mkdir -p -- "$GRAPH/completed/$JOB"
-  LINK="$(mktemp -- "$GRAPH/completed/$JOB/.completed.XXXXXX")"
-  trap 'rm -f -- "$LINK"' EXIT
-  ln -sTnfr -- "$RECORD" "$LINK"
-  mv --no-target-directory -- "$LINK" "$GRAPH/completed/$JOB/$INSTANCE"
-  if [[ $(< "$RECORD/exit_status") == 0 ]] && [[ $(< "$RECORD/signal") == 0 ]]; then
-    INDEX="$GRAPH/latest/$JOB"
-    mkdir -p -- "$INDEX"
-    if [[ -L $INDEX/$INSTANCE ]]; then
-      PREVIOUS="$(realpath -- "$INDEX/$INSTANCE")"
-      if [[ ${PREVIOUS##*/} > ${RECORD##*/} ]]; then
-        exit
-      fi
-    fi
-    LINK="$(mktemp -- "$INDEX/.latest.XXXXXX")"
-    trap 'rm -f -- "$LINK"' EXIT
-    ln -sTnfr -- "$RECORD" "$LINK"
-    mv --no-target-directory -- "$LINK" "$INDEX/$INSTANCE"
-  else
-    mkdir -p -- "$STATE/failed/$JOB"
-    ln -sTnfr -- "$RECORD" "$STATE/failed/$JOB/${RECORD##*/}"
   fi
   ;;
 *)

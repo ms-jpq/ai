@@ -117,6 +117,9 @@ EOF
   mkdir -p -- "${LOG_SRC%/*}"
   "${LOGGER[@]}" -- T "${LOG_FMT[@]}" <<< "$EXIT_LINES" | tee --append -- "$LOG_SRC" > /dev/null
   "$INSTANCE_DATA/dataflow.sh" deliver "$STATE" "$JOB" "$INSTANCE" "$STATUS" "$SIGNAL" "$S9_DEAD_DIR" "$INSTANCE_DIR"
+  if ((STATUS == 0 && SIGNAL == 0)); then
+    ln -sTnfr -- "$STATE/graph/completed/$JOB/$INSTANCE" "$STATE/dead/$JOB/$INSTANCE.latest-succ"
+  fi
   if ((EXIT_STATUS == 125)); then
     touch -- "../../data/.exited/$INSTANCE"
     rm -f -- "$INSTANCE_DATA/launch"
