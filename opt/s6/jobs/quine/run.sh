@@ -38,7 +38,7 @@ seed | job)
       set -x
       exit 2
     fi
-    BUILD="$(RECUR='' "$ROOT/libexec/pcp.sh" "$ROOT/base" "$STAGING/template")"
+    BUILD="$(RECUR='' "$ROOT/libexec/p-cp.sh" "$ROOT/base" "$STAGING/template")"
     rsync --archive --checksum --exclude=/data/launch --include='/env/***' --include='/data/***' --exclude='/*' -- "$JOB/" "$BUILD/"
     if [[ ${RUN[*]} -ef $SELF ]]; then
       ln -sTnf -- "${RUN[*]}" "$BUILD/data/job"
