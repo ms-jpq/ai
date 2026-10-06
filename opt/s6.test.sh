@@ -3,7 +3,7 @@
 set -o pipefail
 
 if (($# == 0)); then
-  printf -- '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow contention joins scheduling | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
+  printf -- '%s\n' ctl watchdog snapshots p-cp publication templates queues policy logger finish-timeout runtime lifecycle dataflow contention joins scheduling dependencies | shuf | xargs --max-procs=0 --max-args=1 -- "$0"
   exit
 fi
 trap 'printf "%s [%s]:%s: %s\n" "$0" "$1" "$LINENO" "$BASH_COMMAND" >&2' ERR
@@ -22,6 +22,54 @@ mkdir -- "$STATE"
 cp --archive -- "$ROOT/." "$TEST_DIR/"
 
 case "$1" in
+dependencies)
+  LIST="$TEST_DIR/base/data/list-dependencies.sh"
+  for JOB in dog lil 'dog food'; do
+    mkdir -p -- "$JOBS/$JOB/data/wants"
+  done
+  ln -sTnfr -- "$JOBS/lil" "$JOBS/dog/data/wants/lil"
+  ln -sTnfr -- "$JOBS/dog food" "$JOBS/dog/data/wants/=food"
+  ln -sTnfr -- "$JOBS/dog food" "$JOBS/lil/data/wants/dog food"
+  ln -sTnfr -- "$JOBS/missing" "$JOBS/dog/data/wants/missing"
+  ln -sTnfr -- "$JOBS/dog" "$JOBS/dog/data/wants/.hidden"
+  mkdir -- "$JOBS/dog/data/wants/ignored"
+  "$LIST" --plain "$JOBS/dog" > "$TEST_DIR/actual"
+  cat > "$TEST_DIR/expected" << 'EOF'
+=food
+lil
+lil/dog food
+missing
+EOF
+  diff --unified -- "$TEST_DIR/expected" "$TEST_DIR/actual"
+  "$LIST" --plain "$JOBS/dog" 01 > "$TEST_DIR/actual"
+  cat > "$TEST_DIR/expected" << 'EOF'
+=food
+lil
+missing
+EOF
+  diff --unified -- "$TEST_DIR/expected" "$TEST_DIR/actual"
+  "$LIST" --plain "$JOBS/dog" 0 > "$TEST_DIR/actual"
+  if [[ -s $TEST_DIR/actual ]]; then exit 1; fi
+  "$LIST" --plain "$JOBS/dog food" > "$TEST_DIR/actual"
+  if [[ -s $TEST_DIR/actual ]]; then exit 1; fi
+  ln -sTnfr -- "$JOBS/lil" "$JOBS/lil/data/wants/again"
+  env -C "$JOBS" -- "$LIST" --plain -- lil 2 > "$TEST_DIR/actual"
+  cat > "$TEST_DIR/expected" << 'EOF'
+again
+again/again
+again/dog food
+dog food
+EOF
+  diff --unified -- "$TEST_DIR/expected" "$TEST_DIR/actual"
+  for ARG in --unknown nope -1; do
+    STATUS=0
+    "$LIST" --plain "$JOBS/dog" "$ARG" > "$TEST_DIR/output" 2>&1 || STATUS=$?
+    [[ $STATUS == 2 ]]
+  done
+  STATUS=0
+  "$LIST" > "$TEST_DIR/output" 2>&1 || STATUS=$?
+  [[ $STATUS == 2 ]]
+  ;;
 scheduling)
   shopt -u failglob dotglob
   TOPOLOGY="$TEST_DIR/base/data/topology.sh"
