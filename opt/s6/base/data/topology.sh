@@ -21,6 +21,7 @@ TOPOLOGY="$GRAPH/topology"
 INPUTS_ROOT="$GRAPH/inputs"
 DEAD="$STATE/dead"
 XARGS=(xargs --null --no-run-if-empty --max-procs=0 --max-args=1 --)
+TRAVERSAL="${SELF%/*}/traversal.sh"
 
 case "$ACTION" in
 compile | projection)
@@ -68,10 +69,7 @@ compile)
   done
 
   find "$BUILD/wants" -mindepth 1 -maxdepth 1 -printf '%f\0' | "${XARGS[@]}" "$SELF" edges "$STATE" "$BUILD" "${SOURCES[@]}"
-  for JOB in "$BUILD"/wants/*; do
-    "$SELF" visit "$STATE" "$JOB" "$BUILD/check"
-  done
-  rm -fr -- "$BUILD/check"
+  "$TRAVERSAL" --unique . -1 "$BUILD"/wants/* > /dev/null
   PREVIOUS=''
   if [[ -L $TOPOLOGY ]]; then
     PREVIOUS="$(realpath -- "$TOPOLOGY")"
@@ -90,8 +88,8 @@ projection)
   PASS="$(mktemp -d -- "$GRAPH/.projection.XXXXXX")"
   trap 'rm -fr -- "$PASS"' EXIT
 
-  for JOB in "$TOPOLOGY"/wants/*; do
-    "$SELF" visit "$STATE" "$JOB" "$PASS"
+  "$TRAVERSAL" --unique . -1 "$TOPOLOGY"/wants/* | while IFS= read -r -d '' _ && IFS= read -r -d '' DIR; do
+    if [[ -n $DIR ]]; then mkdir -p -- "$PASS/${DIR##*/}/records"; fi
   done
   find "$PASS" -mindepth 1 -maxdepth 1 -type d -printf '%f\0' | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
   ;;
@@ -145,31 +143,13 @@ evaluated)
   done | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
   "$SELF" combine "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS" '' | sort --zero-terminated --unique --key=1,1 | "${XARGS[@]}" "$SELF" publish "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS"
   ;;
-visit | combine | publish)
+combine | publish)
   cd -P -- "$1"
   PASS="$2"
   JOB="${PWD##*/}"
   shift -- 2
   WANTS=(*)
   ;;&
-visit)
-  if [[ -f $PASS/$JOB/visited ]]; then
-    exit
-  fi
-  if [[ -d $PASS/$JOB ]]; then
-    tee >&2 <<- EOF
-Dependency cycle at $JOB
-EOF
-    exit 2
-  fi
-  mkdir -p -- "$PASS/$JOB/records"
-  for WANT in "${WANTS[@]}"; do
-    if [[ -L $WANT ]]; then
-      "$SELF" visit "$STATE" "$PWD/$WANT" "$PASS"
-    fi
-  done
-  touch -- "$PASS/$JOB/visited"
-  ;;
 combine)
   KEY="$1"
   shift -- 1

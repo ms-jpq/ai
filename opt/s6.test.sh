@@ -52,15 +52,29 @@ EOF
   if [[ -s $TEST_DIR/actual ]]; then exit 1; fi
   "$LIST" --plain "$JOBS/dog food" > "$TEST_DIR/actual"
   if [[ -s $TEST_DIR/actual ]]; then exit 1; fi
+  TRAVERSAL="$TEST_DIR/base/data/traversal.sh"
+  "$TRAVERSAL" --unique data/wants -1 "$JOBS/dog" "$JOBS/lil" > "$TEST_DIR/traversal"
+  COUNT=0
+  while IFS= read -r -d '' CHAIN && IFS= read -r -d '' TARGET; do
+    ((COUNT += 1))
+    case "$CHAIN" in
+    dog) [[ $TARGET -ef $JOBS/dog ]] ;;
+    dog/=food) [[ $TARGET -ef "$JOBS/dog food" ]] ;;
+    dog/lil) [[ $TARGET -ef $JOBS/lil ]] ;;
+    dog/missing) [[ -z $TARGET ]] ;;
+    *) exit 1 ;;
+    esac
+  done < "$TEST_DIR/traversal"
+  [[ $COUNT == 4 ]]
+  mkdir -- "$JOBS/"$'dog\nhouse'
+  "$TRAVERSAL" data/wants 1 "$JOBS/"$'dog\nhouse' > "$TEST_DIR/traversal"
+  IFS= read -r -d '' CHAIN < "$TEST_DIR/traversal"
+  [[ $CHAIN == $'dog\nhouse' ]]
   ln -sTnfr -- "$JOBS/lil" "$JOBS/lil/data/wants/again"
-  env -C "$JOBS" -- "$LIST" --plain -- lil 2 > "$TEST_DIR/actual"
-  cat > "$TEST_DIR/expected" << 'EOF'
-again
-again/again
-again/dog food
-dog food
-EOF
-  diff --unified -- "$TEST_DIR/expected" "$TEST_DIR/actual"
+  STATUS=0
+  env -C "$JOBS" -- "$LIST" --plain -- lil 2 > "$TEST_DIR/actual" 2> "$TEST_DIR/error" || STATUS=$?
+  [[ $STATUS == 2 ]]
+  grep --quiet --fixed-strings 'Dependency cycle at lil/again' "$TEST_DIR/error"
   for ARG in --unknown nope -1; do
     STATUS=0
     "$LIST" --plain "$JOBS/dog" "$ARG" > "$TEST_DIR/output" 2>&1 || STATUS=$?
@@ -408,12 +422,13 @@ BASH
     [[ $RUNTIME/graph/topology/wants/consumer/$PRODUCER -ef $RUNTIME/graph/topology/wants/$PRODUCER ]]
   done
   REQUEST="${REQUESTS[0]}"
-  for JOB in sink sink; do
-    "$TOPOLOGY" visit "$RUNTIME" "$RUNTIME/graph/topology/wants/$JOB" "$TEST_DIR/visit"
-  done
-  for JOB in producer-1 producer-2 consumer sink; do
-    [[ -f $TEST_DIR/visit/$JOB/visited ]]
-  done
+  "$TEST_DIR/base/data/traversal.sh" --unique . -1 "$RUNTIME/graph/topology/wants/sink" > "$TEST_DIR/traversal"
+  COUNT=0
+  while IFS= read -r -d '' CHAIN && IFS= read -r -d '' DIR; do
+    [[ -d $DIR ]]
+    ((COUNT += 1))
+  done < "$TEST_DIR/traversal"
+  [[ $COUNT == 4 ]]
   HASH="${REQUEST##*/}"
   INPUTS="$RUNTIME/graph/inputs/consumer/$HASH"
   [[ $REQUEST -ef $INPUTS ]]
