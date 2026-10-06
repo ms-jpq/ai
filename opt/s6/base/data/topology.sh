@@ -141,7 +141,49 @@ evaluated)
       printf -- '%s\0' "${PRODUCER#=}"
     fi
   done | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
-  "$SELF" combine "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS" '' | sort --zero-terminated --unique --key=1,1 | "${XARGS[@]}" "$SELF" publish "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS"
+  WANTS=("$TOPOLOGY/wants/$JOB/"*)
+  CACHE="$INPUTS_ROOT/$JOB/.s9/projection"
+  if ((${#WANTS[@]})); then
+    INPUT_SUM="$(
+      {
+        printf -- '%s\0' "$STATE"
+        if [[ -f $TOPOLOGY/wants/$JOB/.s9/defs.sum ]]; then
+          printf -- '%s\0' "$(< "$TOPOLOGY/wants/$JOB/.s9/defs.sum")"
+        fi
+        for WANT in "${WANTS[@]}"; do
+          PRODUCER="${WANT##*/}"
+          printf -- '%s\0' "$PRODUCER"
+          if [[ -L $WANT ]]; then
+            printf -- '%s\0' "$(< "$PASS/${PRODUCER#=}/sum")"
+          else
+            printf -- '%s\0' missing
+          fi
+        done
+      } | b3sum
+    )"
+  fi
+  {
+    if ((${#WANTS[@]})) && [[ -f $CACHE/.sum ]] && [[ $(< "$CACHE/.sum") == "$INPUT_SUM" ]]; then
+      find "$CACHE" -mindepth 1 -maxdepth 1 -type f ! -name '.*' -printf '%f %p\0'
+    else
+      rm -fr -- "$CACHE"
+      mkdir -p -- "$CACHE"
+      "$SELF" combine "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS" '' | sort --zero-terminated --unique --key=1,1
+    fi
+  } | "${XARGS[@]}" "$SELF" publish "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS"
+  if ((${#WANTS[@]})) && ! [[ -f $CACHE/.sum ]]; then
+    printf -- '%s' "$INPUT_SUM" > "$CACHE/.sum"
+  fi
+  for OUTPUT in "$PASS"/"$JOB"/records/*/outputs/*; do
+    RECORD="${OUTPUT%/outputs/*}"
+    if [[ -d $OUTPUT ]] && ! [[ -f $RECORD/.s9/outputs.sum/${OUTPUT##*/} ]]; then
+      printf -- '%s\0%s\0' "$RECORD" "${OUTPUT##*/}"
+    fi
+  done | xargs --null --no-run-if-empty --max-procs=0 --max-args=2 -- "${SELF%/*}/dataflow.sh" hash-row "$STATE" "$JOB" -
+  RECORDS=("$PASS/$JOB/records/"*)
+  {
+    if ((${#RECORDS[@]})); then readlink --zero -- "${RECORDS[@]}"; fi
+  } | b3sum > "$PASS/$JOB/sum"
   ;;
 combine | publish)
   cd -P -- "$1"
@@ -195,7 +237,9 @@ combine)
       while (($#)); do
         printf -- '%s\0' "$1" "${2##*/}"
         if [[ -n $2 ]]; then
-          tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --dereference --hard-dereference --create --file=- --directory="$2" . || exit "$?"
+          SUM="${2%/outputs/*}/.s9/outputs.sum/${2##*/}"
+          if ! [[ -s $SUM ]]; then exit 2; fi
+          printf -- '%s\0' "$(< "$SUM")"
         fi
         shift -- 2
       done
@@ -203,11 +247,15 @@ combine)
   )"
   INPUTS="$(mktemp -- "$PASS/$JOB/input.XXXXXX")"
   printf -- '%s\0' "$@" > "$INPUTS"
-  printf -- '%s %s\0' "$INSTANCE" "${INPUTS##*/}"
+  printf -- '%s %s\0' "$INSTANCE" "$INPUTS"
   ;;
 publish)
   INSTANCE="${1%% *}"
-  mapfile -d '' -t ARGS < "$PASS/$JOB/${1#* }"
+  CACHE="$INPUTS_ROOT/$JOB/.s9/projection"
+  if ! [[ ${1#* } -ef $CACHE/$INSTANCE ]]; then
+    cp -- "${1#* }" "$CACHE/$INSTANCE"
+  fi
+  mapfile -d '' -t ARGS < "$CACHE/$INSTANCE"
   set -- "${ARGS[@]}"
   if [[ -L $DEAD/$JOB/$INSTANCE/latest-succ ]]; then
     ln -sTnfr -- "$DEAD/$JOB/$INSTANCE/latest-succ" "$PASS/$JOB/records/$INSTANCE"

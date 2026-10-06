@@ -201,10 +201,10 @@ settings|one|x|x
 settings|one|y|y
 EOF
   mkdir -- "$TEST_DIR/bin" "$TEST_DIR/parallel"
-  cat > "$TEST_DIR/bin/tar" << 'BASH'
+  cat > "$TEST_DIR/bin/b3sum" << 'BASH'
 #!/usr/bin/env bash
 set -euo pipefail
-ROOT="${0%/bin/tar}"
+ROOT="${0%/bin/b3sum}"
 JOB="${PWD##*/}"
 case "$JOB" in
 matched | mixed | product | single)
@@ -213,19 +213,25 @@ matched | mixed | product | single)
   ;;
 esac
 if [[ $JOB == matched ]]; then
-  for ARG in "$@"; do
-    if [[ $ARG == --directory=* ]]; then
-      touch -- "$ROOT/parallel/row-${ARG##*/}"
-    fi
-  done
+  INPUT="$ROOT/parallel/input.$BASHPID"
+  trap 'rm -f -- "$INPUT"' EXIT
+  cat > "$INPUT"
+  {
+    IFS= read -r -d '' _
+    IFS= read -r -d '' _
+    IFS= read -r -d '' ROW
+  } < "$INPUT"
+  touch -- "$ROOT/parallel/row-$ROW"
   timeout 10 bash -c 'until [[ -f $1/row-shared ]] && [[ -f $1/row-key\[\*\] ]]; do sleep 0.01; done' -- "$ROOT/parallel"
+  "$REAL_B3SUM" < "$INPUT"
+  exit
 fi
 if [[ $JOB == "${FAIL_JOB:-}" ]]; then exit 67; fi
-exec -- "$REAL_TAR" "$@"
+exec -- "$REAL_B3SUM" "$@"
 BASH
-  chmod +x -- "$TEST_DIR/bin/tar"
-  REAL_TAR="$(command -v tar)"
-  export -- REAL_TAR
+  chmod +x -- "$TEST_DIR/bin/b3sum"
+  REAL_B3SUM="$(command -v b3sum)"
+  export -- REAL_B3SUM
   PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" compile "$TEST_DIR" "$JOBS" > "$TEST_DIR/compile.log" 2>&1
   while read -r JOB EXPECTED; do
     REQUESTS=("$STATE/$JOB/data/.s9/launch/"*)
@@ -258,15 +264,24 @@ EOF
   [[ -d $TEST_DIR/live/matched/${REQUESTS[0]##*/}/inputs/dogs ]]
   if [[ -e $TEST_DIR/graph/cartesian-inputs ]]; then exit 1; fi
   printf -- '%s\n' "${REQUESTS[@]}" > "$TEST_DIR/before"
-  "$TOPOLOGY" projection "$TEST_DIR"
+  cat > "$TEST_DIR/bin/tar" << 'BASH'
+#!/usr/bin/env bash
+exit 67
+BASH
+  chmod +x -- "$TEST_DIR/bin/tar"
+  FAIL_JOB=product PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" projection "$TEST_DIR"
   REQUESTS=("$STATE/matched/data/.s9/launch/"*)
   printf -- '%s\n' "${REQUESTS[@]}" > "$TEST_DIR/after"
   diff --unified -- "$TEST_DIR/before" "$TEST_DIR/after"
+  printf -- '%s' product-v2 > "$STATE/product/template/data/.s9/defs.sum"
   STATUS=0
-  FAIL_JOB=product PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" projection "$TEST_DIR" > "$TEST_DIR/failure.log" 2>&1 || STATUS=$?
+  FAIL_JOB=product PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" compile "$TEST_DIR" "$JOBS" > "$TEST_DIR/failure.log" 2>&1 || STATUS=$?
   ((STATUS != 0))
   PASSES=("$TEST_DIR/graph/".projection.*)
   ((${#PASSES[@]} == 0))
+  if [[ -f $TEST_DIR/graph/inputs/product/.s9/projection/.sum ]]; then exit 1; fi
+  PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" projection "$TEST_DIR"
+  [[ -s $TEST_DIR/graph/inputs/product/.s9/projection/.sum ]]
   ;;
 contention)
   FLOW="$TEST_DIR/base/data/dataflow.sh"
@@ -391,19 +406,25 @@ BASH
     fi
     mkdir -- "$RUNTIME/live/$JOB/$HASH/outputs/A" "$TEST_DIR/$JOB-row"
     ln -sTnfr -- "$TEST_DIR/$JOB-row" "$RUNTIME/live/$JOB/$HASH/outputs/B"
+    printf -- '%s' before > "$TEST_DIR/$JOB-external"
     for ROW in A B; do
       OUTPUT="$RUNTIME/live/$JOB/$HASH/outputs/$ROW"
       mkdir -- "$OUTPUT/nested"
       printf -- '%s' payload > "$OUTPUT/nested/value"
       printf -- '%s' hidden > "$OUTPUT/.hidden"
       ln -sTnfr -- "$OUTPUT/nested/value" "$OUTPUT/alias"
+      ln -sTnfr -- "$TEST_DIR/$JOB-external" "$OUTPUT/external"
     done
     printf -- '%s' "$JOB" > "$RUNTIME/live/$JOB/$HASH/log"
     "$FINISH" "$JOB" "$HASH" 0 0
     rm -- "$JOBS/$JOB/data/.s9/launch/$HASH"
     RECORD="$(realpath -- "$RUNTIME/dead/$JOB/$HASH/latest-succ")"
+    printf -- '%s' after > "$TEST_DIR/$JOB-external"
     for ROW in A B; do
       [[ $(< "$RECORD/outputs/$ROW/.s9/defs.sum") == "$JOB-v1" ]]
+      [[ $(< "$RECORD/outputs/$ROW/external") == before ]]
+      if [[ -L $RECORD/outputs/$ROW/external ]]; then exit 1; fi
+      [[ -s $RECORD/.s9/outputs.sum/$ROW ]]
     done
     if [[ -f $TEST_DIR/$JOB-row/.s9/defs.sum ]]; then exit 1; fi
     if [[ -f $TEST_DIR/$JOB-outputs/A/.s9/defs.sum ]]; then exit 1; fi

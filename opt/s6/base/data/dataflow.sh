@@ -88,22 +88,20 @@ deliver)
       ln -sTnfr -- "$LINK" "$STAGING/telemetry/${LINK##*/}"
     done
 
-    for OUTPUT in "$STAGING/outputs" "$STAGING"/outputs/*; do
+    rm -fr -- "$STAGING/outputs"
+    mkdir -- "$STAGING/outputs"
+    if [[ -d $LIVE/outputs ]]; then
+      rsync --archive --copy-links -- "$LIVE/outputs/" "$STAGING/outputs/"
+    fi
+    for OUTPUT in "$STAGING"/outputs/*; do
       if ! [[ -d $OUTPUT ]]; then
         continue
       fi
 
-      if [[ -L $OUTPUT ]]; then
-        COPY="$(RECUR='' "$PCP" "$OUTPUT" "$OUTPUT")"
-        rm -- "$OUTPUT"
-        mv --no-target-directory -- "$COPY" "$OUTPUT"
-      fi
-
-      if [[ $OUTPUT != "$STAGING/outputs" ]]; then
-        mkdir -p -- "$OUTPUT/.s9"
-        cp --remove-destination -- "$SERVICE/data/.s9/defs.sum" "$OUTPUT/.s9/defs.sum"
-      fi
-    done
+      mkdir -p -- "$OUTPUT/.s9"
+      cp --remove-destination -- "$SERVICE/data/.s9/defs.sum" "$OUTPUT/.s9/defs.sum"
+      printf -- '%s\0' "${OUTPUT##*/}"
+    done | xargs --null --no-run-if-empty --max-procs=0 --max-args=1 -- "$SELF" hash-row "$STATE" "$JOB" "$INSTANCE" "$STAGING"
     rm -- "$STAGING/.s9/record"
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi
@@ -124,6 +122,16 @@ deliver)
   fi
 
   rm -fr -- "$LIVE"
+  ;;
+hash-row)
+  RECORD="$1"
+  ROW="$2"
+  SUMS="$RECORD/.s9/outputs.sum"
+  mkdir -p -- "$SUMS"
+  SUM="$(mktemp -- "$SUMS/.sum.XXXXXX")"
+  trap 'rm -f -- "$SUM"' EXIT
+  tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --dereference --hard-dereference --create --file=- --directory="$RECORD/outputs/$ROW" . | b3sum | cut --delimiter=' ' --fields=1 > "$SUM"
+  mv --no-target-directory -- "$SUM" "$SUMS/$ROW"
   ;;
 *)
   set -x

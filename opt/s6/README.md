@@ -45,6 +45,7 @@ STATE/
 ├── dead/<service>/<instance>/
 │   ├── latest-succ -> <timestamp>/
 │   └── <timestamp>/
+│       ├── .s9/outputs.sum/<row>
 │       ├── inputs/
 │       ├── outputs/
 │       ├── telemetry/
@@ -105,7 +106,11 @@ STATE/graph/
 │       ├── .s9/defs.sum
 │       ├── =<producer-1> -> ../<producer-1>/
 │       └── =<producer-2> -> ../<producer-2>/
-└── inputs/<consumer>/<hash(def, rows)>/
-    ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<key>/
-    └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<key>/
+└── inputs/<consumer>/
+    ├── .s9/projection/
+    │   ├── .sum
+    │   └── <hash(def, rows)>
+    └── <hash(def, rows)>/
+        ├── <producer-1> -> ../../../../dead/<producer-1>/<instance>/<timestamp>/outputs/<key>/
+        └── <producer-2> -> ../../../../dead/<producer-2>/<instance>/<timestamp>/outputs/<key>/
 ```
