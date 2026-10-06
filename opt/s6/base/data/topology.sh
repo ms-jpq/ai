@@ -133,13 +133,13 @@ evaluated)
   STATUS="$PASS/$JOB/status"
   if [[ -f $STATUS ]]; then exit "$(< "$STATUS")"; fi
   trap 'printf -- "%s" "$?" > "$STATUS"' EXIT
-  for WANT in "$TOPOLOGY/wants/$JOB/"*; do
+  WANTS=("$TOPOLOGY/wants/$JOB/"*)
+  for WANT in "${WANTS[@]}"; do
     if [[ -L $WANT ]]; then
       PRODUCER="${WANT##*/}"
       printf -- '%s\0' "${PRODUCER#=}"
     fi
   done | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
-  WANTS=("$TOPOLOGY/wants/$JOB/"*)
   CACHE="$INPUTS_ROOT/$JOB/.s9/projection"
   if ((${#WANTS[@]})); then
     INPUT_SUM="$(
