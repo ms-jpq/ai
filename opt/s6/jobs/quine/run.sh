@@ -47,14 +47,15 @@ seed | job)
     for DIR in env data; do
       if [[ -d $JOB/$DIR ]]; then OVERLAY+=("$DIR"); fi
     done
+    WANTS=("$JOB"/data/wants/*)
     INPUT_SUM="$(
       {
         printf -- '%s\0' "$BASE_SUM" "$JOB"
         "${TAR[@]}" --dereference --directory="$JOB" "${RUN[0]##*/}" || exit "$?"
         "${TAR[@]}" --exclude='data/.s9' --directory="$JOB" --files-from=/dev/null -- "${OVERLAY[@]}" || exit "$?"
-        for WANT in "$JOB"/data/wants/*; do
-          realpath --zero --canonicalize-missing -- "$WANT" || exit "$?"
-        done
+        if ((${#WANTS[@]})); then
+          realpath --zero --canonicalize-missing -- "${WANTS[@]}" || exit "$?"
+        fi
       } | b3sum
     )"
     if ! [[ -f $SUPERVISOR/data/.s9/inputs.sum ]] || ! [[ -d $TEMPLATE ]] || [[ $(< "$SUPERVISOR/data/.s9/inputs.sum") != "$INPUT_SUM" ]]; then
