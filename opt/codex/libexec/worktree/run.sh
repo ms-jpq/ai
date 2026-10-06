@@ -24,7 +24,7 @@ SESSION="$("$SELF/pool.sh" session "$NAME")"
 NOTES="$ROOT_NOTES/worktrees/$NAME"
 TASK="$NOTES/LIVE_CONTEXT.md"
 
-if [[ $ACTION == @(r|resume|rm|remove) && -z $NAME ]]; then
+if [[ $ACTION == @(r|resume|rm|remove) ]] && [[ -z $NAME ]]; then
   tee -- >&2 <<- EOF
 	$PROG: $ACTION needs a worker name
 EOF

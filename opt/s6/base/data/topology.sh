@@ -209,8 +209,8 @@ combine)
     } | b3sum | cut --delimiter=' ' --fields=1
   )"
   INPUTS="$(mktemp -- "$PASS/$JOB/input.XXXXXX")"
-  printf '%s\0' "$@" > "$INPUTS"
-  printf '%s %s\0' "$INSTANCE" "${INPUTS##*/}"
+  printf -- '%s\0' "$@" > "$INPUTS"
+  printf -- '%s %s\0' "$INSTANCE" "${INPUTS##*/}"
   ;;
 publish)
   INSTANCE="${1%% *}"

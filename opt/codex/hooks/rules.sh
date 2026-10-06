@@ -68,7 +68,7 @@ UserPromptSubmit | PostToolUse)
   ;;
 esac
 
-if [[ $EVENT == UserPromptSubmit && -d $SENTINELS ]]; then
+if [[ $EVENT == UserPromptSubmit ]] && [[ -d $SENTINELS ]]; then
   exit
 fi
 

@@ -27,7 +27,7 @@ rebase)
     fi
 
     TOP="$ROOT/.worktrees/$WORKER"
-    if [[ ! -e "$TOP/.git" ]]; then
+    if ! [[ -e "$TOP/.git" ]]; then
       set -x
       exit 2
     fi

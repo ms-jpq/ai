@@ -29,7 +29,7 @@ fi
 
 SOURCES=()
 for SOURCE in "$CONFIG/"{CLAUDE.md,rules,skills} "$CWD/.claude/"{CLAUDE.md,rules,skills}; do
-  if [[ -e $SOURCE || -L $SOURCE ]]; then
+  if [[ -e $SOURCE ]] || [[ -L $SOURCE ]]; then
     SOURCES+=("$SOURCE")
   fi
 done

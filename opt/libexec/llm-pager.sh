@@ -5,12 +5,6 @@ set -o pipefail
 STREAMING="$1"
 shift -- 1
 
-hr() {
-  printf -- '\n'
-  hr.sh "$@"
-  printf -- '\n'
-}
-
 SED=(
   sed
   -E -n -u
@@ -18,7 +12,15 @@ SED=(
   -e '/^data:/s/^data:[[:space:]]+(\{.*)/\1/gp'
 )
 
-hr '>' >&2
+{
+  printf -- '\n'
+  hr.sh '>'
+  printf -- '\n'
+} >&2
 "${SED[@]}" | "$@" | md-pager.sh "$STREAMING" | tee -- /dev/stderr
 printf -- '\n' >&2
-hr '<' >&2
+{
+  printf -- '\n'
+  hr.sh '<'
+  printf -- '\n'
+} >&2
