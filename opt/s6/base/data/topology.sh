@@ -36,7 +36,6 @@ compile)
     printf -- '%s\0' "$RECORD"
   done | "${XARGS[@]}" "$SELF" recover "$STATE"
 
-  SOURCES=()
   DEFINITIONS=()
   for JOB in "$1"/*; do
     NAME="${JOB##*/}"
@@ -45,7 +44,6 @@ compile)
       continue
     fi
     TARGET="$(readlink -- "$SOURCE")"
-    SOURCES+=("$TARGET" "$NAME")
     DEFINITION=''
     if [[ -f $SERVICES/$NAME/template/data/.s9/defs.sum ]]; then
       DEFINITION="$(< "$SERVICES/$NAME/template/data/.s9/defs.sum")"
@@ -60,15 +58,15 @@ compile)
   trap 'rm -fr -- "$BUILD"' EXIT
   mkdir -p -- "$BUILD/wants" "$BUILD/.s9"
   printf -- '%s' "$INPUT_SUM" > "$BUILD/.s9/inputs.sum"
-  for ((INDEX = 1; INDEX < ${#SOURCES[@]}; INDEX += 2)); do
-    NAME="${SOURCES[$INDEX]}"
+  for ((INDEX = 0; INDEX < ${#DEFINITIONS[@]}; INDEX += 3)); do
+    NAME="${DEFINITIONS[$INDEX]}"
     mkdir -p -- "$BUILD/wants/$NAME/.s9"
     if [[ -f $SERVICES/$NAME/template/data/.s9/defs.sum ]]; then
       cp -- "$SERVICES/$NAME/template/data/.s9/defs.sum" "$BUILD/wants/$NAME/.s9/defs.sum"
     fi
   done
 
-  find "$BUILD/wants" -mindepth 1 -maxdepth 1 -printf '%f\0' | "${XARGS[@]}" "$SELF" edges "$STATE" "$BUILD" "${SOURCES[@]}"
+  find "$BUILD/wants" -mindepth 1 -maxdepth 1 -printf '%f\0' | "${XARGS[@]}" "$SELF" edges "$STATE" "$BUILD" "${DEFINITIONS[@]}"
   "$TRAVERSAL" --unique . -1 "$BUILD"/wants/* > /dev/null
   PREVIOUS=''
   if [[ -L $TOPOLOGY ]]; then
@@ -104,8 +102,8 @@ edges)
   shift -- 1
   declare -A -- JOB_NAMES=()
   while (($# > 1)); do
-    JOB_NAMES[$1]="${JOB_NAMES[$1]:-$2}"
-    shift -- 2
+    JOB_NAMES[$2]="${JOB_NAMES[$2]:-$1}"
+    shift -- 3
   done
   for WANT in "$SERVICES/$CONSUMER/template/data/wants/"*; do
     PRODUCER=''
@@ -161,18 +159,26 @@ evaluated)
         done
       } | b3sum
     )"
-  fi
-  {
-    if ((${#WANTS[@]})) && [[ -f $CACHE/.sum ]] && [[ $(< "$CACHE/.sum") == "$INPUT_SUM" ]]; then
-      find "$CACHE" -mindepth 1 -maxdepth 1 -type f ! -name '.*' -printf '%f %p\0'
-    else
-      rm -fr -- "$CACHE"
-      mkdir -p -- "$CACHE"
-      "$SELF" combine "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS" '' | sort --zero-terminated --unique --key=1,1
+    {
+      if [[ -f $CACHE/.sum ]] && [[ $(< "$CACHE/.sum") == "$INPUT_SUM" ]]; then
+        find "$CACHE" -mindepth 1 -maxdepth 1 -type f ! -name '.*' -printf '%f %p\0'
+      else
+        rm -fr -- "$CACHE"
+        mkdir -p -- "$CACHE"
+        "$SELF" combine "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS" '' | sort --zero-terminated --unique --key=1,1
+      fi
+    } | "${XARGS[@]}" "$SELF" publish "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS"
+    if ! [[ -f $CACHE/.sum ]]; then
+      printf -- '%s' "$INPUT_SUM" > "$CACHE/.sum"
     fi
-  } | "${XARGS[@]}" "$SELF" publish "$STATE" "$TOPOLOGY/wants/$JOB" "$PASS"
-  if ((${#WANTS[@]})) && ! [[ -f $CACHE/.sum ]]; then
-    printf -- '%s' "$INPUT_SUM" > "$CACHE/.sum"
+  else
+    if [[ -d $CACHE ]]; then rm -fr -- "$CACHE"; fi
+    if [[ -f $TOPOLOGY/wants/$JOB/.s9/defs.sum ]]; then
+      for SOURCE in "$DEAD"/"$JOB"/*/latest-succ; do
+        PARENT="${SOURCE%/*}"
+        ln -sTnfr -- "$SOURCE" "$PASS/$JOB/records/${PARENT##*/}"
+      done
+    fi
   fi
   for OUTPUT in "$PASS"/"$JOB"/records/*/outputs/*; do
     RECORD="${OUTPUT%/outputs/*}"
@@ -190,19 +196,12 @@ combine | publish)
   PASS="$2"
   JOB="${PWD##*/}"
   shift -- 2
-  WANTS=(*)
   ;;&
 combine)
+  WANTS=(*)
   KEY="$1"
   shift -- 1
   if ! [[ -f .s9/defs.sum ]]; then
-    exit
-  fi
-  if ((${#WANTS[@]} == 0)); then
-    for SOURCE in "$DEAD"/"$JOB"/*/latest-succ; do
-      PARENT="${SOURCE%/*}"
-      ln -sTnfr -- "$SOURCE" "$PASS/$JOB/records/${PARENT##*/}"
-    done
     exit
   fi
   INDEX=$(($# / 2))
@@ -253,7 +252,7 @@ publish)
   INSTANCE="${1%% *}"
   CACHE="$INPUTS_ROOT/$JOB/.s9/projection"
   if ! [[ ${1#* } -ef $CACHE/$INSTANCE ]]; then
-    cp -- "${1#* }" "$CACHE/$INSTANCE"
+    mv --no-target-directory -- "${1#* }" "$CACHE/$INSTANCE"
   fi
   mapfile -d '' -t ARGS < "$CACHE/$INSTANCE"
   set -- "${ARGS[@]}"

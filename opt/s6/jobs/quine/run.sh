@@ -73,7 +73,7 @@ seed | job)
       else
         cp --dereference --preserve=mode,timestamps -- "${RUN[*]}" "$BUILD/data/.run"
       fi
-      tar --sort=name --mtime=@0 --owner=0 --group=0 --numeric-owner --format=gnu --create --file=- --directory="$BUILD" . | b3sum > "$STAGING/defs.sum"
+      "${TAR[@]}" --directory="$BUILD" . | b3sum > "$STAGING/defs.sum"
       mv -- "$STAGING/defs.sum" "$BUILD/data/.s9/defs.sum"
       ln -sTnf -- "$JOB" "$BUILD/data/.s9/source"
 
