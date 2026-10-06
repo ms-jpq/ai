@@ -3,24 +3,26 @@
 set -o pipefail
 shopt -u failglob dotglob
 
-: "${S9_GRAPH_TIMEOUT?}"
-
 SELF="$0"
 ACTION="$1"
-STATE="$(realpath -- "$2")"
-JOB="$3"
-INSTANCE="$4"
-shift -- 4
-
-SERVICES="$STATE/services"
-LIVE="$STATE/live/$JOB/$INSTANCE"
-INPUTS="$LIVE/inputs"
-TELEMETRY="$LIVE/telemetry"
-DEAD="$STATE/dead/$JOB/$INSTANCE"
-RECORD_FILE="$LIVE/.s9/record"
-PCP="${SELF%/*}/p-cp.sh"
+shift -- 1
 
 case "$ACTION" in
+prepare | deliver)
+  : "${S9_GRAPH_TIMEOUT?}"
+  STATE="$(realpath -- "$1")"
+  JOB="$2"
+  INSTANCE="$3"
+  shift -- 3
+
+  SERVICES="$STATE/services"
+  LIVE="$STATE/live/$JOB/$INSTANCE"
+  INPUTS="$LIVE/inputs"
+  TELEMETRY="$LIVE/telemetry"
+  DEAD="$STATE/dead/$JOB/$INSTANCE"
+  RECORD_FILE="$LIVE/.s9/record"
+  PCP="${SELF%/*}/p-cp.sh"
+  ;;&
 deliver)
   if [[ ${RECUR:-} != record ]] && (($#)) && ! [[ -f $RECORD_FILE ]]; then
     mkdir -p -- "$LIVE/.s9"
@@ -101,7 +103,7 @@ deliver)
       mkdir -p -- "$OUTPUT/.s9"
       cp --remove-destination -- "$SERVICE/data/.s9/defs.sum" "$OUTPUT/.s9/defs.sum"
       printf -- '%s\0' "${OUTPUT##*/}"
-    done | xargs --null --no-run-if-empty --max-procs=0 --max-args=1 -- "$SELF" hash-row "$STATE" "$JOB" "$INSTANCE" "$STAGING"
+    done | xargs --null --no-run-if-empty --max-procs=0 --max-args=1 -- "$SELF" hash-row "$STAGING"
     rm -- "$STAGING/.s9/record"
     mv --no-target-directory -- "$STAGING" "$RECORD"
   fi

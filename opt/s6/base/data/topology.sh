@@ -185,7 +185,7 @@ evaluated)
     if [[ -d $OUTPUT ]] && ! [[ -f $RECORD/.s9/outputs.sum/${OUTPUT##*/} ]]; then
       printf -- '%s\0%s\0' "$RECORD" "${OUTPUT##*/}"
     fi
-  done | xargs --null --no-run-if-empty --max-procs=0 --max-args=2 -- "${SELF%/*}/dataflow.sh" hash-row "$STATE" "$JOB" -
+  done | xargs --null --no-run-if-empty --max-procs=0 --max-args=2 -- "${SELF%/*}/dataflow.sh" hash-row
   RECORDS=("$PASS/$JOB/records/"*)
   {
     if ((${#RECORDS[@]})); then readlink --zero -- "${RECORDS[@]}"; fi
