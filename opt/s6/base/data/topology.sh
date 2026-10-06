@@ -88,9 +88,9 @@ projection)
   PASS="$(mktemp -d -- "$GRAPH/.projection.XXXXXX")"
   trap 'rm -fr -- "$PASS"' EXIT
 
-  "$TRAVERSAL" --unique . -1 "$TOPOLOGY"/wants/* | while IFS= read -r -d '' _ && IFS= read -r -d '' DIR; do
-    if [[ -n $DIR ]]; then mkdir -p -- "$PASS/${DIR##*/}/records"; fi
-  done
+  for JOB in "$TOPOLOGY"/wants/*; do
+    printf -- '%s\0' "$PASS/${JOB##*/}/records"
+  done | xargs --null --no-run-if-empty --max-procs=0 -- mkdir --parents --
   find "$PASS" -mindepth 1 -maxdepth 1 -type d -printf '%f\0' | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
   ;;
 recover)
