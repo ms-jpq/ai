@@ -56,11 +56,14 @@ compile)
   fi
   BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
   trap 'rm -fr -- "$BUILD"' EXIT
-  mkdir -p -- "$BUILD/wants" "$BUILD/.s9"
+  DIRECTORIES=("$BUILD/wants" "$BUILD/.s9")
+  for ((INDEX = 0; INDEX < ${#DEFINITIONS[@]}; INDEX += 3)); do
+    DIRECTORIES+=("$BUILD/wants/${DEFINITIONS[$INDEX]}/.s9")
+  done
+  mkdir -p -- "${DIRECTORIES[@]}"
   printf -- '%s' "$INPUT_SUM" > "$BUILD/.s9/inputs.sum"
   for ((INDEX = 0; INDEX < ${#DEFINITIONS[@]}; INDEX += 3)); do
     NAME="${DEFINITIONS[$INDEX]}"
-    mkdir -p -- "$BUILD/wants/$NAME/.s9"
     if [[ -f $SERVICES/$NAME/template/data/.s9/defs.sum ]]; then
       cp -- "$SERVICES/$NAME/template/data/.s9/defs.sum" "$BUILD/wants/$NAME/.s9/defs.sum"
     fi
@@ -223,11 +226,16 @@ combine)
     else
       ROWS=("$PASS"/"$PRODUCER"/records/*/outputs/*)
     fi
-    for OUTPUT in "${ROWS[@]}"; do
-      if [[ -d $OUTPUT ]]; then
-        realpath --zero -- "$OUTPUT"
+    for INDEX in "${!ROWS[@]}"; do
+      if ! [[ -d ${ROWS[$INDEX]} ]]; then
+        unset 'ROWS[INDEX]'
       fi
-    done | "${XARGS[@]}" "$SELF" combine "$STATE" "$PWD" "$PASS" "$KEY" "$@" "$WANT"
+    done
+    {
+      if ((${#ROWS[@]})); then
+        realpath --zero -- "${ROWS[@]}"
+      fi
+    } | "${XARGS[@]}" "$SELF" combine "$STATE" "$PWD" "$PASS" "$KEY" "$@" "$WANT"
     exit
   fi
   INSTANCE="$(

@@ -108,13 +108,17 @@ job)
   fi
   s6-svwait -U -t "$TIMEOUT" -- "$SUPERVISOR"
 
+  LAUNCHES=()
+  for SOURCE in "$JOB" "$SUPERVISOR"; do
+    if [[ -d $SOURCE/data/.s9/launch ]]; then
+      LAUNCHES+=("$SOURCE/data/.s9/launch/")
+    fi
+  done
   {
     find "$INSTANCES" -mindepth 1 -maxdepth 1 ! -name '.*' -printf '%f\0'
-    for SOURCE in "$JOB" "$SUPERVISOR"; do
-      if [[ -d $SOURCE/data/.s9/launch ]]; then
-        find "$SOURCE/data/.s9/launch/" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
-      fi
-    done
+    if ((${#LAUNCHES[@]})); then
+      find "${LAUNCHES[@]}" -mindepth 1 -maxdepth 1 -type l ! -name '.*' -printf '%f\0'
+    fi
   } | sort --zero-terminated --unique | RECUR=instance "${XARGS[@]}" "$SELF" "$NAME" '{}' "$JOB"
   ;;
 cleanup)
