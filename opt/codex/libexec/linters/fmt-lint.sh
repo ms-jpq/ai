@@ -2,7 +2,7 @@
 
 set -o pipefail
 
-: "${XDG_CONFIG_HOME?}"
+: "${XDG_CONFIG_HOME:=$HOME/.config}"
 
 FILE_PATH="$*"
 BASE="${0%/*}"

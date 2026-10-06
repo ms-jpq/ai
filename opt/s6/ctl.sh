@@ -24,9 +24,9 @@ start)
   rm -fr -- "$SVCS/watchdog"
   env -C "$SVCS" -- RECUR=seed "$BASE/jobs/quine/run.sh" watchdog "$P_PID"
 
-  mkdir -p -- "$DATA/launch"
+  mkdir -p -- "$DATA/.s9/launch"
   printf -- '%s' "$P_STARTED" > "$DATA/lstart"
-  ln -sTnfr -- "$DATA/lstart" "$DATA/launch/$P_PID"
+  ln -sTnfr -- "$DATA/lstart" "$DATA/.s9/launch/$P_PID"
 
   S9_WORKING_DIRECTORY="$WS" s6-svscan -- "$SVCS" 67>&1 2>&1 | s6-log -b -l 0 -- T 1 2>&1 | tee --append -- "$LIVE/s6.log" > /dev/null
   ;;

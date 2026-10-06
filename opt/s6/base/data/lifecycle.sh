@@ -76,7 +76,7 @@ attempt)
   unset -- RECUR
   INSTANCE="$1"
   shift -- 1
-  "$DATAFLOW" prepare "$STATE" "$JOB" "$INSTANCE" "$INSTANCE_DATA/launch"
+  "$DATAFLOW" prepare "$STATE" "$JOB" "$INSTANCE" "$INSTANCE_DATA/.s9/launch"
   cd -- "$S9_WORKING_DIRECTORY"
 
   {

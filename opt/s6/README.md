@@ -7,14 +7,16 @@ JOBS/<service>/
 ├── run.sh
 ├── env/
 │   └── S9_ON_UNIT_INACTIVE_SEC
-└── data/launch/
+└── data/.s9/launch/
     └── <instance> -> <arg1>/
 ```
 
 ```tree
 STATE/
 ├── services/<service>/
-│   ├── data/launch/
+│   ├── data/.s9/
+│   │   ├── launch/
+│   │   └── inputs.sum
 │   ├── template/data/.s9/
 │   │   ├── source -> <pinned-job>/
 │   │   └── defs.sum
@@ -29,9 +31,9 @@ STATE/
 │               │   ├── defs.sum
 │               │   ├── pgid
 │               │   ├── attempt
+│               │   ├── launch -> <arg1>/
 │               │   └── died -> ../../../../../../dead/<service>/<instance>/<timestamp>/
-│               ├── .run
-│               └── launch -> <arg1>/
+│               └── .run
 ├── live/
 │   ├── s6.log
 │   └── <service>/<instance>/
@@ -78,10 +80,10 @@ JOBS/
 ```tree
 STATE/
 ├── services/<consumer>/
-│   ├── data/launch/<hash(def, rows)> -> <inputs>/
+│   ├── data/.s9/launch/<hash(def, rows)> -> <inputs>/
 │   ├── template/
 │   ├── instance/<hash(def, rows)> -> ../instances/<hash(def, rows)>/
-│   └── instances/<hash(def, rows)>/data/launch -> <inputs>/
+│   └── instances/<hash(def, rows)>/data/.s9/launch -> <inputs>/
 └── live/<consumer>/<hash(def, rows)>/
     ├── inputs/
     │   ├── .s9/defs.sum
@@ -98,6 +100,7 @@ STATE/
 ```tree
 STATE/graph/
 ├── topology/
+│   ├── .s9/inputs.sum
 │   └── wants/<consumer>/
 │       ├── .s9/defs.sum
 │       ├── =<producer-1> -> ../<producer-1>/

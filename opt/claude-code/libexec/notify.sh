@@ -17,7 +17,7 @@ DISPATCH=(~/.local/libexec/notify/dispatch.sh --id "$ID")
 if [[ ${RECUR:-} == 1 ]]; then
   jq . <<< "$JSON" >&2
 else
-  : "${XDG_CONFIG_HOME?}"
+  : "${XDG_CONFIG_HOME:=$HOME/.config}"
 
   "$XDG_CONFIG_HOME/tmux/libexec/taint-inactive.sh"
 

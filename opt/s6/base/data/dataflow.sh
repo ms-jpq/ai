@@ -120,7 +120,7 @@ deliver)
 
   if [[ -f $SERVICE/env/S9_ON_UNIT_INACTIVE_SEC ]] && (($(< "$SERVICE/env/S9_ON_UNIT_INACTIVE_SEC") < 0)); then
     ln -sTnfr -- "$RECORD" "$SERVICE/data/.s9/died"
-    rm -f -- "$SERVICE/data/launch"
+    rm -f -- "$SERVICE/data/.s9/launch"
   fi
 
   rm -fr -- "$LIVE"

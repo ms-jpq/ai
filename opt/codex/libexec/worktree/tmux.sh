@@ -10,7 +10,7 @@ shift -- 1
 
 case "$ACTION" in
 launch)
-  : "${XDG_CONFIG_HOME?}"
+  : "${XDG_CONFIG_HOME:=$HOME/.config}"
 
   SESSION="$1"
   CWD="$2"

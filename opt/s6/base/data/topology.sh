@@ -35,11 +35,8 @@ compile)
     printf -- '%s\0' "$RECORD"
   done | "${XARGS[@]}" "$SELF" recover "$STATE"
 
-  BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
-  trap 'rm -fr -- "$BUILD"' EXIT
-  mkdir -- "$BUILD/wants"
-
   SOURCES=()
+  DEFINITIONS=()
   for JOB in "$1"/*; do
     NAME="${JOB##*/}"
     SOURCE="$SERVICES/$NAME/template/data/.s9/source"
@@ -48,6 +45,22 @@ compile)
     fi
     TARGET="$(readlink -- "$SOURCE")"
     SOURCES+=("$TARGET" "$NAME")
+    DEFINITION=''
+    if [[ -f $SERVICES/$NAME/template/data/.s9/defs.sum ]]; then
+      DEFINITION="$(< "$SERVICES/$NAME/template/data/.s9/defs.sum")"
+    fi
+    DEFINITIONS+=("$NAME" "$TARGET" "$DEFINITION")
+  done
+  INPUT_SUM="$(printf -- '%s\0' "${DEFINITIONS[@]}" | b3sum)"
+  if [[ -f $TOPOLOGY/.s9/inputs.sum ]] && [[ $(< "$TOPOLOGY/.s9/inputs.sum") == "$INPUT_SUM" ]]; then
+    exec -- "$SELF" projection "$STATE"
+  fi
+  BUILD="$(mktemp -d -- "$GRAPH/.topology.XXXXXX")"
+  trap 'rm -fr -- "$BUILD"' EXIT
+  mkdir -p -- "$BUILD/wants" "$BUILD/.s9"
+  printf -- '%s' "$INPUT_SUM" > "$BUILD/.s9/inputs.sum"
+  for ((INDEX = 1; INDEX < ${#SOURCES[@]}; INDEX += 2)); do
+    NAME="${SOURCES[$INDEX]}"
     mkdir -p -- "$BUILD/wants/$NAME/.s9"
     if [[ -f $SERVICES/$NAME/template/data/.s9/defs.sum ]]; then
       cp -- "$SERVICES/$NAME/template/data/.s9/defs.sum" "$BUILD/wants/$NAME/.s9/defs.sum"
@@ -219,7 +232,7 @@ publish)
   if [[ -L $DEAD/$JOB/$INSTANCE/latest-succ ]]; then
     ln -sTnfr -- "$DEAD/$JOB/$INSTANCE/latest-succ" "$PASS/$JOB/records/$INSTANCE"
   fi
-  LAUNCH="$SERVICES/$JOB/data/launch"
+  LAUNCH="$SERVICES/$JOB/data/.s9/launch"
   COMPLETED=("$DEAD/$JOB/$INSTANCE/"[0-9]*/exit_status)
   if [[ -L $LAUNCH/$INSTANCE ]] || [[ -d $SERVICES/$JOB/instances/$INSTANCE ]] || [[ -f $STATE/live/$JOB/$INSTANCE/.s9/record ]] || ((${#COMPLETED[@]})); then
     exit
