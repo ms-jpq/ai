@@ -140,7 +140,11 @@ evaluated)
   for WANT in "${WANTS[@]}"; do
     if [[ -L $WANT ]]; then
       PRODUCER="${WANT##*/}"
-      printf -- '%s\0' "${PRODUCER#=}"
+      PRODUCER="${PRODUCER#=}"
+      if [[ -f $PASS/$PRODUCER/status ]] && [[ $(< "$PASS/$PRODUCER/status") == 0 ]]; then
+        continue
+      fi
+      printf -- '%s\0' "$PRODUCER"
     fi
   done | "${XARGS[@]}" "$SELF" evaluate "$STATE" "$PASS"
   CACHE="$INPUTS_ROOT/$JOB/.s9/projection"
@@ -262,8 +266,6 @@ publish)
   if ! [[ ${1#* } -ef $CACHE/$INSTANCE ]]; then
     mv --no-target-directory -- "${1#* }" "$CACHE/$INSTANCE"
   fi
-  mapfile -d '' -t ARGS < "$CACHE/$INSTANCE"
-  set -- "${ARGS[@]}"
   if [[ -L $DEAD/$JOB/$INSTANCE/latest-succ ]]; then
     ln -sTnfr -- "$DEAD/$JOB/$INSTANCE/latest-succ" "$PASS/$JOB/records/$INSTANCE"
   fi
@@ -275,6 +277,8 @@ publish)
   INPUTS="$INPUTS_ROOT/$JOB/$INSTANCE"
   mkdir -p -- "$INPUTS_ROOT/$JOB" "$LAUNCH"
   if ! [[ -d $INPUTS ]]; then
+    mapfile -d '' -t ARGS < "$CACHE/$INSTANCE"
+    set -- "${ARGS[@]}"
     STAGING="$INPUTS_ROOT/$JOB/.$INSTANCE"
     rm -fr -- "$STAGING"
     mkdir -p -- "$STAGING/.s9"

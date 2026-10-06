@@ -144,6 +144,25 @@ BASH
   done
   REQUESTS=("$STATE/report/data/.s9/launch/"* "$STATE/sibling/data/.s9/launch/"*)
   ((${#REQUESTS[@]} == 0))
+  PASS="$TEST_DIR/pass"
+  mkdir -p -- "$PASS/"{dog,report}/records
+  printf -- '%s' empty > "$PASS/dog/sum"
+  cat > "$TEST_DIR/bin/s6-setlock" << 'BASH'
+#!/usr/bin/env bash
+exit 67
+BASH
+  chmod +x -- "$TEST_DIR/bin/s6-setlock"
+  for RESULT in 0 67 ''; do
+    printf -- '%s' "$RESULT" > "$PASS/dog/status"
+    rm -f -- "$PASS/report/status"
+    STATUS=0
+    PATH="$TEST_DIR/bin:$PATH" "$TOPOLOGY" evaluated "$TEST_DIR" "$PASS" report > "$TEST_DIR/output" 2>&1 || STATUS=$?
+    if [[ $RESULT == 0 ]]; then
+      [[ $STATUS == 0 ]]
+    else
+      [[ $STATUS == 123 ]]
+    fi
+  done
   ;;
 joins)
   shopt -u failglob dotglob
