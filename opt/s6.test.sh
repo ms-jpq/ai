@@ -1435,6 +1435,7 @@ exit 0
 BASH
   cat > "$TEST_DIR/bin/s6-svstat" << 'BASH'
 #!/usr/bin/env bash
+if [[ ${TEST_STAT_FORBIDDEN:-} == 1 ]]; then exit 67; fi
 printf -- '%s\n' "${TEST_STATUS:-true}"
 BASH
   cat > "$TEST_DIR/bin/s6-instance-delete" << 'BASH'
@@ -1456,6 +1457,7 @@ BASH
     exit 1
   fi
   [[ -L $LAUNCH/.pending ]]
+  TEST_STAT_FORBIDDEN=1 "${RECONCILE[@]}" queue-dog
 
   mkdir -- "$TEST_DIR/stale" "$TEST_DIR/current"
   mkdir -p -- "$TEST_DIR/stale/.s9" "$TEST_DIR/current/.s9"

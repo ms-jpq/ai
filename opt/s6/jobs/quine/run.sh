@@ -189,8 +189,11 @@ instance)
     fi
     s6-instance-create -D -t "$TIMEOUT" -- "$SUPERVISOR" "$INSTANCE"
   else
+    if ! [[ -f $SERVICE/down ]]; then
+      exit
+    fi
     STATUS="$(s6-svstat -o up -- "$SERVICE")"
-    if ! [[ -f $SERVICE/down ]] || [[ $STATUS == true ]]; then
+    if [[ $STATUS == true ]]; then
       exit
     fi
     s6-svwait -D -t "$TIMEOUT" -- "$SERVICE"
