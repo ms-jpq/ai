@@ -7,6 +7,8 @@ paths:
 
 ## Defaults
 
+- Write Perl with the same fail-fast intent as Bash's `set -Eeuo pipefail`.
+
 - Typical script prelude:
 
   ```perl
