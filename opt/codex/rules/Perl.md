@@ -16,13 +16,11 @@ paths:
 
   use Carp;
   use English;
-  use autodie qw(:all);
+  use autodie;
   use strict;
   use utf8;
   use warnings FATAL => 'all';
   ```
-
-- Install `IPC::System::Simple` for `autodie` support of `system`.
 
 - Declare lexical variables with `my`.
 
@@ -53,9 +51,11 @@ paths:
 - Use list-form `system` and `exec` to pass arguments without shell interpolation.
 
   ```perl
-  system( 'dog-check', '--', @argv );
-  exec 'dog-walk', '--', @ARGV;
+  system( 'dog-check', '--', @argv ) == 0 or croak $CHILD_ERROR;
+  exec 'dog-walk', '--', @ARGV or croak $ERRNO;
   ```
+
+- Check `system` and `exec` explicitly because plain `autodie` does not cover them.
 
 - Check failures outside `autodie` coverage explicitly, including individual pipeline stages.
 
