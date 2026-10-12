@@ -12,7 +12,6 @@
   },
   "tui": {
     "alternate_screen": "never",
-    "animations": false,
     "status_line": ["run-state", "model-with-reasoning", "context-used", "context-window-size", "task-progress"]
   }
 }
