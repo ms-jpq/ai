@@ -12,14 +12,17 @@ paths:
 - Typical script prelude:
 
   ```perl
-  #!/usr/bin/env -S -- PERL_UNICODE=ASD perl -w
+  #!/usr/bin/env -S -- PERL_UNICODE=ASD perl
 
   use Carp;
   use English;
-  use autodie;
+  use autodie qw(:all);
   use strict;
   use utf8;
+  use warnings FATAL => 'all';
   ```
+
+- Install `IPC::System::Simple` for `autodie` support of `system`.
 
 - Declare lexical variables with `my`.
 
@@ -50,11 +53,11 @@ paths:
 - Use list-form `system` and `exec` to pass arguments without shell interpolation.
 
   ```perl
-  system( 'dog-check', '--', @ARGV ) == 0 or croak $CHILD_ERROR;
-  exec 'dog-walk', '--', @ARGV or croak $ERRNO;
+  system( 'dog-check', '--', @argv );
+  exec 'dog-walk', '--', @ARGV;
   ```
 
-- Check process status explicitly; `autodie` does not make every process call fatal.
+- Check failures outside `autodie` coverage explicitly, including individual pipeline stages.
 
 - Check `$CHILD_ERROR` immediately after capturing command output with backticks.
 
