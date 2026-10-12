@@ -9,8 +9,6 @@ paths:
 
 - Enable `#![deny(clippy::all, clippy::cargo, clippy::pedantic)]`.
 
-- Import standard-library names directly, grouped under `use std::{ ... };`.
-
 ---
 
 ## Generics
