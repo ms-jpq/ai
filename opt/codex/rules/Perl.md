@@ -51,7 +51,7 @@ paths:
 - Use list-form `system` and `exec` to pass arguments without shell interpolation.
 
   ```perl
-  system( 'dog-check', '--', @argv ) == 0 or croak $CHILD_ERROR;
+  system( 'dog-check', '--', @ARGV ) == 0 or croak $CHILD_ERROR;
   exec 'dog-walk', '--', @ARGV or croak $ERRNO;
   ```
 
