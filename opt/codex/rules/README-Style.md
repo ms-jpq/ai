@@ -31,7 +31,7 @@ README files explain **what** and **why**.
 
 - Establish a consistent 📖 lexicon of emojis for semantic compression and ease of reading.
 
-  - Avoid multi-byte emojis for ease of scripting.
+  - Use only single-code-point emoji for tooling compatibility.
 
 - Use families to express closed sets of values.
 
@@ -41,7 +41,7 @@ README files explain **what** and **why**.
 
   - 📕 📙 📒 📗 📘
 
-- Pair recurring labels with consistent emoji to make them easy to spot.
+- Pair recurring labels with consistent emoji to make them easy to scan.
 
   - 🐶 **foo**
 
