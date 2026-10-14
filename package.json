@@ -16,6 +16,8 @@
     "@earendil-works/pi-coding-agent": "*",
     "@modelcontextprotocol/sdk": "*",
     "@types/node": "*",
+    "remark-cli": "*",
+    "remark-gfm": "*",
     "typescript": "*"
   },
   "scripts": {

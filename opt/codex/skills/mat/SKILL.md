@@ -17,6 +17,15 @@ description: Represent a system's state space densely using Markdown tables.
 
 ## Machine Parsability
 
+```json
+{
+  "devDependencies": {
+    "remark-cli": "*",
+    "remark-gfm": "*"
+  }
+}
+```
+
 ```bash
-remark --no-config --use remark-gfm --tree-out -- '<spec>.md'
+remark --no-config --use remark-gfm --tree-out -- '<spec>.md' | jq -e '[recurse(select(.type != "table") | .children[]?) | select(.type == "table")]'
 ```
