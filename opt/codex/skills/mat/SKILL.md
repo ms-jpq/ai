@@ -18,5 +18,5 @@ description: Represent a system's state space densely using Markdown tables.
 ## Machine Parsability
 
 ```bash
-remark --no-config --use remark-gfm --tree-out spec.md
+remark --no-config --use remark-gfm --tree-out -- '<spec>.md'
 ```
