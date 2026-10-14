@@ -9,3 +9,5 @@ disable-model-invocation: true
   - Do not perform any part of it yourself.
 
 - Continue with other work while it runs.
+
+- See: `go func()`.
