@@ -7,35 +7,35 @@ description: Fold accumulated unstructured material into an existing structured 
 
 ## Artifact (Output)
 
-- An updated structured representation that incorporates accumulated material compactly.
+- A compact structured representation incorporating the accumulated material.
 
-- Explicit unresolved questions, contradictions, and material not yet incorporated.
+- Unresolved questions, contradictions, and unabsorbed material remain explicit.
 
 ## Observation (Input)
 
-- Read the existing representation and accumulated material within the requested scope.
+- Read the existing representation and accumulated material in scope.
 
-- Identify the claims, distinctions, relationships, and uncertainties that must survive incorporation.
+- Identify claims, distinctions, relationships, and uncertainties to preserve.
 
-- Identify where the organisation or notation cannot express the incoming material.
+- Locate material the current organisation or notation cannot express.
 
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Explain the mismatch between the material and the representation, then propose changes to organisation or notation.
+- Explain why the material does not fit and propose changes to organisation or notation.
 
-- Prefer a compact shared expression for repeated meaning, preserving differences in scope, conditions, and certainty.
+- Express repeated meaning once, preserving differences in scope, conditions, and certainty.
 
 ## Deduction
 
 _Derive consequences of the explanation._
 
-- Determine where each incoming claim would be represented and which existing claims the changes would affect.
+- Map incoming claims to their proposed locations and identify affected existing claims.
 
-- Specify what a reader must still be able to recover, including distinctions, ordering, and unresolved conflicts.
+- Predict which distinctions, ordering, and unresolved conflicts a reader could recover from the revision.
 
-- Identify which source passages would become redundant and which would remain unabsorbed.
+- Identify passages the revision would absorb and those it would leave unabsorbed.
 
 ## Induction
 
@@ -43,8 +43,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Apply the proposed changes and compare the result with both inputs.
 
-- Check that the predicted meanings remain recoverable without introducing unsupported claims or erasing uncertainty.
+- Verify that the revision preserves meaning and uncertainty without adding unsupported claims.
 
-- Revise any organisation or notation that loses a required distinction or adds unnecessary complexity.
+- Correct lost distinctions and unnecessary complexity.
 
-- Remove absorbed passages only after verifying their meaning is represented. Retain unabsorbed material.
+- Remove passages whose meaning is verified in the revision. Retain the rest.
