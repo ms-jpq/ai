@@ -29,3 +29,5 @@ description: Represent a system's state space densely using Markdown tables.
 ```bash
 remark --no-config --use remark-gfm --tree-out -- '<spec>.md' | jq -e '[recurse(select(.type != "table") | .children[]?) | select(.type == "table")]'
 ```
+
+- See: [The AST format](https://github.com/syntax-tree/mdast)
