@@ -7,23 +7,21 @@ description: Fold accumulated unstructured material into an existing structured 
 
 ## Artifact (Output)
 
-- A compact structured representation incorporating the accumulated material.
+- A compact structured representation incorporating the additions.
 
-- Unresolved questions, contradictions, and unabsorbed material remain explicit.
+- Unresolved questions, contradictions, and anything unabsorbed remain explicit.
 
 ## Observation (Input)
 
 - Read the existing representation and accumulated material in scope.
 
-- Identify claims, distinctions, relationships, and uncertainties to preserve.
-
-- Locate material the current organisation or notation cannot express.
+- Locate what the current organisation or notation cannot express.
 
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Explain why the material does not fit and propose changes to organisation or notation.
+- Explain the mismatch and propose changes to organisation or notation.
 
 - Express repeated meaning once, preserving differences in scope, conditions, and certainty.
 
@@ -35,7 +33,7 @@ _Derive consequences of the explanation._
 
 - Predict which distinctions, ordering, and unresolved conflicts a reader could recover from the revision.
 
-- Identify passages the revision would absorb and those it would leave unabsorbed.
+- Identify what the revision would absorb and what would remain.
 
 ## Induction
 
@@ -47,4 +45,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Correct lost distinctions and unnecessary complexity.
 
-- Remove passages whose meaning is verified in the revision. Retain the rest.
+- Remove only what is verified as represented in the revision. Retain the rest.
