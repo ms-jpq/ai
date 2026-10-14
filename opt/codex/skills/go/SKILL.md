@@ -4,8 +4,6 @@ description: Delegate bounded task(s) only when explicitly invoked by the user.
 disable-model-invocation: true
 ---
 
-- Delegate the task to one or more agents.
-
-  - Do not perform any part of it yourself.
+- Delegate the task, do not perform any part of it yourself.
 
 - See: `go func()`.
