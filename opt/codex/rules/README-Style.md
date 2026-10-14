@@ -31,15 +31,19 @@ README files explain **what** and **why**.
 
 ## Emoji
 
-- Use families of emoji to compress repeated meanings.
+- Establish a consistent lexicon of emojis for semantic compression and ease of reading.
+
+- Use recognisable families to express closed sets of values.
 
 - Example families:
 
-  - Coloured dots: 🟢 ready, 🟡 needs attention, 🔴 blocked, ⚪ unknown.
+  - Circles: 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪.
 
-  - Choices: 📕 option A, 📗 option B, 📘 option C, 📙 option D.
+  - Squares: 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ ⬜.
 
-- Retain useful detail beside the emoji, such as `⚠️ 2/5 cases`.
+  - Hearts: ❤️ 🧡 💛 💚 💙 🩵 💜 🩷 🤎 🖤 🩶 🤍.
+
+  - Books: 📕 📙 📒 📗 📘.
 
 ---
 
