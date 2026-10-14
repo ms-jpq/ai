@@ -33,17 +33,15 @@ README files explain **what** and **why**.
 
 - Establish a consistent lexicon of emojis for semantic compression and ease of reading.
 
-- Use recognisable families to express closed sets of values.
-
-- Example families:
+- Use families to express closed sets of values.
 
   - Circles: 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪.
 
   - Squares: 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ ⬜.
 
-  - Hearts: ❤️ 🧡 💛 💚 💙 🩵 💜 🩷 🤎 🖤 🩶 🤍.
+  - Hearts : ❤️ 🧡 💛 💚 💙 🩵 💜 🩷 🤎 🖤 🩶 🤍.
 
-  - Books: 📕 📙 📒 📗 📘.
+  - Books : 📕 📙 📒 📗 📘.
 
 ---
 
