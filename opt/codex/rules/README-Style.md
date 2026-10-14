@@ -15,8 +15,6 @@ README files explain **what** and **why**.
 
 - Use code blocks for configuration and commands.
 
-- See @../skills/mat/SKILL.md.
-
 ---
 
 ## Layout
@@ -56,3 +54,7 @@ README files explain **what** and **why**.
 - Write sui generis: matter-of-fact, casually deviant in passing.
 
 - Apply @./Example-Generation.md#prose lightly and subordinate it to clarity.
+
+---
+
+- Also see @../skills/mat/SKILL.md.
