@@ -15,7 +15,9 @@
     "@anthropic-ai/claude-agent-sdk": "*",
     "@earendil-works/pi-coding-agent": "*",
     "@modelcontextprotocol/sdk": "*",
+    "@types/mdast": "*",
     "@types/node": "*",
+    "mdast-util-to-string": "*",
     "remark-cli": "*",
     "remark-gfm": "*",
     "typescript": "*"
