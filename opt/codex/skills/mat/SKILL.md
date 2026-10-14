@@ -1,16 +1,12 @@
 ---
 name: mat
-description: Break down a system into dimensions and illustrate gaps with Markdown tables.
+description: Represent a system's state space densely using Markdown tables.
 ---
 
-- Break down the system into dimensions and show useful intersections as Markdown tables.
+- Establish a dense, readable representation of the full state space defined by the system's chosen dimensions using Markdown tables.
 
-- Make gaps visible. Distinguish missing coverage, unknowns, and inapplicable intersections.
+- Define a compact notation using emoji, symbols, and short labels in a legend, then apply it consistently inside cells to represent the combinations of dimension values.
 
-## Markdown Limits
+- Combine symbols to express relationships or order. For example, with `🍎 = A`, `🍏 = B`, and `→ = then`, distinguish `🍎 → 🍏` from `🍏 → 🍎`.
 
-- Split wide tables into focused views. Keep long explanations, lists, and code blocks outside cells.
-
-- Pipe tables lack native multiline and merged cells. Escape literal pipes as `\|`.
-
-- Use prose or diagrams for order and causality. Check relationships and repeated claims manually.
+- Keep detailed explanations outside the cells.
