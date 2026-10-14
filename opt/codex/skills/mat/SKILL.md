@@ -17,21 +17,6 @@ description: Represent a system's state space densely using Markdown tables.
 
 ## Machine Parsability
 
-```json
-{
-  "devDependencies": {
-    "remark-cli": "*",
-    "remark-gfm": "*"
-  }
-}
-```
-
-```bash
-# https://github.com/syntax-tree/mdast
-
-remark --no-config --use remark-gfm --tree-out < '<spec>.md' | ./references/mdast-2-rows-and-cols.jq > tables.json
-```
-
 - Example uses of the extracted tables include:
 
   - Linting required columns, duplicate identifiers, and undefined symbols.
@@ -39,3 +24,21 @@ remark --no-config --use remark-gfm --tree-out < '<spec>.md' | ./references/mdas
   - Checking coverage against declared dimension values and constraints.
 
   - Generating test cases when notation is bound to executable behaviour.
+
+```json
+{
+  "devDependencies": {
+    "@types/mdast": "*",
+    "@types/node": "*",
+    "mdast-util-to-string": "*",
+    "remark-cli": "*",
+    "remark-gfm": "*"
+  }
+}
+```
+
+```bash
+remark --no-config --use remark-gfm --tree-out < '<spec>.md' > ast.json
+
+./references/mdast-2-rows-and-cols.ts < ast.json > tables.json
+```

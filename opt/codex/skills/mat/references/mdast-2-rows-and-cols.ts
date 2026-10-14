@@ -40,6 +40,7 @@ const convertTable = ({ children }: Table): RowsAndColumns => {
 
 const tree: unknown = JSON.parse(await text(stdin))
 assertRoot(tree)
+
 const result = tables(tree).map(convertTable).toArray()
 stdout.end(`${JSON.stringify(result, undefined, 2)}\n`)
 await finished(stdout)
