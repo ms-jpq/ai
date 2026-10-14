@@ -31,7 +31,7 @@ README files explain **what** and **why**.
 
 ## Emoji
 
-- Establish a consistent lexicon of emojis for semantic compression and ease of reading.
+- Establish a consistent 📖 lexicon of emojis for semantic compression and ease of reading.
 
 - Use families to express closed sets of values.
 
@@ -42,6 +42,12 @@ README files explain **what** and **why**.
   - ❤️ 🧡 💛 💚 💙 🩵 💜 🩷 🤎 🖤 🩶 🤍.
 
   - 📕 📙 📒 📗 📘.
+
+- Pair recurring labels with consistent emoji to make them easy to spot.
+
+  - 🐶 **foo**
+
+  - 🦴 **bar**
 
 ---
 
