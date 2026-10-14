@@ -29,7 +29,7 @@ description: Represent a system's state space densely using Markdown tables.
 - See: [the AST specifications](https://github.com/syntax-tree/mdast)
 
 ```bash
-cat -- '<spec>.md' | remark --no-config --use remark-gfm --tree-out | jq -e '[recurse(select(.type != "table") | .children[]?) | select(.type == "table")]' > ast.json
+remark --no-config --use remark-gfm --tree-out < '<spec>.md' | jq -e '[recurse(select(.type != "table") | .children[]?) | select(.type == "table")]' > ast.json
 ```
 
 - Example uses of the extracted tables include:
