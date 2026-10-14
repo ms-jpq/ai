@@ -35,13 +35,13 @@ README files explain **what** and **why**.
 
 - Use families to express closed sets of values.
 
-  - Circles: 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪.
+  - 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪.
 
-  - Squares: 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ ⬜.
+  - 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ ⬜.
 
-  - Hearts : ❤️ 🧡 💛 💚 💙 🩵 💜 🩷 🤎 🖤 🩶 🤍.
+  - ❤️ 🧡 💛 💚 💙 🩵 💜 🩷 🤎 🖤 🩶 🤍.
 
-  - Books : 📕 📙 📒 📗 📘.
+  - 📕 📙 📒 📗 📘.
 
 ---
 
