@@ -1,6 +1,7 @@
 #!/usr/bin/env -S -- node
 
 import { ok } from "node:assert/strict"
+import { EOL } from "node:os"
 import { stdin, stdout } from "node:process"
 import { text } from "node:stream/consumers"
 import { finished } from "node:stream/promises"
@@ -42,5 +43,5 @@ const tree: unknown = JSON.parse(await text(stdin))
 assertRoot(tree)
 
 const result = tables(tree).map(convertTable).toArray()
-stdout.end(`${JSON.stringify(result, undefined, 2)}\n`)
+stdout.end(`${JSON.stringify(result, undefined, 2)}${EOL}`)
 await finished(stdout)
