@@ -31,15 +31,15 @@ README files explain **what** and **why**.
 
 - Establish a consistent 📖 lexicon of emojis for semantic compression and ease of reading.
 
+  - Avoid multi-byte emojis for ease of scripting.
+
 - Use families to express closed sets of values.
 
-  - 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪.
+  - 🔴 🟠 🟡 🟢 🔵 🟣 🟤 ⚫ ⚪
 
-  - 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ ⬜.
+  - 🟥 🟧 🟨 🟩 🟦 🟪 🟫 ⬛ ⬜
 
-  - ❤️ 🧡 💛 💚 💙 🩵 💜 🩷 🤎 🖤 🩶 🤍.
-
-  - 📕 📙 📒 📗 📘.
+  - 📕 📙 📒 📗 📘
 
 - Pair recurring labels with consistent emoji to make them easy to spot.
 
