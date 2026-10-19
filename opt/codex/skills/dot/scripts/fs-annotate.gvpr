@@ -13,86 +13,100 @@ BEGIN {
     return separator < 0 ? "." : substr(dirname_path, 0, separator);
   }
 
-  string chomp(string value) {
-    int size = length(value);
-    if (size && substr(value, size - 1) == "\n") {
-      size--;
-      if (size && substr(value, size - 1, 1) == "\r") {
-        size--;
-      }
-    }
-    return substr(value, 0, size);
-  }
+  string attributes[string];
+  int seen[string];
 
-  int open_read(string path) {
-    int descriptor = openF(path, "r");
-    if (descriptor < 0) {
-      printf(2, "Cannot read %s\n", path);
-      exit(1);
-    }
-    return descriptor;
-  }
-
-  obj_t find_subject(graph_t input_graph, string directory, string metadata_root, int incoming) {
-    if (!strcmp(directory, metadata_root)) {
-      return input_graph;
+  string target_key(string directory, int incoming) {
+    if (directory == ".") {
+      return "graph";
     }
     string node_id = basename(directory);
     if (node_id != ".*") {
-      return isNode(input_graph, node_id);
+      return "node/" + node_id;
     }
     string source_directory = dirname(directory);
     string source_id = basename(source_directory);
-    node_t source = isNode(input_graph, source_id);
-    node_t target = isNode(input_graph, substr(node_id, 1));
-    if (!source || !target) {
-      return NULL;
-    }
-    return incoming ? isEdge(target, source, "") : isEdge(source, target, "");
+    string target_id = substr(node_id, 1);
+    return incoming ? "edge/" + target_id + "/" + source_id : "edge/" + source_id + "/" + target_id;
   }
 
-  if (ARGC != 3 || (ARGV[0] != "outgoing" && ARGV[0] != "incoming")) {
-    printf(2, "Usage: fs-annotate.gvpr -a \"outgoing|incoming '<root>' '<metadata>'\" < topology.gv\n");
+  void load_metadata(string metadata_file, int incoming) {
+    string records[string];
+    int descriptor = openF(metadata_file, "r");
+    if (descriptor < 0) {
+      printf(2, "Cannot read %s\n", metadata_file);
+      exit(1);
+    }
+    string line;
+    while (strcmp(line = readL(descriptor), "")) {
+      if (substr(line, length(line) - 1) == "\n") {
+        line = substr(line, 0, length(line) - 1);
+      }
+      int separator = index(line, "=:");
+      if (separator < 0) {
+        continue;
+      }
+      string key = substr(line, 0, separator + 1);
+      records[key] = substr(line, separator + 2);
+    }
+    closeF(descriptor);
+    string path;
+    for (records[path]) {
+      string filename = basename(path);
+      if (filename != ".?*=") {
+        continue;
+      }
+      string attribute = substr(filename, 1, length(filename) - 2);
+      string directory = dirname(path);
+      string target = target_key(directory, incoming);
+      attributes[target] += attribute + "=:" + records[path] + "\n";
+    }
+  }
+
+  void apply_attributes(obj_t subject, string key) {
+    if (!(key in attributes)) {
+      return;
+    }
+    seen[key] = 1;
+    string lines[int];
+    int count = tokens(attributes[key], lines, "\n");
+    int i;
+    for (i = 0; i < count; i++) {
+      int separator = index(lines[i], "=:");
+      aset(subject, substr(lines[i], 0, separator), substr(lines[i], separator + 2));
+    }
+  }
+
+  if (ARGC != 2 || (ARGV[0] != "outgoing" && ARGV[0] != "incoming")) {
+    printf(2, "Usage: fs-annotate.gvpr -a \"outgoing|incoming '<metadata>'\" < topology.gv\n");
     exit(2);
   }
 
   int incoming = ARGV[0] == "incoming";
-  string metadata_root = ARGV[1];
-  while (length(metadata_root) > 1 && substr(metadata_root, length(metadata_root) - 1) == "/") {
-    metadata_root = substr(metadata_root, 0, length(metadata_root) - 1);
-  }
-
-  string values[string];
-  int descriptor = open_read(ARGV[2]);
-  string line;
-  while (strcmp(line = readL(descriptor), "")) {
-    line = chomp(line);
-    int separator = index(line, "=:");
-    if (separator < 0 || separator == length(line) - 2) {
-      continue;
-    }
-    string key = substr(line, 0, separator + 1);
-    values[key] = substr(line, separator + 2);
-  }
-  closeF(descriptor);
+  load_metadata(ARGV[1], incoming);
 }
 
 BEG_G {
-  string path;
-  for (values[path]) {
-    string filename = basename(path);
-    if (filename != ".?*=") {
-      continue;
-    }
-    string attribute = substr(filename, 1, length(filename) - 2);
+  unset(seen);
+  apply_attributes($G, "graph");
+}
 
-    string directory = dirname(path);
-    obj_t subject = find_subject($G, directory, metadata_root, incoming);
-    if (!subject) {
-      printf(2, "No graph node or edge for %s\n", path);
+N {
+  string node_key = "node/" + $.name;
+  apply_attributes($, node_key);
+}
+
+E {
+  string edge_key = "edge/" + $.tail.name + "/" + $.head.name;
+  apply_attributes($, edge_key);
+}
+
+END_G {
+  string key;
+  for (attributes[key]) {
+    if (!(key in seen)) {
+      printf(2, "No graph object for %s\n", key);
       exit(1);
     }
-
-    aset(subject, attribute, values[path]);
   }
 }
