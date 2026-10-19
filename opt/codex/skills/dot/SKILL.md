@@ -54,3 +54,9 @@ _Test those consequences and provisionally retain or revise the explanation._
 - If rendering, inspect readability and adjust presentation without silently changing topology.
 
 - Deliver the DOT and conversion command, with any unresolved mappings or omissions.
+
+---
+
+## Other Representations
+
+- `./references/path-2-graph.md`.

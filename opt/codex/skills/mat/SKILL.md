@@ -92,5 +92,5 @@ _Test those consequences and provisionally retain or revise the explanation._
 ```bash
 remark --no-config --use remark-gfm --tree-out < '<spec>.md' > ast.json
 
-./references/mdast-2-rows-and-cols.ts < ast.json > tables.json
+./scripts/mdast-2-rows-and-cols.ts < ast.json > tables.json
 ```
