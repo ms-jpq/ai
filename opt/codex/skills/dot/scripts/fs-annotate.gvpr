@@ -1,0 +1,96 @@
+#!/usr/bin/env -S -- gvpr -c -f
+
+BEGIN {
+  string basename(string basename_path) {
+    return substr(basename_path, rindex(basename_path, "/") + 1);
+  }
+
+  string dirname(string dirname_path) {
+    int separator = rindex(dirname_path, "/");
+    if (separator == 0) {
+      return "/";
+    }
+    return separator < 0 ? "." : substr(dirname_path, 0, separator);
+  }
+
+  string chomp(string value) {
+    int size = length(value);
+    if (size && substr(value, size - 1) == "\n") {
+      size--;
+      if (size && substr(value, size - 1, 1) == "\r") {
+        size--;
+      }
+    }
+    return substr(value, 0, size);
+  }
+
+  int open_read(string path) {
+    int descriptor = openF(path, "r");
+    if (descriptor < 0) {
+      printf(2, "Cannot read %s\n", path);
+      exit(1);
+    }
+    return descriptor;
+  }
+
+  if (ARGC != 3 || (ARGV[0] != "outgoing" && ARGV[0] != "incoming")) {
+    printf(
+        2,
+        "Usage: fs-annotate.gvpr -a \"outgoing|incoming '<root>' '<metadata-list>'\" < topology.gv\n");
+    exit(2);
+  }
+
+  int incoming = ARGV[0] == "incoming";
+  string metadata_root = ARGV[1];
+  while (length(metadata_root) > 1 &&
+         substr(metadata_root, length(metadata_root) - 1) == "/") {
+    metadata_root = substr(metadata_root, 0, length(metadata_root) - 1);
+  }
+}
+
+BEG_G {
+  int manifest = open_read(ARGV[2]);
+  string path;
+
+  while (strcmp(path = readL(manifest), "")) {
+    path = chomp(path);
+    string filename = basename(path);
+    if (filename != ".?*=") {
+      continue;
+    }
+    string attribute = substr(filename, 1, length(filename) - 2);
+
+    string directory = dirname(path);
+    string node_id = basename(directory);
+    obj_t subject;
+    if (!strcmp(directory, metadata_root)) {
+      subject = $G;
+    } else if (node_id == ".*") {
+      string source_directory = dirname(directory);
+      string source_id = basename(source_directory);
+      node_t source = isNode($G, source_id);
+      node_t target = isNode($G, substr(node_id, 1));
+      subject = NULL;
+      if (source && target) {
+        subject =
+            incoming ? isEdge(target, source, "") : isEdge(source, target, "");
+      }
+    } else {
+      subject = isNode($G, node_id);
+    }
+    if (!subject) {
+      printf(2, "No graph node or edge for %s\n", path);
+      exit(1);
+    }
+
+    int descriptor = open_read(path);
+    string value = "";
+    string line;
+    while (strcmp(line = readL(descriptor), "")) {
+      value += line;
+    }
+    closeF(descriptor);
+    aset(subject, attribute, chomp(value));
+  }
+  closeF(manifest);
+}

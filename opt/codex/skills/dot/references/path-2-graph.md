@@ -37,9 +37,7 @@
   tree --fromfile --noreport -- . < '<chains>.txt'
   ```
 
----
-
-## Conversion
+### Conversion
 
 ```bash
 ../scripts/path-2-dot.py outgoing < '<chains>.txt' > '<topology>.gv'
@@ -54,32 +52,40 @@
 - Filesystem metadata convention:
 
   ```text
-  a/
-  ├── .label=
-  ├── .color=
-  ├── x → ../x
-  └── .x/
+  <ROOT>/
+  ├── .rankdir=
+  ├── .splines=
+  └── a/
       ├── .label=
-      └── .style=
+      ├── .color=
+      ├── x → ../x
+      └── .x/
+          ├── .label=
+          └── .style=
   ```
 
 - `.<attribute>=` stores a DOT attribute's value: `.color=` containing `blue` sets `color=blue`.
 
+- Files directly under `<ROOT>` set graph attributes, such as `.rankdir=` containing `TB` or `.splines=` containing `ortho`.
+
 - `.x/` holds edge attributes for the relationship to `x`.
 
-- Skip hidden entries and their contents when extracting topology:
+- Skip hidden entries and their contents when extracting topology.
 
-  ```bash
-  env -C '<ROOT>' -- find . -mindepth 1 -name '.*' -prune -or -print > '<chains>.txt'
-  ```
+### Conversion
 
-- Use the same adjacency direction for both passes:
+```bash
+DIRECTION=outgoing
+ROOT='<ROOT>'
 
-  ```bash
-  DIRECTION=outgoing
+env -C "$ROOT" -- find . -mindepth 1 -name '.*' -prune -or -print > '<chains>.txt'
+../scripts/path-2-dot.py "$DIRECTION" < '<chains>.txt' > '<topology>.gv'
+```
 
-  find '<ROOT>' -type f -name '.?*=' | sort > '<metadata>.txt'
-  env -C '<ROOT>' -- find . -mindepth 1 -name '.*' -prune -or -print | ../scripts/path-2-dot.py "$DIRECTION" > '<topology>.gv'
+```bash
+find "$ROOT" -type f -name '.?*=' | sort > '<metadata>.txt'
+ARGV=("$DIRECTION" "$ROOT" '<metadata>.txt')
+../scripts/fs-annotate.gvpr -a "${ARGV[*]@Q}" < '<topology>.gv' > '<annotated>.gv'
+```
 
-  ../scripts/metadata-to-dot.gvpr -a "$DIRECTION" -a "'<metadata>.txt'" < '<topology>.gv' > '<annotated>.gv'
-  ```
+- For shared styling, run a gvpr pass before loading metadata so individual attributes can override it.
