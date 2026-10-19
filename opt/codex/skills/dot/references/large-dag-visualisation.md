@@ -119,13 +119,3 @@
 
   edgepaint -v -random_seed=42 -color_scheme=dark28 -angle=89 '<positioned>.gv' > /dev/null 2> '<colour>.log'
   ```
-
-- The positioned graph must contain the candidate's node positions and routed edge paths.
-
-- GNU `time` records elapsed seconds with `%e`:
-
-  ```bash
-  /usr/bin/time -f '%e' -o '<timing>.log' dot < '<graph>.gv' > /dev/null
-  ```
-
-- Use the same measurement definitions, Graphviz version, palette, and conflict threshold across trials.
