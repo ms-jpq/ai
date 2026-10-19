@@ -26,16 +26,16 @@ def _dot(lines: Iterable[str], *, incoming: bool) -> Iterator[str]:
     for parts in _chains(lines):
         nodes.update(parts)
         edges.update(
-            (target, source) if incoming else (source, target)
-            for source, target in pairwise(parts)
+            (head, tail) if incoming else (tail, head) for tail, head in pairwise(parts)
         )
 
     yield "digraph {"
     for node_id in sorted(nodes, key=strxfrm):
         yield f"  {dumps(node_id, ensure_ascii=False)};"
-    for source, target in sorted(edges, key=lambda x: tuple(map(strxfrm, x))):
-        stmt = f"  {dumps(source, ensure_ascii=False)} -> {dumps(target, ensure_ascii=False)};"
-        yield stmt
+    for tail, head in sorted(edges, key=lambda x: tuple(map(strxfrm, x))):
+        yield (
+            f"  {dumps(tail, ensure_ascii=False)} -> {dumps(head, ensure_ascii=False)};"
+        )
     yield "}"
 
 
