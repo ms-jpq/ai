@@ -29,7 +29,7 @@ _Devise an explanation for observations._
 
   - Define the notation using emoji, symbols, and short labels in a legend.
 
-- Combine symbols to express relationships or order. For example, with `🍎 = A`, `🍏 = B`, and `→ = then`, distinguish `🍎 → 🍏` from `🍏 → 🍎`.
+- Combine symbols to express relationships or order. i.e. with `🍎 = A`, `🍏 = B`, and `→ = then`, distinguish `🍎 → 🍏` from `🍏 → 🍎`.
 
 - Give unknown, impossible, and inapplicable combinations distinct representations where those distinctions matter.
 
