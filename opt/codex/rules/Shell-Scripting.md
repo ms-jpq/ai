@@ -185,9 +185,9 @@
 - Auto allocate file descriptors with `{NAME}`.
 
   ```bash
-  exec {INPUT_FD}< "$FILE"
-  cmd <&"$INPUT_FD"
-  exec {INPUT_FD}<&-
+  exec {FD}< "$FILE"
+  cmd <&"$FD"
+  exec {FD}<&-
   ```
 
 ---
