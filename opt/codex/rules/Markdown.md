@@ -43,3 +43,5 @@
   - @../skills/brief/SKILL.md.
 
   - @../skills/mat/SKILL.md.
+
+  - @../skills/dot/SKILL.md.
