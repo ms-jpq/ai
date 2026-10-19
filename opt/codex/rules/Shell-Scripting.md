@@ -258,6 +258,8 @@
 
 - Never let concurrent work escape the foreground command tree.
 
+  - Keep children in the inherited process group and session.
+
   - Avoid background jobs so failures and signals propagate predictably.
 
   ```bash
