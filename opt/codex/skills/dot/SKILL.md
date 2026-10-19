@@ -57,6 +57,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ---
 
-## Other Representations
+## References
 
 - `./references/path-2-graph.md`.
+
+- `./references/large-dag-visualisation.md`.
