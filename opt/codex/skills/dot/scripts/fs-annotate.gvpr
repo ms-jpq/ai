@@ -33,17 +33,6 @@ BEGIN {
     return descriptor;
   }
 
-  string read_value(string value_path) {
-    int descriptor = open_read(value_path);
-    string value = "";
-    string line;
-    while (strcmp(line = readL(descriptor), "")) {
-      value += line;
-    }
-    closeF(descriptor);
-    return chomp(value);
-  }
-
   obj_t find_subject(graph_t input_graph, string directory, string metadata_root, int incoming) {
     if (!strcmp(directory, metadata_root)) {
       return input_graph;
@@ -63,7 +52,7 @@ BEGIN {
   }
 
   if (ARGC != 3 || (ARGV[0] != "outgoing" && ARGV[0] != "incoming")) {
-    printf(2, "Usage: fs-annotate.gvpr -a \"outgoing|incoming '<root>' '<metadata-list>'\" < topology.gv\n");
+    printf(2, "Usage: fs-annotate.gvpr -a \"outgoing|incoming '<root>' '<metadata>'\" < topology.gv\n");
     exit(2);
   }
 
@@ -72,14 +61,25 @@ BEGIN {
   while (length(metadata_root) > 1 && substr(metadata_root, length(metadata_root) - 1) == "/") {
     metadata_root = substr(metadata_root, 0, length(metadata_root) - 1);
   }
+
+  string values[string];
+  int descriptor = open_read(ARGV[2]);
+  string line;
+  while (strcmp(line = readL(descriptor), "")) {
+    line = chomp(line);
+    int separator = index(line, "=:");
+    if (separator < 0 || separator == length(line) - 2) {
+      continue;
+    }
+    string key = substr(line, 0, separator + 1);
+    values[key] = substr(line, separator + 2);
+  }
+  closeF(descriptor);
 }
 
 BEG_G {
-  int manifest = open_read(ARGV[2]);
   string path;
-
-  while (strcmp(path = readL(manifest), "")) {
-    path = chomp(path);
+  for (values[path]) {
     string filename = basename(path);
     if (filename != ".?*=") {
       continue;
@@ -93,8 +93,6 @@ BEG_G {
       exit(1);
     }
 
-    string value = read_value(path);
-    aset(subject, attribute, value);
+    aset(subject, attribute, values[path]);
   }
-  closeF(manifest);
 }

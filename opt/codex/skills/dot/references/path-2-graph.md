@@ -66,6 +66,8 @@
 
 - `.<attribute>=` stores a DOT attribute's value: `.color=` containing `blue` sets `color=blue`.
 
+  - Ordinary directory names must not contain `=`.
+
 - Files directly under `<ROOT>` set graph attributes, such as `.rankdir=` containing `TB` or `.splines=` containing `ortho`.
 
 - `.x/` holds edge attributes for the relationship to `x`.
@@ -83,7 +85,7 @@ env -C "$ROOT" -- find . -mindepth 1 -name '.*' -prune -or -print > '<chains>.tx
 ```
 
 ```bash
-find "$ROOT" -type f -name '.?*=' | sort > '<metadata>.txt'
+grep --recursive --with-filename --include '.?*=' -e '.' -- "$ROOT" > '<metadata>.txt'
 ARGV=("$DIRECTION" "$ROOT" '<metadata>.txt')
 ../scripts/fs-annotate.gvpr -a "${ARGV[*]@Q}" < '<topology>.gv' > '<annotated>.gv'
 ```
