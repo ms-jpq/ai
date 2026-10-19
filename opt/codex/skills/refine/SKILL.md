@@ -9,6 +9,8 @@ description: Refine prose for the reader's goal and local context.
 
 - Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
 
+- Use @../conform/SKILL.md when prose needs to follow conventions established by references or comparable peers.
+
 ## Artifact (Output)
 
 - Prose that supports the reader's intended understanding, decision, or action while preserving necessary meaning and factual constraints.
