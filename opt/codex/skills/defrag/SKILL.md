@@ -1,37 +1,37 @@
 ---
 name: defrag
-description: A semantics-preserving maintenance pass.
+description: Consolidate fragmented content and semantic duplicates while preserving meaning and behaviour.
 ---
 
 # Defrag
 
-- Use @../op-purpose-formation/SKILL.md when the corpus's purpose or preservation boundary is unclear.
+- Use @../op-purpose-formation/SKILL.md when the purpose or what must be preserved is unclear.
 
-- Use @../op-problem-framing/SKILL.md when the fragmentation problem or its priorities are unclear.
+- Use @../op-problem-framing/SKILL.md when the consequences of fragmentation or their priorities are unclear.
 
-- Use @../op-conceptual-synthesis/SKILL.md when aliases or inconsistent terms need resolution.
+- Use @../op-conceptual-synthesis/SKILL.md when inconsistent terms obscure shared meanings or necessary distinctions.
 
-- Use @../refine/SKILL.md when local prose needs rewriting after placement is settled.
+- Use @../refine/SKILL.md when prose remains unclear after consolidation.
 
-- Use @../refactor/SKILL.md when simplification requires reorganizing responsibilities or flows while preserving required behaviour and contracts.
+- Use @../refactor/SKILL.md when consolidation requires reorganising responsibilities or flows.
 
 - Obtain agreement before changing required behaviour or contracts.
 
 ## Artifact (Output)
 
-- A collocated corpus with canonical regions, repaired references, and consolidated exact duplicates and confirmed aliases.
+- Related content gathered in canonical locations, with repaired references, consolidated semantic duplicates, and consistent terms.
 
 - Preserved meaning, responsibilities, contracts, and flows, with unresolved ambiguities explicit.
 
-- Old-to-new path mappings, deduplications, and required follow-up.
+- Mappings for moved content and any required follow-up.
 
 ## Observation (Input)
 
-- Select a fragmented corpus or a narrower operand: code, prose, configuration, or instructions.
+- Select the fragmented code, prose, configuration, or instructions in scope.
 
-- Inventory each artifact's region, role, terms, and inbound and outbound dependencies.
+- Identify each part's location, role, terms, and dependencies in both directions.
 
-- Identify fragmented clusters, duplicate indexes, broken dependencies, redundant dependencies, and unresolved aliases.
+- Locate scattered related content, semantic duplicates, broken or redundant references, and unresolved aliases.
 
 - Exclude runtime state, generated output, and unrelated material by default.
 
@@ -39,13 +39,15 @@ description: A semantics-preserving maintenance pass.
 
 _Devise an explanation for observations._
 
-- Propose one canonical region for each framed concern and explain how it reduces fragmentation.
+- Propose a canonical location for each concern and explain how it reduces fragmentation.
 
 - Map each proposed move to its destination and affected references.
 
-- Propose deduplication of exact copies only.
+- Propose consolidation of semantic duplicates: equivalent meaning or behaviour under the same scope and conditions, regardless of wording or form.
 
-  - Preserve non-identical material and unresolved alias candidates.
+  - Preserve differences in scope, conditions, certainty, and required behaviour.
+
+  - Retain candidates whose equivalence is unresolved.
 
 - Propose one canonical term per confirmed alias set.
 
@@ -55,11 +57,13 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive which reads and edits become local under the proposed placement.
+- Identify which reads and edits the proposed placement brings together.
 
-- Derive reference updates from the proposed moves, including consumers that depend on the old paths.
+- Derive reference updates for each move, including consumers of the old locations.
 
-- Derive which uses must change under each proposed alias substitution and which distinct meanings must remain untouched.
+- Derive what each proposed consolidation must preserve for every original use.
+
+- Identify which uses each term change affects and which distinct meanings it must preserve.
 
 ## Induction
 
@@ -67,6 +71,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Apply the proposed moves, deduplications, and confirmed term changes one cluster at a time.
 
-- Verify the predicted regions, dependencies, and vocabulary after each cluster.
+- Check the resulting locations, references, and terms against the predictions.
+
+- Check each consolidation against its original uses. Remove duplicates only when the retained form preserves their meaning and behaviour.
 
 - Retain a change only when it reduces fragmentation without changing preserved meaning or behaviour.

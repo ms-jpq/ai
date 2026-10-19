@@ -5,15 +5,27 @@ description: Gather and distil outstanding questions into a structured decision 
 
 # Brief
 
-## Prepare
+## Artifact (Output)
+
+- A structured decision brief whose answers resolve the outstanding decisions with minimal answering effort.
+
+---
+
+## Observation (Input)
 
 - Gather outstanding questions from the conversation and documents in scope.
 
+- Read available evidence and prior resolutions, including the conditions under which they hold.
+
+---
+
+## Abduction
+
+_Devise an explanation for observations._
+
+- Propose which questions need user input and which available evidence or prior answers already resolve.
+
 - Merge semantic duplicates: questions about the same decision under the same conditions.
-
-- Resolve questions from available evidence, prior answers, and their implications before asking the user, including when new questions arise.
-
-- Preserve the conditions of prior resolutions. Reconsider them when conditions change or evidence conflicts.
 
 - Use `../op-conceptual-synthesis/SKILL.md` to unify terminology while preserving distinct decisions.
 
@@ -25,19 +37,31 @@ description: Gather and distil outstanding questions into a structured decision 
 
 ---
 
-## Check
+## Deduction
+
+_Derive consequences of the explanation._
 
 - Account for each original question: retained, answered by evidence, implied by another answer, or irrelevant for a stated reason.
 
-- Check each answer branch for follow-ups that remain necessary.
-
-- Apply `../refine/SKILL.md` to question and option wording.
-
-- Recheck that the refined questions cover the original decisions and preserve viable choices.
+- Derive which decisions each possible answer would resolve and which follow-ups would remain necessary.
 
 ---
 
-## Present
+## Induction
+
+_Test those consequences and provisionally retain or revise the explanation._
+
+- Apply `../refine/SKILL.md` to question and option wording.
+
+- Compare the refined set with the original questions and evidence. Restore missing decisions, conditions, or viable choices.
+
+- As answers arrive or new questions arise, apply existing resolutions and their implications before asking again. Remove resolved follow-ups and revise those still needed.
+
+- Reconsider prior resolutions when their conditions change or evidence conflicts.
+
+---
+
+## Presentation
 
 - Give each question a unique, stable decision label and only the context needed to answer it.
 
@@ -46,8 +70,6 @@ description: Gather and distil outstanding questions into a structured decision 
 - Use free text when predefined choices would distort the question.
 
 - Present the prepared set together in the format below, marking conditional questions.
-
-- As answers arrive, remove resolved follow-ups and revise those still needed.
 
 - Assign option emoji in reverse-rainbow order: 📘📗📒📙📕.
 
