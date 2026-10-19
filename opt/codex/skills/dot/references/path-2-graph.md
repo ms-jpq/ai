@@ -80,7 +80,8 @@
 DIRECTION=outgoing
 ROOT='<ROOT>'
 
-env -C "$ROOT" -- find . -mindepth 1 -name '.*' -prune -or -print > '<chains>.txt'
+env -C "$ROOT" -- find . -mindepth 1 '(' -name '.*' -prune ')' -or -print > '<chains>.txt'
+
 ../scripts/path-2-dot.py "$DIRECTION" < '<chains>.txt' > '<topology>.gv'
 ```
 
