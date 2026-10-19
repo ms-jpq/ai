@@ -9,6 +9,8 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 - Use the operator skill for every layer whose model requires revision.
 
+---
+
 ## Artifact (Output)
 
 - A failure account with the expected outcome, observed outcome, evidence, and affected system.
@@ -27,6 +29,8 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 - A corrective revision, its evidence, and the condition that would reopen the diagnosis.
 
+---
+
 ## Observation (Input)
 
 - Record the expected and observed outcomes, their difference, and the affected system.
@@ -38,6 +42,8 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 - Preserve the evidence needed to reproduce or explain the failure.
 
 - Record the model assumptions and dependencies relevant to the observed failure.
+
+---
 
 ## Abduction
 
@@ -59,6 +65,8 @@ _Devise an explanation for observations._
 
 - Propose a correction to the implementation discrepancy or earliest deficient model layer.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -68,6 +76,8 @@ _Derive consequences of the explanation._
 - Derive changes to the deficient artifact and its dependents.
 
 - Predict evidence that would falsify the diagnosis.
+
+---
 
 ## Induction
 

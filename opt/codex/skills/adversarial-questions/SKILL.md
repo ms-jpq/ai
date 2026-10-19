@@ -5,6 +5,14 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 # Adversarial Questions
 
+- Use @../op-purpose-formation/SKILL.md when the purpose needs clarification.
+
+- Use @../op-problem-framing/SKILL.md to establish or revise the concerns and priorities from which questions are derived.
+
+- Use @../gap-analysis/SKILL.md to discover missing concerns or gaps in question coverage relative to the purpose.
+
+---
+
 ## Goals
 
 - Derive useful questions through `purpose → concerns → questions`, without relying on the user's presence or objections.
@@ -13,17 +21,15 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 - Help the caller address what matters to the purpose, not to prescribe solutions.
 
-- Use @../op-purpose-formation/SKILL.md when the purpose needs clarification.
-
-- Use @../op-problem-framing/SKILL.md to establish or revise the concerns and priorities from which questions are derived.
-
-- Use @../gap-analysis/SKILL.md to discover missing concerns or gaps in question coverage relative to the purpose.
+---
 
 ## Artifact (Output)
 
 - Prioritized questions, each traceable to a concern and its motivating purpose, with that connection stated when not apparent.
 
 - Reusable additions or revisions to the question bank when experience supports them.
+
+---
 
 ## Observation (Input)
 
@@ -32,6 +38,8 @@ description: Derive questions from a purpose and its concerns, building a reusab
 - Read the Question Bank below for candidate mappings, not a checklist to apply wholesale.
 
 - Record what is already known or answered and what remains uncertain about achieving the purpose.
+
+---
 
 ## Abduction
 
@@ -45,6 +53,8 @@ _Devise an explanation for observations._
 
 - Let the concern determine whether to ask about understanding, options, evidence, coordination, simplification, or another response.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -56,6 +66,8 @@ _Derive consequences of the explanation._
 - Check whether the question still matters if the current implementation or proposed solution changes.
 
 - Separate reusable questions arising from the concern from details specific to this situation.
+
+---
 
 ## Induction
 
@@ -73,6 +85,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retire a question for the current work when answered without discarding its reusable form or the underlying concern.
 
+---
+
 ## Application
 
 - Apply as work develops, including before action, after material changes, and before completion. A failure or suspected defect is not required.
@@ -86,6 +100,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Return questions and necessary context, not the deliberation used to generate them. An empty result is valid when no useful question remains.
 
 - Re-invoke `adversarial-questions` as work and evidence change, not to repeat questions awaiting answers.
+
+---
 
 ## Question Bank
 

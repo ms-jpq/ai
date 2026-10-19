@@ -11,11 +11,15 @@ description: Fold accumulated unstructured material into an existing structured 
 
 - Unresolved questions, contradictions, and anything unabsorbed remain explicit.
 
+---
+
 ## Observation (Input)
 
 - Read the existing representation and accumulated material in scope.
 
 - Locate what the current organisation or notation cannot express.
+
+---
 
 ## Abduction
 
@@ -24,6 +28,8 @@ _Devise an explanation for observations._
 - Explain the mismatch and propose changes to organisation or notation.
 
 - Express repeated meaning once, preserving differences in scope, conditions, and certainty.
+
+---
 
 ## Deduction
 
@@ -34,6 +40,8 @@ _Derive consequences of the explanation._
 - Predict which distinctions, ordering, and unresolved conflicts a reader could recover from the revision.
 
 - Identify what the revision would absorb and what would remain.
+
+---
 
 ## Induction
 

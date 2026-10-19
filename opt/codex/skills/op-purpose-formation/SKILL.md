@@ -17,6 +17,8 @@ description: Form and revise the system purpose that guides the remaining operat
 
 - Explicit purpose conflicts, exclusions, and unresolved questions.
 
+---
+
 ## Observation (Input)
 
 - Describe the encountered system, its current behaviour, and its external boundary.
@@ -26,6 +28,8 @@ description: Form and revise the system purpose that guides the remaining operat
 - Record who is affected by the purpose.
 
 - Keep competing purposes distinct until their relationship is established.
+
+---
 
 ## Abduction
 
@@ -37,6 +41,8 @@ _Devise an explanation for observations._
 
 - Identify where each candidate conflicts with commitments or affected parties' interests.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -44,6 +50,8 @@ _Derive consequences of the explanation._
 - Derive observations that would show the system purpose is achieved or contradicted.
 
 - Predict which problems become relevant under the proposed purpose.
+
+---
 
 ## Induction
 
@@ -54,6 +62,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Retain a candidate purpose only when it has observable success conditions and survives those tests.
 
 - Revise the proposed purpose or boundary when evaluation exposes a conflict or gap.
+
+---
 
 ## Agreement
 

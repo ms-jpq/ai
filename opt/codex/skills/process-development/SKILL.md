@@ -5,6 +5,14 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 # Process Development
 
+- Use @../converge/SKILL.md when the process's purpose, concerns, outcome dependencies, or mechanisms need clarification.
+
+- Use @../op-topology-recomposition/SKILL.md during abduction to organize shared intermediate outcomes into stages and isolate residual work into disjoint parts.
+
+- Use @../op-mechanism-alignment/SKILL.md during abduction to propose how each transformation produces its outcomes, distinguishing required steps from replaceable methods.
+
+---
+
 ## Goals
 
 - Discover the common process within varied tasks rather than treating each task as a separate procedure.
@@ -13,7 +21,7 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 - Keep the common core and residual task-specific work disjoint, joining their outcomes only where needed.
 
-- Use @../converge/SKILL.md when the process's purpose, concerns, outcome dependencies, or mechanisms need clarification.
+---
 
 ## Artifact (Output)
 
@@ -33,6 +41,8 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 - Evidence of reuse, preserved outcomes, and improved progress, with untested paths and unresolved bottlenecks explicit.
 
+---
+
 ## Observation (Input)
 
 - Read representative tasks, their required outcomes, inputs, constraints, and existing procedures.
@@ -45,19 +55,19 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 - Seek established processes for the same or analogous problems before inventing one.
 
+---
+
 ## Abduction
 
 _Devise an explanation for observations._
 
 - Propose a common core that explains recurring work, distinguishing genuine commonality from superficial resemblance.
 
-- Use @../op-topology-recomposition/SKILL.md to organize shared intermediate outcomes into stages and isolate residual work into disjoint parts.
-
-- Use @../op-mechanism-alignment/SKILL.md to propose how each transformation produces its outcomes, distinguishing required steps from replaceable methods.
-
 - Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required rather than building exceptions into every shared stage.
 
 - Apply a fork–join lens to widen the pipeline: independent parts proceed together, and each join waits only for its required outcomes, not every outstanding task.
+
+---
 
 ## Deduction
 
@@ -70,6 +80,8 @@ _Derive consequences of the explanation._
 - Predict how a delayed, failed, or retried part affects its dependants and what permits unrelated parts to continue.
 
 - Identify observations that distinguish a missing dependency, an ineffective method, and execution that departs from the specification.
+
+---
 
 ## Induction
 
@@ -87,7 +99,9 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Remove stages, steps, or barriers shown unnecessary for required outcomes. Retain parallelism only when it improves progress without violating constraints.
 
-## Iteration
+---
+
+## Application
 
 - Re-invoke `process-development` when new tasks reveal further commonality, a forced abstraction, or avoidable waiting.
 

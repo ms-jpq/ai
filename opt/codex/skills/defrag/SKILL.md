@@ -17,6 +17,8 @@ description: Consolidate fragmented content and semantic duplicates while preser
 
 - Obtain agreement before changing required behaviour or contracts.
 
+---
+
 ## Artifact (Output)
 
 - Related content gathered in canonical locations, with repaired references, consolidated semantic duplicates, and consistent terms.
@@ -24,6 +26,8 @@ description: Consolidate fragmented content and semantic duplicates while preser
 - Preserved meaning, responsibilities, contracts, and flows, with unresolved ambiguities explicit.
 
 - Mappings for moved content and any required follow-up.
+
+---
 
 ## Observation (Input)
 
@@ -34,6 +38,8 @@ description: Consolidate fragmented content and semantic duplicates while preser
 - Locate scattered related content, semantic duplicates, broken or redundant references, and unresolved aliases.
 
 - Exclude runtime state, generated output, and unrelated material by default.
+
+---
 
 ## Abduction
 
@@ -53,6 +59,8 @@ _Devise an explanation for observations._
 
   - Do not collapse distinct meanings or scopes.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -64,6 +72,8 @@ _Derive consequences of the explanation._
 - Derive what each proposed consolidation must preserve for every original use.
 
 - Identify which uses each term change affects and which distinct meanings it must preserve.
+
+---
 
 ## Induction
 

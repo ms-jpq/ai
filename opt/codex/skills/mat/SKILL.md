@@ -3,6 +3,8 @@ name: mat
 description: Represent a system's state space densely using Markdown tables.
 ---
 
+# Mat
+
 - Establish a dense, parsable representation of the full state space defined by the system's chosen dimensions using Markdown tables.
 
 - Define a compact notation using emoji, symbols, and short labels in a legend, then apply it consistently inside cells to represent the combinations of dimension values.
@@ -11,9 +13,13 @@ description: Represent a system's state space densely using Markdown tables.
 
 - Keep detailed explanations outside the cells.
 
+---
+
 ## Errata
 
 - In interactive documents, avoid inline code, bold, italic, and Markdown links because they interact poorly with Neovim. Use plain text and symbols instead.
+
+---
 
 ## Machine Parsability
 

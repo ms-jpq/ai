@@ -17,6 +17,8 @@ description: Reconcile two system representations while preserving authorized ch
 
 - Use @../op-topology-recomposition/SKILL.md when reconciliation requires revising outcomes, boundaries, or connections between parts.
 
+---
+
 ## Artifact (Output)
 
 - Reconciled representations that preserve authorized changes and required correspondence.
@@ -24,6 +26,8 @@ description: Reconcile two system representations while preserving authorized ch
 - Explicit authorized divergences and unresolved conflicts, with their evidence and disposition.
 
   - Dispositions identify changes by representation and their supporting authority and intent.
+
+---
 
 ## Observation (Input)
 
@@ -46,6 +50,8 @@ description: Reconcile two system representations while preserving authorized ch
 - Record the authority, evidence, and intent available for each difference.
 
 - Prioritize differences that could obstruct the system purpose or mechanism coverage.
+
+---
 
 ## Abduction
 
@@ -79,6 +85,8 @@ _Devise an explanation for observations._
 
 - Explain how the proposed disposition accounts for the difference without losing an authorized change.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -86,6 +94,8 @@ _Derive consequences of the explanation._
 - Derive which claims should change, agree, remain divergent, or remain unresolved after each disposition, and how to check them.
 
 - Derive whether each disposition preserves the system purpose and required mechanism coverage.
+
+---
 
 ## Induction
 

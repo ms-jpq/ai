@@ -7,6 +7,10 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 - Use @../op-topology-recomposition/SKILL.md when a mechanism requires different part boundaries, placement, or connections.
 
+- Use @../op-problem-framing/SKILL.md during induction when the concerns or their priorities need revision.
+
+---
+
 ## Artifact (Output)
 
 - A minimal basis of named mechanisms that covers salient concerns.
@@ -23,6 +27,8 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 - An explicit gap for each salient concern without an understood mechanism.
 
+---
+
 ## Observation (Input)
 
 - Take the framed concerns, priorities, and evidence as inputs.
@@ -34,6 +40,8 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 - Keep an implementation distinct from its intended mechanism model.
 
   - A mechanism describes how an effect is produced, not a part boundary. One mechanism may span parts, and one part may support several mechanisms.
+
+---
 
 ## Abduction
 
@@ -47,6 +55,8 @@ _Devise an explanation for observations._
 
 - Specialize or split a mechanism when its concerns require incompatible effects or preconditions, without assuming separate part boundaries.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -56,6 +66,8 @@ _Derive consequences of the explanation._
 - Predict which concerns remain covered by a shared mechanism and which require distinct ones.
 
 - Predict what evidence would require the mechanism, its mapping, or its concern priority to change.
+
+---
 
 ## Induction
 
@@ -73,4 +85,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Remove a mechanism when testing confirms that its removal preserves required coverage under the stated assumptions.
 
-- Revisit the mechanism mapping when changing the mechanism does not resolve the gap. Use @../op-problem-framing/SKILL.md when the concerns or their priorities need revision.
+- Revisit the mechanism mapping when changing the mechanism does not resolve the gap.

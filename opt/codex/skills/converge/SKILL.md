@@ -11,6 +11,8 @@ description: Iteratively develop and test a shared model of how a system should 
 
 - Model the iteration after convergent functions: repeated application should stabilize the system despite variation between passes.
 
+---
+
 ## Operators
 
 - An operator transforms explicit inputs into an explicit output: `operator(input) → output`.
@@ -46,6 +48,8 @@ description: Iteratively develop and test a shared model of how a system should 
 4. **Mechanism Alignment:** Cultivate a minimal basis of mechanisms that covers salient concerns.
 
    - @../op-mechanism-alignment/SKILL.md
+
+---
 
 ## Application
 

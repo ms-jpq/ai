@@ -15,11 +15,15 @@ description: Give consistent names that semantically compress ideas.
 
   - Unresolved aliases and distinctions that proposed names or model views must preserve.
 
+---
+
 ## Observation (Input)
 
 - Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or inconsistent across representations.
 
 - Collect its uses, counterexamples, neighbouring concepts, and representations.
+
+---
 
 ## Abduction
 
@@ -37,6 +41,8 @@ _Devise an explanation for observations._
 
 - Propose a view of a model that preserves its necessary distinctions while hiding irrelevant detail.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -44,6 +50,8 @@ _Derive consequences of the explanation._
 - Predict how examples, counterexamples, and neighbouring concepts should be classified in relation to the synthesized concept.
 
 - Derive which meanings and distinctions must survive each proposed rename or model view.
+
+---
 
 ## Induction
 

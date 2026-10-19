@@ -9,6 +9,14 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 - Use @../converge/SKILL.md when review requires revising the system purpose, problem frame, or design model.
 
+- Use @../op-topology-recomposition/SKILL.md during abduction to simplify outcome dependencies, boundaries, and flows.
+
+- Use @../op-mechanism-alignment/SKILL.md during abduction to replace special cases with shared mechanisms, existing or proposed, while preserving required effects.
+
+- Use @../op-conceptual-synthesis/SKILL.md during abduction when inconsistent names or obscured distinctions complicate the system.
+
+---
+
 ## Artifact (Output)
 
 - A simpler affected system, with changes implemented and required behaviour, contracts, constraints, and meaning preserved.
@@ -16,6 +24,8 @@ description: Discover and remove unnecessary complexity, implementing and testin
 - Passing tests and checks that distinguish agreed changes from regressions.
 
 - Evidence of reduced complexity or more local, verifiable subsequent changes.
+
+---
 
 ## Observation (Input)
 
@@ -39,6 +49,8 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
   - Distinguish assertions of required behaviour from assertions that merely mirror the current implementation.
 
+---
+
 ## Abduction
 
 _Devise an explanation for observations._
@@ -47,17 +59,13 @@ _Devise an explanation for observations._
 
   - Identify the assumption that makes each candidate necessary before proposing its removal.
 
-- Use @../op-topology-recomposition/SKILL.md to simplify outcome dependencies, boundaries, and flows.
-
-- Use @../op-mechanism-alignment/SKILL.md to replace special cases with shared mechanisms, existing or proposed, while preserving required effects.
-
-- Use @../op-conceptual-synthesis/SKILL.md when inconsistent names or obscured distinctions complicate the system.
-
 - Propose removal, consolidation, replacement, or restructuring, and explain why the simpler alternative still satisfies the requirements.
 
 - Consider leaving the current design unchanged.
 
   - Fewer lines alone do not establish lower complexity.
+
+---
 
 ## Deduction
 
@@ -70,6 +78,8 @@ _Derive consequences of the explanation._
 - Derive tests that would expose a missing responsibility or regression if the proposed removal or replacement were wrong.
 
 - Predict what dependencies, exceptions, coordination, or required context the alternative removes, and what complexity it introduces elsewhere.
+
+---
 
 ## Induction
 

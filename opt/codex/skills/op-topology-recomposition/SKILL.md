@@ -5,7 +5,11 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 # Topology Recomposition
 
+- Use @../op-purpose-formation/SKILL.md when external boundaries need revision.
+
 - Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced, not merely where responsibilities reside or how parts connect.
+
+---
 
 ## Artifact (Output)
 
@@ -16,6 +20,8 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 - An explicit mapping from framed concerns to outcomes and from outcomes to parts, justifying each part's boundary and placement and explaining concerns needing no structural embodiment.
 
 - Explicit cycles, their sources, and their precedence, iteration, or feedback semantics.
+
+---
 
 ## Observation (Input)
 
@@ -29,11 +35,13 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 - Record each cycle, its source, and whether it prevents a required order or represents iteration or feedback.
 
+---
+
 ## Abduction
 
 _Devise an explanation for observations._
 
-- Treat external boundaries as fixed for the pass. Use @../op-purpose-formation/SKILL.md when those boundaries need revision.
+- Treat external boundaries as fixed for the pass.
 
 - Decompose the desired outcome into intermediate outcomes that together suffice to achieve it.
 
@@ -69,6 +77,8 @@ _Devise an explanation for observations._
 
 - Push branches toward callers that own the decision and loops toward operations that own the collection, when this reduces cross-boundary dependencies.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
@@ -80,6 +90,8 @@ _Derive consequences of the explanation._
 - Derive an execution order from precedence dependencies and identify remaining conflicts.
 
 - Derive how each retained cycle advances, terminates, or regulates its state under the proposed structure.
+
+---
 
 ## Induction
 

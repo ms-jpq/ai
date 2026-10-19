@@ -11,15 +11,21 @@ description: Refine prose for the reader's goal and local context.
 
 - Use @../conform/SKILL.md when prose needs to follow conventions established by references or comparable peers.
 
+---
+
 ## Artifact (Output)
 
 - Prose that supports the reader's intended understanding, decision, or action while preserving necessary meaning and factual constraints.
+
+---
 
 ## Observation (Input)
 
 - Select one reader-facing defect per pass.
 
 - Record the current text, the reader's goal, knowledge, and vocabulary.
+
+---
 
 ## Abduction
 
@@ -45,11 +51,15 @@ _Devise an explanation for observations._
 
   - Put reasons, conditions, steps, and outcomes in children.
 
+---
+
 ## Deduction
 
 _Derive consequences of the explanation._
 
 - Predict how the revision changes the reader's interpretation, lookup, or decision without changing necessary meaning.
+
+---
 
 ## Induction
 
@@ -62,6 +72,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Remove absolutes not supported by evidence and hedges not required by uncertainty.
 
 - Re-read the revision in context and retain it only if the predicted reading holds.
+
+---
 
 ## Application
 

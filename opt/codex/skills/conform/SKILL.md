@@ -1,6 +1,6 @@
 ---
 name: conform
-description: Conform code or prose to explicit references or comparable peers without changing behaviour or meaning.
+description: A semantics-preserving transformation toward local conventions, using explicit references or comparable peers.
 ---
 
 # Conform

@@ -5,6 +5,16 @@ description: Gather and distil outstanding questions into a structured decision 
 
 # Brief
 
+- Use @../defrag/SKILL.md during abduction to consolidate scattered questions and semantic duplicates about the same decision under the same conditions.
+
+- Use @../op-conceptual-synthesis/SKILL.md during abduction to unify terminology while preserving distinct decisions.
+
+- Use @../op-topology-recomposition/SKILL.md during abduction to put prerequisite decisions first and mark conditional follow-ups.
+
+- Use @../refine/SKILL.md during induction to refine question and option wording before checking coverage.
+
+---
+
 ## Artifact (Output)
 
 - A structured decision brief whose answers resolve the outstanding decisions with minimal answering effort.
@@ -25,12 +35,6 @@ _Devise an explanation for observations._
 
 - Propose which questions need user input and which available evidence or prior answers already resolve.
 
-- Use @../defrag/SKILL.md to consolidate scattered questions and semantic duplicates about the same decision under the same conditions.
-
-- Use @../op-conceptual-synthesis/SKILL.md to unify terminology while preserving distinct decisions.
-
-- Use @../op-topology-recomposition/SKILL.md to put prerequisite decisions first and mark conditional follow-ups.
-
 - Retain enough questions to resolve every decision that still matters.
 
 - Keep independent decisions separate when combining them would make answering harder.
@@ -50,8 +54,6 @@ _Derive consequences of the explanation._
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
-
-- Use @../refine/SKILL.md to refine question and option wording.
 
 - Compare the refined set with the original questions and evidence. Restore missing decisions, conditions, or viable choices.
 

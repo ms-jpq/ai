@@ -11,17 +11,25 @@ description: Discover consequential omissions relative to a purpose, reassessing
 
 - Use @../op-problem-framing/SKILL.md when a suspected omission requires revising the problem frame or its concerns.
 
+- Use @../op-mechanism-alignment/SKILL.md during abduction when indirect coverage depends on an unclear causal path.
+
+---
+
 ## Artifact (Output)
 
 - Prioritized gaps, each linked to the purpose, its missing coverage, and the consequence of leaving it unresolved.
 
 - Explicit uncertainty where available information cannot establish whether coverage is missing.
 
+---
+
 ## Observation (Input)
 
 - Read the purpose, scope, constraints, and material whose coverage is being examined.
 
 - Identify what is already covered, deliberately excluded, unresolved, or previously dismissed and why.
+
+---
 
 ## Abduction
 
@@ -31,7 +39,9 @@ _Devise an explanation for observations._
 
 - Explain why each candidate is missing coverage rather than another name for something present or a preference for a different solution.
 
-- Consider whether existing provisions cover the need indirectly. Use @../op-mechanism-alignment/SKILL.md when that coverage depends on an unclear causal path.
+- Consider whether existing provisions cover the need indirectly.
+
+---
 
 ## Deduction
 
@@ -42,6 +52,8 @@ _Derive consequences of the explanation._
 - Identify a case or observation that would distinguish missing coverage from adequate coverage.
 
 - Describe the coverage needed without assuming a particular implementation or expanding the purpose.
+
+---
 
 ## Induction
 
@@ -54,6 +66,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Prioritize supported gaps by their consequences, distinguishing them from unverified possibilities.
 
 - Return no gaps when none are supported, without treating that result as proof of completeness.
+
+---
 
 ## Application
 

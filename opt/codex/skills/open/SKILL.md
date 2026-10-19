@@ -3,6 +3,8 @@ name: open
 description: Open focused files, directories, and links only when explicitly invoked by the user.
 ---
 
+# Open
+
 - Invoke this skill only when the user calls `/open` or explicitly asks to open something.
 
 - Open what is currently in focus, not the entire session history.

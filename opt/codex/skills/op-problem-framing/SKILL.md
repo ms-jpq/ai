@@ -5,6 +5,10 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 # Problem Framing
 
+- Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.
+
+---
+
 ## Artifact (Output)
 
 - A working, covering hierarchy of named problems that explains resistance to the system purpose.
@@ -14,6 +18,8 @@ description: Classify a system's obstructing problems and prioritize their conce
   - The classification supplies candidate concerns. The frame prioritizes them for the system.
 
   - Deprioritized concerns remain recorded. Later evaluation may revise their priority or exclude them when they are no longer relevant.
+
+---
 
 ## Observation (Input)
 
@@ -35,6 +41,8 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 - Record current concerns and their candidate relations to the problems.
 
+---
+
 ## Abduction
 
 _Devise an explanation for observations._
@@ -49,7 +57,7 @@ _Devise an explanation for observations._
 
   - State why each concern matters here and why it has its priority.
 
-  - Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.
+---
 
 ## Deduction
 
@@ -60,6 +68,8 @@ _Derive consequences of the explanation._
 - Predict how resolving each problem would advance the system purpose.
 
 - Predict which salient concerns require structural embodiment and which do not.
+
+---
 
 ## Induction
 
