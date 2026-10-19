@@ -4,6 +4,7 @@ from argparse import ArgumentParser, Namespace
 from collections.abc import Iterable, Iterator
 from itertools import pairwise
 from json import dumps
+from locale import strxfrm
 from os import linesep
 from pathlib import PurePosixPath
 from sys import stdin, stdout
@@ -31,10 +32,10 @@ def _dot(lines: Iterable[str], *, incoming: bool) -> Iterator[str]:
 
     yield "digraph {"
     yield linesep
-    for node_id in sorted(nodes):
+    for node_id in sorted(nodes, key=strxfrm):
         yield f"  {dumps(node_id, ensure_ascii=False)};"
         yield linesep
-    for source, target in sorted(edges):
+    for source, target in sorted(edges, key=lambda x: tuple(map(strxfrm, x))):
         stmt = f"  {dumps(source, ensure_ascii=False)} -> {dumps(target, ensure_ascii=False)};"
         yield stmt
         yield linesep

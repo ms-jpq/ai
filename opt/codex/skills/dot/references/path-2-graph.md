@@ -42,7 +42,7 @@
 ## Conversion
 
 ```bash
-../scripts/paths-to-dot.py outgoing < '<chains>.txt' > '<graph>.dot'
+../scripts/path-2-dot.py outgoing < '<chains>.txt' > '<graph>.dot'
 
-../scripts/paths-to-dot.py incoming < '<chains>.txt' > '<graph>.dot'
+../scripts/path-2-dot.py incoming < '<chains>.txt' > '<graph>.dot'
 ```
