@@ -3,7 +3,7 @@ paths:
   - "*.gvpr"
 ---
 
-# Gvpr
+# Graphviz Processing Language
 
 ## Defaults
 
