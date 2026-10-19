@@ -7,14 +7,8 @@ BEGIN {
 
   string dirname(string dirname_path) {
     int separator = rindex(dirname_path, "/");
-    if (separator == 0) {
-      return "/";
-    }
     return separator < 0 ? "." : substr(dirname_path, 0, separator);
   }
-
-  string attributes[string];
-  int seen[string];
 
   string target_key(string directory, int incoming) {
     if (directory == ".") {
@@ -29,6 +23,9 @@ BEGIN {
     string target_id = substr(node_id, 1);
     return incoming ? "edge/" + target_id + "/" + source_id : "edge/" + source_id + "/" + target_id;
   }
+
+  string attributes[string];
+  int seen[string];
 
   void load_metadata(string metadata_file, int incoming) {
     string records[string];
