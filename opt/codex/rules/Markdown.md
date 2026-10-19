@@ -4,7 +4,7 @@
 
 - Separate sections with `---`.
 
-- Reference each Markdown file from a parent or sibling Markdown file using a relative path: `./User-Quirks.md`.
+- Reference each Markdown file from a parent or sibling Markdown file using a relative path: i.e. `./User-Quirks.md`.
 
 - Put configuration and commands in code blocks.
 
@@ -39,5 +39,7 @@
 ---
 
 - See:
+
+  - @../skills/brief/SKILL.md.
 
   - @../skills/mat/SKILL.md.
