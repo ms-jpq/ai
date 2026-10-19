@@ -32,7 +32,7 @@
 
   - Reject candidates that lose required nodes, relationships, or arrow meaning.
 
-- Present the tested candidates' Pareto frontier as viewer tabs, labelled with settings, scores, and tradeoffs.
+- Present the tested candidates' _Pareto frontier_ as viewer tabs, labelled with settings, scores, and tradeoffs.
 
   - Keep candidates for which no other is at least as good on every selected objective and better on at least one.
 
