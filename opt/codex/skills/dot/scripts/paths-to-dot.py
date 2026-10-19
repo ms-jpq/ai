@@ -19,26 +19,27 @@ def _chains(lines: Iterable[str]) -> Iterator[tuple[str, ...]]:
 
 
 def _dot(lines: Iterable[str], *, incoming: bool) -> Iterator[str]:
-    nodes: dict[str, None] = {}
-    edges: dict[tuple[str, str], None] = {}
+    nodes: set[str] = set()
+    edges: set[tuple[str, str]] = set()
 
     for parts in _chains(lines):
-        nodes.update(dict.fromkeys(parts))
+        nodes.update(parts)
         edges.update(
-            dict.fromkeys(
-                (target, source) if incoming else (source, target)
-                for source, target in pairwise(parts)
-            )
+            (target, source) if incoming else (source, target)
+            for source, target in pairwise(parts)
         )
 
-    yield f"digraph paths {{{linesep}"
-    for node_id in nodes:
-        yield f"  {dumps(node_id, ensure_ascii=False)};{linesep}"
-    for source, target in edges:
-        yield (
-            f"  {dumps(source, ensure_ascii=False)} -> {dumps(target, ensure_ascii=False)};{linesep}"
-        )
-    yield f"}}{linesep}"
+    yield "digraph {"
+    yield linesep
+    for node_id in sorted(nodes):
+        yield f"  {dumps(node_id, ensure_ascii=False)};"
+        yield linesep
+    for source, target in sorted(edges):
+        stmt = f"  {dumps(source, ensure_ascii=False)} -> {dumps(target, ensure_ascii=False)};"
+        yield stmt
+        yield linesep
+    yield "}"
+    yield linesep
 
 
 def _parse_args() -> Namespace:
