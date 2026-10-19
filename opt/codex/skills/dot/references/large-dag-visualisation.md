@@ -20,6 +20,20 @@
 
 ## Layout
 
+- Generate multiple candidate layouts in one step and expose them as tabs in the viewer.
+
+  - Label each tab with its layout settings and crossing count for comparison.
+
+- Minimise the **crossing count** reported by `dot -v`, while preserving dependency direction and readability.
+
+  ```bash
+  ../scripts/dot-diagnostics.sh < '<graph>.gv' | tee -- '<layout>.log' | grep -E -e '^mincross .* crossings'
+  ```
+
+  - The count measures rank-order crossings before edge routing, not exact intersections in the rendered graph.
+
+  - Inspect promising variants for overlapping edge tracks, label collisions, and crossing hotspots.
+
 - Prefer top-to-bottom dependency flow for vertical scrolling.
 
 - Define arrow direction so prerequisites and dependants are unambiguous.
@@ -69,13 +83,3 @@
 - Check readability and responsiveness against the requirements above using 250 nodes with long chains, broad fan-out, and shared dependencies.
 
   - Check that highlighting distinguishes edges at crossings and along shared tracks.
-
-- Compare layout variants using the **crossing count** reported by `dot -v`.
-
-  ```bash
-  ../scripts/dot-diagnostics.sh < '<graph>.gv' | tee -- '<layout>.log' | grep -E -e '^mincross .* crossings'
-  ```
-
-  - The count measures rank-order crossings before edge routing, not exact intersections in the rendered graph.
-
-  - Inspect promising variants for overlapping edge tracks, label collisions, and crossing hotspots.
