@@ -22,7 +22,7 @@
 
 ## File System
 
-- Use symlinks to represent shared nodes: a/x and b/x can both point to the same x.
+- Use relative symlinks to represent shared nodes: a/x and b/x can both point to the same x.
 
   ```bash
   mkdir --parents -- a b x
@@ -42,7 +42,44 @@
 ## Conversion
 
 ```bash
-../scripts/path-2-dot.py outgoing < '<chains>.txt' > '<graph>.dot'
+../scripts/path-2-dot.py outgoing < '<chains>.txt' > '<topology>.gv'
 
-../scripts/path-2-dot.py incoming < '<chains>.txt' > '<graph>.dot'
+../scripts/path-2-dot.py incoming < '<chains>.txt' > '<topology>.gv'
 ```
+
+---
+
+## Extensions
+
+- Filesystem metadata convention:
+
+  ```text
+  a/
+  ├── .label=
+  ├── .color=
+  ├── x → ../x
+  └── .x/
+      ├── .label=
+      └── .style=
+  ```
+
+- `.<attribute>=` stores a DOT attribute's value: `.color=` containing `blue` sets `color=blue`.
+
+- `.x/` holds edge attributes for the relationship to `x`.
+
+- Skip hidden entries and their contents when extracting topology:
+
+  ```bash
+  env -C '<ROOT>' -- find . -mindepth 1 -name '.*' -prune -or -print > '<chains>.txt'
+  ```
+
+- Use the same adjacency direction for both passes:
+
+  ```bash
+  DIRECTION=outgoing
+
+  find '<ROOT>' -type f -name '.?*=' | sort > '<metadata>.txt'
+  env -C '<ROOT>' -- find . -mindepth 1 -name '.*' -prune -or -print | ../scripts/path-2-dot.py "$DIRECTION" > '<topology>.gv'
+
+  ../scripts/metadata-to-dot.gvpr -a "$DIRECTION" -a "'<metadata>.txt'" < '<topology>.gv' > '<annotated>.gv'
+  ```
