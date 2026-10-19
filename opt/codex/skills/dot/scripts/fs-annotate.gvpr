@@ -24,10 +24,11 @@ BEGIN {
     return incoming ? "edge/" + target_id + "/" + source_id : "edge/" + source_id + "/" + target_id;
   }
 
+  string SEPARATOR = "=:";
   string attributes[string];
   int seen[string];
 
-  void load_metadata(string metadata_file, int incoming) {
+  void load_metadata(int incoming, string metadata_file) {
     string records[string];
     int descriptor = openF(metadata_file, "r");
     if (descriptor < 0) {
@@ -39,12 +40,12 @@ BEGIN {
       if (substr(line, length(line) - 1) == "\n") {
         line = substr(line, 0, length(line) - 1);
       }
-      int separator = index(line, "=:");
+      int separator = index(line, SEPARATOR);
       if (separator < 0) {
         continue;
       }
       string key = substr(line, 0, separator + 1);
-      records[key] = substr(line, separator + 2);
+      records[key] = substr(line, separator + length(SEPARATOR));
     }
     closeF(descriptor);
     string path;
@@ -56,7 +57,7 @@ BEGIN {
       string attribute = substr(filename, 1, length(filename) - 2);
       string directory = dirname(path);
       string target = target_key(directory, incoming);
-      attributes[target] += attribute + "=:" + records[path] + "\n";
+      attributes[target] += attribute + SEPARATOR + records[path] + "\n";
     }
   }
 
@@ -69,8 +70,8 @@ BEGIN {
     int count = tokens(attributes[key], lines, "\n");
     int i;
     for (i = 0; i < count; i++) {
-      int separator = index(lines[i], "=:");
-      aset(subject, substr(lines[i], 0, separator), substr(lines[i], separator + 2));
+      int separator = index(lines[i], SEPARATOR);
+      aset(subject, substr(lines[i], 0, separator), substr(lines[i], separator + length(SEPARATOR)));
     }
   }
 
@@ -80,7 +81,7 @@ BEGIN {
   }
 
   int incoming = ARGV[0] == "incoming";
-  load_metadata(ARGV[1], incoming);
+  load_metadata(incoming, ARGV[1]);
 }
 
 BEG_G {
