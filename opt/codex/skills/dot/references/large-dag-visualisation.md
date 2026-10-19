@@ -28,11 +28,11 @@
 
 - Conduct parallel trials of layout settings and graph-processing passes against the same graph, task, and constraints.
 
-  - Choose measurable objectives before comparing candidates.
+  - Consider the concerns below, then retain the measures that help distinguish useful views.
 
   - Reject candidates that lose required nodes, relationships, or arrow meaning.
 
-- Present the tested candidates' _Pareto frontier_ as viewer tabs, labelled with settings, scores, and tradeoffs.
+- Present the tested candidates' **Pareto frontier** as viewer tabs, labelled with settings, scores, and tradeoffs.
 
   - Keep candidates for which no other is at least as good on every selected objective and better on at least one.
 
@@ -42,31 +42,25 @@
 
 ### Readability Considerations
 
-- Capture diagnostics once per candidate using its trial settings, then query the saved logs:
-
-  ```bash
-  dot -v < '<graph>.gv' > /dev/null 2> '<layout>.log'
-
-  edgepaint -v -random_seed=42 -color_scheme=dark28 -angle=89 '<positioned>.gv' > /dev/null 2> '<colour>.log'
-  ```
-
-- The positioned graph must contain the candidate's node positions and routed edge paths.
-
-- Use the same measurement definitions, Graphviz version, palette, and conflict threshold across trials.
-
 - Notation: 📉 minimise, 📈 maximise, ? unmeasured, N/A inapplicable.
 
-| Concern          | Aim | Log query                                                   |
+| Concern          | Aim | Example assessment                                          |
 | ---------------- | --- | ----------------------------------------------------------- |
 | Crossings        | 📉  | `grep -E -e '^mincross .* crossings' < '<layout>.log'`      |
 | Edge conflicts   | 📉  | `grep -F -e 'The edge conflict graph has' < '<colour>.log'` |
 | Edge distinction | 📈  | `grep -F -e 'final color_diff=' < '<colour>.log'`           |
+| Command runtime  | 📉  | `/usr/bin/time -f '%e' -o '<timing>.log' <command>`         |
+| ...              | ... | ...                                                         |
 
-- Add measures only with executable collection commands, defined readouts, and comparable units.
+- These are examples, not a requirement to implement every measurement.
 
-  - Record missing diagnostics as ?, never zero or a passing score.
+  - Record unmeasured concerns as ?.
 
-- Inspect crossing angles, bends, overlapping tracks, occlusion, structural clarity, navigation, and task performance until executable measurements exist.
+  - Prune ranking objectives when trials show they are redundant, unreliable, or do not help distinguish useful views.
+
+  - Retain the queries and evidence so those decisions can be revisited on different graphs.
+
+- Inspect unmeasured concerns visually. Use only comparable measured scores for dominance comparisons.
 
 ---
 
@@ -113,3 +107,25 @@
 - Check readability and responsiveness against the requirements above using 250 nodes with long chains, broad fan-out, and shared dependencies.
 
   - Check that highlighting distinguishes edges at crossings and along shared tracks.
+
+---
+
+## Diagnostic Examples
+
+- Capture diagnostics once per candidate using its trial settings, then query the saved logs:
+
+  ```bash
+  dot -v < '<graph>.gv' > /dev/null 2> '<layout>.log'
+
+  edgepaint -v -random_seed=42 -color_scheme=dark28 -angle=89 '<positioned>.gv' > /dev/null 2> '<colour>.log'
+  ```
+
+- The positioned graph must contain the candidate's node positions and routed edge paths.
+
+- GNU `time` records elapsed seconds with `%e`:
+
+  ```bash
+  /usr/bin/time -f '%e' -o '<timing>.log' dot < '<graph>.gv' > /dev/null
+  ```
+
+- Use the same measurement definitions, Graphviz version, palette, and conflict threshold across trials.
