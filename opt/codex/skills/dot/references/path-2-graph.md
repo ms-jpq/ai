@@ -86,8 +86,9 @@ env -C "$ROOT" -- find . -mindepth 1 -name '.*' -prune -or -print > '<chains>.tx
 
 ```bash
 env -C "$ROOT" -- grep --recursive --with-filename --include '.?*=' -e '.' > '<metadata>.txt'
-ARGV=("$DIRECTION" '<metadata>.txt')
-../scripts/fs-annotate.gvpr -a "${ARGV[*]@Q}" < '<topology>.gv' > '<annotated>.gv'
+exec {METADATA_FD}< '<metadata>.txt'
+../scripts/fs-annotate.gvpr -a "$DIRECTION /dev/fd/$METADATA_FD" < '<topology>.gv' > '<annotated>.gv'
+exec {METADATA_FD}<&-
 ```
 
 - For shared styling, run a gvpr pass before loading metadata so individual attributes can override it.
