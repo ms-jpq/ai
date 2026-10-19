@@ -4,9 +4,17 @@
 
 - Reuse the viewer across graphs supplied in a Graphviz output format.
 
-  - Enrich the graph before rendering through composable gvpr filter passes for labels, source URIs, classes, and other attributes.
+  - Compose Graphviz tools to inspect, filter, transform, and enrich the graph before rendering.
 
-  - See `../scripts/*` for conversion and annotation scripts.
+    - List executables installed by the Graphviz Debian package:
+
+      ```bash
+      dpkg-query --listfiles graphviz | grep -E -e '/bin/'
+      ```
+
+    - Use gvpr scripts when custom filter or annotation passes are useful, such as adding labels, source URIs, classes, and other attributes.
+
+      - See `../scripts/*` for local conversion and annotation scripts.
 
 ---
 
