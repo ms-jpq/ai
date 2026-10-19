@@ -39,13 +39,13 @@ _Devise an explanation for observations._
 
 - Compare candidate purposes by how they account for declared and unmet intentions.
 
-- Identify where each candidate conflicts with commitments or affected parties' interests.
-
 ---
 
 ## Deduction
 
 _Derive consequences of the explanation._
+
+- Derive where each proposed purpose would conflict with commitments or affected parties' interests.
 
 - Derive observations that would show the system purpose is achieved or contradicted.
 

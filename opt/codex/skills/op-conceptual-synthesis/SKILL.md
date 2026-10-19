@@ -23,6 +23,8 @@ description: Give consistent names that semantically compress ideas.
 
 - Collect its uses, counterexamples, neighbouring concepts, and representations.
 
+- Search the domain and adjacent disciplines for existing concepts, terms, and models that may subsume the distinction.
+
 ---
 
 ## Abduction
@@ -32,8 +34,6 @@ _Devise an explanation for observations._
 - Define the concept before naming it.
 
   - State its scope, exclusions, relations, and distinctions that must survive.
-
-- Search the domain and adjacent disciplines for existing concepts, terms, and models that may subsume the distinction.
 
 - Coin or revise a concise term that carries the distinction.
 

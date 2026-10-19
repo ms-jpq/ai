@@ -33,6 +33,8 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 - Record which outcomes the current parts achieve and which concerns they address.
 
+- Identify which current boundaries or flows force a concern to be understood across several parts.
+
 - Record each cycle, its source, and whether it prevents a required order or represents iteration or feedback.
 
 ---
@@ -48,8 +50,6 @@ _Devise an explanation for observations._
   - Specify what must hold at each intermediate outcome before prescribing how to achieve it.
 
   - Distinguish necessary dependencies from incidental sequencing.
-
-- Identify which boundaries or flows force a concern to be understood across several parts.
 
 - Organize parts around those outcomes by exploring topology changes, including:
 

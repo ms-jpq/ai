@@ -9,9 +9,9 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 - Use @../converge/SKILL.md when review requires revising the system purpose, problem frame, or design model.
 
-- Use @../op-topology-recomposition/SKILL.md during abduction to simplify outcome dependencies, boundaries, and flows.
+- Use @../op-topology-recomposition/SKILL.md during abduction to propose simpler outcome dependencies, boundaries, and flows.
 
-- Use @../op-mechanism-alignment/SKILL.md during abduction to replace special cases with shared mechanisms, existing or proposed, while preserving required effects.
+- Use @../op-mechanism-alignment/SKILL.md during abduction to propose shared mechanisms in place of special cases while preserving required effects.
 
 - Use @../op-conceptual-synthesis/SKILL.md during abduction when inconsistent names or obscured distinctions complicate the system.
 

@@ -27,7 +27,7 @@ _Devise an explanation for observations._
 
 - Explain the mismatch and propose changes to organisation or notation.
 
-- Express repeated meaning once, preserving differences in scope, conditions, and certainty.
+- Propose a representation that expresses repeated meaning once, preserving differences in scope, conditions, and certainty.
 
 ---
 

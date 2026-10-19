@@ -49,14 +49,6 @@ description: Reconcile two system representations while preserving authorized ch
 
 - Record the authority, evidence, and intent available for each difference.
 
-- Prioritize differences that could obstruct the system purpose or mechanism coverage.
-
----
-
-## Abduction
-
-_Devise an explanation for observations._
-
 - For each difference, identify which representation changed:
 
   - Neither changed from a common base.
@@ -68,6 +60,14 @@ _Devise an explanation for observations._
   - Both changed independently from a common base.
 
   - No common base is known.
+
+- Prioritize differences that could obstruct the system purpose or mechanism coverage.
+
+---
+
+## Abduction
+
+_Devise an explanation for observations._
 
 - Name the reconciliation disposition:
 
