@@ -1,11 +1,4 @@
----
-paths:
-  - "*.md"
----
-
-# README Style
-
-README files explain **what** and **why**.
+# Markdown
 
 ## Writing
 
