@@ -27,7 +27,7 @@ _Devise an explanation for observations._
 
 - Propose a source-to-DOT mapping that preserves identity and relationship meaning.
 
-- Resolve ambiguous source conventions before encoding them. A directory parent, a symlink target, and a dependency are different relationships.
+  - Resolve ambiguous source conventions before encoding them. A directory parent, a symlink target, and a dependency are different relationships.
 
 - When a visualisation is wanted, choose layout and styling separately from the graph's topology.
 

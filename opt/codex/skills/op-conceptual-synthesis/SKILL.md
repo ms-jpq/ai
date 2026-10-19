@@ -37,7 +37,7 @@ _Devise an explanation for observations._
 
 - Coin or revise a concise term that carries the distinction.
 
-- Propose a consistent mapping of the term, definition, and constraint across each relevant representation.
+  - Propose a consistent mapping of the term, definition, and constraint across each relevant representation.
 
 - Propose a view of a model that preserves its necessary distinctions while hiding irrelevant detail.
 

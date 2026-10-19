@@ -49,9 +49,9 @@ _Devise an explanation for observations._
 
 - Propose a working hierarchy that explains observed resistance to the system purpose.
 
-- Distinguish independent, coupled, and nested problems.
+  - Distinguish independent, coupled, and nested problems.
 
-- Treat prior art as a candidate frame, not a borrowed answer.
+  - Treat prior art as a candidate frame, not a borrowed answer.
 
 - Enumerate and prioritize the concerns implied by each problem.
 

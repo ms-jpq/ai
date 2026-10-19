@@ -47,11 +47,11 @@ _Devise an explanation for observations._
 
 - Propose a canonical location for each concern and explain how it reduces fragmentation.
 
-- Nest related elements under a shared parent to make their relationship explicit.
+  - Nest related elements under a shared parent to make their relationship explicit.
 
-  - For example, declarations in a namespace or supporting bullets beneath a shared point.
+    - For example, declarations in a namespace or supporting bullets beneath a shared point.
 
-- Map each proposed move to its destination and affected references.
+  - Map each proposed move to its destination and affected references.
 
 - Propose consolidation of semantic duplicates: equivalent meaning or behaviour under the same scope and conditions, regardless of wording or form.
 

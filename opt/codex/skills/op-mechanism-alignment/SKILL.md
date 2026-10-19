@@ -49,7 +49,7 @@ _Devise an explanation for observations._
 
 - Explore candidate mechanisms by reusing, adapting, combining, or inventing them.
 
-- Explain how each candidate would produce its intended effects under the proposed assumptions.
+  - Explain how each candidate would produce its intended effects under the proposed assumptions.
 
 - Generalize a mechanism when one causal path addresses several concerns, without assuming their parts must merge.
 
@@ -75,9 +75,9 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the derived effects against the system and its intended model.
 
-- Retain a mechanism only when its effects address its mapped concerns under its stated assumptions.
+  - Test shared mechanisms across their mapped concerns, including cases where satisfying one could impair another.
 
-- Test shared mechanisms across their mapped concerns, including cases where satisfying one could impair another.
+- Retain a mechanism only when its effects address its mapped concerns under its stated assumptions.
 
 - Specialize, split, or replace a mechanism when evaluation exposes incompatible effects or preconditions.
 

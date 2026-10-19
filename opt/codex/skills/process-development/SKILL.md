@@ -63,7 +63,7 @@ _Devise an explanation for observations._
 
 - Propose a common core that explains recurring work, distinguishing genuine commonality from superficial resemblance.
 
-- Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required rather than building exceptions into every shared stage.
+  - Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required rather than building exceptions into every shared stage.
 
 - Apply a fork–join lens to widen the pipeline: independent parts proceed together, and each join waits only for its required outcomes, not every outstanding task.
 
@@ -95,7 +95,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Revise boundaries, dependencies, or methods where the comparison exposes a defect. Correct execution errors without automatically changing the specification.
 
-- Test revisions against previously supported cases and new variations to distinguish reusable stages from a process fitted to one task.
+  - Test revisions against previously supported cases and new variations to distinguish reusable stages from a process fitted to one task.
 
 - Remove stages, steps, or barriers shown unnecessary for required outcomes. Retain parallelism only when it improves progress without violating constraints.
 

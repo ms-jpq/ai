@@ -37,7 +37,7 @@ _Devise an explanation for observations._
 
 - Retain enough questions to resolve every decision that still matters.
 
-- Keep independent decisions separate when combining them would make answering harder.
+  - Keep independent decisions separate when combining them would make answering harder.
 
 ---
 
@@ -59,7 +59,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - As answers arrive or new questions arise, apply existing resolutions and their implications before asking again. Remove resolved follow-ups and revise those still needed.
 
-- Reconsider prior resolutions when their conditions change or evidence conflicts.
+  - Reconsider prior resolutions when their conditions change or evidence conflicts.
 
 ---
 
@@ -69,11 +69,11 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Explain what each option changes and whether to choose one or several.
 
-- Use free text when predefined choices would distort the question.
+  - Use free text when predefined choices would distort the question.
 
 - Present the prepared set together in the format below, marking conditional questions.
 
-- Assign option emoji in reverse-rainbow order: 📘📗📒📙📕.
+  - Assign option emoji in reverse-rainbow order: 📘📗📒📙📕.
 
 ```markdown
 # 📋 User Input: <Topic>

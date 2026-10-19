@@ -37,9 +37,9 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 - Collect evidence from the system, its intended model, and relevant decisions.
 
-- Map model and system differences without changing either representation.
+  - Preserve the evidence needed to reproduce or explain the failure.
 
-- Preserve the evidence needed to reproduce or explain the failure.
+- Map model and system differences without changing either representation.
 
 - Record the model assumptions and dependencies relevant to the observed failure.
 
@@ -89,4 +89,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retain the diagnosis only when it explains the failure and its correction holds.
 
-- Reopen the diagnosis when later evidence contradicts it or the failure recurs.
+  - Reopen the diagnosis when later evidence contradicts it or the failure recurs.

@@ -37,15 +37,15 @@ description: Reconcile two system representations while preserving authorized ch
 
 - Map corresponding claims, parts, relations, and constraints.
 
-- Classify the correspondence:
+  - Classify the correspondence:
 
-  - Both agree.
+    - Both agree.
 
-  - One is absent.
+    - One is absent.
 
-  - They disagree.
+    - They disagree.
 
-  - Their correspondence is unknown.
+    - Their correspondence is unknown.
 
 - Record the authority, evidence, and intent available for each difference.
 
@@ -83,7 +83,7 @@ _Devise an explanation for observations._
 
 - State the permission, evidence, and intended correspondence supporting the disposition. Defer when permission or intent remains unresolved.
 
-- Explain how the proposed disposition accounts for the difference without losing an authorized change.
+  - Explain how the proposed disposition accounts for the difference without losing an authorized change.
 
 ---
 

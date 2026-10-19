@@ -39,7 +39,7 @@ _Devise an explanation for observations._
 
 - Explain why each candidate is missing coverage rather than another name for something present or a preference for a different solution.
 
-- Consider whether existing provisions cover the need indirectly.
+  - Consider whether existing provisions cover the need indirectly.
 
 ---
 
@@ -49,7 +49,7 @@ _Derive consequences of the explanation._
 
 - Predict what becomes impossible, unreliable, or materially worse if the suspected gap remains.
 
-- Identify a case or observation that would distinguish missing coverage from adequate coverage.
+  - Identify a case or observation that would distinguish missing coverage from adequate coverage.
 
 - Describe the coverage needed without assuming a particular implementation or expanding the purpose.
 

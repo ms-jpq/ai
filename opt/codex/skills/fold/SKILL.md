@@ -49,8 +49,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Apply the proposed changes and compare the result with both inputs.
 
-- Verify that the revision preserves meaning and uncertainty without adding unsupported claims.
+  - Verify that the revision preserves meaning and uncertainty without adding unsupported claims.
 
-- Correct lost distinctions and unnecessary complexity.
+  - Correct lost distinctions and unnecessary complexity.
 
 - Remove only what is verified as represented in the revision. Retain the rest.

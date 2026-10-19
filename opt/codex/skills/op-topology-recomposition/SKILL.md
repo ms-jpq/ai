@@ -27,11 +27,11 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 - Take the framed concerns, system purpose, desired outcome, and external boundary as inputs.
 
-- When invoked independently, state the concerns and constraints the topology must accommodate.
+  - When invoked independently, state the concerns and constraints the topology must accommodate.
 
 - Record the affected system's parts, boundaries, containment, flows, and ordering constraints.
 
-- Record which outcomes the current parts achieve and which concerns they address.
+  - Record which outcomes the current parts achieve and which concerns they address.
 
 - Identify which current boundaries or flows force a concern to be understood across several parts.
 

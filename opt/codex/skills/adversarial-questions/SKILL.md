@@ -47,11 +47,11 @@ _Devise an explanation for observations._
 
 - Propose what needs to be understood or decided about the framed concerns, using their priorities to focus the questions.
 
+  - Let the concern determine whether to ask about understanding, options, evidence, coordination, simplification, or another response.
+
 - Derive questions from consequential gaps and known concerns to help the caller address them. Missing coverage is not a prerequisite for questioning.
 
 - Adapt relevant bank entries and generate questions where the bank provides no suitable mapping.
-
-- Let the concern determine whether to ask about understanding, options, evidence, coordination, simplification, or another response.
 
 ---
 
@@ -61,7 +61,7 @@ _Derive consequences of the explanation._
 
 - Predict how plausible answers would change understanding, a decision, or an action relevant to the concern.
 
-- Identify what information would distinguish those answers and whether it is already available.
+  - Identify what information would distinguish those answers and whether it is already available.
 
 - Check whether the question still matters if the current implementation or proposed solution changes.
 
@@ -83,7 +83,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retain useful mappings in the Question Bank with their motivating purposes, concerns, and applicability conditions.
 
-- Retire a question for the current work when answered without discarding its reusable form or the underlying concern.
+  - Retire a question for the current work when answered without discarding its reusable form or the underlying concern.
 
 ---
 

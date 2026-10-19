@@ -69,7 +69,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the predicted outcome against competing readings, factual constraints, and the reader's goal.
 
-- Correct unsupported absolutes and unnecessary hedges exposed by the check.
+  - Correct unsupported absolutes and unnecessary hedges exposed by the check.
 
 - Re-read the revision in context and retain it only if the predicted reading holds.
 

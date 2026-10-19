@@ -25,7 +25,7 @@ description: Form and revise the system purpose that guides the remaining operat
 
 - Record declared intentions, existing commitments, and unmet intentions.
 
-- Record who is affected by the purpose.
+  - Record who is affected by the purpose.
 
 - Keep competing purposes distinct until their relationship is established.
 
@@ -37,7 +37,7 @@ _Devise an explanation for observations._
 
 - Propose a system purpose that explains why the system should change or be preserved.
 
-- Compare candidate purposes by how they account for declared and unmet intentions.
+  - Compare candidate purposes by how they account for declared and unmet intentions.
 
 ---
 

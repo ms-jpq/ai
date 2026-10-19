@@ -7,7 +7,7 @@ description: A semantics-preserving transformation toward local conventions, usi
 
 - `conform [src…] dst` transforms the destination using explicit sources or, when omitted, its closest comparable peers.
 
-- Sources and destinations may be functions, modules, documents, or passages. Change only the destination.
+  - Sources and destinations may be functions, modules, documents, or passages. Change only the destination.
 
 - Use @../op-purpose-formation/SKILL.md when the destination's purpose or preservation boundary is unclear.
 
@@ -31,7 +31,7 @@ description: A semantics-preserving transformation toward local conventions, usi
 
 - Read the destination, applicable rules, and explicit sources.
 
-- When sources are omitted, inspect peers with comparable roles and scope. Prefer relevant peers over mere filesystem proximity.
+  - When sources are omitted, inspect peers with comparable roles and scope. Prefer relevant peers over mere filesystem proximity.
 
 - Map corresponding roles and conventions in naming, structure, idioms, terminology, references, and formatting.
 
@@ -47,7 +47,7 @@ _Devise an explanation for observations._
 
 - Prefer explicit sources over inferred conventions, subject to applicable rules and semantic preservation.
 
-- Resolve conflicting examples from their context and repeated patterns. Leave unsupported conventions unresolved rather than copying isolated quirks.
+  - Resolve conflicting examples from their context and repeated patterns. Leave unsupported conventions unresolved rather than copying isolated quirks.
 
 - Propose changes that resolve supported inconsistencies while preserving necessary differences.
 
@@ -73,7 +73,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the predictions against the references and the original destination.
 
-- Run relevant checks for code changes. For prose, verify that claims, conditions, and uncertainty survive the revision.
+  - Run relevant checks for code changes. For prose, verify that claims, conditions, and uncertainty survive the revision.
 
 - Retain a change only when it achieves the predicted conformity without changing required semantics.
 

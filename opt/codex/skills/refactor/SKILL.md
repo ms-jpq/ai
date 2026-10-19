@@ -39,7 +39,7 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 - Inspect entry points, dependencies, branches, repeated transformations, and exceptions for complexity whose necessity is unclear.
 
-- Identify the requirement each candidate serves and the consumers that depend on it.
+  - Identify the requirement each candidate serves and the consumers that depend on it.
 
 - Select one supported simplification opportunity per pass.
 
@@ -91,7 +91,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Run the affected tests, adding or updating those derived above, alongside applicable static and contract checks.
 
-- Compare results with the derived expectations and reject unexplained differences.
+  - Compare results with the derived expectations and reject unexplained differences.
 
 - Reject reductions that merely relocate complexity across callers, configuration, instructions, or operational work when comparing the affected system.
 
