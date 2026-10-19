@@ -20,7 +20,7 @@
 
 ## Layout
 
-- Generate multiple candidate layouts in one step and expose them as tabs in the viewer.
+- Conduct parallel trials of layout settings and graph-processing passes, then expose distinct candidates as tabs in the viewer.
 
   - Label each tab with its layout settings and crossing count for comparison.
 
@@ -53,6 +53,8 @@
   - Preserve ordinary wheel scrolling. Use a modifier or explicit controls for zoom.
 
 - Find a node by identifier or label and bring it into view.
+
+- Support selecting multiple nodes and adding or removing nodes from the selection.
 
 - Link node labels to their source URIs.
 
