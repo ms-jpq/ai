@@ -85,7 +85,7 @@ env -C "$ROOT" -- find . -mindepth 1 -name '.*' -prune -or -print > '<chains>.tx
 ```
 
 ```bash
-env -C "$ROOT" -- grep --recursive --with-filename --include '.?*=' -e '.' -- | sed -E -e 's/\r$//' > '<metadata>.txt'
+env -C "$ROOT" -- grep --recursive --with-filename --include '.?*=' -e '.' > '<metadata>.txt'
 ARGV=("$DIRECTION" '<metadata>.txt')
 ../scripts/fs-annotate.gvpr -a "${ARGV[*]@Q}" < '<topology>.gv' > '<annotated>.gv'
 ```
