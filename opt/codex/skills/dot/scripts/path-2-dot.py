@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser, Namespace
 from collections.abc import Iterable, Iterator
-from itertools import pairwise
+from itertools import chain, pairwise, repeat
 from json import dumps
 from locale import strxfrm
 from os import linesep
@@ -31,16 +31,12 @@ def _dot(lines: Iterable[str], *, incoming: bool) -> Iterator[str]:
         )
 
     yield "digraph {"
-    yield linesep
     for node_id in sorted(nodes, key=strxfrm):
         yield f"  {dumps(node_id, ensure_ascii=False)};"
-        yield linesep
     for source, target in sorted(edges, key=lambda x: tuple(map(strxfrm, x))):
         stmt = f"  {dumps(source, ensure_ascii=False)} -> {dumps(target, ensure_ascii=False)};"
         yield stmt
-        yield linesep
     yield "}"
-    yield linesep
 
 
 def _parse_args() -> Namespace:
@@ -55,7 +51,8 @@ def _parse_args() -> Namespace:
 
 def _main() -> None:
     args = _parse_args()
-    stdout.writelines(_dot(stdin, incoming=args.direction == "incoming"))
+    statements = _dot(stdin, incoming=args.direction == "incoming")
+    stdout.writelines(chain.from_iterable(zip(statements, repeat(linesep))))
 
 
 _main()
