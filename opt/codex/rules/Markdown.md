@@ -1,22 +1,12 @@
 # Markdown
 
-## Writing
-
-- Show before telling. Place examples before explanations.
-
-- Prefer bullets to paragraphs.
-
-- Use code blocks for configuration and commands.
-
----
-
 ## Layout
 
-- Delineate sections with `---`.
+- Separate sections with `---`.
 
-- Give every directory a `README.md`.
+- Reference each Markdown file from a parent or sibling Markdown file using a relative path: `./User-Quirks.md`.
 
-- Reference `*.md` page from a parent or sibling `README.md` with a relative inline-code path.
+- Put configuration and commands in code blocks.
 
 ---
 
@@ -46,8 +36,8 @@
 
 - Write sui generis: matter-of-fact, casually deviant in passing.
 
-- Apply @./Example-Generation.md#prose lightly and subordinate it to clarity.
-
 ---
 
-- Also see @../skills/mat/SKILL.md.
+- See:
+
+  - @../skills/mat/SKILL.md.
