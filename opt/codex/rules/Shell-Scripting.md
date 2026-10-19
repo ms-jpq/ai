@@ -156,14 +156,6 @@
 
 ### Redirects and Strings
 
-- Auto allocate additional file descriptors with `{NAME}`.
-
-  ```bash
-  exec {INPUT_FD}< "$FILE"
-  cmd <&"$INPUT_FD"
-  exec {INPUT_FD}<&-
-  ```
-
 - Feed data through redirects instead of `echo` or `printf` pipelines.
 
   - `jq <<< "$JSON"` over `echo "$JSON" | jq`
@@ -188,6 +180,14 @@
   ```bash
   ARGS=(--flag "$VALUE")
   printf -v COMMAND -- '%s' "${ARGS[*]}"
+  ```
+
+- Auto allocate file descriptors with `{NAME}`.
+
+  ```bash
+  exec {INPUT_FD}< "$FILE"
+  cmd <&"$INPUT_FD"
+  exec {INPUT_FD}<&-
   ```
 
 ---
