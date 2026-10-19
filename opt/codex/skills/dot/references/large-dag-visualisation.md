@@ -2,17 +2,17 @@
 
 - Trace dependencies among hundreds of nodes in a webpage without reading the whole graph at once.
 
-- Reuse the viewer across graphs supplied in a Graphviz output format.
+- Pipeline: `graph in DOT → enrich via graph-processing → viewer`.
 
-  - Compose Graphviz tools to inspect, filter, transform, and enrich the graph before rendering.
+  - Prefer existing Graphviz tools before building custom ones.
 
-    - List executables installed by the Graphviz Debian package:
+    - eg. Discover available tools:
 
       ```bash
       dpkg-query --listfiles graphviz | grep -E -e '/bin/'
       ```
 
-    - Use gvpr scripts when custom filter or annotation passes are useful, such as adding labels, source URIs, classes, and other attributes.
+    - Use gvpr for custom filtering and annotation.
 
       - See `../scripts/*` for local conversion and annotation scripts.
 
@@ -26,11 +26,9 @@
 
 - Keep labels short and expose details on demand.
 
-- Preserve spatial context.
+- Keep node positions fixed during selection and highlighting.
 
-  - Keep node positions fixed during selection and highlighting.
-
-  - Preserve the viewport when changing scope where possible.
+- Preserve the viewport when changing scope where possible.
 
 ---
 
@@ -68,13 +66,9 @@
 
 ## Checks
 
-- Use a representative graph of 250 nodes, including long chains, broad fan-out, and shared dependencies.
-
-  - Find a named node, trace its prerequisites and dependants, open its source, narrow the view, and return to the previous context.
+- Check readability and responsiveness against the requirements above using 250 nodes with long chains, broad fan-out, and shared dependencies.
 
   - Check that highlighting distinguishes edges at crossings and along shared tracks.
-
-  - Assess readability and responsiveness through these tasks, rather than rendering success alone.
 
 - Compare layout variants using the **crossing count** reported by `dot -v`.
 
