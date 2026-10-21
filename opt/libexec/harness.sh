@@ -11,19 +11,6 @@ if [[ $PWD == "$HOME" ]]; then
   exec -- "$0" "$@"
 fi
 
-case "$OSTYPE" in
-linux*)
-  OOM=(
-    choom
-    --adjust 1000
-    --
-  )
-  ;;
-*)
-  OOM=()
-  ;;
-esac
-
 SANDBOX=(
   ~/.local/libexec/sandbox/libexec/dispatch.sh
   --auth
@@ -47,4 +34,4 @@ SANDBOX+=(
 unset -- SHELL VISUAL
 export -- PATH="$ROOT/opt/codex/bin:$PATH" BASH_ENV="$ROOT/opt/libexec/bash-env.sh"
 export -- PAGER=tee
-exec -- nice -n 19 -- "${OOM[@]}" "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
+exec -- ~/.local/libexec/supernice.sh "${SANDBOX[@]}" -- ~/.local/bin/hp "$@"
