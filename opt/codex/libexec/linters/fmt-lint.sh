@@ -34,11 +34,6 @@ case "$FILE_PATH" in
 *.json | *.yml | *.yaml | *.toml)
   "$BASE/json-schema.ts" "$FILE_PATH"
   ;;
-*.rec)
-  if command -v -- recfix > /dev/null; then
-    recfix --check -- "$FILE_PATH"
-  fi
-  ;;
 *.sh | *.bash)
   if command -v -- shellcheck > /dev/null; then
     shellcheck -- "$FILE_PATH"
