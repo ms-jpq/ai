@@ -1,11 +1,12 @@
----
-paths:
-  - "*.jq"
----
-
 # JQ
 
 ## Defaults
+
+- Convert other structured formats (i.e. YAML, TOML, CSV) to JSON before processing with jq.
+
+- Prefer `jq -e` (`--exit-status`).
+
+  - Omit it when `false`, `null`, or no output is an expected successful result.
 
 - Start standalone `jq` scripts with:
 
