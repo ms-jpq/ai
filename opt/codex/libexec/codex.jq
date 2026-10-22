@@ -10,7 +10,7 @@ def leaf_paths:
   walk([]);
 
 def mcp_servers:
-  to_entries | map(.key as $name | .value | del(.type, .alwaysLoad) | {key: $name, value: .}) | from_entries;
+  with_entries(.value |= del(.type, .alwaysLoad));
 
 . * {mcp_servers: ($mcp | mcp_servers)}
 | leaf_paths as $p
