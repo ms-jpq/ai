@@ -4,6 +4,10 @@
 
 - Pipeline: `DOT graph → enrich with graph-processing tools → viewer`.
 
+  - Keep filter passes additive: enrich the graph without removing nodes or edges.
+
+    - Hide elements for readability while retaining them in the graph used for relationship queries and correctness checks.
+
   - Prefer existing Graphviz tools before building custom ones.
 
     - Discover available tools:
@@ -28,7 +32,7 @@
 
   - Choose useful measures from the concerns below.
 
-  - Reject candidates that lose required nodes, relationships, or arrow meaning.
+  - Reject candidates that remove nodes or edges or change arrow meaning.
 
 - Present the tested candidates' **Pareto frontier** as viewer tabs.
 
