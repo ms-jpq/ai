@@ -1,9 +1,9 @@
 ---
-name: brief
+name: qs
 description: Gather and distil outstanding questions into a structured decision brief that minimises the user's answering effort.
 ---
 
-# Brief
+# Questions
 
 - Use @../fold/SKILL.md to incorporate new questions and subsequent edits into the existing brief, preserving its presentation and stable decision labels.
 
@@ -73,7 +73,13 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Give each question a unique, stable decision label and only the context needed to answer it.
 
-- Explain what each option changes and whether to choose one or several.
+- Label each option with the concrete choice being made.
+
+- Explain each option's trade-offs: what it gains, what it costs or gives up, and which constraints or uncertainties affect the choice.
+
+  - Compare options on the same relevant dimensions using specific effects rather than vague claims such as faster or simpler.
+
+- State whether to choose one option or several.
 
   - Use free text when predefined choices would distort the question.
 
@@ -88,7 +94,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 <Question and necessary context>.
 
-- 📘 _Option Label_: <Consequence>.
+- 📘 _<Concrete choice>_: <Benefit>. <Cost or limitation>.
 
-- 📗 _Option Label_: <Consequence>.
+- 📗 _<Concrete choice>_: <Benefit>. <Cost or limitation>.
 ```
