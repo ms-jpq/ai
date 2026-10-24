@@ -5,6 +5,8 @@ description: Gather and distil outstanding questions into a structured decision 
 
 # Brief
 
+- Use @../fold/SKILL.md to incorporate new questions and subsequent edits into the existing brief, preserving its presentation and stable decision labels.
+
 - Use @../defrag/SKILL.md during abduction to consolidate scattered questions and semantic duplicates about the same decision under the same conditions.
 
 - Use @../op-conceptual-synthesis/SKILL.md during abduction to unify terminology while preserving distinct decisions.
@@ -58,6 +60,10 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Compare the refined set with the original questions and evidence. Restore missing decisions, conditions, or viable choices.
 
 - As answers arrive or new questions arise, apply existing resolutions and their implications before asking again. Remove resolved follow-ups and revise those still needed.
+
+  - Record resolutions and their applicable conditions in the relevant project documents or decision notes outside the brief.
+
+  - Remove answered questions from the brief once their resolutions are recorded.
 
   - Reconsider prior resolutions when their conditions change or evidence conflicts.
 

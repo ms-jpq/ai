@@ -5,6 +5,12 @@ description: Represent a system's state space densely using Markdown tables.
 
 # Mat
 
+- Use @../fold/SKILL.md for subsequent document edits: first incorporate changes into the existing matrix, revising its axes or notation as needed.
+
+  - Keep supporting explanations and anything the matrix cannot express clearly outside the cells.
+
+---
+
 ## Artifact (Output)
 
 - A dense, parsable Markdown representation of the state space defined by the chosen dimensions and constraints.
