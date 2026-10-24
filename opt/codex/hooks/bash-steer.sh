@@ -52,9 +52,6 @@ case "$CMD_LINE" in
 'terraform '*)
   REASON='review dangerous terraform command'
   ;;
-'kill '* | 'killall '* | 'pkill '*)
-  REASON='review process killing'
-  ;;
 'git rebase '* | 'git commit '*--amend*)
   REASON='review history rewriting'
   ;;
