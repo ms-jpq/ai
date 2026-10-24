@@ -82,7 +82,7 @@ _Test those consequences and provisionally retain or revise the explanation._
   - Assign option emoji in reverse-rainbow order: 📘📗📒📙📕.
 
 ```markdown
-# 📋 User Input: <Topic>
+# 🐸 User Input: <Topic>
 
 ## 📚 <Decision Label>
 
