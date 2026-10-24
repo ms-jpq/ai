@@ -1,3 +1,10 @@
+---
+paths:
+  - "*.bash"
+  - "*.jq"
+  - "*.sh"
+---
+
 # JQ
 
 ## Defaults
@@ -13,3 +20,13 @@
 ```jq
 #!/usr/bin/env -S -- jq --exit-status --from-file
 ```
+
+- Use a quoted heredoc for non-trivial jq programs embedded in Bash:
+
+  ```bash
+  read -r -d '' -- JQ <<- 'JQ' || true
+  .
+  JQ
+
+  jq -e "$JQ"
+  ```

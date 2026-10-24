@@ -212,19 +212,22 @@
 
 - Pass trivial `sed`, `jq`, and `awk` programs directly as command arguments.
 
-- Embed short, non-trivial programs with heredocs, especially for jq and awk.
+- Embed short, non-trivial programs with quoted heredocs.
 
   ```bash
-  IFS= read -r -d '' -- JQ <<- 'JQ' || true
-  .[] | to_entries[] | [.key] + .value | join("\n")
-  JQ
+  IFS= read -r -d '' -- PYTHON <<- 'PYTHON' || true
+  from json import dump, load
+  from sys import stdin, stdout
 
-  jq --raw-output0 "$JQ" < 'example.json'
+  dump(load(stdin), stdout, ensure_ascii=False, indent=2)
+  PYTHON
+
+  python3 -c "$PYTHON" < '<input>.json' > '<output>.json'
   ```
 
   - `|| true` is allowed here because `read -d ''` returns nonzero at heredoc EOF.
 
-- Keep substantial or reusable programs in standalone `.sed`, `.jq`, or `.awk` executables.
+- Keep substantial or reusable programs in standalone executables.
 
 ---
 
