@@ -61,4 +61,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - `./references/path-2-graph.md`.
 
+- `./references/prolog-2-dot.md`.
+
 - `./references/large-dag-visualisation.md`.

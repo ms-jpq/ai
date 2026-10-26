@@ -1,39 +1,31 @@
 # Prolog
 
-- Map stable entity IDs to atoms and named relationships to predicates with documented argument order.
+- Use Prolog for domain facts, relationships, constraints, and inference.
 
-- Separate translated facts from hand-maintained inference rules and validation queries so regeneration preserves the latter.
+- Keep orchestration and presentation outside the model. Use JSON for interchange with other tools.
 
-- Translate only explicitly defined notation mechanically. Review interpretations of free prose before treating them as model facts.
-
----
-
-## Correspondence
-
-- For a Markdown relation table with columns `stage`, `relation`, and `condition`:
-
-  | stage   | relation | condition          |
-  | ------- | -------- | ------------------ |
-  | cutover | requires | copy_verified      |
-  | cutover | ensures  | destination_active |
-
-  ```prolog
-  requires(cutover, copy_verified).
-  ensures(cutover, destination_active).
-  ```
-
-- Decode the table export into relation tuples and compare them with the model's direct facts, preserving IDs and argument order.
-
-  - Table extraction returns cell strings; the declared mapping supplies their meaning.
-
-- Keep assertions about requirements separate from evidence that they hold. A failed query does not by itself establish the opposite claim about the real system.
+- Expose queries and checks through scriptable CLI entrypoints that run and exit without an interactive session.
 
 ---
 
-## Interaction
+## Gap Exploration
 
-- Load the model with `swipl '<model>.pl'`, query `requires(cutover, What).`, and reload saved changes with `make.`.
+- Use @../../gap-analysis/SKILL.md to identify consequential omissions and express them as queries over the model.
 
-- Save accepted model changes in files; an interactive session alone does not preserve revision history.
+- Enumerate the declared domain systematically rather than checking only selected examples.
 
-- See: [SWI-Prolog interaction](https://www.swi-prolog.org/pldoc/man?section=quickstart).
+  - Look for missing relationships, uncovered cases, contradictory obligations, and unreachable outcomes where applicable.
+
+  - Return the entities and conditions witnessing each gap as JSON for review and reconciliation.
+
+- State the domains and search bounds covered. Claim exhaustive coverage only when enumeration completes over that scope.
+
+- Distinguish missing knowledge from false claims. No findings establish only what the encoded model and completed checks cover.
+
+---
+
+## References
+
+- [SWI-Prolog command-line options](https://www.swi-prolog.org/pldoc/man?section=cmdline).
+
+- [JSON input and output](https://www.swi-prolog.org/pldoc/man?section=json).
