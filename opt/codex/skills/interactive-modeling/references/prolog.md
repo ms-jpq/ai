@@ -4,7 +4,9 @@
 
 - Keep orchestration and presentation outside the model. Use JSON for interchange with other tools.
 
-- Expose queries and checks through scriptable CLI entrypoints that run and exit without an interactive session.
+- Expose queries and checks through executable `.pro` scripts.
+
+  - Follow @../../../rules/Prolog.md for script preludes, resource cleanup, and subprocess handling.
 
 ---
 
@@ -25,6 +27,8 @@
 ---
 
 ## References
+
+- For graph export, see `../../dot/references/prolog-2-dot.md`.
 
 - [SWI-Prolog command-line options](https://www.swi-prolog.org/pldoc/man?section=cmdline).
 
