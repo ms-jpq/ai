@@ -21,9 +21,3 @@
 
   dot -Tcanon < '<graph>.gv' > /dev/null
   ```
-
----
-
-## References
-
-- [SWI-Prolog command-line options](https://www.swi-prolog.org/pldoc/man?section=cmdline).
