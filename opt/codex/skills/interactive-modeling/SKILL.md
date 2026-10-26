@@ -9,11 +9,11 @@ description: Interactively evolve a domain model and reconcile it with a queryab
 
 - Use @../converge/SKILL.md to revise the shared model when ambiguity, surprising results, or failed checks expose gaps in understanding.
 
-- Use @../mat/SKILL.md when tables clarify the model's dimensions and relationships.
-
 - Use @../fold/SKILL.md to incorporate new observations and decisions into the existing model.
 
 - Use @../bisync/SKILL.md to reconcile the representations when their claims diverge.
+
+- Use @../mat/SKILL.md when tables clarify the model's dimensions and relationships.
 
 ---
 
@@ -75,4 +75,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ## Representations
 
-- For Prolog, read `./references/prolog.md`.
+- Use @../dot/SKILL.md for graph views that make entities and their relationships visible.
+
+- See `./references/prolog.md` for one example representation of facts, inference rules, and queries.
