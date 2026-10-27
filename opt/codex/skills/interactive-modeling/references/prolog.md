@@ -2,6 +2,14 @@
 
 - Use Prolog for domain facts, relationships, constraints, and inference.
 
+- Store model commentary as `comment(Subject, Text).` facts rather than Prolog source comments so it can be queried as data.
+
+  ```prolog
+  comment('<subject>', "<explanation>").
+  ```
+
+  - Replace the placeholders with a subject ID and its explanation. Query `comment('<subject>', Text)` to retrieve the explanation.
+
 - Keep orchestration and presentation outside the model. Use JSON for interchange with other tools.
 
 - Expose queries and checks through executable `.pro` scripts.

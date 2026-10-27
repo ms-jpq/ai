@@ -13,7 +13,7 @@ description: Gather and distil outstanding questions into a structured decision 
 
 - Use @../op-topology-recomposition/SKILL.md during abduction to put prerequisite decisions first and mark conditional follow-ups.
 
-- Use @../refine/SKILL.md during induction to refine question and option wording before checking coverage.
+- Use @../wat/SKILL.md during induction to explain each decision and its options' consequences in concrete terms, removing jargon, vague claims, and filler.
 
 ---
 
