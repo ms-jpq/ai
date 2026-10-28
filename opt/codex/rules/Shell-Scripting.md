@@ -1,5 +1,11 @@
 # Shell Scripting
 
+## **Golden Rule**
+
+- When asking the user to run multiple commands, provide a _single_ shell script that follows these guidelines.
+
+---
+
 ## Defaults
 
 - Start bash scripts with the strict prelude.
