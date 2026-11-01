@@ -19,9 +19,11 @@ description: Discover consequential omissions relative to a purpose, reassessing
 
 _State the intended properties declaratively._
 
-- Prioritized gaps, each linked to the purpose, its missing coverage, and the consequence of leaving it unresolved.
+- Supported gaps identify missing coverage and are prioritised by their consequences for the purpose.
 
-- Explicit uncertainty where available information cannot establish whether coverage is missing.
+  - Findings exclude duplicates, already-covered needs, and additions unrelated to the purpose.
+
+- Uncertain coverage remains explicit.
 
 ---
 

@@ -27,9 +27,13 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 _State the intended properties declaratively._
 
-- Prioritized questions, each traceable to a concern and its motivating purpose, with that connection stated when not apparent.
+- Each question traces to a concern and its motivating purpose, with answers that could change understanding, a decision, or an action.
 
-- Reusable additions or revisions to the question bank when experience supports them.
+- The set contains only unanswered, distinct questions, prioritised by concern and current usefulness.
+
+  - An empty set is valid.
+
+- Reusable question-bank mappings retain their motivating purposes, concerns, and applicability conditions, with revisions supported by experience.
 
 ---
 

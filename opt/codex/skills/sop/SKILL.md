@@ -21,9 +21,15 @@ description: Build or revise a standard operating procedure, or advance it throu
 
 _State the intended properties declaratively._
 
-- When building or revising: a procedure defining principal states, transition prerequisites, actions, and completion conditions.
+- When building or revising, the procedure connects starting conditions to the desired outcome through observable principal states and transitions.
 
-- When advancing: the observed resulting state, the transition attempted, and its completion evidence.
+  - Each transition has prerequisites, actions, and completion conditions.
+
+  - Missing paths and untested transitions remain explicit.
+
+- When advancing, the process reaches the next principal state within the authorised scope, with evidence distinguishing completion from an attempt.
+
+  - If completion fails, the record describes the observed state and failed checks rather than claiming advancement.
 
   - When blocked or already complete, the record identifies the current state and why no transition was taken.
 

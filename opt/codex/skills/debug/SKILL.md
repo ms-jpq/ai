@@ -15,21 +15,13 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 _State the intended properties declaratively._
 
-- A failure account with the expected outcome, observed outcome, evidence, and affected system.
+- The corrected implementation or model prevents, detects, or contains the failure under the identified conditions, with affected dependents updated.
 
-- A diagnosis identifying an implementation discrepancy or the earliest supported deficient model layer, with its downstream consequences.
+  - Checks against the original failure and relevant counterexamples support the correction.
 
-  - Purpose Formation: the purpose, boundary, agreement, or success conditions were deficient.
+- The diagnosis explains the failure through an implementation discrepancy or the earliest supported deficient model layer and its downstream consequences.
 
-  - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritized.
-
-  - Topology Recomposition: outcome dependencies, part boundaries, or connections were deficient.
-
-  - Conceptual Synthesis: ambiguous names or collapsed distinctions obscured the relevant meaning.
-
-  - Mechanism Alignment: the proposed causal path or its preconditions failed to cover a salient concern.
-
-- A corrective revision, its evidence, and the condition that would reopen the diagnosis.
+- Unresolved causal claims and conditions that would reopen the diagnosis remain explicit.
 
 ---
 
@@ -61,9 +53,17 @@ _Devise an explanation for observations._
 
 - Classify each supported model deficiency by its earliest layer.
 
-  - Permit several interacting deficiencies.
+  - Purpose Formation: the purpose, boundary, agreement, or success conditions were deficient.
 
-  - Keep an unsupported causal claim unresolved.
+  - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritized.
+
+  - Topology Recomposition: outcome dependencies, part boundaries, or connections were deficient.
+
+  - Conceptual Synthesis: ambiguous names or collapsed distinctions obscured the relevant meaning.
+
+  - Mechanism Alignment: the proposed causal path or its preconditions failed to cover a salient concern.
+
+- Allow several interacting deficiencies, while keeping unsupported causal claims unresolved.
 
 - Propose a correction to the implementation discrepancy or earliest deficient model layer.
 

@@ -9,9 +9,11 @@ description: Translate an existing graph from filesystems, tables, or other repr
 
 _State the intended properties declaratively._
 
-- DOT representing the source graph, with a reproducible conversion when the source changes.
+- The DOT preserves the source graph's identities, relationship directions, and retained attributes under an explicit mapping.
 
-- An explicit mapping from source entities and relationships to nodes and edges, including any scoped omissions.
+- Conversion is reproducible when the source changes, and scoped omissions or unresolved mappings are explicit.
+
+- Any rendered view preserves topology while making the intended relationships readable.
 
 ---
 

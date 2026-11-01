@@ -23,11 +23,15 @@ description: Consolidate fragmented content and semantic duplicates while preser
 
 _State the intended properties declaratively._
 
-- Related content gathered in canonical locations, with repaired references, consolidated semantic duplicates, and consistent terms.
+- Related content shares canonical locations, and references resolve to the retained content.
 
-- Preserved meaning, responsibilities, contracts, and flows, with unresolved ambiguities explicit.
+- Confirmed semantic duplicates have one retained form, and confirmed aliases have one canonical term.
 
-- Mappings for moved content and any required follow-up.
+  - Differences in scope, conditions, certainty, and required behaviour remain expressible.
+
+- Meaning, responsibilities, contracts, and flows are preserved, with unresolved ambiguities explicit.
+
+- Moved content remains traceable to its new location, with required follow-up explicit.
 
 ---
 

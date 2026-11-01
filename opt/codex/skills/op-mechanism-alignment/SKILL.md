@@ -17,11 +17,13 @@ _State the intended properties declaratively._
 
 - A minimal basis of named mechanisms that covers salient concerns.
 
-  - A concern may require several mechanisms.
+  - Each mechanism produces effects that address its mapped concerns under stated assumptions.
 
-  - A mechanism may cover several concerns.
+  - Shared mechanisms preserve coverage across their concerns without incompatible effects or preconditions.
 
-- An explicit concern-to-mechanism mapping.
+  - Redundant mechanisms are removed where testing supports preserved coverage.
+
+- An explicit many-to-many concern-to-mechanism mapping.
 
   - Shared mappings state the causal path that covers their concerns.
 

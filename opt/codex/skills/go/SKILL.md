@@ -15,7 +15,9 @@ description: Maximise parallelism through task decomposition and delegation.
 
 _State the intended properties declaratively._
 
-- Integrated results that satisfy the task, with unresolved work explicit.
+- Integrated subtask outputs satisfy the task without conflicting changes.
+
+  - Unresolved work remains explicit.
 
 ---
 
@@ -56,6 +58,8 @@ _Derive consequences of the explanation._
 _Test those consequences and provisionally retain or revise the explanation._
 
 - Delegate independent subtasks concurrently, releasing dependent work as its inputs become available.
+
+  - Limit waiting to required inputs and shared-resource constraints.
 
 - Check returned results and integrate them against the required outcomes.
 

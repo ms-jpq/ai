@@ -23,6 +23,14 @@ _State the intended properties declaratively._
 
 - A structured decision brief whose answers resolve the outstanding decisions with minimal answering effort.
 
+  - Retained questions and existing resolutions cover every decision that still matters, preserving its conditions and viable choices.
+
+- Questions have stable decision labels and explicit conditional follow-ups.
+
+  - Any predefined options name concrete choices with comparable trade-offs.
+
+- Recorded resolutions remain available outside the brief, while answered questions no longer occupy it.
+
 ---
 
 ## Observation (Input)

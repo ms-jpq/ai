@@ -11,13 +11,13 @@ _State the intended properties declaratively._
 
 - A description of the encountered system and its external boundary.
 
-- A system purpose that states the intended effect of the system.
+- A system purpose that explains why the system should change or be preserved, accounting for declared and unmet intentions.
 
-  - Success conditions define how its achievement can be recognized.
+  - Observable success conditions define when the purpose is achieved.
 
-- The commitments and affected parties that constrain revision of the purpose.
+- The purpose accounts for existing commitments and affected parties' interests, with unresolved conflicts explicit.
 
-- Explicit purpose conflicts, exclusions, and unresolved questions.
+- Exclusions, unresolved questions, and acceptance or disagreement about the purpose and boundary are explicit.
 
 ---
 

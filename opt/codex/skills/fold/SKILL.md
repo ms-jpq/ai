@@ -9,9 +9,13 @@ description: Fold accumulated unstructured material into an existing structured 
 
 _State the intended properties declaratively._
 
-- A compact structured representation incorporating the additions.
+- The structured representation incorporates the additions compactly, expressing repeated meaning once.
+
+  - Required distinctions, ordering, scope, conditions, and uncertainty remain recoverable without unsupported claims.
 
 - Unresolved questions, contradictions, and anything unabsorbed remain explicit.
+
+- Removed material is fully represented in the revised structure.
 
 ---
 

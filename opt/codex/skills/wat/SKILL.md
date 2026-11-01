@@ -17,6 +17,10 @@ _State the intended properties declaratively._
 
 - An explanation the user can use to predict behaviour, understand a consequence, or make a decision.
 
+  - It explains what acts, what changes, under which conditions, and why consequential steps follow.
+
+  - Claims agree with available evidence, and observation, intention, inference, and uncertainty remain distinguishable.
+
 ---
 
 ## Observation (Input)

@@ -15,9 +15,11 @@ description: Represent a system's state space densely using Markdown tables.
 
 _State the intended properties declaratively._
 
-- A dense, parsable Markdown representation of the state space defined by the chosen dimensions and constraints.
+- Parsable Markdown tables densely represent the combinations defined by the chosen dimensions and constraints, with gaps visible.
 
-- A legend defining the notation used inside cells, with detailed explanations outside the tables.
+- Cell meanings are recoverable from a consistent legend, preserving relevant distinctions, relationships, and order.
+
+- Cells remain succinct, with detailed explanations outside the tables. Machine extraction preserves their notation when required.
 
 ---
 

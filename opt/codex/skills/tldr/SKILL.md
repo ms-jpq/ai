@@ -19,7 +19,11 @@ description: Refocus a document on the user's current concerns, removing irrelev
 
 _State the intended properties declaratively._
 
-- A document focused on the user's current concerns, with obsolete or irrelevant content removed and consequential gaps filled.
+- The document contains the information needed to understand, decide, or act on the user's current concerns, without obsolete claims or irrelevant detail.
+
+  - Evidence supports additions and replacements, and unresolved questions remain explicit.
+
+  - Necessary context, constraints, trade-offs, and uncertainty survive the revision.
 
 ---
 

@@ -21,11 +21,13 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 _State the intended properties declaratively._
 
-- A simpler affected system, with changes implemented and required behaviour, contracts, constraints, and meaning preserved.
+- The affected system has less unnecessary complexity, with required behaviour, contracts, constraints, and meaning preserved except for agreed changes.
+
+  - Evidence shows reduced complexity or more local, verifiable subsequent changes.
+
+  - Simplification does not merely transfer complexity to callers, configuration, instructions, or operational work.
 
 - Passing tests and checks that distinguish agreed changes from regressions.
-
-- Evidence of reduced complexity or more local, verifiable subsequent changes.
 
 ---
 

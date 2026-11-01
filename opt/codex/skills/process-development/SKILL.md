@@ -27,21 +27,23 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 _State the intended properties declaratively._
 
-- A reusable pipeline extracted from a family of tasks.
+- A reusable pipeline preserves the required outcomes across its stated family of tasks.
 
-  - Applicable situations, required inputs, desired outcome, and constraints.
+  - Applicability, inputs, outcomes, and constraints are explicit.
 
-  - Shared stages defined by intermediate outcomes, completion conditions, and necessary dependencies.
+  - Shared stages retain their meaning across tasks, with defined intermediate outcomes, completion conditions, and necessary dependencies.
 
-  - Transformations defined by required inputs and resulting outcomes, with suggested methods distinguished from required steps.
+  - Transformations connect required inputs to resulting outcomes, with suggested methods distinguished from required steps.
 
-  - Attachment points for residual task-specific work, including errata, without duplicating or complicating the common core.
+  - Residual task-specific work, including errata, joins where its outcomes are needed without duplicating or complicating the common core.
 
-  - Independent paths, dependency-specific joins, and shared-resource constraints.
+  - Independent paths proceed together within shared-resource constraints. Each join waits only for its required outcomes.
 
-  - Explicit choices, branches, retries, and unresolved gaps where needed.
+  - Choices, branches, retries, and unresolved gaps are explicit where needed.
 
-- Evidence of reuse, preserved outcomes, and improved progress, with untested paths and unresolved bottlenecks explicit.
+- Claims of reuse, preserved outcomes, and improved progress have supporting evidence.
+
+  - Untested paths and unresolved bottlenecks remain explicit.
 
 ---
 

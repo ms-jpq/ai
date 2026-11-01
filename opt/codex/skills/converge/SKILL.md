@@ -15,7 +15,11 @@ _State the intended properties declaratively._
 
 - A reasoned system model built from a minimal sufficient basis of concepts, parts, relationships, and mechanisms.
 
-  - Its purpose and constraints are connected to the concerns, outcomes, and means of achieving them.
+  - It connects purpose and constraints to concerns, outcomes, and the means of achieving them.
+
+  - Missing components are developed and redundant components reduced without weakening required outcomes, distinctions, or concern coverage.
+
+  - Another pass under unchanged inputs yields no justified revision.
 
 - Rationale and available evidence supporting the model, with unresolved assumptions and contradictions explicit.
 

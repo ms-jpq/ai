@@ -9,13 +9,15 @@ description: Give consistent names that semantically compress ideas.
 
 _State the intended properties declaratively._
 
-- A lexicon.
+- A lexicon consistently applied across relevant representations.
 
-  - Names that preserve relevant distinctions between concepts.
+  - Necessary distinctions have concise names with explicit definitions, scope, exclusions, and mappings to uses.
 
-  - Definitions, scope, exclusions, and mappings to uses across relevant representations.
+  - Meaningless variation is normalised. Concepts are revised or retired when their underlying distinctions change.
 
-  - Unresolved aliases and distinctions that proposed names or model views must preserve.
+  - Unresolved aliases remain explicit.
+
+- Model views preserve necessary distinctions while hiding irrelevant detail.
 
 ---
 

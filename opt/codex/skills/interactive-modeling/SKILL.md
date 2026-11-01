@@ -21,9 +21,17 @@ description: Interactively evolve a domain model and reconcile it with a queryab
 
 _State the intended properties declaratively._
 
-- An evolving domain model and a corresponding stricter representation, with reproducible translation and checks.
+- Mapped facts and relationships agree across the shared model and its stricter representation, except for explicit unresolved discrepancies.
 
-- Defined mappings between representations, with unresolved questions and translation gaps recorded.
+- Queries and checks address the model's questions and possible gaps or contradictions.
+
+  - Results trace to stated facts and distinguish them from derived conclusions.
+
+- Translation preserves required distinctions.
+
+  - Unmapped content remains available, with unknowns, interpretation choices, and translation gaps explicit.
+
+- Both representations, their mappings, and reproducible checks remain under source control.
 
 ---
 

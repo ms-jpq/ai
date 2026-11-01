@@ -9,7 +9,13 @@ description: Visualise quantitative data or functions using reproducible gnuplot
 
 _State the intended properties declaratively._
 
-- A gnuplot script, its source data or data-generation command, and the rendered plot.
+- The rendered plot makes the intended comparison or relationship readable without obscuring relevant source values, ranges, or trends.
+
+- Labels identify quantities, units, and series.
+
+  - Scales, transformations, aggregation, and uncertainty are explicit.
+
+- The plot is reproducible in the required format from the supplied gnuplot script, data or data-generation command, and invocation.
 
 ---
 

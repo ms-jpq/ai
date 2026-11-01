@@ -17,9 +17,13 @@ _State the intended properties declaratively._
 
 - A decomposition of the desired outcome into intermediate outcomes, their dependencies, and explicit conditions for achieving or maintaining each outcome.
 
+  - Their combined achievement satisfies the desired outcome and each dependent outcome's prerequisites.
+
 - A named hierarchy of parts that achieves those outcomes and resolves structural problems in the concern hierarchy.
 
   - Boundaries, containment relations, and flows are explicit.
+
+  - The organisation makes representative changes easier to understand, carry out, and verify while preserving required outcomes.
 
 - An explicit mapping from framed concerns to outcomes and from outcomes to parts.
 
@@ -27,7 +31,7 @@ _State the intended properties declaratively._
 
   - Concerns needing no structural embodiment are identified and explained.
 
-- Explicit cycles, their sources, and their precedence, iteration, or feedback semantics.
+- Cycles that prevent required ordering are resolved. Retained cycles have explicit sources and iteration or feedback semantics.
 
 ---
 

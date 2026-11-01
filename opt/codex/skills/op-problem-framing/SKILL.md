@@ -17,7 +17,9 @@ _State the intended properties declaratively._
 
 - An enumeration of concerns implied by each problem, prioritized by salience.
 
-  - The classification supplies candidate concerns. The frame prioritizes them for the system.
+  - Each concern explains observed resistance or could change the response to it or its consequences.
+
+  - Priorities reflect current evidence and each concern's relevance to the system.
 
   - Deprioritized concerns remain recorded while relevant.
 

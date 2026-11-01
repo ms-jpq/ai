@@ -23,9 +23,9 @@ description: Reconcile two system representations while preserving authorized ch
 
 _State the intended properties declaratively._
 
-- Reconciled representations that preserve authorized changes and required correspondence.
+- Reconciled claims satisfy the required correspondence without losing authorized changes or violating the system's purpose and constraints.
 
-- Explicit authorized divergences and unresolved conflicts, with their evidence and disposition.
+- Remaining differences are authorized divergences or explicit unresolved conflicts, with their evidence and disposition.
 
   - Dispositions identify changes by representation and their supporting authority and intent.
 
