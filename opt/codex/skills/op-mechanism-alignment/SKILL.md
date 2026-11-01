@@ -13,6 +13,8 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A minimal basis of named mechanisms that covers salient concerns.
 
   - A concern may require several mechanisms.

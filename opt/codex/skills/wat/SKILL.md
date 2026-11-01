@@ -13,6 +13,8 @@ description: Explain how something works and why it matters using concrete mecha
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - An explanation the user can use to predict behaviour, understand a consequence, or make a decision.
 
 ---

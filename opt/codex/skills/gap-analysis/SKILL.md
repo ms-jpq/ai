@@ -17,6 +17,8 @@ description: Discover consequential omissions relative to a purpose, reassessing
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - Prioritized gaps, each linked to the purpose, its missing coverage, and the consequence of leaving it unresolved.
 
 - Explicit uncertainty where available information cannot establish whether coverage is missing.

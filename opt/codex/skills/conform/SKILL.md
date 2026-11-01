@@ -23,6 +23,8 @@ description: A semantics-preserving transformation toward applicable rules and l
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A destination consistent with applicable rules and reference conventions, with its behaviour, contracts, constraints, and meaning preserved.
 
 - Reasons for retained differences and any unresolved conflicts.

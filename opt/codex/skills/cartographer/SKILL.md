@@ -21,27 +21,31 @@ description: Maintain a persistent atlas of work that brings the system toward i
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A persistent atlas covering the required changes and their execution order.
 
-  - Coverage: every required outcome is linked to completed work with evidence, remaining work with acceptance checks, or an explicit unresolved gap.
+  - Every required outcome is linked to completed work with evidence, remaining work with acceptance checks, or an explicit unresolved gap.
 
-    - Combined work outcomes account for the target design, including integration and verification. Each work item contributes to a required outcome.
+  - Combined work outcomes account for the target design, including integration and verification.
 
-  - Ordering: each dependency names the condition it satisfies and what releases dependent work.
+  - Each work item contributes to a required outcome.
 
-    - Retain only necessary sequencing. Separate work that can proceed independently without losing integration obligations.
+  - Every dependency has a reason and an explicit release condition.
 
-- Execution frontier: identify all unstarted items whose prerequisites and start conditions are satisfied, and which can proceed together.
+  - Sequencing reflects necessary prerequisites. Independently executable work remains separate, with integration obligations explicit.
+
+- The execution frontier includes all unstarted items whose prerequisites and start conditions are satisfied, with concurrently executable sets identified.
 
   - Each item supplies enough context, scope, and completion checks for a contributor to act without reconstructing the originating conversation.
 
-  - Make conflicts over ownership, interfaces, or shared resources explicit.
+  - Conflicts over ownership, interfaces, or shared resources are explicit.
 
-- Keep pending, active, and closed work, preserving identities, ownership, history, and evidence across revisions.
+- Pending, active, and closed work retains its identities, ownership, history, and evidence across revisions.
 
   - Contributors may be humans or AI agents.
 
-- Record unresolved gaps and discrepancies. The atlas can be incomplete or stale.
+- Unresolved gaps and discrepancies remain explicit, including incomplete or stale claims.
 
 ---
 

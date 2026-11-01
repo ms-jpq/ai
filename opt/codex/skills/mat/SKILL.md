@@ -13,6 +13,8 @@ description: Represent a system's state space densely using Markdown tables.
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A dense, parsable Markdown representation of the state space defined by the chosen dimensions and constraints.
 
 - A legend defining the notation used inside cells, with detailed explanations outside the tables.

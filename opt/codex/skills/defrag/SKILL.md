@@ -21,6 +21,8 @@ description: Consolidate fragmented content and semantic duplicates while preser
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - Related content gathered in canonical locations, with repaired references, consolidated semantic duplicates, and consistent terms.
 
 - Preserved meaning, responsibilities, contracts, and flows, with unresolved ambiguities explicit.

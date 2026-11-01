@@ -17,6 +17,8 @@ description: Refocus a document on the user's current concerns, removing irrelev
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A document focused on the user's current concerns, with obsolete or irrelevant content removed and consequential gaps filled.
 
 ---

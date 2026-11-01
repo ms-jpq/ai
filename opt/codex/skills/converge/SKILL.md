@@ -11,9 +11,11 @@ description: Seek the simplest system model sufficient for its purpose, reasonin
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A reasoned system model built from a minimal sufficient basis of concepts, parts, relationships, and mechanisms.
 
-  - Connect its purpose and constraints to the concerns, outcomes, and means of achieving them.
+  - Its purpose and constraints are connected to the concerns, outcomes, and means of achieving them.
 
 - Rationale and available evidence supporting the model, with unresolved assumptions and contradictions explicit.
 

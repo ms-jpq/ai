@@ -7,6 +7,8 @@ description: Give consistent names that semantically compress ideas.
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A lexicon.
 
   - Names that preserve relevant distinctions between concepts.

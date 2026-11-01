@@ -7,7 +7,9 @@ description: Form and revise the system purpose that guides the remaining operat
 
 ## Artifact (Output)
 
-- An encountered system and its external boundary.
+_State the intended properties declaratively._
+
+- A description of the encountered system and its external boundary.
 
 - A system purpose that states the intended effect of the system.
 

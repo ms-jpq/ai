@@ -15,6 +15,8 @@ description: Refine prose for the reader's goal and local context.
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - Prose that supports the reader's intended understanding, decision, or action while preserving necessary meaning and factual constraints.
 
 ---

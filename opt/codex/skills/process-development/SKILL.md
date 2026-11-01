@@ -25,6 +25,8 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A reusable pipeline extracted from a family of tasks.
 
   - Applicable situations, required inputs, desired outcome, and constraints.

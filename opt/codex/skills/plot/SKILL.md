@@ -7,6 +7,8 @@ description: Visualise quantitative data or functions using reproducible gnuplot
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A gnuplot script, its source data or data-generation command, and the rendered plot.
 
 ---

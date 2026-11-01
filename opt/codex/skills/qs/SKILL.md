@@ -19,6 +19,8 @@ description: Gather and distil outstanding questions into a structured decision 
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A structured decision brief whose answers resolve the outstanding decisions with minimal answering effort.
 
 ---

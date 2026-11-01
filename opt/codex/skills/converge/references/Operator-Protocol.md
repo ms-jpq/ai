@@ -1,5 +1,7 @@
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 ...
 
 ## Observation (Input)

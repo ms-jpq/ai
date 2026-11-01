@@ -13,11 +13,19 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A decomposition of the desired outcome into intermediate outcomes, their dependencies, and explicit conditions for achieving or maintaining each outcome.
 
-- A named hierarchy of parts organized to achieve those outcomes and resolve structural problems in the concern hierarchy, with explicit boundaries, containment relations, and flows.
+- A named hierarchy of parts that achieves those outcomes and resolves structural problems in the concern hierarchy.
 
-- An explicit mapping from framed concerns to outcomes and from outcomes to parts, justifying each part's boundary and placement and explaining concerns needing no structural embodiment.
+  - Boundaries, containment relations, and flows are explicit.
+
+- An explicit mapping from framed concerns to outcomes and from outcomes to parts.
+
+  - Each part's boundary and placement are justified.
+
+  - Concerns needing no structural embodiment are identified and explained.
 
 - Explicit cycles, their sources, and their precedence, iteration, or feedback semantics.
 

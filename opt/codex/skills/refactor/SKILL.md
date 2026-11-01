@@ -19,6 +19,8 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A simpler affected system, with changes implemented and required behaviour, contracts, constraints, and meaning preserved.
 
 - Passing tests and checks that distinguish agreed changes from regressions.

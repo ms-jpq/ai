@@ -7,6 +7,8 @@ description: Translate an existing graph from filesystems, tables, or other repr
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - DOT representing the source graph, with a reproducible conversion when the source changes.
 
 - An explicit mapping from source entities and relationships to nodes and edges, including any scoped omissions.

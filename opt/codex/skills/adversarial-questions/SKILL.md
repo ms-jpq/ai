@@ -25,6 +25,8 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - Prioritized questions, each traceable to a concern and its motivating purpose, with that connection stated when not apparent.
 
 - Reusable additions or revisions to the question bank when experience supports them.

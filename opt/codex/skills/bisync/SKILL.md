@@ -21,6 +21,8 @@ description: Reconcile two system representations while preserving authorized ch
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - Reconciled representations that preserve authorized changes and required correspondence.
 
 - Explicit authorized divergences and unresolved conflicts, with their evidence and disposition.

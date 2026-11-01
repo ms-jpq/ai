@@ -11,13 +11,15 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 ## Artifact (Output)
 
-- A working, covering hierarchy of named problems that explains resistance to the system purpose.
+_State the intended properties declaratively._
+
+- A working hierarchy of named problems that covers and explains observed resistance to the system purpose.
 
 - An enumeration of concerns implied by each problem, prioritized by salience.
 
   - The classification supplies candidate concerns. The frame prioritizes them for the system.
 
-  - Deprioritized concerns remain recorded. Later evaluation may revise their priority or exclude them when they are no longer relevant.
+  - Deprioritized concerns remain recorded while relevant.
 
 ---
 
@@ -80,3 +82,5 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Retain concerns only when they account for observed resistance or could change the response to it or its consequences.
 
 - Revise a problem, its relation, or its concern priority when later evaluation exposes a gap.
+
+  - Exclude concerns that are no longer relevant.

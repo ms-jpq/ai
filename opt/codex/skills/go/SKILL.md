@@ -13,6 +13,8 @@ description: Maximise parallelism through task decomposition and delegation.
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - Integrated results that satisfy the task, with unresolved work explicit.
 
 ---

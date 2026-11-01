@@ -13,6 +13,8 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A failure account with the expected outcome, observed outcome, evidence, and affected system.
 
 - A diagnosis identifying an implementation discrepancy or the earliest supported deficient model layer, with its downstream consequences.

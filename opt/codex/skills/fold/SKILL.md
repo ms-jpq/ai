@@ -7,6 +7,8 @@ description: Fold accumulated unstructured material into an existing structured 
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - A compact structured representation incorporating the additions.
 
 - Unresolved questions, contradictions, and anything unabsorbed remain explicit.

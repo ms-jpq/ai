@@ -19,11 +19,13 @@ description: Build or revise a standard operating procedure, or advance it throu
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - When building or revising: a procedure defining principal states, transition prerequisites, actions, and completion conditions.
 
 - When advancing: the observed resulting state, the transition attempted, and its completion evidence.
 
-  - If blocked or already complete, report the current state and why no transition was taken.
+  - When blocked or already complete, the record identifies the current state and why no transition was taken.
 
 ---
 

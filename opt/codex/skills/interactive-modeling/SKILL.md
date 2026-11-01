@@ -19,6 +19,8 @@ description: Interactively evolve a domain model and reconcile it with a queryab
 
 ## Artifact (Output)
 
+_State the intended properties declaratively._
+
 - An evolving domain model and a corresponding stricter representation, with reproducible translation and checks.
 
 - Defined mappings between representations, with unresolved questions and translation gaps recorded.
