@@ -23,13 +23,19 @@ description: Maintain a persistent atlas of work that brings the system toward i
 
 - A persistent atlas covering the required changes and their execution order.
 
-  - Coverage: connect the current system to the target design through work items with explicit outcomes, including integration and verification.
+  - Coverage: every required outcome is linked to completed work with evidence, remaining work with acceptance checks, or an explicit unresolved gap.
 
-  - Ordering: preserve necessary prerequisites and remove unnecessary sequencing to expose the widest frontier of independently executable work.
+    - Combined work outcomes account for the target design, including integration and verification. Each work item contributes to a required outcome.
 
-    - The frontier contains unstarted items whose prerequisites and start conditions are satisfied.
+  - Ordering: each dependency names the condition it satisfies and what releases dependent work.
 
-    - Check conflicts over ownership, interfaces, and shared resources before treating items as concurrently executable.
+    - Retain only necessary sequencing. Separate work that can proceed independently without losing integration obligations.
+
+- Execution frontier: identify all unstarted items whose prerequisites and start conditions are satisfied, and which can proceed together.
+
+  - Each item supplies enough context, scope, and completion checks for a contributor to act without reconstructing the originating conversation.
+
+  - Make conflicts over ownership, interfaces, or shared resources explicit.
 
 - Keep pending, active, and closed work, preserving identities, ownership, history, and evidence across revisions.
 
