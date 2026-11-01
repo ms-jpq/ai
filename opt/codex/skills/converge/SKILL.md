@@ -31,7 +31,7 @@ _State the intended properties declaratively._
 
 - Identify what the model cannot explain or achieve, and where inconsistent concepts, coupled responsibilities, or overlapping mechanisms make it difficult to use.
 
-- Parallelise independent read and query operations through delegation.
+- Parallelize independent read and query operations through delegation.
 
 ---
 
@@ -43,7 +43,7 @@ _Devise an explanation for observations._
 
 - Use the relevant operators below to develop missing components and reduce redundant ones.
 
-  - Allow temporary increases in detail or parts when they expose a simpler organisation.
+  - Allow temporary increases in detail or parts when they expose a simpler organization.
 
 - Revisit purpose or boundaries when commitments or intended outcomes conflict. Do not silently weaken the purpose to make the model smaller.
 
@@ -57,7 +57,7 @@ _Derive consequences of the explanation._
 
   - Include cases where commitments conflict, assumptions fail, or effects interfere.
 
-- For each addition, removal, merge, or generalisation, derive its effect on required outcomes, constraints, distinctions, and concern coverage.
+- For each addition, removal, merge, or generalization, derive its effect on required outcomes, constraints, distinctions, and concern coverage.
 
 - Compare the context, coordinated changes, and verification effort required by current and proposed models for the same change.
 

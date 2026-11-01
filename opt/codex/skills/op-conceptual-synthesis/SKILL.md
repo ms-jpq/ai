@@ -13,7 +13,7 @@ _State the intended properties declaratively._
 
   - Necessary distinctions have concise names with explicit definitions, scope, exclusions, and mappings to uses.
 
-  - Meaningless variation is normalised. Concepts are revised or retired when their underlying distinctions change.
+  - Meaningless variation is normalized. Concepts are revised or retired when their underlying distinctions change.
 
   - Unresolved aliases remain explicit.
 

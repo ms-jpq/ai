@@ -33,7 +33,7 @@ _Devise an explanation for observations._
 
   - Resolve ambiguous source conventions before encoding them. A directory parent, a symlink target, and a dependency are different relationships.
 
-- When a visualisation is wanted, choose layout and styling separately from the graph's topology.
+- When a visualization is wanted, choose layout and styling separately from the graph's topology.
 
 ---
 

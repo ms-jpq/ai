@@ -87,7 +87,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ## Representations
 
-- Use @../dot/SKILL.md to visualise entities and relationships.
+- Use @../dot/SKILL.md to visualize entities and relationships.
 
   - Derive views from the model's queries, keeping presentation separate from domain facts and inference rules.
 

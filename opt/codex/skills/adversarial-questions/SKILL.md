@@ -29,7 +29,7 @@ _State the intended properties declaratively._
 
 - Each question traces to a concern and its motivating purpose, with answers that could change understanding, a decision, or an action.
 
-- The set contains only unanswered, distinct questions, prioritised by concern and current usefulness.
+- The set contains only unanswered, distinct questions, prioritized by concern and current usefulness.
 
   - An empty set is valid.
 

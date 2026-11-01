@@ -47,7 +47,7 @@ _Devise an explanation for observations._
 
   - Support additions with evidence and keep unresolved questions explicit.
 
-- Organise the document around what matters most now.
+- Organize the document around what matters most now.
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 name: go
-description: Maximise parallelism through task decomposition and delegation.
+description: Maximize parallelism through task decomposition and delegation.
 ---
 
 # Go
 
-- Use @../op-topology-recomposition/SKILL.md during abduction to organise intermediate outcomes into independent subtasks and distinguish necessary dependencies from incidental sequencing.
+- Use @../op-topology-recomposition/SKILL.md during abduction to organize intermediate outcomes into independent subtasks and distinguish necessary dependencies from incidental sequencing.
 
 - See: `go func()`.
 
@@ -35,7 +35,7 @@ _Devise an explanation for observations._
 
 - Propose a decomposition into independently executable subtasks wherever possible.
 
-  - Optimise task boundaries and dependencies for parallelism, disregarding capacity constraints during decomposition.
+  - Optimize task boundaries and dependencies for parallelism, disregarding capacity constraints during decomposition.
 
   - Define each subtask's inputs, output, and ownership boundary.
 

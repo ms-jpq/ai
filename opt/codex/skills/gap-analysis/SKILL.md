@@ -19,7 +19,7 @@ description: Discover consequential omissions relative to a purpose, reassessing
 
 _State the intended properties declaratively._
 
-- Supported gaps identify missing coverage and are prioritised by their consequences for the purpose.
+- Supported gaps identify missing coverage and are prioritized by their consequences for the purpose.
 
   - Findings exclude duplicates, already-covered needs, and additions unrelated to the purpose.
 

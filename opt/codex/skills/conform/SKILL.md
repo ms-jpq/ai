@@ -15,7 +15,7 @@ description: A semantics-preserving transformation toward applicable rules and l
 
 - Use @../op-conceptual-synthesis/SKILL.md when inconsistent terms obscure shared meanings or necessary distinctions.
 
-- Use @../op-topology-recomposition/SKILL.md when conformity requires revising organisation or connections between parts.
+- Use @../op-topology-recomposition/SKILL.md when conformity requires revising organization or connections between parts.
 
 - Use @../refine/SKILL.md when prose needs rewriting.
 

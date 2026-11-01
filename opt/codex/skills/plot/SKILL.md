@@ -1,6 +1,6 @@
 ---
 name: plot
-description: Visualise quantitative data or functions using reproducible gnuplot scripts.
+description: Visualize quantitative data or functions using reproducible gnuplot scripts.
 ---
 
 # Plot

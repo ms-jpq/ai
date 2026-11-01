@@ -23,7 +23,7 @@ _State the intended properties declaratively._
 
   - Boundaries, containment relations, and flows are explicit.
 
-  - The organisation makes representative changes easier to understand, carry out, and verify while preserving required outcomes.
+  - The organization makes representative changes easier to understand, carry out, and verify while preserving required outcomes.
 
 - An explicit mapping from framed concerns to outcomes and from outcomes to parts.
 

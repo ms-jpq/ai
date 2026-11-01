@@ -87,7 +87,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply authorised revisions and check them against current evidence.
+- Apply authorized revisions and check them against current evidence.
 
   - Coordinate changes with owners of active work and record whether their current attempt can continue, needs revision, or is superseded.
 
@@ -118,6 +118,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 | Coverage discovery  | What is missing?                            | Missing work and relationships                          |
 | Reconciliation      | What is inaccurate or stale?                | Corrected claims and unresolved discrepancies           |
 | Work specification  | How should the work be described?           | Actionable work units and acceptance checks             |
-| Work organisation   | How should work connect and be grouped?     | Revised boundaries, relationships, and readiness        |
+| Work organization   | How should work connect and be grouped?     | Revised boundaries, relationships, and readiness        |
 | Context recovery    | Can a reader recover enough context to act? | Recovered context and identified gaps                   |
 | Progress assessment | What remains, and how is work progressing?  | Progress views separating completion from scope changes |

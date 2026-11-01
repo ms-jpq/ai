@@ -7,7 +7,7 @@ description: Build or revise a standard operating procedure, or advance it throu
 
 - Distinguish requests to build or revise the procedure from requests to advance the process.
 
-- Use @../op-topology-recomposition/SKILL.md when intermediate outcomes and dependencies need organising into steps.
+- Use @../op-topology-recomposition/SKILL.md when intermediate outcomes and dependencies need organizing into steps.
 
 - Use @../op-mechanism-alignment/SKILL.md to select actions that produce the required outcomes.
 
@@ -27,7 +27,7 @@ _State the intended properties declaratively._
 
   - Missing paths and untested transitions remain explicit.
 
-- When advancing, the process reaches the next principal state within the authorised scope, with evidence distinguishing completion from an attempt.
+- When advancing, the process reaches the next principal state within the authorized scope, with evidence distinguishing completion from an attempt.
 
   - If completion fails, the record describes the observed state and failed checks rather than claiming advancement.
 
@@ -83,7 +83,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Mark untested transitions explicitly.
 
-- When advancing, perform the transition within the authorised scope.
+- When advancing, perform the transition within the authorized scope.
 
   - Complete the actions needed to reach the next principal state.
 

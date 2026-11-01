@@ -1,4 +1,4 @@
-# Large DAG Visualisation
+# Large DAG Visualization
 
 - Trace dependencies among hundreds of nodes in a webpage without reading the whole graph at once.
 
@@ -44,7 +44,7 @@
 
 ### Assessment Metrics
 
-- Notation: 📉 minimise, 📈 maximise, ? unmeasured, N/A inapplicable.
+- Notation: 📉 minimize, 📈 maximize, ? unmeasured, N/A inapplicable.
 
 | Concern          | Aim | Example assessment                                          |
 | ---------------- | --- | ----------------------------------------------------------- |

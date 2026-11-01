@@ -23,7 +23,7 @@ _State the intended properties declaratively._
 
 - Read the existing representation and accumulated material in scope.
 
-- Locate what the current organisation or notation cannot express.
+- Locate what the current organization or notation cannot express.
 
 ---
 
@@ -31,7 +31,7 @@ _State the intended properties declaratively._
 
 _Devise an explanation for observations._
 
-- Explain the mismatch and propose changes to organisation or notation.
+- Explain the mismatch and propose changes to organization or notation.
 
 - Propose a representation that expresses repeated meaning once, preserving differences in scope, conditions, and certainty.
 

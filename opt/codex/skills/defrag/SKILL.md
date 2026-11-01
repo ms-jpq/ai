@@ -13,7 +13,7 @@ description: Consolidate fragmented content and semantic duplicates while preser
 
 - Use @../refine/SKILL.md when prose remains unclear after consolidation.
 
-- Use @../refactor/SKILL.md when consolidation requires reorganising responsibilities or flows.
+- Use @../refactor/SKILL.md when consolidation requires reorganizing responsibilities or flows.
 
 - Obtain agreement before changing required behaviour or contracts.
 

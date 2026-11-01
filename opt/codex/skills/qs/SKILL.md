@@ -1,6 +1,6 @@
 ---
 name: qs
-description: Gather and distil outstanding questions into a structured decision brief that minimises the user's answering effort.
+description: Gather and distil outstanding questions into a structured decision brief that minimizes the user's answering effort.
 ---
 
 # Questions
