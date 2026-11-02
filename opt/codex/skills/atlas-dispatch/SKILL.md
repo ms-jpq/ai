@@ -58,7 +58,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Spawn agents concurrently with their node briefs and record successful assignments in the atlas.
 
 - Leave failed dispatches unclaimed and record the cause.
-
----
-
-- Use @../atlas-view/SKILL.md to refresh the execution frontier when node states or ordering constraints change.

@@ -23,7 +23,7 @@ _State the input categories and their roles._
 
 - **Questions:** What the reader wants to learn about selected work.
 
-- **Conventions:** Classification and display conventions that guide presentation.
+- **Conventions:** Display conventions that guide presentation.
 
 ---
 

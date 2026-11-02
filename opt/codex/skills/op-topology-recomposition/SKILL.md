@@ -94,9 +94,3 @@ _Test those consequences and provisionally retain or revise the explanation._
   - Prefer the topology that makes the change easier to understand, carry out, and verify while preserving required behaviour.
 
 - Remove unnecessary components, concern mappings, containment relations, and connections.
-
----
-
-- Use @../op-purpose-formation/SKILL.md when external boundaries need revision.
-
-- Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced.

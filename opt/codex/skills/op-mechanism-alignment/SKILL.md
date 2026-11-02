@@ -72,9 +72,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Retain the smallest tested mechanism basis that preserves required coverage.
 
 - Revisit the mechanism mapping when changing the mechanism does not resolve the gap.
-
----
-
-- Use @../op-topology-recomposition/SKILL.md when a mechanism requires different component boundaries, placement, or connections.
-
-- Use @../op-problem-framing/SKILL.md during induction when the concerns or their priorities need revision.

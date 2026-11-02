@@ -66,7 +66,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Test the hierarchy and priorities against observed obstacles and alternative explanations.
 
 - Retain concerns that explain obstacles or affect the response to them.
-
----
-
-- Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.

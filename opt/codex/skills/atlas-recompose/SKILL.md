@@ -62,7 +62,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Check dependency release conditions and compare the resulting frontier with the prediction.
 
 - Retain changes that widen concurrent execution while preserving required ordering and coverage.
-
----
-
-- Use @../atlas-view/SKILL.md to compute and compare execution frontiers.

@@ -64,7 +64,3 @@ _Test those consequences and provisionally retain or revise the explanation._
   - Check that they can reconstruct the assignment and acceptance checks.
 
 - Retain unresolved discrepancies.
-
----
-
-- Use @../atlas-recompose/SKILL.md to revise work boundaries and ordering after decomposition changes.

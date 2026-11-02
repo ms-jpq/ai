@@ -37,9 +37,11 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
   1. Project the intended system model into nodes, attributes, and decomposition edges, reconciling them with the current system.
 
-  2. Recompose work boundaries and ordering dependencies to maximize the concurrent execution frontier.
+  2. Establish categories and classify nodes for grouping and filtering.
 
-  3. Derive views, including the execution frontier and clusters, from node attributes and edges.
+  3. Recompose work boundaries and ordering dependencies to maximize the concurrent execution frontier.
+
+  4. Derive views, including the execution frontier and clusters, from node attributes and edges.
 
 ---
 
@@ -48,6 +50,8 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 _State the intended properties declaratively._
 
 - **Nodes:** Consistent with the intended and current system.
+
+- **Classification:** Node attributes follow defined categories and membership criteria.
 
 - **Decomposition edges:** Children collectively cover their parent's work.
 
@@ -73,25 +77,31 @@ _State the input categories and their roles._
 
 ## Operations
 
-- **Converge:** Seek the simplest system model sufficient for its purpose, reasoning through revisions toward a stable fixed point.
+- Apply these operations in order, revisiting earlier operations as findings require.
 
-  - @../converge/SKILL.md
+0. **Converge:** Seek the simplest system model sufficient for its purpose, reasoning through revisions toward a stable fixed point.
 
-- **Project:** Project the intended system model into a work decomposition reconciled with the current system.
+   - @../converge/SKILL.md
 
-  - @../atlas-project/SKILL.md
+1. **Project:** Project the intended system model into a work decomposition reconciled with the current system.
 
-- **Recompose:** Recompose work and its ordering to maximize the concurrent execution frontier.
+   - @../atlas-project/SKILL.md
 
-  - @../atlas-recompose/SKILL.md
+2. **Classify:** Establish meaningful categories and classify atlas nodes to support grouping and filtering.
 
-- **View:** Build reproducible queries or scripts that derive views from an atlas.
+   - @../atlas-classify/SKILL.md
 
-  - @../atlas-view/SKILL.md
+3. **Recompose:** Recompose work and its ordering to maximize the concurrent execution frontier.
 
-- **Dispatch:** Spawn agents on unclaimed atlas nodes along the execution frontier and record their assignments.
+   - @../atlas-recompose/SKILL.md
 
-  - @../atlas-dispatch/SKILL.md
+4. **View:** Build reproducible queries or scripts that derive views from an atlas.
+
+   - @../atlas-view/SKILL.md
+
+5. **Dispatch:** Spawn agents on unclaimed atlas nodes along the execution frontier and record their assignments.
+
+   - @../atlas-dispatch/SKILL.md
 
 ---
 
@@ -101,10 +111,10 @@ _State the input categories and their roles._
 
   - Tickets represent nodes.
 
-  - Dependencies represent ordering edges.
+  - Parent–child relationships represent decomposition edges.
 
-  - Projects and milestones represent derived clusters.
+  - Dependencies represent ordering edges.
 
   - Statuses and labels represent node attributes.
 
-  - Parent–child relationships represent decomposition edges.
+  - Projects and milestones represent derived clusters.
