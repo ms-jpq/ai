@@ -1,19 +1,9 @@
 ---
 name: defrag
-description: Consolidate fragmented content and semantic duplicates while preserving meaning and behaviour.
+description: Establish canonical homes for related elements, consolidating scattered material and relocating misplaced elements.
 ---
 
 # Defrag
-
-- Use @../op-purpose-formation/SKILL.md when the purpose or what must be preserved is unclear.
-
-- Use @../op-problem-framing/SKILL.md when the consequences of fragmentation or their priorities are unclear.
-
-- Use @../op-conceptual-synthesis/SKILL.md when inconsistent terms obscure shared meanings or necessary distinctions.
-
-- Use @../refine/SKILL.md when prose remains unclear after consolidation.
-
-- Use @../refactor/SKILL.md when consolidation requires reorganizing responsibilities or flows.
 
 - Obtain agreement before changing required behaviour or contracts.
 
@@ -23,15 +13,9 @@ description: Consolidate fragmented content and semantic duplicates while preser
 
 _State the intended properties declaratively._
 
-- Related content shares canonical locations, and references resolve to the retained content.
+- **Canonical homes:** Locations where related elements are consolidated.
 
-- Semantic duplicates have one retained form, and aliases have one canonical term.
-
-  - Differences in scope, conditions, certainty, and required behaviour remain expressible.
-
-- Meaning, responsibilities, contracts, and flows are preserved, with unresolved ambiguities explicit.
-
-- Moved content remains traceable to its new location, with required follow-up explicit.
+- **References:** Links and uses updated to resolve to those homes.
 
 ---
 
@@ -39,13 +23,13 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Code, prose, configuration, or instructions in scope: the content to consolidate.
+- **Elements:** Code, prose, configuration, or instructions to organize.
 
-  - Runtime state, generated output, and unrelated material are outside the scope by default.
+- **Organization:** Existing homes, responsibilities, and relationships that guide placement.
 
-- Existing locations, roles, terminology, and dependencies in both directions: context for choosing destinations and preserving uses.
+- **Uses:** Readers, callers, and references affected by relocation or consolidation.
 
-- Required meaning, behaviour, responsibilities, contracts, and flows: constraints on consolidation.
+- **Constraints:** Meaning and behaviour that consolidation must preserve.
 
 ---
 
@@ -53,17 +37,19 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Identify scattered related content, candidate semantic duplicates, broken or redundant references, and unresolved aliases.
+- Identify scattered or misplaced elements, competing homes, semantic duplicates, and unresolved aliases.
 
-- Propose a canonical location for each concern and explain how it reduces fragmentation.
+  - Exclude runtime state and generated output unless they are explicitly in scope.
 
-  - Nest related elements under a shared parent to make their relationship explicit.
+- Choose or construct a canonical home for each concern.
+
+  - Place related elements under a shared parent.
 
     - For example, declarations in a namespace or supporting bullets beneath a shared point.
 
-  - Map each proposed move to its destination and affected references.
+  - Map misplaced elements to their proposed homes and identify affected references.
 
-- Propose consolidation of semantic duplicates: equivalent meaning or behaviour under the same scope and conditions, regardless of wording or form.
+- Propose consolidating semantic duplicates: elements with equivalent meaning or behaviour under the same scope and conditions.
 
   - Retain candidates whose equivalence is unresolved.
 
@@ -75,7 +61,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Identify which reads and edits the proposed placement brings together.
+- Predict which related elements can be read or changed together in each proposed home.
 
 - Derive reference updates for each move, including consumers of the old locations.
 
@@ -89,10 +75,20 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply the proposed moves, deduplications, and confirmed term changes one cluster at a time.
+- Establish the homes, move misplaced elements, and consolidate duplicates and confirmed aliases.
 
-- Check the resulting locations, references, and terms against the predictions.
+- Check that elements are in their intended homes and references resolve to them.
 
 - Retain a change only when it reduces fragmentation without changing preserved meaning or behaviour.
 
-  - Remove duplicates only after checking the retained form against every original use.
+---
+
+- Use @../op-purpose-formation/SKILL.md when the purpose or what must be preserved is unclear.
+
+- Use @../op-problem-framing/SKILL.md when the consequences of fragmentation or their priorities are unclear.
+
+- Use @../op-conceptual-synthesis/SKILL.md when inconsistent terms obscure shared meanings or necessary distinctions.
+
+- Use @../refine/SKILL.md when prose remains unclear after consolidation.
+
+- Use @../refactor/SKILL.md when consolidation requires reorganizing responsibilities or flows.

@@ -5,21 +5,11 @@ description: Explain how something works and why it matters using concrete mecha
 
 # Wat
 
-- Use @../converge/SKILL.md when confusion exposes a gap in the underlying model.
-
-- Use @../refine/SKILL.md to remove unnecessary wording after the explanation is substantively clear.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- An explanation the user can use to predict behaviour, understand a consequence, or make a decision.
-
-  - It explains what acts, what changes, under which conditions, and why consequential steps follow.
-
-  - Claims agree with available evidence, and observation, intention, inference, and uncertainty remain distinguishable.
+- **Explanation:** How the subject works and why it matters, in terms the user can follow.
 
 ---
 
@@ -27,9 +17,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Subject and surrounding conversation: what needs explaining and the user's current understanding.
+- **Subject:** What needs explaining.
 
-- Relevant code, data, observations, and stated intentions: evidence for explaining how the subject works.
+- **Reader:** The user's current understanding and confusion.
+
+- **Evidence:** Code, data, observations, and intentions supporting the explanation.
 
 ---
 
@@ -63,10 +55,18 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Check the explanation against the evidence and revise unsupported claims. State what remains unknown.
+- Check the explanation against the evidence and revise unsupported claims.
+
+  - Distinguish observation, intention, and inference.
 
 - Lead with the answer, then supply the mechanism and consequences needed to understand it.
 
   - Include the concrete case when it clarifies something the prose leaves abstract.
 
   - Remove throat-clearing, repeated conclusions, decorative terminology, and detail unrelated to the user's confusion.
+
+---
+
+- Use @../converge/SKILL.md when confusion exposes a gap in the underlying model.
+
+- Use @../refine/SKILL.md to remove unnecessary wording after the explanation is substantively clear.

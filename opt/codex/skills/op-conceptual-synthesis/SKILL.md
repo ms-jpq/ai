@@ -35,11 +35,11 @@ _Devise an explanation for observations._
 
 - Define the concept before naming it.
 
-  - State its scope, exclusions, relations, and distinctions that must survive.
+  - State its scope, exclusions, relationships, and necessary distinctions.
 
 - Coin or revise a concise term that carries the distinction.
 
-  - Propose a consistent mapping of the term, definition, and constraint across each relevant representation.
+  - Propose how each relevant representation will use the term, its definition, and its constraints consistently.
 
 ---
 

@@ -5,10 +5,6 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 # Mechanism Alignment
 
-- Use @../op-topology-recomposition/SKILL.md when a mechanism requires different component boundaries, placement, or connections.
-
-- Use @../op-problem-framing/SKILL.md during induction when the concerns or their priorities need revision.
-
 - A mechanism describes how an effect is produced. Structural components, such as modules or services, implement mechanisms.
 
   - One mechanism may span several components, and one component may implement several mechanisms.
@@ -57,11 +53,11 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive observable outcomes when each mapping's preconditions hold and when they fail, including adverse effects.
+- Derive each mechanism's observable effects when its preconditions hold and when they fail, including adverse effects.
 
 - Predict which concerns remain covered by a shared mechanism and which require distinct ones.
 
-- Predict what evidence would require the mechanism, its mapping, or its concern priority to change.
+- Predict what evidence would require revising a mechanism, its concern mapping, or a concern's priority.
 
 ---
 
@@ -73,10 +69,14 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Test shared mechanisms across their mapped concerns, including cases where satisfying one could impair another.
 
-- Retain a mechanism only when its effects address its mapped concerns under its stated assumptions.
-
 - Specialize, split, or replace a mechanism when evaluation exposes incompatible effects or preconditions.
 
 - Retain the smallest tested mechanism basis that preserves required coverage.
 
 - Revisit the mechanism mapping when changing the mechanism does not resolve the gap.
+
+---
+
+- Use @../op-topology-recomposition/SKILL.md when a mechanism requires different component boundaries, placement, or connections.
+
+- Use @../op-problem-framing/SKILL.md during induction when the concerns or their priorities need revision.

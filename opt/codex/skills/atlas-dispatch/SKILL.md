@@ -11,11 +11,7 @@ description: Spawn agents on unclaimed atlas nodes along the execution frontier 
 
 _State the intended properties declaratively._
 
-- Selected, unclaimed frontier nodes have agents assigned to carry out their work.
-
-- Each assignment includes the node's outcome, source context, boundaries, and acceptance checks.
-
-- The atlas records node ownership and agent identity. Undispatched work remains identifiable.
+- **Assignments:** Selected frontier nodes claimed by agents, with ownership and agent identity recorded in the atlas.
 
 ---
 
@@ -23,13 +19,13 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Selected nodes and ordering edges define candidate work and its prerequisites.
+- **Selection:** Nodes to dispatch and their ordering dependencies.
 
-- Completion evidence, ownership, and running agents establish readiness and existing assignments.
+- **Execution state:** Completion evidence, ownership, and running agents that establish readiness and existing assignments.
 
-- Node descriptions and references supply each agent's brief.
+- **Context:** Node descriptions and references that supply each agent's brief.
 
-- The domain and execution permissions bound assignments.
+- **Authority:** Domain and execution permissions that bound assignments.
 
 ---
 
@@ -49,6 +45,8 @@ _Derive consequences of the explanation._
 
 - Derive each agent's inputs, expected output, and ownership boundary from its node.
 
+  - Include source context and acceptance checks in its brief.
+
 - Check that the assignments cover selected ready work without duplicating active assignments.
 
 ---
@@ -62,5 +60,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Spawn agents concurrently with their node briefs and record successful assignments in the atlas.
 
 - Verify that each recorded assignment corresponds to a spawned agent. Leave failed dispatches unclaimed and record the cause.
-
-- Report assignments and undispatched nodes. Completion requires returned work and acceptance evidence.

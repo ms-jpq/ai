@@ -5,19 +5,11 @@ description: A semantics-preserving transformation toward applicable rules and l
 
 # Conform
 
-- `conform [src…] dst` transforms the destination using explicit sources or, when omitted, its closest comparable peers.
+- `conform [src…] dst` transforms the subject (`dst`) using explicit sources or, when omitted, its closest comparable peers.
 
-  - Sources and destinations may be functions, modules, documents, or passages.
+  - Sources and subjects may be functions, modules, documents, or passages.
 
-  - Change only the destination.
-
-- Use @../op-purpose-formation/SKILL.md when the destination's purpose or preservation boundary is unclear.
-
-- Use @../op-conceptual-synthesis/SKILL.md when inconsistent terms obscure shared meanings or necessary distinctions.
-
-- Use @../op-topology-recomposition/SKILL.md when conformity requires revising organization or connections between parts.
-
-- Use @../refine/SKILL.md when prose needs rewriting.
+  - Change only the subject.
 
 ---
 
@@ -25,9 +17,7 @@ description: A semantics-preserving transformation toward applicable rules and l
 
 _State the intended properties declaratively._
 
-- A destination consistent with applicable rules and reference conventions, with its behaviour, contracts, constraints, and meaning preserved.
-
-- Reasons for retained differences and any unresolved conflicts.
+- **Conformed subject:** The subject follows applicable rules and local conventions while preserving its meaning and behaviour.
 
 ---
 
@@ -35,15 +25,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Destination: the content to transform and the baseline for preserved behaviour, contracts, constraints, and meaning.
+- **Subject:** What to conform, including the meaning, behaviour, and deliberate differences to preserve.
 
-- Explicit sources or comparable peers: reference conventions for naming, structure, idioms, terminology, references, and formatting.
+- **References:** Explicit sources or peers comparable by role and scope.
 
-  - Peers are comparable by role and scope, not filesystem proximity.
-
-- Applicable rules in `../../rules/`: global, path-specific, and embedded-language requirements governing the destination.
-
-- Deliberate differences and their rationale: constraints on copying reference conventions.
+- **Rules:** Applicable requirements from `../../rules/`, including embedded languages.
 
 ---
 
@@ -51,7 +37,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Compare corresponding roles and conventions in the destination, references, and applicable rules.
+- Compare the subject's conventions with its references and applicable rules, matching elements by role.
 
 - Explain each mismatch as a rule violation, inconsistent convention, necessary difference, or unresolved conflict.
 
@@ -77,12 +63,20 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply the proposed changes to the destination.
+- Apply the proposed changes to the subject.
 
-- Check the result against the rules, references, and original destination. Retain changes that conform and preserve semantics.
-
-  - For code, run relevant checks.
+- Check the result against the rules, references, and original subject. Retain changes that conform and preserve semantics.
 
   - For prose, verify that claims, conditions, and uncertainty survive.
 
 - Explain retained differences and unresolved conflicts, including conformity that would require semantic changes.
+
+---
+
+- Use @../op-purpose-formation/SKILL.md when the subject's purpose or what must be preserved is unclear.
+
+- Use @../op-conceptual-synthesis/SKILL.md when inconsistent terms obscure shared meanings or necessary distinctions.
+
+- Use @../op-topology-recomposition/SKILL.md when conformity requires revising organization or connections between parts.
+
+- Use @../refine/SKILL.md when prose needs rewriting.

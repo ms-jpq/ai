@@ -5,10 +5,6 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 # Debug
 
-- Use @../bisync/SKILL.md when the diagnosed correction requires reconciling maintained representations. Correct an implementation discrepancy directly when the intended model remains sound.
-
-- Use the operator skill for every layer whose model requires revision.
-
 - Preserve evidence needed to reproduce or explain the failure before changing the system or its model.
 
 ---
@@ -17,13 +13,9 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 _State the intended properties declaratively._
 
-- The corrected implementation or model prevents, detects, or contains the failure under the identified conditions, with affected dependents updated.
+- **Diagnosis:** The implementation discrepancy or model deficiency explaining the failure.
 
-  - Checks against the original failure and relevant counterexamples support the correction.
-
-- The diagnosis explains the failure through an implementation discrepancy or the earliest supported deficient model layer and its downstream consequences.
-
-- Unresolved causal claims and conditions that would reopen the diagnosis remain explicit.
+- **Correction:** An implementation or model change that prevents, detects, or contains the failure.
 
 ---
 
@@ -31,19 +23,17 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Expected and observed outcomes: the discrepancy requiring explanation.
+- **Failure:** The difference between expected and observed behaviour.
 
-- Affected system and intended model: the implementation, assumptions, and dependencies through which the failure may arise.
+- **System:** The affected implementation and intended model.
 
-- Available observations, reproduction evidence, and relevant decisions: support for tracing and testing possible causes.
+- **Evidence:** Observations and reproductions supporting or contradicting possible causes.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
-
-- Compare the model and system without changing either representation.
 
 - Trace the failure through the implicated implementation and model dependencies.
 
@@ -59,7 +49,7 @@ _Devise an explanation for observations._
 
   - Problem Framing: an obstruction was absent, misclassified, or insufficiently prioritized.
 
-  - Topology Recomposition: outcome dependencies, part boundaries, or connections were deficient.
+  - Topology Recomposition: components, boundaries, or connections were deficient.
 
   - Conceptual Synthesis: ambiguous names or collapsed distinctions obscured the relevant meaning.
 
@@ -91,6 +81,12 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Correct the implementation or update the deficient operator artifact and its dependents.
 
-- Retain the diagnosis only when it explains the failure and its correction holds.
+- Retain the diagnosis only when it explains the failure and its correction holds. Record unresolved causal claims.
 
-  - Reopen the diagnosis when later evidence contradicts it or the failure recurs.
+---
+
+- Use @../reconcile/SKILL.md when the correction requires resolving discrepancies between things that should agree.
+
+  - Correct the implementation directly when the intended model remains sound.
+
+- Use the operator skill for every layer whose model requires revision.

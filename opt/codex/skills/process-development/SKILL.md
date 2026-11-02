@@ -5,35 +5,11 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 # Process Development
 
-- Use @../converge/SKILL.md when the process's purpose, concerns, outcome dependencies, or mechanisms need clarification.
-
-- Use @../op-topology-recomposition/SKILL.md during abduction to organize shared intermediate outcomes into stages and isolate residual work into disjoint parts.
-
-- Use @../op-mechanism-alignment/SKILL.md during abduction to propose how each transformation produces its outcomes, distinguishing required steps from replaceable methods.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- A reusable pipeline preserves the required outcomes across its stated family of tasks.
-
-  - Applicability, inputs, outcomes, and constraints are explicit.
-
-  - Shared stages retain their meaning across tasks, with defined intermediate outcomes, completion conditions, and necessary dependencies.
-
-  - Transformations connect required inputs to resulting outcomes, with suggested methods distinguished from required steps.
-
-  - Residual task-specific work, including errata, joins where its outcomes are needed without duplicating or complicating the common core.
-
-  - Independent paths proceed together within shared-resource constraints. Each join waits only for its required outcomes.
-
-  - Choices, branches, retries, and unresolved gaps are explicit where needed.
-
-- Claims of reuse, preserved outcomes, and improved progress have supporting evidence.
-
-  - Untested paths and unresolved bottlenecks remain explicit.
+- **Pipeline:** Reusable stages and dependencies that produce the required outcomes across a defined family of tasks.
 
 ---
 
@@ -41,11 +17,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Representative tasks, required outcomes, inputs, and constraints define the family the pipeline should support.
+- **Tasks:** Representative cases, their inputs, required outcomes, and constraints.
 
-- Existing procedures and execution attempts provide candidate stages and evidence of recurring or task-specific work.
+- **Procedures:** Existing steps and dependencies to generalize or revise.
 
-- Recorded waits, release conditions, and claimed dependencies or resource constraints explain the current ordering.
+- **Execution evidence:** Attempts, waits, and resource use that reveal recurring work and bottlenecks.
 
 ---
 
@@ -57,11 +33,13 @@ _Devise an explanation for observations._
 
 - Propose a common core that explains recurring work.
 
+  - Define each stage's inputs, transformation, outcomes, and completion conditions.
+
   - Compare attempts for recurring outcomes and transformations beneath differences in terminology, methods, and task details.
 
   - Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required.
 
-- Apply a fork–join lens to widen the pipeline: independent parts proceed together, and each join waits only for its required outcomes.
+- Propose parallel stages for independent work, with each join waiting only for its required outcomes.
 
 ---
 
@@ -69,7 +47,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Trace representative tasks through the proposed core and attachment points, checking that shared stages retain their meaning and no required work disappears.
+- Trace representative tasks through the shared and task-specific stages, checking their meaning and coverage of required work.
 
 - Predict which duplication and waits disappear, which dependencies remain, and whether adaptation or coordination costs erase the gains from reuse and parallelism.
 
@@ -89,18 +67,22 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Compare progress, repeated effort, and coordination costs with predictions.
 
-- Revise boundaries, dependencies, or methods where the comparison exposes a defect. Correct execution errors without automatically changing the specification.
+- Revise boundaries, dependencies, methods, or execution where the comparison exposes a defect.
 
   - Test revisions against previously supported cases and new variations to distinguish reusable stages from a process fitted to one task.
 
-- Remove stages, steps, or barriers shown unnecessary for required outcomes. Retain parallelism only when it improves progress without violating constraints.
+- Remove stages, steps, or barriers shown unnecessary for required outcomes.
 
 ---
 
 ## Application
 
-- Re-invoke `process-development` when new tasks reveal further commonality, a forced abstraction, or avoidable waiting.
+- Promote recurring task-specific work into shared stages when its inputs and outcomes support reuse. Separate stages whose differences prevent reuse.
 
-- Promote recurring residual work into shared stages when its inputs and outcomes support reuse. Return false commonality to task-specific paths.
+---
 
-- Update the reusable specification so later executions benefit from the revision.
+- Use @../converge/SKILL.md when the process's purpose, concerns, outcome dependencies, or mechanisms need clarification.
+
+- Use @../op-topology-recomposition/SKILL.md during abduction to organize shared intermediate outcomes into stages and isolate residual work into disjoint parts.
+
+- Use @../op-mechanism-alignment/SKILL.md during abduction to propose how each transformation produces its outcomes, distinguishing required steps from replaceable methods.

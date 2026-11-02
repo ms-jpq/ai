@@ -11,13 +11,11 @@ description: Project an intended system model into an existing atlas, reconcilin
 
 _State the intended properties declaratively._
 
-- The atlas covers the intended system through work nodes with outcomes, source references, and acceptance checks.
+- **Nodes:** Work needed to reach the intended system, with current attributes, source references, and acceptance checks.
 
-- Decomposition edges account for parent outcomes. Ordering edges express necessary prerequisites and release conditions.
+- **Decomposition edges:** Children collectively cover their parent's work.
 
-- Missing work is added, stale descriptions and attributes are corrected, and extraneous work is pruned within the domain.
-
-- Node identities, ownership, history, and external relationships survive revision. Unresolved discrepancies remain explicit.
+- **Ordering edges:** Necessary prerequisites with explicit release conditions.
 
 ---
 
@@ -25,13 +23,13 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The independently maintained system model defines the outcomes and constraints to project.
+- **System model:** Intended outcomes and constraints to project.
 
-- The existing atlas and its history provide the nodes and edges to reconcile.
+- **Atlas:** Existing nodes, attributes, edges, and history to reconcile.
 
-- Current system evidence and decisions establish remaining work, completion state, and work category.
+- **Evidence:** Current system state and decisions that establish needed work and node attributes.
 
-- The domain defines which nodes may be created or updated.
+- **Domain:** Nodes we may create or update.
 
 ---
 
@@ -51,7 +49,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Trace coverage in both directions between intended outcomes and proposed work.
+- Check that each intended outcome has proposed work and each proposed node contributes to an outcome.
 
 - Derive effects on active work, parent outcomes, dependants, and the execution frontier.
 
@@ -66,5 +64,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Check proposed changes against the model and evidence, coordinating changes to active work with its owners.
 
 - Apply revisions within the domain and verify coverage, references, and both edge types.
+
+  - Preserve identities, ownership, history, and external relationships.
 
 - Recompute the execution frontier and retain unresolved discrepancies.

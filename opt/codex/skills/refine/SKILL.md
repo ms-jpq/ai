@@ -5,19 +5,11 @@ description: Refine prose for the reader's goal and local context.
 
 # Refine
 
-- Use @../op-purpose-formation/SKILL.md when the reader's purpose or intended effect is unclear.
-
-- Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
-
-- Use @../conform/SKILL.md when prose needs to follow conventions established by references or comparable peers.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- Prose that supports the reader's intended understanding, decision, or action while preserving necessary meaning and factual constraints.
+- **Prose:** Clear wording and structure serving the reader's goal without losing meaning.
 
 ---
 
@@ -25,9 +17,9 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Current text and local context: the prose to revise and the meaning to preserve.
+- **Prose:** The text and context to revise.
 
-- Reader's goal, knowledge, and vocabulary: the basis for judging clarity and relevance.
+- **Reader:** Their goal, knowledge, and vocabulary.
 
 ---
 
@@ -44,6 +36,12 @@ _Devise an explanation for observations._
   - One claim per bullet.
 
 - Replace vague words with precise ones. Remove words that do not change the claim.
+
+- State the intended meaning directly.
+
+  - Remove obvious instructions and repeated task statements.
+
+  - Remove unnecessary qualifications.
 
 - Order claims by importance.
 
@@ -77,10 +75,16 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Correct unsupported absolutes and unnecessary hedges exposed by the check.
 
-- Re-read the revision in context and retain it only if the predicted reading holds.
-
 ---
 
 ## Application
 
 - Ask one question per turn when the reader must choose between tradeoffs.
+
+---
+
+- Use @../op-purpose-formation/SKILL.md when the reader's purpose or intended effect is unclear.
+
+- Use @../op-conceptual-synthesis/SKILL.md when a recurring meaning needs a stable term.
+
+- Use @../conform/SKILL.md when prose needs to follow conventions established by references or comparable peers.

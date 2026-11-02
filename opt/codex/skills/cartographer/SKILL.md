@@ -45,33 +45,13 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
 _State the intended properties declaratively._
 
-- Nodes:
+- **Nodes:** Work needed to reach the intended system, with current attributes and enough context to execute and verify it.
 
-  - The intended system model is projected into work with defined outcomes, including integration and verification. Missing work is added and extraneous work is pruned.
+- **Decomposition edges:** Children collectively cover their parent's work, including integration and verification.
 
-  - Descriptions and references provide enough context to carry out and check the work. Unclear descriptions and stale attributes are corrected.
+- **Ordering edges:** Necessary prerequisites with explicit release conditions.
 
-  - Completion state and work category reflect current information. Identity, ownership, history, and evidence survive revisions.
-
-- Decomposition edges:
-
-  - Children account for their parent's outcome, including the work needed to integrate and verify their results.
-
-- Ordering edges:
-
-  - Each edge expresses a necessary prerequisite and an explicit release condition.
-
-  - Unnecessary sequencing is removed, widening the concurrent execution frontier.
-
-- Domain:
-
-  - Revisions stay within the domain and retain relationships to external nodes.
-
-- Views and clusters:
-
-  - Selections, groupings, and progress views derive from node attributes, relationships, and history.
-
-- Unresolved gaps and discrepancies remain explicit.
+- **Views:** Selections, clusters, and progress measures derived from the graph.
 
 ---
 
@@ -79,7 +59,13 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- `work graph + information → revised work graph`.
+- **Atlas:** Existing work, relationships, attributes, and history to revise.
+
+- **System model:** Intended behaviour and constraints that define what the work must achieve.
+
+- **Evidence:** Current system state, execution results, and decisions that establish needed work.
+
+- **Domain:** Nodes we may create or update.
 
 ---
 
@@ -88,8 +74,6 @@ _State the input categories and their roles._
 _Devise an explanation for observations._
 
 - Propose a projection of the intended system model into nodes, reconciling it with existing work and current evidence.
-
-  - Identify additions, removals, and revisions to descriptions and attributes.
 
 - Propose decomposition edges whose child outcomes combine into the parent outcome.
 
@@ -125,7 +109,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Coordinate revisions with owners of active work and record the effect on their attempt.
+- Coordinate revisions with owners of active work and record how their assignments change.
 
 - Verify completed work before relying on it as a prerequisite. Preserve its closure history when reopening it or adding follow-up work.
 
@@ -144,8 +128,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Generate views and clusters from the revised graph and check them against the predicted membership and totals.
 
   - Separate scope changes from completion in progress views.
-
-  - Do not count both parents and children for the same outcome.
 
 - Retain unresolved discrepancies and revisit affected operations when evidence or the intended system changes.
 
@@ -168,8 +150,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 ---
 
 ## Operations
-
-- Compose these operations to maintain the system model and its atlas:
 
 - **Converge:** Develop and simplify the intended system model into a minimal sufficient basis.
 

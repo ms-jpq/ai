@@ -7,31 +7,15 @@ description: Build or revise a standard operating procedure, or advance it throu
 
 - Distinguish requests to build or revise the procedure from requests to advance the process.
 
-- Use @../op-topology-recomposition/SKILL.md when intermediate outcomes and dependencies need organizing into steps.
-
-- Use @../op-mechanism-alignment/SKILL.md to select actions that produce the required outcomes.
-
-- Use @../process-development/SKILL.md to extract a reusable procedure from several tasks.
-
-- Use @../mat/SKILL.md to represent principal states and transitions in tables.
-
 ---
 
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- When building or revising, the procedure connects starting conditions to the desired outcome through observable principal states and transitions.
+- **Procedure:** Principal states and transitions connecting starting conditions to the desired outcome.
 
-  - Each transition has prerequisites, actions, and completion conditions.
-
-  - Missing paths and untested transitions remain explicit.
-
-- When advancing, the process reaches the next principal state within the authorized scope, with evidence distinguishing completion from an attempt.
-
-  - If completion fails, the record describes the observed state and failed checks.
-
-  - When blocked or already complete, the record identifies the current state and why no transition was taken.
+- **Transition record:** The observed state, action taken, and completion evidence when advancing the process.
 
 ---
 
@@ -39,11 +23,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The process's purpose, desired outcome, and constraints define what the procedure must achieve and preserve.
+- **Purpose and constraints:** What the process must achieve and preserve.
 
-- The current state and available execution evidence establish the starting conditions and uncertainty about progress.
+- **Current state:** Starting conditions and evidence of progress.
 
-- Any existing procedure supplies state definitions, transitions, and completion conditions to assess or revise.
+- **Procedure:** Existing states, transitions, and completion conditions, if defined.
 
 ---
 
@@ -55,7 +39,7 @@ _Devise an explanation for observations._
 
   - Specify each transition's prerequisites, actions, and completion conditions.
 
-- When advancing, assess the current state against the procedure's observable conditions, then propose the next transition whose prerequisites fit.
+- When advancing, assess the current state against the procedure's observable conditions, then propose the next transition whose prerequisites are satisfied.
 
   - Keep uncertain state assignments explicit.
 
@@ -89,6 +73,16 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Check the resulting state against the predicted completion conditions before recording advancement.
 
-  - If checks fail, report the actual state and revise the assessment or procedure as the evidence warrants.
-
   - Record the observed state and transition outcome.
+
+  - If blocked or already complete, record why no transition was taken.
+
+---
+
+- Use @../op-topology-recomposition/SKILL.md when intermediate outcomes and dependencies need organizing into steps.
+
+- Use @../op-mechanism-alignment/SKILL.md to select actions that produce the required outcomes.
+
+- Use @../process-development/SKILL.md to extract a reusable procedure from several tasks.
+
+- Use @../mat/SKILL.md to represent principal states and transitions in tables.

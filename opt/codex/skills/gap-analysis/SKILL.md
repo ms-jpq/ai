@@ -7,23 +7,13 @@ description: Discover consequential omissions relative to a purpose, reassessing
 
 - Apply to concerns, questions, features, mechanisms, outcomes, or another level of the system.
 
-- Use @../op-purpose-formation/SKILL.md when the purpose or scope needs clarification.
-
-- Use @../op-problem-framing/SKILL.md when a suspected omission requires revising the problem frame or its concerns.
-
-- Use @../op-mechanism-alignment/SKILL.md during abduction when indirect coverage depends on an unclear causal path.
-
 ---
 
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- Supported gaps identify missing coverage and are prioritized by their consequences for the purpose.
-
-  - Findings exclude duplicates, already-covered needs, and additions unrelated to the purpose.
-
-- Uncertain coverage remains explicit.
+- **Gaps:** Missing coverage, ranked by its consequences for the purpose and distinguished from uncertain coverage.
 
 ---
 
@@ -31,11 +21,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Purpose, scope, and constraints: the basis for judging which omissions matter.
+- **Purpose:** The intended achievement and scope against which coverage is judged.
 
-- Material under examination: the provisions whose coverage is being assessed.
+- **Provisions:** What currently addresses that purpose.
 
-- Available evidence and prior findings, exclusions, or dismissals: grounds for assessing coverage and revisiting earlier conclusions.
+- **Evidence:** Observations and prior findings supporting coverage assessments.
 
 ---
 
@@ -47,7 +37,7 @@ _Devise an explanation for observations._
 
 - Propose omissions that could obstruct the purpose, considering relevant situations, dependencies, and failure conditions beyond those already represented.
 
-- Explain why each candidate is missing coverage rather than another name for something present or a preference for a different solution.
+- Explain what coverage each candidate adds.
 
   - Consider whether existing provisions cover the need indirectly.
 
@@ -75,7 +65,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Prioritize supported gaps by their consequences, distinguishing them from unverified possibilities.
 
-- Return no gaps when none are supported, without treating that result as proof of completeness.
+- Return no gaps when none are supported.
 
 ---
 
@@ -86,3 +76,11 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Reconsider dismissed gaps when their premises change. Report newly found or revised gaps and material uncertainties.
 
 - The caller chooses how to address findings. A gap does not itself authorize new features, implementation, or scope changes.
+
+---
+
+- Use @../op-purpose-formation/SKILL.md when the purpose or scope needs clarification.
+
+- Use @../op-problem-framing/SKILL.md when a suspected omission requires revising the problem frame or its concerns.
+
+- Use @../op-mechanism-alignment/SKILL.md during abduction when indirect coverage depends on an unclear causal path.

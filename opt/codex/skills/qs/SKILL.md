@@ -5,31 +5,13 @@ description: Gather and distil outstanding questions into a structured decision 
 
 # Questions
 
-- Use @../fold/SKILL.md to incorporate new questions and subsequent edits into the existing brief, preserving its presentation and stable decision labels.
-
-- Use @../defrag/SKILL.md during abduction to consolidate scattered questions and semantic duplicates about the same decision under the same conditions.
-
-- Use @../op-conceptual-synthesis/SKILL.md during abduction to unify terminology while preserving distinct decisions.
-
-- Use @../op-topology-recomposition/SKILL.md during abduction to put prerequisite decisions first and mark conditional follow-ups.
-
-- Use @../wat/SKILL.md during induction to explain each decision and its options' consequences in concrete terms.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- A structured decision brief whose answers resolve the outstanding decisions with minimal answering effort.
+- **Decision brief:** Questions whose answers resolve outstanding decisions with minimal answering effort.
 
-  - Retained questions and existing resolutions cover every decision that still matters, preserving its conditions and viable choices.
-
-- Questions have stable decision labels and explicit conditional follow-ups.
-
-  - Any predefined options name concrete choices with comparable trade-offs.
-
-- Recorded resolutions remain available outside the brief, while answered questions no longer occupy it.
+- **Resolutions:** Recorded answers and their applicable conditions, retained outside the brief.
 
 ---
 
@@ -37,9 +19,9 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The conversation and documents in scope supply outstanding questions and their decision context.
+- **Questions:** Outstanding decisions and the context needed to answer them.
 
-- Available evidence and prior resolutions, with their applicability conditions, establish what can be answered without asking again.
+- **Evidence and resolutions:** What can already be answered and under which conditions.
 
 ---
 
@@ -47,7 +29,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose which questions need user input and which available evidence or prior answers already resolve.
+- Propose which questions need user input and which are already resolved by evidence or prior answers.
 
 - Keep independent decisions separate when combining them would make answering harder.
 
@@ -83,8 +65,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Give each question a unique, stable decision label and only the context needed to answer it.
 
-- Label each option with the concrete choice being made.
-
 - Explain each option's trade-offs: what it gains, what it costs or gives up, and which constraints or uncertainties affect the choice.
 
   - Compare options on the same dimensions using specific effects.
@@ -108,3 +88,15 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - 📗 _<Concrete choice>_: <Benefit>. <Cost or limitation>.
 ```
+
+---
+
+- Use @../fold/SKILL.md to incorporate new questions and subsequent edits into the existing brief, preserving its presentation and stable decision labels.
+
+- Use @../defrag/SKILL.md during abduction to consolidate scattered questions and semantic duplicates about the same decision under the same conditions.
+
+- Use @../op-conceptual-synthesis/SKILL.md during abduction to unify terminology while preserving distinct decisions.
+
+- Use @../op-topology-recomposition/SKILL.md during abduction to put prerequisite decisions first and mark conditional follow-ups.
+
+- Use @../wat/SKILL.md during induction to explain each decision and its options' consequences in concrete terms.

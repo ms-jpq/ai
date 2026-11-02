@@ -1,17 +1,11 @@
 ---
 name: interactive-modeling
-description: Interactively evolve a domain model and reconcile it with a queryable, checkable representation under source control.
+description: Progressively build a model through conversation, maintaining the model and its executable representation under source control.
 ---
 
 # Interactive Modelling
 
-- Use @../converge/SKILL.md to revise the shared model when ambiguity, surprising results, or failed checks expose gaps in understanding.
-
-- Use @../fold/SKILL.md to incorporate new observations and decisions into the existing model.
-
-- Use @../bisync/SKILL.md to reconcile the representations when their claims diverge.
-
-- Use @../mat/SKILL.md when tables clarify the model's dimensions and relationships.
+- Develop the model together in chat or a shared document.
 
 ---
 
@@ -19,17 +13,11 @@ description: Interactively evolve a domain model and reconcile it with a queryab
 
 _State the intended properties declaratively._
 
-- Mapped facts and relationships agree across the shared model and its stricter representation, except for explicit unresolved discrepancies.
+- **Revised model:** Entities, relationships, and constraints developed through conversation, with unresolved questions explicit.
 
-- Queries and checks address the model's questions, gaps, and contradictions.
+- **Executable representation:** A form of the model supporting reproducible queries and checks.
 
-  - Results trace to stated facts and distinguish them from derived conclusions.
-
-- Translation preserves required distinctions.
-
-  - Unmapped content remains available, with unknowns, interpretation choices, and translation gaps explicit.
-
-- Both representations, their mappings, and reproducible checks remain under source control.
+- Both are maintained under source control, with their mappings and checks.
 
 ---
 
@@ -37,11 +25,9 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Any existing model and corresponding representation provide claims and mappings to revise.
+- **Model:** The current model and any executable representation, mappings, and revision history. The model may initially be absent.
 
-- New observations and relevant revision history supply evidence for changes and context for earlier decisions.
-
-- The questions the model must answer guide queries and the distinctions each representation must preserve.
+- **Interactions:** Questions, explanations, examples, observations, corrections, and decisions exchanged while developing the model.
 
 ---
 
@@ -51,7 +37,7 @@ _Devise an explanation for observations._
 
 - Propose revisions to the entities, relationships, and constraints that explain the observations.
 
-- Propose or revise the mapping of identities and notation into a stricter representation.
+- Propose or revise the mapping of identities and notation into the executable representation.
 
   - Keep unknowns explicit and identify prose whose meaning requires interpretation before translation.
 
@@ -71,26 +57,34 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Update the shared model interactively. Refresh its stricter representation before relying on answers affected by the changes.
+- Refresh the model's executable representation before relying on answers affected by changes.
 
 - Run the queries and checks, then compare their results with the expected answers and mapped source facts.
 
-  - Compare meanings rather than formatting, distinguishing derived conclusions from stated facts.
-
-  - For Markdown tables, use the JSON extraction in @../mat/SKILL.md.
+  - Compare meanings, distinguishing derived conclusions from stated facts.
 
 - Reconcile discrepancies and incorporate findings into the shared model.
 
   - Preserve unmapped content and unresolved conflicts.
 
-- Review the diff for lost requirements or unintended changes in meaning.
-
 ---
 
 ## Representations
 
+- See `./references/prolog.md` for an example representation of facts, inference rules, and queries.
+
+---
+
+- Use @../converge/SKILL.md to revise the shared model when ambiguity, surprising results, or failed checks expose gaps in understanding.
+
+- Use @../fold/SKILL.md to incorporate new observations and decisions into the existing model.
+
+- Use @../reconcile/SKILL.md to reconcile the representations when their claims diverge.
+
+- Use @../mat/SKILL.md when tables clarify the model's dimensions and relationships.
+
+  - Use its JSON extraction to check Markdown tables against the executable representation.
+
 - Use @../dot/SKILL.md to visualize entities and relationships.
 
   - Derive views from the model's queries, keeping presentation separate from domain facts and inference rules.
-
-- See `./references/prolog.md` for an example representation of facts, inference rules, and queries.

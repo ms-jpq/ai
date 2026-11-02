@@ -9,13 +9,9 @@ description: Visualize quantitative data or functions using reproducible gnuplot
 
 _State the intended properties declaratively._
 
-- The rendered plot makes the intended comparison or relationship readable without obscuring relevant source values, ranges, or trends.
+- **Plot:** A readable visualization of the intended comparison or relationship.
 
-- Labels identify quantities, units, and series.
-
-  - Scales, transformations, aggregation, and uncertainty are explicit.
-
-- The plot is reproducible in the required format from the supplied gnuplot script, data or data-generation command, and invocation.
+- **Reproduction:** The gnuplot script, data, and command needed to regenerate the plot.
 
 ---
 
@@ -23,11 +19,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The question to answer defines the comparison or relationship the plot should reveal.
+- **Question:** The comparison or relationship to reveal.
 
-- Source data or functions supply the values to plot, with units and missing observations informing their interpretation.
+- **Data:** Values or functions to plot, with units and missing observations.
 
-- The destination, format, and interactive-terminal requirements constrain rendering.
+- **Destination:** The required format and display environment.
 
 ---
 
@@ -36,6 +32,8 @@ _State the input categories and their roles._
 _Devise an explanation for observations._
 
 - Choose axes, scales, series, and plot styles that expose the relevant comparison or relationship.
+
+  - Make transformations, aggregation, and uncertainty explicit.
 
 ---
 
@@ -56,7 +54,3 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Write and run the gnuplot script with an explicit terminal and output destination.
 
 - Inspect the rendering against the source, including labels, units, legends, and obscured data.
-
-- Revise the presentation where the intended comparison is unclear.
-
-- Deliver the script, data, plot, and reproduction command.

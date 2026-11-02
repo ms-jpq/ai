@@ -5,25 +5,11 @@ description: Refocus a document on the user's current concerns, removing irrelev
 
 # TLDR
 
-- Use @../op-purpose-formation/SKILL.md when the user's concerns or the document's purpose are unclear.
-
-- Use @../gap-analysis/SKILL.md to find missing information that affects the user's understanding, decisions, or actions.
-
-- Use @../refine/SKILL.md to make the revised content concise and comprehensible.
-
-- Use @../qs/SKILL.md when deciding what to retain, remove, or add requires user input that existing answers and evidence cannot resolve.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- The document contains the information needed to understand, decide, or act on the user's current concerns, without obsolete claims or irrelevant detail.
-
-  - Evidence supports additions and replacements, and unresolved questions remain explicit.
-
-  - Necessary context, constraints, trade-offs, and uncertainty survive the revision.
+- **Document:** Current information addressing the user's concerns, with irrelevant detail removed and consequential omissions filled.
 
 ---
 
@@ -31,11 +17,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Document: the content to refocus, including context and constraints that may still matter.
+- **Document:** The content to refocus.
 
-- User's current goals and priorities: the basis for deciding what they need to understand, decide, or do.
+- **Concerns:** What the user needs to understand, decide, or do.
 
-- Relevant evidence: support for assessing existing claims and proposed additions or replacements.
+- **Evidence:** Sources supporting corrections and additions.
 
 ---
 
@@ -73,4 +59,14 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Check the result against the user's concerns for remaining distractions and consequential omissions.
 
-- Refine the retained and added content.
+  - Keep unresolved questions explicit.
+
+---
+
+- Use @../op-purpose-formation/SKILL.md when the user's concerns or the document's purpose are unclear.
+
+- Use @../gap-analysis/SKILL.md to find missing information that affects the user's understanding, decisions, or actions.
+
+- Use @../refine/SKILL.md to make the revised content concise and comprehensible.
+
+- Use @../qs/SKILL.md when deciding what to retain, remove, or add requires user input that existing answers and evidence cannot resolve.

@@ -5,10 +5,6 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 # Topology Recomposition
 
-- Use @../op-purpose-formation/SKILL.md when external boundaries need revision.
-
-- Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced.
-
 - When invoked independently, establish the concerns and constraints the topology must accommodate.
 
 ---
@@ -65,15 +61,13 @@ _Devise an explanation for observations._
 
   - Resolve a cycle when it prevents a required order by changing the components or connections that create it.
 
-    - Retain other cycles only as explicit iterations or feedback loops.
-
 ### Heuristic
 
 - Recomposition may temporarily increase complexity.
 
-  - For deeply entangled sub-graphs, temporarily aggregate components sharing concerns across hierarchy levels until the aggregate exposes an emergent concern or clearer partition.
+  - For deeply entangled subgraphs, temporarily group components that share concerns across hierarchy levels until the group reveals an emergent concern or clearer partition.
 
-- Prefer a single event loop for events requiring shared ordering, unless independent ownership or progress requires separate loops.
+- Prefer a shared event loop for shared ordering and separate loops for independent ownership or progress.
 
 - Push branches toward callers that own the decision and loops toward operations that own the collection, when this reduces cross-boundary dependencies.
 
@@ -106,3 +100,9 @@ _Test those consequences and provisionally retain or revise the explanation._
   - Prefer the topology that makes the change easier to understand, carry out, and verify while preserving required behaviour.
 
 - Retain only necessary concern mappings, components, containment relations, and connections, revising the topology when evidence contradicts the model.
+
+---
+
+- Use @../op-purpose-formation/SKILL.md when external boundaries need revision.
+
+- Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced.

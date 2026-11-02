@@ -5,8 +5,6 @@ description: Seek the simplest system model sufficient for its purpose, reasonin
 
 # Convergence
 
-- Follow @./references/Operator-Protocol.md for explicit inputs, outputs, and Peircean reasoning.
-
 - `system model + optional(information) → revised system model`.
 
 ---
@@ -15,11 +13,7 @@ description: Seek the simplest system model sufficient for its purpose, reasonin
 
 _State the intended properties declaratively._
 
-- The revised system model has fewer redundant distinctions, relationships, and mechanisms while covering its purpose and constraints.
-
-- Missing components are supplied and unnecessary complexity is removed.
-
-- Further application under unchanged inputs yields no justified simplification or correction.
+- **System model:** A minimal sufficient basis of concepts, components, relationships, and mechanisms serving the system's purpose.
 
 ---
 
@@ -27,17 +21,19 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- `system model + optional(information) → revised system model`.
+- **System model:** The current purpose, concerns, structure, concepts, and mechanisms to revise.
+
+- **Information:** Optional observations, constraints, or decisions that inform revision.
 
 ---
 
 ## Operators
 
-- Each operator performs its own reasoning cycle over explicit inputs and outputs. Compose them by passing one operator's output to another.
+- Develop missing components and remove unnecessary complexity until unchanged inputs yield no justified simplification or correction.
+
+- Compose operators by passing one operator's output to another.
 
 - Keep operators as a basis of transformations with distinct primary effects.
-
-- Operators may invoke other operators, not higher-level skills. Higher-level skills compose these building blocks and may reuse one another.
 
 - Apply and re-enter these transformations in order as evidence warrants:
 
@@ -60,3 +56,7 @@ _State the input categories and their roles._
 4. **Mechanism Alignment:** Cultivate a minimal basis of mechanisms that covers salient concerns.
 
    - @../op-mechanism-alignment/SKILL.md
+
+---
+
+- Follow @./references/Operator-Protocol.md for explicit inputs, outputs, and Peircean reasoning.

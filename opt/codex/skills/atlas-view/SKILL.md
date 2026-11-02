@@ -5,21 +5,11 @@ description: Derive views and clusters from atlas nodes, attributes, relationshi
 
 # Atlas View
 
-- Use @../mat/SKILL.md for tabular views.
-
-- Use @../dot/SKILL.md for graph views.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- Views answer the reader's questions through selections, clusters, or progress measures derived from the atlas.
-
-- Displayed nodes retain their identities, and relationships retain their meanings. Connections beyond a selection remain visible as references or boundary indicators.
-
-- Progress distinguishes completion from scope changes and counts each outcome once.
+- **Views:** Selections, clusters, or progress measures that answer the reader's questions using atlas data.
 
 ---
 
@@ -27,11 +17,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Atlas nodes, attributes, edges, and history supply the data.
+- **Atlas:** Nodes, attributes, edges, and history to represent.
 
-- Reader questions and selected work define what the views should expose.
+- **Questions:** What the reader wants to learn about selected work.
 
-- Classification conventions and the display medium guide grouping and presentation.
+- **Conventions:** Classification and display conventions that guide presentation.
 
 ---
 
@@ -61,6 +51,14 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Generate views from the atlas and compare membership, relationships, and totals with the predictions.
 
-- Check that the reader can answer the intended questions and revise the presentation where needed.
+  - Preserve node identities and relationship meanings, indicating connections beyond the selection.
 
-- Keep selection and presentation changes in the views rather than changing the source graph to fit them.
+  - Distinguish completion from scope changes and count each outcome once.
+
+- Apply selection and presentation changes to the views, preserving the source graph.
+
+---
+
+- Use @../mat/SKILL.md for tabular views.
+
+- Use @../dot/SKILL.md for graph views.

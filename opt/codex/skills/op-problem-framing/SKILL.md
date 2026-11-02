@@ -5,9 +5,9 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 # Problem Framing
 
-- Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.
+- Seek prior art in the domain and adjacent disciplines.
 
-- Seek prior art in the domain and adjacent disciplines. Record material differences or its absence.
+  - Record relevant differences from the current problem.
 
 ---
 
@@ -37,7 +37,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose a working hierarchy that explains observed resistance to the system purpose.
+- Propose a problem hierarchy that explains what obstructs the system's purpose.
 
   - Keep candidate problems distinct until their independent, coupled, or nested relationships are established.
 
@@ -57,7 +57,7 @@ _Derive consequences of the explanation._
 
 - Predict how resolving each problem would advance the system purpose.
 
-- Predict which salient concerns require structural embodiment and which do not.
+- Predict which salient concerns require a structural response, such as new components or changed relationships.
 
 ---
 
@@ -65,10 +65,12 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the hierarchy and priorities against observed resistance and alternatives.
+- Test the hierarchy and priorities against observed obstacles and alternative explanations.
 
-- Retain concerns only when they account for observed resistance or could change the response to it or its consequences.
+- Retain concerns only when they explain observed obstacles or could change how those obstacles or their consequences are addressed.
 
-- Revise a problem, its relation, or its concern priority when later evaluation exposes a gap.
+- Revise problems, their relationships, or concern priorities when evaluation exposes a gap.
 
-  - Exclude concerns that are no longer relevant.
+---
+
+- Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.

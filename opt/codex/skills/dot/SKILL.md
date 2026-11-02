@@ -1,6 +1,6 @@
 ---
 name: dot
-description: Translate an existing graph from filesystems, tables, or other representations into Graphviz DOT.
+description: Convert a problem into a base graph in DOT notation, then progressively process it through reproducible passes.
 ---
 
 # Dot
@@ -9,11 +9,11 @@ description: Translate an existing graph from filesystems, tables, or other repr
 
 _State the intended properties declaratively._
 
-- The DOT preserves the source graph's identities, relationship directions, and retained attributes under an explicit mapping.
+- **Conversion:** A reproducible mapping from the problem to nodes, edges, and attributes.
 
-- Conversion is reproducible when the source changes, and scoped omissions or unresolved mappings are explicit.
+- **Base graph:** The problem represented in DOT notation, before processing passes.
 
-- Any rendered view preserves topology while making the intended relationships readable.
+- **Pipeline:** Reproducible passes that progressively process the base graph.
 
 ---
 
@@ -21,9 +21,9 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The source representation supplies the graph to translate.
+- **Problem:** The entities and relationships to represent, as described in existing graphs, filesystems, tables, or other sources.
 
-- Source conventions establish entity identity, relationship direction, and attribute meaning.
+- **Conventions:** Rules for node identity, relationship direction, and attribute meaning.
 
 ---
 
@@ -31,13 +31,15 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose a source-to-DOT mapping that preserves identity and relationship meaning.
+- Propose how the problem maps to nodes, edges, and attributes while preserving identity and relationship meaning.
 
   - Distinguish missing information from absent relationships.
 
   - Resolve ambiguous source conventions before encoding them. A directory parent, a symlink target, and a dependency are different relationships.
 
 - When a visualization is wanted, choose layout and styling separately from the graph's topology.
+
+- Compose processing passes over the base graph, including filters and annotations.
 
 ---
 
@@ -57,11 +59,11 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Generate DOT and check that Graphviz parses it.
 
-- Compare node identities, edge endpoints, directions, and retained attributes with the source. Counts alone do not establish fidelity.
+- Compare node identities, edge endpoints, directions, and retained attributes with the source.
 
 - If rendering, inspect readability and adjust presentation while preserving topology.
 
-- Deliver the DOT and conversion command, with any unresolved mappings or omissions.
+- Deliver the DOT and reproducible pipeline, with any unresolved mappings or omissions.
 
 ---
 

@@ -5,25 +5,13 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 # Adversarial Questions
 
-- Use @../op-purpose-formation/SKILL.md when the purpose needs clarification.
-
-- Use @../op-problem-framing/SKILL.md to establish or revise the concerns and priorities from which questions are derived.
-
-- Use @../gap-analysis/SKILL.md to discover missing concerns or gaps in question coverage.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- Each question traces to a concern and its motivating purpose, with answers that could change understanding, a decision, or an action.
+- **Questions:** Distinct, unanswered questions prioritized by the concerns they address.
 
-- The set contains only unanswered, distinct questions, prioritized by concern and current usefulness.
-
-  - An empty set is valid.
-
-- Reusable question-bank mappings retain their motivating purposes, concerns, and applicability conditions, with revisions supported by experience.
+- **Question bank:** Reusable questions linked to their purposes, concerns, and applicability conditions.
 
 ---
 
@@ -31,11 +19,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Purpose, constraints, and known concerns establish what the questions should help address.
+- **Purpose and concerns:** What the questions should help address.
 
-- The current situation, available evidence, and prior answers distinguish established knowledge from remaining uncertainty.
+- **Context:** The situation, constraints, evidence, and prior answers that establish what remains uncertain.
 
-- The Question Bank supplies candidate concern-to-question mappings, not a checklist to apply wholesale.
+- **Question bank:** Existing questions to adapt.
 
 ---
 
@@ -47,9 +35,7 @@ _Devise an explanation for observations._
 
   - Let the concern determine whether to ask about understanding, options, evidence, coordination, simplification, or another response.
 
-- Derive questions from consequential gaps and known concerns.
-
-- Adapt relevant bank entries and generate questions where the bank provides no suitable mapping.
+- Adapt relevant bank entries and generate questions for concerns they do not cover.
 
 ---
 
@@ -75,8 +61,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Remove answered, duplicate, or inconsequential questions and revise false premises or leading formulations.
 
-- Return the remaining questions prioritized by concern and usefulness now, without supplying unestablished answers.
-
 - When answers or changed work become available, check whether the questions helped address their concerns and revise the mappings accordingly.
 
 - Retain useful mappings in the Question Bank with their motivating purposes, concerns, and applicability conditions.
@@ -91,13 +75,9 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Direct questions to the working agent or caller, including yourself during self-review.
 
-- The caller owns answers, experiments, implementation, and acceptance. The output is questions, not a readiness verdict or a required competing implementation.
+- The caller owns answers, experiments, implementation, and acceptance.
 
-- Involve the user only for unresolved requirements, tradeoffs they must choose, or additional permission. Question generation does not broaden scope or relax constraints.
-
-- Return questions and necessary context, not the deliberation used to generate them.
-
-- Re-invoke `adversarial-questions` as work and evidence change, not to repeat questions awaiting answers.
+- Involve the user for unresolved requirements, tradeoffs they must choose, or additional permission.
 
 ---
 
@@ -108,3 +88,11 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Safe change → compatibility: Which existing caller would behave differently?
 
 - Useful communication → prior knowledge: What does the reader already know, and what must be explained?
+
+---
+
+- Use @../op-purpose-formation/SKILL.md when the purpose needs clarification.
+
+- Use @../op-problem-framing/SKILL.md to establish or revise the concerns and priorities from which questions are derived.
+
+- Use @../gap-analysis/SKILL.md to discover missing concerns or gaps in question coverage.

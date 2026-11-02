@@ -5,8 +5,6 @@ description: Maximize parallelism through task decomposition and delegation.
 
 # Go
 
-- Use @../op-topology-recomposition/SKILL.md during abduction to organize intermediate outcomes into independent subtasks and distinguish necessary dependencies from incidental sequencing.
-
 - See: `go func()`.
 
 ---
@@ -15,9 +13,7 @@ description: Maximize parallelism through task decomposition and delegation.
 
 _State the intended properties declaratively._
 
-- Integrated subtask outputs satisfy the task without conflicting changes.
-
-  - Unresolved work remains explicit.
+- **Result:** Integrated subtask outputs that satisfy the task.
 
 ---
 
@@ -25,9 +21,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The task and required outcomes define what the combined work must achieve.
+- **Task:** The work to complete and its required outcomes.
 
-- Available inputs support execution, while constraints, known dependencies, and shared resources bound independence.
+- **Resources:** Inputs and shared resources available for execution.
+
+- **Constraints:** Dependencies and limits on how the work can proceed.
 
 ---
 
@@ -61,8 +59,10 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Delegate independent subtasks concurrently, releasing dependent work as its inputs become available.
 
-  - Limit waiting to required inputs and shared-resource constraints.
-
 - Check returned results and integrate them against the required outcomes.
 
 - Revise task boundaries or dependencies when execution exposes avoidable waiting, conflicting changes, or missing work.
+
+---
+
+- Use @../op-topology-recomposition/SKILL.md during abduction to organize intermediate outcomes into independent subtasks and distinguish necessary dependencies from incidental sequencing.

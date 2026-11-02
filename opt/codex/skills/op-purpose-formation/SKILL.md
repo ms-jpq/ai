@@ -55,7 +55,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the purpose against the encountered system, commitments, and affected parties' interests.
+- Test the purpose against the system, commitments, and affected parties' interests.
 
 - Retain a candidate purpose only when it has observable success conditions and survives those tests.
 

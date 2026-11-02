@@ -5,21 +5,13 @@ description: Represent a system's state space densely using Markdown tables.
 
 # Mat
 
-- Use @../fold/SKILL.md for subsequent document edits: first incorporate changes into the existing matrix, revising its axes or notation as needed.
-
-  - Keep supporting explanations and anything the matrix cannot express clearly outside the cells.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- Parsable Markdown tables densely represent the combinations defined by the chosen dimensions and constraints, with gaps visible.
+- **Tables:** A dense Markdown representation of the selected state space, with gaps visible.
 
-- Cell meanings are recoverable from a consistent legend, preserving relevant distinctions, relationships, and order.
-
-- Cells remain succinct, with detailed explanations outside the tables. Machine extraction preserves their notation when required.
+- **Legend:** Compact notation defining cell meanings, relationships, and order.
 
 ---
 
@@ -27,9 +19,9 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The system and its existing representations supply known values, relationships, constraints, and unknowns.
+- **System model:** Values, relationships, constraints, and unknowns to represent.
 
-- The question the tables should answer determines which dimensions and combinations matter.
+- **Questions:** What the tables should reveal.
 
 ---
 
@@ -37,7 +29,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose dimensions, their value domains, table axes, and views that represent the relevant state space compactly.
+- Propose dimensions, their allowed values, table axes, and views that represent the state space compactly.
 
   - Define the notation using emoji, symbols, and short labels in a legend.
 
@@ -53,7 +45,7 @@ _Derive consequences of the explanation._
 
 - Derive which combinations the tables must cover from the dimension values and constraints.
 
-- Predict how representative cases, including ordering and exceptions, will be encoded and recovered from the cells.
+- Predict how cells will express representative cases, including ordering and exceptions, and how a reader will interpret them.
 
 - Identify checks for missing combinations, inconsistent repeated claims, and ambiguous notation.
 
@@ -62,8 +54,6 @@ _Derive consequences of the explanation._
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
-
-- Populate the tables using the notation consistently.
 
 - Compare coverage with the expected combinations and trace cell meanings back to the source.
 
@@ -106,3 +96,9 @@ remark --no-config --use remark-gfm --tree-out < '<spec>.md' > ast.json
 
 ./scripts/mdast-2-rows-and-cols.ts < ast.json > tables.json
 ```
+
+---
+
+- Use @../fold/SKILL.md for subsequent document edits: first incorporate changes into the existing matrix, revising its axes or notation as needed.
+
+  - Keep supporting explanations and anything the matrix cannot express clearly outside the cells.
