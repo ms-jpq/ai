@@ -1,21 +1,45 @@
 ---
 name: cartographer
-description: Maintain a persistent atlas of work that brings the system toward its intended model and exposes the widest frontier of independently executable work.
+description: Revise a persistent graph of work and dependencies to cover the changes from the current system to the intended system.
 ---
 
 # Cartographer
 
-- The system model describes what should exist and how it should work.
+- Work graph:
 
-- The current system is what actually exists and how it behaves.
+  - Nodes:
 
-- The atlas models the operations needed to move the current system toward the intended model, their dependencies, and their completion evidence.
+    - Attributes include completion state and work category.
 
-  - Work units describe those operations for contributors to carry out.
+  - Edges:
 
-  - A ticketing system is one representation of the atlas, using tickets, projects, milestones, and labels.
+    - Structural edges describe relationships in the system model.
 
-- Findings from the work can revise both the atlas and the system model.
+    - Ordering edges describe dependencies between units of work.
+
+    - A structural edge does not by itself imply an ordering edge.
+
+  - Domain:
+
+    - The subset of nodes we may create or update.
+
+    - Relationships may extend beyond this subset.
+
+    - External ordering dependencies still constrain the execution frontier.
+
+- `work graph + information → revised work graph`.
+
+  1. Maintain the intended system model independently of the work graph.
+
+  2. Project the model into work-graph nodes, reconciling them with existing work.
+
+  3. Maximize the execution frontier by removing unnecessary sequencing and revising work boundaries.
+
+  4. Assign labels to nodes for state, delivery target, and other relevant properties.
+
+     - Mark completed nodes as done based on completion evidence, and recompute the execution frontier when state changes.
+
+     - Derive views and clusters from labels as needed.
 
 ---
 
@@ -23,19 +47,15 @@ description: Maintain a persistent atlas of work that brings the system toward i
 
 _State the intended properties declaratively._
 
-- A persistent atlas covering the target design, including integration and verification.
+- The revised work graph accounts for the work needed to reach the intended system, including integration and verification.
 
   - Missing work is added, stale or inaccurate work units are corrected, unclear descriptions are clarified, and extraneous work is pruned.
 
-  - Dependencies justify necessary waits and state release conditions. Independent work remains separate, with integration work identified.
+- Dependencies express necessary ordering and explicit release conditions, leaving independent work able to proceed separately.
 
-- The execution frontier includes all unstarted work units with satisfied prerequisites and start conditions, identifying which can proceed together without conflicts.
-
-  - A contributor can determine what to do, what is out of scope, and how to check completion from the work unit and its references alone.
+- Each work unit and its references explain what to do, what is out of scope, and how to check completion without the originating conversation.
 
 - Pending, active, and closed work retains its identities, ownership, history, and evidence across revisions.
-
-  - Contributors may be humans or AI agents.
 
 - Unresolved gaps and discrepancies remain explicit, including incomplete or stale claims.
 
@@ -45,13 +65,15 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Target design, desired outcomes, and constraints define what the work must achieve.
+- The existing work graph and its history are the state to revise.
 
-- The current implementation and evidence from execution and review establish what exists and which completion claims are supported.
+- The intended system's model, desired outcomes, and constraints define the destination.
 
-- The existing atlas and its history supply work units, dependencies, ownership, and prior decisions to reconcile.
+- The current system and evidence from execution and review establish the starting state and support or contradict recorded completion.
 
-- Grouping and classification conventions determine how work is organized and found.
+- New findings and decisions change what work is needed or how it relates.
+
+- Grouping and classification conventions govern how work is organized and found.
 
 ---
 
@@ -59,17 +81,17 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Explain omissions and conflicting or stale claims, then propose corrections.
+- Compare the current and intended systems with the work graph. Propose additions, corrections, clarifications, and removals where they disagree.
 
-- Specify each work unit's outcome, constraints, scope, prerequisites, source context, and completion evidence.
+- Describe affected work units by outcome, scope, constraints, prerequisites, source context, and acceptance checks.
 
-- Keep grouping, classification, and execution dependencies distinct.
+- Propose dependencies with explicit release conditions, distinguishing starting work, reviewing results, and integrating them.
 
-- State what satisfies each dependency.
+- Split, merge, or regroup work to remove duplication and unnecessary sequencing.
 
-  - Starting work, reviewing results, and integrating them may require different conditions.
+  - Keep containment, classification, and execution dependencies distinct.
 
-- Split, merge, or regroup proposed work to remove duplication and unnecessary coordination.
+- When findings challenge the intended system, make the design question explicit rather than silently changing the destination.
 
 ---
 
@@ -77,13 +99,13 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Trace how proposed changes affect coverage, ownership, active work, dependent units, and readiness.
+- Trace the proposed revisions through active work, ownership, dependants, and the execution frontier.
 
-- Check whether the proposed outcomes combine into the intended result, including integration work.
+- Derive whether completing the revised work would produce the intended system, including the joins between independently produced results.
 
 - State what a fresh reader must recover from each unit and its references to carry out and verify the work.
 
-- For progress views, define the scope, measurement unit, and treatment of completion, reopening, scope changes, and splits or merges.
+- For progress assessment, define the scope, measurement unit, and effects of completion, reopening, scope changes, and splits or merges.
 
 ---
 
@@ -91,11 +113,11 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply authorized revisions and check them against current evidence.
+- Coordinate revisions with owners of active work, recording whether their attempt can continue, needs revision, or is superseded.
 
-  - Coordinate changes with owners of active work and record whether their current attempt can continue, needs revision, or is superseded.
+- Verify completed work before relying on it as a prerequisite. Preserve its closure history when reopening it or adding follow-up work.
 
-  - Verify completed work before relying on it as a prerequisite. Preserve its closure history when reopening it or adding follow-up work.
+- Apply authorized revisions and compare the resulting work graph with the current and intended systems.
 
 - Check coverage in both directions: required outcomes have work and acceptance checks, and work contributes to required outcomes.
 
@@ -103,7 +125,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Compare their reconstructed assignment with the source requirements and repair missing context where it belongs.
 
-- Recompute the frontier after changes. Check for blocking cycles and conflicts over ownership, interfaces, or shared resources.
+- Check for blocking cycles and recompute the execution frontier.
 
 - Derive progress views from recorded history.
 
@@ -111,7 +133,31 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Do not count both parents and children for the same outcome.
 
-- Record unresolved discrepancies and revisit affected operations as findings change the atlas.
+- Retain unresolved discrepancies and revisit affected operations when evidence or the intended system changes.
+
+---
+
+## Execution Frontier
+
+- The execution frontier is the set of selected nodes whose constraints on ordering edges are satisfied. Structural edges do not determine readiness.
+
+- Identify which selected work units can proceed together without conflicts over ownership, interfaces, or shared resources.
+
+---
+
+## Graph Representation
+
+- In a ticketing system:
+
+  - Tickets represent nodes.
+
+  - Dependencies represent ordering edges, with conditions that release blocked work.
+
+  - Projects and milestones cluster nodes by scope or delivery target.
+
+  - Labels classify nodes within or across clusters.
+
+  - Typed relationships represent structural edges. Cluster membership alone does not impose execution order.
 
 ---
 
