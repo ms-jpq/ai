@@ -83,8 +83,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ---
 
-- Use @../adversarial-questions/SKILL.md throughout each pass to derive questions from the refactor's purpose and concerns.
-
 - Use @../converge/SKILL.md when review requires revising the system purpose, problem frame, or design model.
 
 - Use @../op-topology-recomposition/SKILL.md during abduction to propose simpler components, boundaries, and connections.
