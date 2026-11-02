@@ -29,17 +29,21 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the document, the user's current goals and priorities, and relevant evidence.
+_State the input categories and their roles._
 
-- Identify what the user needs to understand, decide, or do.
+- Document: the content to refocus, including context and constraints that may still matter.
 
-- Locate outdated claims, irrelevant detail, and missing information.
+- User's current goals and priorities: the basis for deciding what they need to understand, decide, or do.
+
+- Relevant evidence: support for assessing existing claims and proposed additions or replacements.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Identify outdated claims, irrelevant detail, and consequential omissions.
 
 - Propose what to retain, remove, replace, or add based on its relevance to the user's concerns.
 

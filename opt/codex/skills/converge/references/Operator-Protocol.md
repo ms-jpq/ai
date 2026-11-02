@@ -6,6 +6,8 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
+_State the input categories and their roles._
+
 ...
 
 ## Abduction

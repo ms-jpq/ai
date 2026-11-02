@@ -13,16 +13,6 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 ---
 
-## Goals
-
-- Derive useful questions through `purpose → concerns → questions`, without relying on the user's presence or objections.
-
-- Build a reusable bank of concern-to-question mappings that improves through use.
-
-- Help the caller address what matters to the purpose, not to prescribe solutions.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
@@ -39,11 +29,13 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the purpose, constraints, current situation, known concerns, and available evidence.
+_State the input categories and their roles._
 
-- Read the Question Bank below for candidate mappings, not a checklist to apply wholesale.
+- Purpose, constraints, and known concerns establish what the questions should help address.
 
-- Record what is already known or answered and what remains uncertain about achieving the purpose.
+- The current situation, available evidence, and prior answers distinguish established knowledge from remaining uncertainty.
+
+- The Question Bank supplies candidate concern-to-question mappings, not a checklist to apply wholesale.
 
 ---
 
@@ -103,7 +95,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Involve the user only for unresolved requirements, tradeoffs they must choose, or additional permission. Question generation does not broaden scope or relax constraints.
 
-- Return questions and necessary context, not the deliberation used to generate them. An empty result is valid when no useful question remains.
+- Return questions and necessary context, not the deliberation used to generate them.
 
 - Re-invoke `adversarial-questions` as work and evidence change, not to repeat questions awaiting answers.
 

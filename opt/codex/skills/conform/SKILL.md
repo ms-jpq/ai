@@ -33,23 +33,25 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the destination and explicit sources.
+_State the input categories and their roles._
 
-  - When sources are omitted, choose peers by role and scope, not filesystem proximity.
+- Destination: the content to transform and the baseline for preserved behaviour, contracts, constraints, and meaning.
 
-- Read applicable rules in `../../rules/`, including global, path-specific, and embedded-language rules.
+- Explicit sources or comparable peers: reference conventions for naming, structure, idioms, terminology, references, and formatting.
 
-- Map corresponding roles and conventions in naming, structure, idioms, terminology, references, and formatting.
+  - Peers are comparable by role and scope, not filesystem proximity.
 
-- Identify rule violations and differences from references.
+- Applicable rules in `../../rules/`: global, path-specific, and embedded-language requirements governing the destination.
 
-- Identify behaviour and meaning to preserve, including deliberate differences from peers.
+- Deliberate differences and their rationale, where available: constraints on copying reference conventions.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Compare corresponding roles and conventions in the destination, references, and applicable rules.
 
 - Explain each mismatch as a rule violation, inconsistent convention, necessary difference, or unresolved conflict.
 
@@ -79,12 +81,10 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Apply the proposed changes to the destination.
 
-- Check the revised destination against applicable rules, references, and the original destination.
+- Retain changes only when checks against applicable rules, references, and the original destination confirm the predicted conformity and preserved semantics.
 
   - For code, run relevant checks.
 
   - For prose, verify that claims, conditions, and uncertainty survive.
-
-- Retain changes only when they satisfy the predicted rules and conventions while preserving required semantics.
 
 - Explain retained differences and unresolved conflicts, including conformity that would require semantic changes.

@@ -5,8 +5,6 @@ description: Interactively evolve a domain model and reconcile it with a queryab
 
 # Interactive Modelling
 
-- Keep both representations, translation rules, and checks under source control.
-
 - Use @../converge/SKILL.md to revise the shared model when ambiguity, surprising results, or failed checks expose gaps in understanding.
 
 - Use @../fold/SKILL.md to incorporate new observations and decisions into the existing model.
@@ -37,9 +35,13 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the current model, new observations, and relevant revision history.
+_State the input categories and their roles._
 
-- Identify the questions the model must answer and any distinctions lost in translation.
+- Any existing model and corresponding representation provide claims and mappings to revise.
+
+- New observations and relevant revision history supply evidence for changes and context for earlier decisions.
+
+- The questions the model must answer guide queries and the distinctions each representation must preserve.
 
 ---
 

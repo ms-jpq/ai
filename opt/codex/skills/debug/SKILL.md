@@ -9,6 +9,8 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 - Use the operator skill for every layer whose model requires revision.
 
+- Preserve evidence needed to reproduce or explain the failure before changing the system or its model.
+
 ---
 
 ## Artifact (Output)
@@ -27,21 +29,21 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Record the expected and observed outcomes, their difference, and the affected system.
+_State the input categories and their roles._
 
-- Collect evidence from the system, its intended model, and relevant decisions.
+- Expected and observed outcomes: the discrepancy requiring explanation.
 
-  - Preserve the evidence needed to reproduce or explain the failure.
+- Affected system and intended model: the implementation, assumptions, and dependencies through which the failure may arise.
 
-- Map model and system differences without changing either representation.
-
-- Record the model assumptions and dependencies relevant to the observed failure.
+- Available observations, reproduction evidence, and relevant decisions: support for tracing and testing possible causes.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Compare the model and system without changing either representation.
 
 - Trace the failure through the implicated implementation and model dependencies.
 

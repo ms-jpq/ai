@@ -35,9 +35,11 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Gather outstanding questions from the conversation and documents in scope.
+_State the input categories and their roles._
 
-- Read available evidence and prior resolutions, including the conditions under which they hold.
+- The conversation and documents in scope supply outstanding questions and their decision context.
+
+- Available evidence and prior resolutions, with their applicability conditions, establish what can be answered without asking again.
 
 ---
 
@@ -69,11 +71,11 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Compare the refined set with the original questions and evidence. Restore missing decisions, conditions, or viable choices.
 
-- As answers arrive or new questions arise, apply existing resolutions and their implications before asking again. Remove resolved follow-ups and revise those still needed.
+- As answers arrive or new questions arise, apply existing resolutions and their implications before asking again.
 
   - Record resolutions and their applicable conditions in the relevant project documents or decision notes outside the brief.
 
-  - Remove answered questions from the brief once their resolutions are recorded.
+  - Remove answered questions and resolved follow-ups once their resolutions are recorded, then revise those still needed.
 
   - Reconsider prior resolutions when their conditions change or evidence conflicts.
 

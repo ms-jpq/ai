@@ -13,16 +13,6 @@ description: Extract reusable stages from varied tasks and organize them into ef
 
 ---
 
-## Goals
-
-- Discover the common process within varied tasks rather than treating each task as a separate procedure.
-
-- Make the pipeline as wide as dependencies permit while preserving required outcomes and avoiding unnecessary coordination.
-
-- Keep the common core and residual task-specific work disjoint, joining their outcomes only where needed.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
@@ -49,15 +39,13 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read representative tasks, their required outcomes, inputs, constraints, and existing procedures.
+_State the input categories and their roles._
 
-- Compare attempts for recurring outcomes and transformations beneath differences in terminology, methods, and task details.
+- Representative tasks, required outcomes, inputs, and constraints define the family the pipeline should support.
 
-- Record what remains task-specific without assuming every difference needs a general solution.
+- Existing procedures and execution attempts provide candidate stages and evidence of recurring or task-specific work.
 
-- Record where work waits, what releases it, and which dependencies or shared resources are claimed to require that order.
-
-- Seek established processes for the same or analogous problems before inventing one.
+- Recorded waits, release conditions, and claimed dependencies or resource constraints explain the current ordering.
 
 ---
 
@@ -65,7 +53,11 @@ _State the intended properties declaratively._
 
 _Devise an explanation for observations._
 
+- Seek established processes for the same or analogous problems before inventing one.
+
 - Propose a common core that explains recurring work, distinguishing genuine commonality from superficial resemblance.
+
+  - Compare attempts for recurring outcomes and transformations beneath differences in terminology, methods, and task details.
 
   - Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required rather than building exceptions into every shared stage.
 

@@ -21,9 +21,11 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the existing representation and accumulated material in scope.
+_State the input categories and their roles._
 
-- Locate what the current organization or notation cannot express.
+- Existing structured representation: the baseline to extend or reorganize while preserving its meaning.
+
+- Accumulated material in scope: additions to incorporate, including their conditions and uncertainties.
 
 ---
 
@@ -31,9 +33,9 @@ _State the intended properties declaratively._
 
 _Devise an explanation for observations._
 
-- Explain the mismatch and propose changes to organization or notation.
+- Explain what the current organization or notation cannot express and propose a revision that expresses repeated meaning once.
 
-- Propose a representation that expresses repeated meaning once, preserving differences in scope, conditions, and certainty.
+  - Preserve differences in scope, conditions, and certainty.
 
 ---
 

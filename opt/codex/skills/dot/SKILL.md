@@ -19,9 +19,11 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Locate the existing graph, whether represented by filesystem entries, table rows, records, references, or another structure.
+_State the input categories and their roles._
 
-- Identify its entities, relationships, direction, and attributes. Distinguish missing information from absent relationships.
+- The source representation supplies the graph to translate, whether encoded in filesystem entries, table rows, records, references, or another structure.
+
+- Source conventions establish entity identity, relationship direction, and attribute meaning.
 
 ---
 
@@ -30,6 +32,8 @@ _State the intended properties declaratively._
 _Devise an explanation for observations._
 
 - Propose a source-to-DOT mapping that preserves identity and relationship meaning.
+
+  - Distinguish missing information from absent relationships.
 
   - Resolve ambiguous source conventions before encoding them. A directory parent, a symlink target, and a dependency are different relationships.
 

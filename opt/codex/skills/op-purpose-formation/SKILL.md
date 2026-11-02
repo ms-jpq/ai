@@ -23,13 +23,15 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Describe the encountered system, its current behaviour, and its external boundary.
+_State the input categories and their roles._
 
-- Record declared intentions, existing commitments, and unmet intentions.
+- The encountered system, current behaviour, and external boundary establish what may change or be preserved.
 
-  - Record who is affected by the purpose.
+- Declared and unmet intentions provide candidate reasons for the system's existence or revision.
 
-- Keep competing purposes distinct until their relationship is established.
+- Existing commitments and affected parties constrain acceptable purposes.
+
+- Competing purposes expose unresolved differences in intended effects.
 
 ---
 
@@ -40,6 +42,8 @@ _Devise an explanation for observations._
 - Propose a system purpose that explains why the system should change or be preserved.
 
   - Compare candidate purposes by how they account for declared and unmet intentions.
+
+  - Keep competing purposes distinct until their relationship is established.
 
 ---
 
@@ -65,10 +69,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Revise the proposed purpose or boundary when evaluation exposes a conflict or gap.
 
----
-
-## Agreement
-
-- Record whose intentions the proposed purpose reflects.
-
-- Record who accepts or disputes the proposed purpose and external boundary, and what remains unresolved.
+- Record whose intentions the proposed purpose reflects, who accepts or disputes it and its boundary, and what remains unresolved.

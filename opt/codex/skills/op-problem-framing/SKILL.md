@@ -7,6 +7,8 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 - Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.
 
+- Seek prior art in the domain and adjacent disciplines, recording material differences or the absence of relevant prior art.
+
 ---
 
 ## Artifact (Output)
@@ -27,23 +29,17 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Take the system purpose, success conditions, boundary, commitments, and unresolved purpose conflicts from Purpose Formation as inputs.
+_State the input categories and their roles._
 
-- Record observed resistance: surprise, conflict, uncertainty, failure, or unmet intention.
+- The purpose, success conditions, boundary, commitments, and unresolved conflicts from Purpose Formation define what counts as resistance to the system purpose.
 
-- List candidate problems without forcing them into one class.
+- Observed surprise, conflict, uncertainty, failure, or unmet intention provides evidence of resistance.
 
-  - State the observation or evidence that makes each candidate a problem.
+- Candidate problems, their supporting observations, unknowns, and competing interpretations provide alternatives for classification.
 
-  - Record its unknowns and competing interpretations.
+- Analogous problem frames, concern profiles, mechanisms, and material differences provide prior art for comparison.
 
-- Seek prior art in the domain and adjacent disciplines.
-
-  - Record analogous problem frames, concern profiles, mechanisms, and material differences.
-
-  - Record when no relevant prior art was found.
-
-- Record current concerns and their candidate relations to the problems.
+- Current concerns and their candidate relations to problems provide the baseline for reprioritization.
 
 ---
 
@@ -53,7 +49,7 @@ _Devise an explanation for observations._
 
 - Propose a working hierarchy that explains observed resistance to the system purpose.
 
-  - Distinguish independent, coupled, and nested problems.
+  - Keep candidate problems distinct until their independent, coupled, or nested relationships are established.
 
   - Treat prior art as a candidate frame, not a borrowed answer.
 

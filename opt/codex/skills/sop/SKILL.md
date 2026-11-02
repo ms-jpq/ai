@@ -37,11 +37,13 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the process's purpose, desired outcome, constraints, current state, and any existing procedure or execution evidence.
+_State the input categories and their roles._
 
-  - Assess the current state against the procedure's observable conditions.
+- The process's purpose, desired outcome, and constraints define what the procedure must achieve and preserve.
 
-- Identify missing or uncertain state assignments and transitions.
+- The current state and available execution evidence establish the starting conditions and uncertainty about progress.
+
+- Any existing procedure supplies state definitions, transitions, and completion conditions to assess or revise.
 
 ---
 
@@ -55,7 +57,9 @@ _Devise an explanation for observations._
 
   - Treat additions to an incomplete model as hypotheses.
 
-- When advancing, propose the next transition and explain why its prerequisites fit the observed state.
+- When advancing, assess the current state against the procedure's observable conditions, then propose the next transition whose prerequisites fit.
+
+  - Keep uncertain state assignments explicit.
 
 ---
 
@@ -83,14 +87,10 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Mark untested transitions explicitly.
 
-- When advancing, perform the transition within the authorized scope.
-
-  - Complete the actions needed to reach the next principal state.
+- When advancing, perform the transition within the authorized scope, stopping at the next principal state.
 
   - Check the resulting state against the predicted completion conditions before recording advancement.
 
   - If checks fail, report the actual state and revise the assessment or procedure as the evidence warrants.
 
   - Record the observed state and transition outcome.
-
-  - Stop at the next principal state.

@@ -25,9 +25,11 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the system, its existing representations, and the question the tables should answer.
+_State the input categories and their roles._
 
-- Identify relevant dimensions, their possible values, constraints, and unknowns.
+- The system and its existing representations supply known values, relationships, constraints, and unknowns.
+
+- The question the tables should answer determines which dimensions and combinations matter.
 
 ---
 
@@ -35,7 +37,7 @@ _State the intended properties declaratively._
 
 _Devise an explanation for observations._
 
-- Propose table axes and related views that represent the chosen state space compactly.
+- Propose dimensions, their value domains, table axes, and related views that represent the relevant state space compactly.
 
   - Define the notation using emoji, symbols, and short labels in a legend.
 
@@ -61,7 +63,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Populate the tables using the notation consistently, keeping cells succinct and detailed explanations outside them.
+- Populate the tables using the notation consistently.
 
 - Compare coverage with the expected combinations and trace cell meanings back to the source.
 

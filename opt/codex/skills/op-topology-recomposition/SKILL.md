@@ -9,6 +9,8 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 - Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced, not merely where responsibilities reside or how parts connect.
 
+- When invoked independently, establish the concerns and constraints the topology must accommodate.
+
 ---
 
 ## Artifact (Output)
@@ -37,17 +39,17 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Take the framed concerns, system purpose, desired outcome, and external boundary as inputs.
+_State the input categories and their roles._
 
-  - When invoked independently, state the concerns and constraints the topology must accommodate.
+- Framed concerns, system purpose, desired outcome, and external boundary define the topology's obligations and scope.
 
-- Record the affected system's parts, boundaries, containment, flows, and ordering constraints.
+- Current parts, boundaries, containment, flows, and ordering constraints provide the structure to revise.
 
-  - Record which outcomes the current parts achieve and which concerns they address.
+  - Evidence of achieved outcomes and addressed concerns supports assessment of existing coverage.
 
-- Identify which current boundaries or flows force a concern to be understood across several parts.
+- Representative changes and cross-part interactions provide evidence of structural coupling.
 
-- Record each cycle, its source, and whether it prevents a required order or represents iteration or feedback.
+- Known cycles, their sources, and observed behaviour support distinguishing ordering obstructions from iteration or feedback.
 
 ---
 

@@ -37,19 +37,23 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Select the fragmented code, prose, configuration, or instructions in scope.
+_State the input categories and their roles._
 
-- Identify each part's location, role, terms, and dependencies in both directions.
+- Code, prose, configuration, or instructions in scope: the content to consolidate.
 
-- Locate scattered related content, semantic duplicates, broken or redundant references, and unresolved aliases.
+  - Runtime state, generated output, and unrelated material are outside the scope by default.
 
-- Exclude runtime state, generated output, and unrelated material by default.
+- Existing locations, roles, terminology, and dependencies in both directions: context for choosing destinations and preserving uses.
+
+- Required meaning, behaviour, responsibilities, contracts, and flows: constraints on consolidation.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Identify scattered related content, candidate semantic duplicates, broken or redundant references, and unresolved aliases.
 
 - Propose a canonical location for each concern and explain how it reduces fragmentation.
 
@@ -93,6 +97,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Check the resulting locations, references, and terms against the predictions.
 
-- Check each consolidation against its original uses. Remove duplicates only when the retained form preserves their meaning and behaviour.
-
 - Retain a change only when it reduces fragmentation without changing preserved meaning or behaviour.
+
+  - Remove duplicates only after checking the retained form against every original use.

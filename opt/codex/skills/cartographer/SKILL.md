@@ -43,11 +43,15 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the desired outcomes, design, constraints, implementation, and existing atlas, including execution and review evidence.
+_State the input categories and their roles._
 
-- Inspect relevant history, ownership, groupings, and classification conventions.
+- Target design, desired outcomes, and constraints define what the work must achieve.
 
-- Select the relevant operations below.
+- The current implementation and evidence from execution and review establish what exists and which completion claims are supported.
+
+- The existing atlas and its history supply work units, dependencies, ownership, and prior decisions to reconcile.
+
+- Grouping and classification conventions determine how work is organized and found.
 
 ---
 
@@ -112,6 +116,8 @@ _Test those consequences and provisionally retain or revise the explanation._
 ---
 
 ## Operations
+
+- Select the operations needed for the current pass.
 
 | Operation           | Question                                    | Result                                                  |
 | ------------------- | ------------------------------------------- | ------------------------------------------------------- |

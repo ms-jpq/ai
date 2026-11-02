@@ -5,6 +5,10 @@ description: Give consistent names that semantically compress ideas.
 
 # Conceptual Synthesis
 
+- Search the domain and adjacent disciplines for existing concepts, terms, and models before inventing new ones.
+
+---
+
 ## Artifact (Output)
 
 _State the intended properties declaratively._
@@ -23,11 +27,13 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Identify a recurring distinction, relation, or constraint that is unnamed, ambiguous, unstable, or inconsistent across representations.
+_State the input categories and their roles._
 
-- Collect its uses, counterexamples, neighbouring concepts, and representations.
+- A recurring distinction, relation, or constraint whose naming is absent, ambiguous, unstable, or inconsistent defines the scope.
 
-- Search the domain and adjacent disciplines for existing concepts, terms, and models that may subsume the distinction.
+- Uses, counterexamples, neighbouring concepts, and representations constrain the meaning that names and views must preserve.
+
+- Existing concepts, terms, and models from the domain and adjacent disciplines offer candidates that may already express the distinction.
 
 ---
 

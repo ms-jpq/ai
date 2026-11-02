@@ -23,9 +23,11 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the task, required outcomes, available inputs, and constraints.
+_State the input categories and their roles._
 
-- Identify dependencies and shared resources that could couple otherwise independent work.
+- The task and required outcomes define what the combined work must achieve.
+
+- Available inputs support execution, while constraints, known dependencies, and shared resources bound independence.
 
 ---
 

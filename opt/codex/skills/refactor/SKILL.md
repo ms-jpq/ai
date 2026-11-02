@@ -33,31 +33,25 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the system purpose, current work, applicable rules, and observed friction.
+_State the input categories and their roles._
 
-- State the preservation boundary: behaviour, contracts, constraints, and meaning that must remain unchanged.
+- System purpose, current implementation, and observed friction: context for finding unnecessary complexity.
 
-  - Separate these requirements from incidental structure.
+- Required behaviour, contracts, constraints, meaning, and applicable rules: the preservation boundary.
 
-  - Record behaviour or contract changes explicitly requested or subsequently agreed with the user.
+  - Explicitly requested or subsequently agreed changes define exceptions to that boundary.
 
-- Inspect entry points, dependencies, branches, repeated transformations, and exceptions for complexity whose necessity is unclear.
-
-  - Identify the requirement each candidate serves and the consumers that depend on it.
-
-- Select one supported simplification opportunity per pass.
-
-- Establish a passing baseline with existing tests or new characterization tests.
-
-  - Cover a normal case, a boundary case, and relevant failure behaviour.
-
-  - Distinguish assertions of required behaviour from assertions that merely mirror the current implementation.
+- Existing tests, checks, and observed results: evidence of current behaviour and a basis for comparison.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Inspect entry points, dependencies, branches, repeated transformations, and exceptions. Select one supported simplification opportunity per pass.
+
+  - Distinguish requirements and dependent consumers from incidental structure.
 
 - Ask what could disappear while the requirements still hold.
 
@@ -89,6 +83,12 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
+- Establish a passing baseline with existing tests or new characterization tests before changing the implementation.
+
+  - Cover a normal case, a boundary case, and relevant failure behaviour.
+
+  - Distinguish assertions of required behaviour from assertions that merely mirror the current implementation.
+
 - Implement and test the alternative within the preservation boundary and agreed changes.
 
   - Keep the previous state recoverable for comparison.
@@ -105,8 +105,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Ask the user only when progress requires an unresolved product choice or a change beyond the agreed scope.
 
-- Re-invoke `refactor` for another pass after each retained change to search for further simplifications.
-
-- Stop after a pass identifies no further supported simplification.
+- Repeat after each retained change until a pass finds no further supported simplification.
 
   - Report unresolved candidates and what prevents evaluating them.

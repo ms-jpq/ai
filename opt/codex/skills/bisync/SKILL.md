@@ -33,43 +33,27 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Delimit the shared system and the relevant scope of both representations.
+_State the input categories and their roles._
 
-- Use the system's purpose, boundary, authority, and commitments as reconciliation constraints.
+- Representations: the claims, parts, relations, and constraints to reconcile within the shared system's scope.
 
-- Map corresponding claims, parts, relations, and constraints.
+- Purpose, boundaries, authority, and commitments: constraints on permitted reconciliation.
 
-  - Classify the correspondence:
+- Available evidence and intent: grounds for explaining differences and choosing which changes to preserve.
 
-    - Both agree.
-
-    - One is absent.
-
-    - They disagree.
-
-    - Their correspondence is unknown.
-
-- Record the authority, evidence, and intent available for each difference.
-
-- For each difference, identify which representation changed:
-
-  - Neither changed from a common base.
-
-  - Only `src` changed from a common base.
-
-  - Only `dst` changed from a common base.
-
-  - Both changed independently from a common base.
-
-  - No common base is known.
-
-- Prioritize differences that could obstruct the system purpose or mechanism coverage.
+- Change history and any common base: evidence of which representation changed.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Map corresponding elements as agreeing, absent on one side, disagreeing, or unknown.
+
+- Where a common base exists, distinguish changes to neither, one, or both representations. Record when no common base is known.
+
+- Prioritize differences that could obstruct the system purpose or mechanism coverage.
 
 - Name the reconciliation disposition:
 

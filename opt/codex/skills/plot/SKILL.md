@@ -21,9 +21,13 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Identify the question the plot should answer, the source values, units, and missing observations.
+_State the input categories and their roles._
 
-- Identify the destination and required output format or interactive terminal.
+- The question to answer defines the comparison or relationship the plot should reveal.
+
+- Source data or functions supply the values to plot, with units and missing observations informing their interpretation.
+
+- The destination and any format or interactive-terminal requirements constrain rendering.
 
 ---
 

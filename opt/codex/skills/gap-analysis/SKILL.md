@@ -29,15 +29,21 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the purpose, scope, constraints, and material whose coverage is being examined.
+_State the input categories and their roles._
 
-- Identify what is already covered, deliberately excluded, unresolved, or previously dismissed and why.
+- Purpose, scope, and constraints: the basis for judging which omissions matter.
+
+- Material under examination: the provisions whose coverage is being assessed.
+
+- Available evidence and prior findings, exclusions, or dismissals: grounds for assessing coverage and revisiting earlier conclusions.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Distinguish existing coverage, deliberate exclusions, unresolved areas, and previously dismissed gaps using their supporting reasons.
 
 - Propose omissions that could obstruct the purpose, considering relevant situations, dependencies, and failure conditions beyond those already represented.
 

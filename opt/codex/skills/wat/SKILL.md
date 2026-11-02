@@ -25,17 +25,19 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the subject and surrounding conversation to identify what needs explaining.
+_State the input categories and their roles._
 
-- Inspect the relevant code, data, or evidence. Separate observed behaviour, intended behaviour, and inference.
+- Subject and surrounding conversation: what needs explaining and the user's current understanding.
 
-- Find terms without definitions, claims without mechanisms, and missing steps in the explanation.
+- Relevant code, data, observations, and stated intentions: evidence for explaining how the subject works.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Identify undefined terms, claims without mechanisms, and missing explanatory steps, distinguishing observed behaviour, intended behaviour, and inference.
 
 - Propose the simplest explanation that accounts for the evidence.
 

@@ -23,15 +23,19 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Select one reader-facing defect per pass.
+_State the input categories and their roles._
 
-- Record the current text, the reader's goal, knowledge, and vocabulary.
+- Current text and local context: the prose to revise and the meaning to preserve.
+
+- Reader's goal, knowledge, and vocabulary: the basis for judging clarity and relevance.
 
 ---
 
 ## Abduction
 
 _Devise an explanation for observations._
+
+- Select one reader-facing defect per pass.
 
 - Explain how the current wording or structure causes the reader-facing defect, then propose a revision.
 

@@ -5,9 +5,15 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 # Mechanism Alignment
 
-- Use @../op-topology-recomposition/SKILL.md when a mechanism requires different part boundaries, placement, or connections.
+- Use @../op-topology-recomposition/SKILL.md when a mechanism requires different component boundaries, placement, or connections.
 
 - Use @../op-problem-framing/SKILL.md during induction when the concerns or their priorities need revision.
+
+- A mechanism describes how an effect is produced. Structural components, such as modules or services, implement mechanisms.
+
+  - One mechanism may span several components, and one component may implement several mechanisms.
+
+  - Generalizing or splitting a mechanism does not by itself require merging or splitting the components that implement it.
 
 ---
 
@@ -35,15 +41,15 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Take the framed concerns, priorities, and evidence as inputs.
+_State the input categories and their roles._
 
-- Record mechanisms already intended, operating, or proposed.
+- Framed concerns and priorities define the coverage sought.
 
-- Record each concern's current coverage, expected effect, assumptions, and unknowns.
+- Intended, operating, and proposed mechanisms provide candidates for reuse or revision.
 
-- Keep an implementation distinct from its intended mechanism model.
+- Existing coverage claims, expected effects, assumptions, and evidence provide the baseline for assessing mechanisms and discovering gaps.
 
-  - A mechanism describes how an effect is produced, not a part boundary. One mechanism may span parts, and one part may support several mechanisms.
+- The implementation and its intended mechanism model provide distinct accounts of actual and intended effects.
 
 ---
 
@@ -55,9 +61,9 @@ _Devise an explanation for observations._
 
   - Explain how each candidate would produce its intended effects under the proposed assumptions.
 
-- Generalize a mechanism when one causal path addresses several concerns, without assuming their parts must merge.
+- Generalize a mechanism when one causal path addresses several concerns.
 
-- Specialize or split a mechanism when its concerns require incompatible effects or preconditions, without assuming separate part boundaries.
+- Specialize or split a mechanism when its concerns require incompatible effects or preconditions.
 
 ---
 

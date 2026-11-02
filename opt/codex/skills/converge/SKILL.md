@@ -7,6 +7,8 @@ description: Seek the simplest system model sufficient for its purpose, reasonin
 
 - Follow @./references/Operator-Protocol.md for explicit inputs, outputs, and Peircean reasoning.
 
+- Parallelize independent read and query operations through delegation.
+
 ---
 
 ## Artifact (Output)
@@ -27,11 +29,13 @@ _State the intended properties declaratively._
 
 ## Observation (Input)
 
-- Read the system or its representation, intended purpose, constraints, current model, and available evidence.
+_State the input categories and their roles._
 
-- Identify what the model cannot explain or achieve, and where inconsistent concepts, coupled responsibilities, or overlapping mechanisms make it difficult to use.
+- The system or its representation and current model provide the baseline for revision.
 
-- Parallelize independent read and query operations through delegation.
+- Intended purpose and constraints define what the model must explain and achieve.
+
+- Observations and available evidence support assessment of the model's explanatory power, sufficiency, and complexity.
 
 ---
 
