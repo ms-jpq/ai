@@ -59,4 +59,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Retain purposes with observable success conditions that satisfy the constraints.
 
-- Record whose intentions the proposed purpose reflects, who accepts or disputes it and its boundary, and what remains unresolved.
+- Record whose intentions the purpose reflects and who accepts or disputes the purpose and boundary.

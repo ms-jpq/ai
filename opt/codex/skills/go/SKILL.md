@@ -59,7 +59,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Delegate independent subtasks concurrently, releasing dependent work as its inputs become available.
 
-- Check returned results and integrate them against the required outcomes.
+- Integrate returned results and check them against the required outcomes.
 
 - Revise task boundaries or dependencies when execution exposes avoidable waiting, conflicting changes, or missing work.
 

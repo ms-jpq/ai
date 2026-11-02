@@ -25,7 +25,7 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- **Model:** The current model and any executable representation, mappings, and revision history. The model may initially be absent.
+- **Model:** The current model, executable representation, mappings, and revision history, if any.
 
 - **Interactions:** Questions, explanations, examples, observations, corrections, and decisions exchanged while developing the model.
 

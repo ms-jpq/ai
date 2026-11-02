@@ -35,11 +35,9 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
   0. Develop and simplify the intended system model independently of the work graph.
 
-  1. Reconcile work-graph nodes with the model and existing work, updating their attributes.
+  1. Project the intended system model into nodes, attributes, and decomposition edges, reconciling them with the current system.
 
-     - Project the intended system model into the work graph.
-
-  2. Maximize the concurrent execution frontier by removing unnecessary sequencing and revising work boundaries.
+  2. Recompose work boundaries and ordering dependencies to maximize the concurrent execution frontier.
 
   3. Derive views, including the execution frontier and clusters, from node attributes and edges.
 
@@ -79,9 +77,13 @@ _State the input categories and their roles._
 
   - @../converge/SKILL.md
 
-- **Project:** Project an intended system model into an existing atlas, reconciling work nodes, attributes, and edges with the current system.
+- **Project:** Project the intended system model into a work decomposition reconciled with the current system.
 
   - @../atlas-project/SKILL.md
+
+- **Recompose:** Recompose work and its ordering to maximize the concurrent execution frontier.
+
+  - @../atlas-recompose/SKILL.md
 
 - **View:** Build reproducible queries or scripts that derive views from an atlas.
 

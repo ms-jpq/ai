@@ -67,7 +67,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - For prose, verify that claims, conditions, and uncertainty survive.
 
-- Explain retained differences and unresolved conflicts, including conformity that would require semantic changes.
+- Explain retained differences and unresolved conflicts, including changes that would alter meaning or behaviour.
 
 ---
 

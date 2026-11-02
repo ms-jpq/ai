@@ -57,7 +57,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Remove answered, duplicate, or inconsequential questions and revise false premises or leading formulations.
 
-- When answers or changed work become available, check whether the questions helped address their concerns and revise the mappings accordingly.
+- As answers arrive or the work changes, check whether the questions helped address their concerns and revise the mappings.
 
 - Retain useful mappings in the Question Bank with their motivating purposes, concerns, and applicability conditions.
 

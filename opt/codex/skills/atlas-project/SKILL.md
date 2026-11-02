@@ -1,6 +1,6 @@
 ---
 name: atlas-project
-description: Project an intended system model into an existing atlas, reconciling work nodes, attributes, and edges with the current system.
+description: Project the intended system model into a work decomposition reconciled with the current system.
 ---
 
 # Atlas Project
@@ -9,7 +9,7 @@ description: Project an intended system model into an existing atlas, reconcilin
 
 _State the intended properties declaratively._
 
-- **Atlas:** Revised nodes and edges with the properties defined in @../cartographer/SKILL.md.
+- **Decomposition:** Revised nodes, attributes, and decomposition edges with the properties defined in @../cartographer/SKILL.md.
 
 ---
 
@@ -33,7 +33,7 @@ _Devise an explanation for observations._
 
 - Map intended outcomes to existing nodes and propose additions, corrections, and removals.
 
-- Propose decomposition and ordering changes that cover the work and widen the execution frontier.
+- Propose decomposition edges whose children collectively cover their parent's work.
 
 - Surface findings that require revising the intended system model.
 
@@ -45,7 +45,7 @@ _Derive consequences of the explanation._
 
 - Check that each intended outcome has proposed work and each proposed node contributes to an outcome.
 
-- Derive effects on active work, parent outcomes, dependants, and the execution frontier.
+- Derive effects on active work, parent outcomes, and references to changed nodes.
 
 ---
 
@@ -55,11 +55,9 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Coordinate changes to active work with its owners.
 
-- Apply revisions within the domain and verify coverage, references, and both edge types.
+- Apply revisions within the domain and verify coverage, references, and decomposition edges.
 
   - Preserve identities, ownership, history, and external relationships.
-
-- Check dependency release conditions and ordering edges for blocking cycles.
 
 - Give a fresh reader the node and its references.
 
@@ -69,4 +67,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ---
 
-- Use @../atlas-view/SKILL.md to refresh views affected by node or edge changes.
+- Use @../atlas-recompose/SKILL.md to revise work boundaries and ordering after decomposition changes.

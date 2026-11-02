@@ -59,7 +59,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Check the predicted consequences in the identified cases.
 
-- Discard duplicates, already-covered needs, and additions without a consequential connection to the purpose.
+- Discard duplicates, already-covered needs, and additions that do not advance the purpose.
 
 - Prioritize supported gaps by their consequences, distinguishing them from unverified possibilities.
 

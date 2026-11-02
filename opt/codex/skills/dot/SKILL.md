@@ -13,7 +13,7 @@ _State the intended properties declaratively._
 
 - **Base graph:** The problem represented in DOT notation, before processing passes.
 
-- **Pipeline:** Reproducible passes that progressively process the base graph.
+- **Pipeline:** Reproducible processing passes over the base graph, including filters and annotations.
 
 ---
 
