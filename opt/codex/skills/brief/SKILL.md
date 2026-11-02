@@ -1,9 +1,9 @@
 ---
-name: qs
+name: brief
 description: Gather and distil outstanding questions into a structured decision brief that minimizes the user's answering effort.
 ---
 
-# Questions
+# Brief
 
 ## Artifact (Output)
 

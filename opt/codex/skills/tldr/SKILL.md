@@ -63,4 +63,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Use @../refine/SKILL.md to make the revised content concise and comprehensible.
 
-- Use @../qs/SKILL.md when deciding what to retain, remove, or add requires user input.
+- Use @../brief/SKILL.md when deciding what to retain, remove, or add requires user input.

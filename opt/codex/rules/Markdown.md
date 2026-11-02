@@ -40,7 +40,7 @@
 
 - See:
 
-  - @../skills/qs/SKILL.md.
+  - @../skills/brief/SKILL.md.
 
   - @../skills/mat/SKILL.md.
 
