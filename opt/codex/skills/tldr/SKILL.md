@@ -61,8 +61,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Use @../op-purpose-formation/SKILL.md when the user's concerns or the document's purpose are unclear.
 
-- Use @../gap-analysis/SKILL.md to find missing information that affects the user's understanding, decisions, or actions.
-
 - Use @../refine/SKILL.md to make the revised content concise and comprehensible.
 
 - Use @../qs/SKILL.md when deciding what to retain, remove, or add requires user input.

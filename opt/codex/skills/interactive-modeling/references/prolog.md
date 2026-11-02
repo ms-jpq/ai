@@ -20,7 +20,7 @@
 
 ## Gap Exploration
 
-- Use @../../gap-analysis/SKILL.md to identify consequential omissions and express them as queries over the model.
+- Express suspected omissions as queries over the model.
 
 - Enumerate the declared domain.
 
