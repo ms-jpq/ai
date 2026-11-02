@@ -7,7 +7,7 @@ description: Seek the simplest system model sufficient for its purpose, reasonin
 
 - Follow @./references/Operator-Protocol.md for explicit inputs, outputs, and Peircean reasoning.
 
-- Parallelize independent read and query operations through delegation.
+- `system model + optional(information) → revised system model`.
 
 ---
 
@@ -15,15 +15,11 @@ description: Seek the simplest system model sufficient for its purpose, reasonin
 
 _State the intended properties declaratively._
 
-- A reasoned system model built from a minimal sufficient basis of concepts, parts, relationships, and mechanisms.
+- The revised system model has fewer redundant distinctions, relationships, and mechanisms while covering its purpose and constraints.
 
-  - It connects purpose and constraints to concerns, outcomes, and the means of achieving them.
+- Missing components are supplied and unnecessary complexity is removed.
 
-  - Missing components are developed and redundant components reduced without weakening required outcomes, distinctions, or concern coverage.
-
-  - Another pass under unchanged inputs yields no justified revision.
-
-- Rationale and available evidence supporting the model, with unresolved assumptions and contradictions explicit.
+- Further application under unchanged inputs yields no justified simplification or correction.
 
 ---
 
@@ -31,61 +27,7 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The system or its representation and current model provide the baseline for revision.
-
-- Intended purpose and constraints define what the model must explain and achieve.
-
-- Observations and available evidence support assessment of the model's explanatory power, sufficiency, and complexity.
-
----
-
-## Abduction
-
-_Devise an explanation for observations._
-
-- Maintain an internal dialectic: propose and compare revisions to the system's purpose, problem framing, structure, concepts, or mechanisms.
-
-- Use the relevant operators below to develop missing components and reduce redundant ones.
-
-  - Allow temporary increases in detail or parts when they expose a simpler organization.
-
-- Revisit purpose or boundaries when commitments or intended outcomes conflict. Do not silently weaken the purpose to make the model smaller.
-
----
-
-## Deduction
-
-_Derive consequences of the explanation._
-
-- Derive what each candidate implies for the system: what counts as success, which concerns matter, what concepts include or exclude, and how parts and mechanisms produce outcomes.
-
-  - Include cases where commitments conflict, assumptions fail, or effects interfere.
-
-- For each addition, removal, merge, or generalization, derive its effect on required outcomes, constraints, distinctions, and concern coverage.
-
-- Compare the context, coordinated changes, and verification effort required by current and proposed models for the same change.
-
-- Identify cases where candidates imply different decisions, classifications, or outcomes.
-
----
-
-## Induction
-
-_Test those consequences and provisionally retain or revise the explanation._
-
-- Assess the derived consequences through worked scenarios and counterexamples, using observations or experiments where available.
-
-  - Distinguish reasoned conclusions from empirically tested claims.
-
-- First assess whether each candidate satisfies the relevant operator's retention criteria. Add necessary complexity when the current model is insufficient.
-
-  - Among sufficient candidates, prefer the one requiring less effort to understand, change, and verify.
-
-- Record unresolved assumptions or contradictions and re-enter the affected operators when findings change their inputs.
-
-- Stop when another pass with unchanged inputs yields no justified revision.
-
-  - Investigate oscillating choices. Stability does not establish correctness or global simplicity.
+- `system model + optional(information) → revised system model`.
 
 ---
 

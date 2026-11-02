@@ -29,7 +29,7 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
 - `work graph + information → revised work graph`.
 
-  0. Maintain the intended system model independently of the work graph.
+  0. Develop and simplify the intended system model independently of the work graph.
 
   1. Reconcile work-graph nodes with the model and existing work, updating their attributes.
 
@@ -47,11 +47,11 @@ _State the intended properties declaratively._
 
 - Nodes:
 
-  - Together they account for the work needed to reach the intended system, including integration and verification. Missing work is added and extraneous work is pruned.
+  - The intended system model is projected into work with defined outcomes, including integration and verification. Missing work is added and extraneous work is pruned.
 
-  - Each node and its references specify the intended outcome, scope, and acceptance checks without requiring the originating conversation. Stale or inaccurate attributes are corrected and unclear descriptions are clarified.
+  - Descriptions and references provide enough context to carry out and check the work. Unclear descriptions and stale attributes are corrected.
 
-  - Completion state and work category are explicit. Identity, ownership, history, and evidence are preserved across revisions.
+  - Completion state and work category reflect current information. Identity, ownership, history, and evidence survive revisions.
 
 - Decomposition edges:
 
@@ -61,7 +61,15 @@ _State the intended properties declaratively._
 
   - Each edge expresses a necessary prerequisite and an explicit release condition.
 
-  - Unnecessary sequencing is removed so independent work can proceed concurrently.
+  - Unnecessary sequencing is removed, widening the concurrent execution frontier.
+
+- Domain:
+
+  - Revisions stay within the domain and retain relationships to external nodes.
+
+- Views and clusters:
+
+  - Selections, groupings, and progress views derive from node attributes, relationships, and history.
 
 - Unresolved gaps and discrepancies remain explicit.
 
@@ -71,15 +79,7 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The existing work graph and its history are the state to revise.
-
-- The intended system's model, desired outcomes, and constraints define the destination.
-
-- The current system and evidence from execution and review establish the starting state and support or contradict recorded completion.
-
-- New findings and decisions change what work is needed or how it relates.
-
-- Grouping and classification conventions govern how work is organized and found.
+- `work graph + information → revised work graph`.
 
 ---
 
@@ -87,17 +87,19 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Compare the current and intended systems with the work graph. Propose additions, corrections, clarifications, and removals where they disagree.
+- Propose a projection of the intended system model into nodes, reconciling it with existing work and current evidence.
 
-- Describe affected work units by outcome, scope, constraints, prerequisites, source context, and acceptance checks.
+  - Identify additions, removals, and revisions to descriptions and attributes.
 
-- Propose dependencies with explicit release conditions, distinguishing starting work, reviewing results, and integrating them.
+- Propose decomposition edges whose child outcomes combine into the parent outcome.
 
-- Split, merge, or regroup work to remove duplication and unnecessary sequencing.
+- Propose ordering edges and release conditions for starting, reviewing, and integrating work.
 
-  - Keep containment, classification, and execution dependencies distinct.
+- Propose splits, merges, and removal of unnecessary sequencing to widen the execution frontier.
 
-- Surface design questions when findings challenge the intended system.
+- Propose views and clusters from attributes and relationships.
+
+- Refer challenges to the intended design back to the independently maintained system model.
 
 ---
 
@@ -105,13 +107,17 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Trace the proposed revisions through active work, ownership, dependants, and the execution frontier.
+- Trace each intended outcome to the proposed nodes and check how child outcomes combine.
 
-- Derive whether the combined work outcomes would produce the intended system.
+- Derive the execution frontier from selected nodes, their states, and ordering constraints, including external prerequisites.
 
-- State what a fresh reader must recover from each unit and its references to carry out and verify the work.
+- Trace revisions through active work, ownership, dependants, and domain boundaries.
 
-- For progress assessment, define the scope, measurement unit, and effects of completion, reopening, scope changes, and splits or merges.
+- State what a fresh reader must recover from each node and its references to carry out and check the work.
+
+- Predict view membership and progress totals from the proposed attributes and relationships.
+
+  - Account for completion, reopening, scope changes, and splits or merges.
 
 ---
 
@@ -123,19 +129,21 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Verify completed work before relying on it as a prerequisite. Preserve its closure history when reopening it or adding follow-up work.
 
-- Apply authorized revisions and compare the resulting work graph with the current and intended systems.
+- Apply revisions within the domain, preserving identities, history, and external relationships.
 
-- Check coverage in both directions: required outcomes have work and acceptance checks, and work contributes to required outcomes.
+- Check the projection in both directions: intended outcomes have work and acceptance checks, and nodes contribute to those outcomes.
 
-- Give a fresh reader only the work unit and its references.
+- Check that child outcomes cover their parent and ordering edges have justified release conditions.
+
+- Give a fresh reader only the node and its references.
 
   - Compare their reconstructed assignment with the source requirements and repair missing context where it belongs.
 
-- Check for blocking cycles and recompute the execution frontier.
+- Check ordering edges for blocking cycles and recompute the execution frontier.
 
-- Derive progress views from recorded history.
+- Generate views and clusters from the revised graph and check them against the predicted membership and totals.
 
-  - Separate scope changes from completion.
+  - Separate scope changes from completion in progress views.
 
   - Do not count both parents and children for the same outcome.
 
@@ -151,9 +159,9 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Dependencies represent ordering edges.
 
-  - Projects and milestones cluster nodes by scope or delivery target.
+  - Projects and milestones represent derived clusters.
 
-  - Labels classify nodes within or across clusters.
+  - Statuses and labels represent node attributes.
 
   - Parent–child relationships represent decomposition edges.
 
@@ -161,13 +169,20 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ## Operations
 
-- Select the operations needed for the current pass.
+- Compose these operations to maintain the system model and its atlas:
 
-| Operation           | Question                                    | Result                                                  |
-| ------------------- | ------------------------------------------- | ------------------------------------------------------- |
-| Coverage discovery  | What is missing?                            | Missing work and relationships                          |
-| Reconciliation      | What is inaccurate or stale?                | Corrected claims and unresolved discrepancies           |
-| Work specification  | How should the work be described?           | Actionable work units and acceptance checks             |
-| Work organization   | How should work connect and be grouped?     | Revised boundaries, relationships, and readiness        |
-| Context recovery    | Can a reader recover enough context to act? | Recovered context and identified gaps                   |
-| Progress assessment | What remains, and how is work progressing?  | Progress views separating completion from scope changes |
+- **Converge:** Develop and simplify the intended system model into a minimal sufficient basis.
+
+  - @../converge/SKILL.md
+
+- **Project:** Project the intended system model into the atlas and reconcile existing work.
+
+  - @../atlas-project/SKILL.md
+
+- **View:** Derive views and clusters from the atlas.
+
+  - @../atlas-view/SKILL.md
+
+- **Dispatch:** Spawn agents along the execution frontier and record their assignments.
+
+  - @../atlas-dispatch/SKILL.md
