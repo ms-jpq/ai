@@ -5,10 +5,6 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 # Topology Recomposition
 
-- When invoked independently, establish the concerns and constraints the topology must accommodate.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
@@ -31,7 +27,7 @@ _State the input categories and their roles._
 
 - **Topology:** Existing components, responsibilities, and relationships to revise.
 
-- **Evidence:** Behaviour and representative changes that reveal coverage, coupling, and ordering constraints.
+- **Cases:** Behaviour and representative changes that reveal coverage, coupling, and ordering constraints.
 
 ---
 
@@ -63,9 +59,7 @@ _Devise an explanation for observations._
 
 ### Heuristic
 
-- Recomposition may temporarily increase complexity.
-
-  - For deeply entangled subgraphs, temporarily group components that share concerns across hierarchy levels until the group reveals an emergent concern or clearer partition.
+- For entangled subgraphs, temporarily group components that share concerns across hierarchy levels to reveal an emergent concern or clearer partition.
 
 - Prefer a shared event loop for shared ordering and separate loops for independent ownership or progress.
 
@@ -99,7 +93,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Prefer the topology that makes the change easier to understand, carry out, and verify while preserving required behaviour.
 
-- Retain only necessary concern mappings, components, containment relations, and connections, revising the topology when evidence contradicts the model.
+- Remove unnecessary components, concern mappings, containment relations, and connections.
 
 ---
 

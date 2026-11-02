@@ -53,4 +53,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Verify that the revision preserves meaning and uncertainty without adding unsupported claims.
 
-- Remove only what is verified as represented in the revision. Retain the rest.
+- Remove additions after verifying that their meaning is represented.

@@ -27,7 +27,7 @@ _State the input categories and their roles._
 
 - **Purpose and boundary:** What the system should achieve and what it includes.
 
-- **Observations:** Evidence of what obstructs that purpose.
+- **Observations:** Failures, delays, and other obstacles to that purpose.
 
 - **Current framing:** Existing problems, concerns, and priorities to reassess.
 
@@ -43,9 +43,7 @@ _Devise an explanation for observations._
 
   - Evaluate prior art as a candidate frame.
 
-- Enumerate and prioritize the concerns implied by each problem.
-
-  - Explain each concern's priority.
+- Enumerate each problem's concerns and justify their priorities.
 
 ---
 
@@ -67,9 +65,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the hierarchy and priorities against observed obstacles and alternative explanations.
 
-- Retain concerns only when they explain observed obstacles or could change how those obstacles or their consequences are addressed.
-
-- Revise problems, their relationships, or concern priorities when evaluation exposes a gap.
+- Retain concerns that explain obstacles or affect the response to them.
 
 ---
 

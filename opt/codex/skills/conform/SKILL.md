@@ -41,7 +41,7 @@ _Devise an explanation for observations._
 
 - Explain each mismatch as a rule violation, inconsistent convention, necessary difference, or unresolved conflict.
 
-- Prefer explicit sources over inferred conventions, subject to applicable rules and semantic preservation.
+- Prefer explicit sources over inferred conventions.
 
   - Resolve conflicting examples from context and repeated patterns. Leave unsupported conventions unresolved.
 
@@ -63,9 +63,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply the proposed changes to the subject.
-
-- Check the result against the rules, references, and original subject. Retain changes that conform and preserve semantics.
+- Apply the changes and check them against the rules, references, and original subject.
 
   - For prose, verify that claims, conditions, and uncertainty survive.
 

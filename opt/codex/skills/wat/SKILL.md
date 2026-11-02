@@ -1,6 +1,6 @@
 ---
 name: wat
-description: Explain how something works and why it matters using concrete mechanisms and evidence, without jargon or filler.
+description: Explain how something works and why it matters through concrete mechanisms.
 ---
 
 # Wat
@@ -21,8 +21,6 @@ _State the input categories and their roles._
 
 - **Reader:** The user's current understanding and confusion.
 
-- **Evidence:** Code, data, observations, and intentions supporting the explanation.
-
 ---
 
 ## Abduction
@@ -31,7 +29,7 @@ _Devise an explanation for observations._
 
 - Identify undefined terms, claims without mechanisms, and missing explanatory steps.
 
-- Propose the simplest explanation that accounts for the evidence.
+- Propose the simplest explanation of how the subject works.
 
   - Name what acts, what it acts on, what changes, and under which conditions.
 
@@ -55,7 +53,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Check the explanation against the evidence and revise unsupported claims.
+- Check whether the concrete case behaves as predicted.
 
   - Distinguish observation, intention, and inference.
 

@@ -63,7 +63,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - If rendering, inspect readability and adjust presentation while preserving topology.
 
-- Deliver the DOT and reproducible pipeline, with any unresolved mappings or omissions.
+- Record unresolved mappings and omissions.
 
 ---
 

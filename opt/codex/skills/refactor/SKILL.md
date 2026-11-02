@@ -67,9 +67,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Distinguish assertions of required behaviour from assertions that merely mirror the current implementation.
 
-- Implement and test the alternative, preserving required behaviour and meaning except for agreed changes.
-
-- Run the affected tests, adding or updating those derived above, alongside applicable static and contract checks.
+- Implement the alternative and run the derived tests, affected existing tests, and applicable static and contract checks.
 
   - Compare results with the derived expectations and reject unexplained differences.
 

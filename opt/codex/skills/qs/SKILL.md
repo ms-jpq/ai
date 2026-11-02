@@ -21,7 +21,7 @@ _State the input categories and their roles._
 
 - **Questions:** Outstanding decisions and the context needed to answer them.
 
-- **Evidence and resolutions:** What can already be answered and under which conditions.
+- **Resolutions:** Prior answers and their applicable conditions.
 
 ---
 
@@ -29,7 +29,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose which questions need user input and which are already resolved by evidence or prior answers.
+- Propose which questions need user input and which the context or prior answers resolve.
 
 - Keep independent decisions separate when combining them would make answering harder.
 
@@ -39,7 +39,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Account for each original question: retained, answered by evidence, implied by another answer, or irrelevant for a stated reason.
+- Account for each original question: retained, answered, implied by another answer, or irrelevant for a stated reason.
 
 - Derive which decisions each possible answer would resolve and which follow-ups would remain necessary.
 
@@ -49,7 +49,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Compare the refined set with the original questions and evidence. Restore missing decisions, conditions, or viable choices.
+- Compare the refined set with the original questions. Restore missing decisions, conditions, or viable choices.
 
 - As answers arrive or new questions arise, apply existing resolutions and their implications before asking again.
 
@@ -57,15 +57,15 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Remove answered questions and resolved follow-ups once their resolutions are recorded, then revise those still needed.
 
-  - Reconsider prior resolutions when their conditions change or evidence conflicts.
+  - Reconsider prior resolutions when their conditions change.
 
 ---
 
 ## Presentation
 
-- Give each question a unique, stable decision label and only the context needed to answer it.
+- Give each question a stable decision label and the context needed to answer it.
 
-- Explain each option's trade-offs: what it gains, what it costs or gives up, and which constraints or uncertainties affect the choice.
+- Explain each option's benefits, costs, constraints, and uncertainties.
 
   - Compare options on the same dimensions using specific effects.
 

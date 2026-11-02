@@ -17,8 +17,6 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
     - **Ordering edges** describe what work must precede other work.
 
-      - The concurrent **execution frontier** contains selected nodes with satisfied ordering constraints.
-
     - A decomposition edge does not by itself imply an ordering edge.
 
   - Domain:
@@ -26,6 +24,12 @@ description: Revise a persistent graph of work and dependencies to cover the cha
     - The subset of nodes we may create or update.
 
     - Relationships may extend beyond this subset.
+
+  - View:
+
+    - The concurrent **execution frontier** contains selected nodes with satisfied ordering constraints.
+
+    - Clustering groups nodes by attributes and relationships.
 
 - `work graph + information → revised work graph`.
 
@@ -37,7 +41,7 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
   2. Maximize the concurrent execution frontier by removing unnecessary sequencing and revising work boundaries.
 
-  3. Derive views and clusters from node attributes and relationships.
+  3. Derive views, including the execution frontier and clusters, from node attributes and edges.
 
 ---
 
@@ -45,13 +49,13 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
 _State the intended properties declaratively._
 
-- **Nodes:** Work needed to reach the intended system, with current attributes and enough context to execute and verify it.
+- **Nodes:** Consistent with the intended and current system.
 
-- **Decomposition edges:** Children collectively cover their parent's work, including integration and verification.
+- **Decomposition edges:** Children collectively cover their parent's work.
 
-- **Ordering edges:** Necessary prerequisites with explicit release conditions.
+- **Ordering edges:** Simplified to only necessary prerequisites with explicit release conditions.
 
-- **Views:** Selections, clusters, and progress measures derived from the graph.
+- **Views:** Reproducible queries or scripts over the graph.
 
 ---
 
@@ -59,77 +63,33 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- **Atlas:** Existing work, relationships, attributes, and history to revise.
+- **Atlas:** Existing nodes, attributes, edges, and history to revise.
 
 - **System model:** Intended behaviour and constraints that define what the work must achieve.
 
-- **Evidence:** Current system state, execution results, and decisions that establish needed work.
+- **Information:** Current system state, execution results, and decisions.
 
 - **Domain:** Nodes we may create or update.
 
 ---
 
-## Abduction
+## Operations
 
-_Devise an explanation for observations._
+- **Converge:** Seek the simplest system model sufficient for its purpose, reasoning through revisions toward a stable fixed point.
 
-- Propose a projection of the intended system model into nodes, reconciling it with existing work and current evidence.
+  - @../converge/SKILL.md
 
-- Propose decomposition edges whose child outcomes combine into the parent outcome.
+- **Project:** Project an intended system model into an existing atlas, reconciling work nodes, attributes, and edges with the current system.
 
-- Propose ordering edges and release conditions for starting, reviewing, and integrating work.
+  - @../atlas-project/SKILL.md
 
-- Propose splits, merges, and removal of unnecessary sequencing to widen the execution frontier.
+- **View:** Build reproducible queries or scripts that derive views from an atlas.
 
-- Propose views and clusters from attributes and relationships.
+  - @../atlas-view/SKILL.md
 
-- Refer challenges to the intended design back to the independently maintained system model.
+- **Dispatch:** Spawn agents on unclaimed atlas nodes along the execution frontier and record their assignments.
 
----
-
-## Deduction
-
-_Derive consequences of the explanation._
-
-- Trace each intended outcome to the proposed nodes and check how child outcomes combine.
-
-- Derive the execution frontier from selected nodes, their states, and ordering constraints, including external prerequisites.
-
-- Trace revisions through active work, ownership, dependants, and domain boundaries.
-
-- State what a fresh reader must recover from each node and its references to carry out and check the work.
-
-- Predict view membership and progress totals from the proposed attributes and relationships.
-
-  - Account for completion, reopening, scope changes, and splits or merges.
-
----
-
-## Induction
-
-_Test those consequences and provisionally retain or revise the explanation._
-
-- Coordinate revisions with owners of active work and record how their assignments change.
-
-- Verify completed work before relying on it as a prerequisite. Preserve its closure history when reopening it or adding follow-up work.
-
-- Apply revisions within the domain, preserving identities, history, and external relationships.
-
-- Check the projection in both directions: intended outcomes have work and acceptance checks, and nodes contribute to those outcomes.
-
-- Check that child outcomes cover their parent and ordering edges have justified release conditions.
-
-- Give a fresh reader only the node and its references.
-
-  - Compare their reconstructed assignment with the source requirements and repair missing context where it belongs.
-
-- Check ordering edges for blocking cycles and recompute the execution frontier.
-
-- Generate views and clusters from the revised graph and check them against the predicted membership and totals.
-
-  - Separate scope changes from completion in progress views.
-
-- Retain unresolved discrepancies and revisit affected operations when evidence or the intended system changes.
+  - @../atlas-dispatch/SKILL.md
 
 ---
 
@@ -146,23 +106,3 @@ _Test those consequences and provisionally retain or revise the explanation._
   - Statuses and labels represent node attributes.
 
   - Parent–child relationships represent decomposition edges.
-
----
-
-## Operations
-
-- **Converge:** Develop and simplify the intended system model into a minimal sufficient basis.
-
-  - @../converge/SKILL.md
-
-- **Project:** Project the intended system model into the atlas and reconcile existing work.
-
-  - @../atlas-project/SKILL.md
-
-- **View:** Derive views and clusters from the atlas.
-
-  - @../atlas-view/SKILL.md
-
-- **Dispatch:** Spawn agents along the execution frontier and record their assignments.
-
-  - @../atlas-dispatch/SKILL.md

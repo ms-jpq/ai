@@ -1,21 +1,15 @@
 ---
 name: atlas-project
-description: Project an intended system model into an existing atlas, reconciling work nodes, attributes, and edges with current evidence.
+description: Project an intended system model into an existing atlas, reconciling work nodes, attributes, and edges with the current system.
 ---
 
 # Atlas Project
-
----
 
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
-- **Nodes:** Work needed to reach the intended system, with current attributes, source references, and acceptance checks.
-
-- **Decomposition edges:** Children collectively cover their parent's work.
-
-- **Ordering edges:** Necessary prerequisites with explicit release conditions.
+- **Atlas:** Revised nodes and edges with the properties defined in @../cartographer/SKILL.md.
 
 ---
 
@@ -27,7 +21,7 @@ _State the input categories and their roles._
 
 - **Atlas:** Existing nodes, attributes, edges, and history to reconcile.
 
-- **Evidence:** Current system state and decisions that establish needed work and node attributes.
+- **Information:** Current system state, execution results, and decisions.
 
 - **Domain:** Nodes we may create or update.
 
@@ -39,7 +33,7 @@ _Devise an explanation for observations._
 
 - Map intended outcomes to existing nodes and propose additions, corrections, and removals.
 
-- Propose decomposition and ordering edges, keeping parent–child relationships distinct from execution order.
+- Propose decomposition and ordering changes that cover the work and widen the execution frontier.
 
 - Surface findings that require revising the intended system model.
 
@@ -53,18 +47,26 @@ _Derive consequences of the explanation._
 
 - Derive effects on active work, parent outcomes, dependants, and the execution frontier.
 
-- Identify the evidence needed to justify attribute changes and dependency release.
-
 ---
 
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Check proposed changes against the model and evidence, coordinating changes to active work with its owners.
+- Coordinate changes to active work with its owners.
 
 - Apply revisions within the domain and verify coverage, references, and both edge types.
 
   - Preserve identities, ownership, history, and external relationships.
 
-- Recompute the execution frontier and retain unresolved discrepancies.
+- Check dependency release conditions and ordering edges for blocking cycles.
+
+- Give a fresh reader the node and its references.
+
+  - Check that they can reconstruct the assignment and acceptance checks.
+
+- Retain unresolved discrepancies.
+
+---
+
+- Use @../atlas-view/SKILL.md to refresh views affected by node or edge changes.

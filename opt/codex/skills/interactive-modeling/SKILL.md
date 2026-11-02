@@ -75,7 +75,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ---
 
-- Use @../converge/SKILL.md to revise the shared model when ambiguity, surprising results, or failed checks expose gaps in understanding.
+- Use @../converge/SKILL.md when ambiguity, surprising results, or failed checks expose gaps in the model.
 
 - Use @../fold/SKILL.md to incorporate new observations and decisions into the existing model.
 

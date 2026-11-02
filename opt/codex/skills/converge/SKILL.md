@@ -35,7 +35,7 @@ _State the input categories and their roles._
 
 - Keep operators as a basis of transformations with distinct primary effects.
 
-- Apply and re-enter these transformations in order as evidence warrants:
+- Apply these transformations in order:
 
 0. **Purpose Formation:** Form and revise the system purpose that guides the remaining operators.
 

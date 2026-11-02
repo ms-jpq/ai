@@ -31,7 +31,7 @@ _State the input categories and their roles._
 
 - **Mechanisms:** Existing and proposed causal processes to assess.
 
-- **Coverage:** Claimed effects, operating conditions, and evidence linking mechanisms to concerns.
+- **Coverage:** Claimed effects and operating conditions linking mechanisms to concerns.
 
 ---
 
@@ -56,8 +56,6 @@ _Derive consequences of the explanation._
 - Derive each mechanism's observable effects when its preconditions hold and when they fail, including adverse effects.
 
 - Predict which concerns remain covered by a shared mechanism and which require distinct ones.
-
-- Predict what evidence would require revising a mechanism, its concern mapping, or a concern's priority.
 
 ---
 

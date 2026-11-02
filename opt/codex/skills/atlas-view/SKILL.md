@@ -1,6 +1,6 @@
 ---
 name: atlas-view
-description: Derive views and clusters from atlas nodes, attributes, relationships, and history.
+description: Build reproducible queries or scripts that derive views from an atlas.
 ---
 
 # Atlas View
@@ -9,7 +9,7 @@ description: Derive views and clusters from atlas nodes, attributes, relationshi
 
 _State the intended properties declaratively._
 
-- **Views:** Selections, clusters, or progress measures that answer the reader's questions using atlas data.
+- **Views:** Reproducible queries or scripts answering the reader's questions about the atlas.
 
 ---
 
@@ -18,6 +18,8 @@ _State the intended properties declaratively._
 _State the input categories and their roles._
 
 - **Atlas:** Nodes, attributes, edges, and history to represent.
+
+- **Selection:** Nodes included in the view.
 
 - **Questions:** What the reader wants to learn about selected work.
 
@@ -39,7 +41,9 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict view membership, cluster membership, and totals from the selected criteria.
+- Predict membership and totals from the selected criteria.
+
+  - Include prerequisites outside the selection when deriving the execution frontier.
 
 - Identify relationships hidden by filtering and outcomes that could be counted more than once.
 
@@ -49,7 +53,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Generate views from the atlas and compare membership, relationships, and totals with the predictions.
+- Implement and run the queries or scripts, comparing their results with the predictions.
 
   - Preserve node identities and relationship meanings, indicating connections beyond the selection.
 

@@ -5,17 +5,13 @@ description: Build or revise a standard operating procedure, or advance it throu
 
 # SOP
 
-- Distinguish requests to build or revise the procedure from requests to advance the process.
-
----
-
 ## Artifact (Output)
 
 _State the intended properties declaratively._
 
 - **Procedure:** Principal states and transitions connecting starting conditions to the desired outcome.
 
-- **Transition record:** The observed state, action taken, and completion evidence when advancing the process.
+- **Transition record:** The starting state, action taken, and resulting state.
 
 ---
 
@@ -25,9 +21,11 @@ _State the input categories and their roles._
 
 - **Purpose and constraints:** What the process must achieve and preserve.
 
-- **Current state:** Starting conditions and evidence of progress.
+- **Current state:** Starting conditions and completed steps.
 
 - **Procedure:** Existing states, transitions, and completion conditions, if defined.
+
+- **Cases:** Tasks and execution history showing recurring work, variations, and bottlenecks.
 
 ---
 
@@ -38,6 +36,10 @@ _Devise an explanation for observations._
 - When building or revising, propose observable principal states and transitions connecting the starting conditions to the desired outcome.
 
   - Specify each transition's prerequisites, actions, and completion conditions.
+
+  - Extract shared stages from representative cases, parameterizing differences and separating task-specific work.
+
+  - Allow independent stages to proceed concurrently, with joins waiting for their required outcomes.
 
 - When advancing, assess the current state against the procedure's observable conditions, then propose the next transition whose prerequisites are satisfied.
 
@@ -53,6 +55,8 @@ _Derive consequences of the explanation._
 
   - Identify unreachable outcomes, missing prerequisites, and branches without a continuation or stopping condition.
 
+  - Predict how delays, failures, and retries affect dependent and independent work.
+
 - Predict each proposed transition's effects and derive checks that distinguish completion from an attempt.
 
   - Identify conditions that would prevent completion.
@@ -65,15 +69,13 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - When building or revising, represent the procedure in tables.
 
-  - Check it against representative cases and available execution evidence.
+  - Test revisions against existing cases and new variations, checking for duplication, unnecessary waiting, and task-specific exceptions in shared stages.
 
   - Mark untested transitions explicitly.
 
 - When advancing, perform the transition within the authorized scope, stopping at the next principal state.
 
   - Check the resulting state against the predicted completion conditions before recording advancement.
-
-  - Record the observed state and transition outcome.
 
   - If blocked or already complete, record why no transition was taken.
 
@@ -82,7 +84,5 @@ _Test those consequences and provisionally retain or revise the explanation._
 - Use @../op-topology-recomposition/SKILL.md when intermediate outcomes and dependencies need organizing into steps.
 
 - Use @../op-mechanism-alignment/SKILL.md to select actions that produce the required outcomes.
-
-- Use @../process-development/SKILL.md to extract a reusable procedure from several tasks.
 
 - Use @../mat/SKILL.md to represent principal states and transitions in tables.

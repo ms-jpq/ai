@@ -21,7 +21,7 @@ _State the input categories and their roles._
 
 - **Purpose and concerns:** What the questions should help address.
 
-- **Context:** The situation, constraints, evidence, and prior answers that establish what remains uncertain.
+- **Context:** The situation, constraints, and prior answers.
 
 - **Question bank:** Existing questions to adapt.
 
@@ -31,9 +31,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose what needs to be understood or decided about the framed concerns, using their priorities to focus the questions.
-
-  - Let the concern determine whether to ask about understanding, options, evidence, coordination, simplification, or another response.
+- Identify what needs to be understood or decided about each concern, in priority order.
 
 - Adapt relevant bank entries and generate questions for concerns they do not cover.
 
@@ -56,8 +54,6 @@ _Derive consequences of the explanation._
 ## Induction
 
 _Test those consequences and provisionally retain or revise the explanation._
-
-- Test each proposed mapping against the stated purpose, actual situation, and available evidence.
 
 - Remove answered, duplicate, or inconsequential questions and revise false premises or leading formulations.
 

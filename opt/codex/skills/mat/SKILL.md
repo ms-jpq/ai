@@ -35,7 +35,7 @@ _Devise an explanation for observations._
 
     - Combine symbols to express relationships or order. i.e. with `🍎 = A`, `🍏 = B`, and `→ = then`, distinguish `🍎 → 🍏` from `🍏 → 🍎`.
 
-    - Give unknown, impossible, and inapplicable combinations distinct representations where those distinctions matter.
+    - Distinguish unknown, impossible, and inapplicable combinations.
 
 ---
 
@@ -59,7 +59,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Revise axes or notation when the representation loses distinctions or obscures gaps.
 
-- When machine parsing is required, extract the tables using the workflow below and verify that the decoded cells preserve the intended notation.
+- For machine parsing, extract the tables and verify that the decoded cells preserve the notation.
 
 ---
 

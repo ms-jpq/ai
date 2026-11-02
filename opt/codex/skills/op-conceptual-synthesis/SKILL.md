@@ -39,7 +39,7 @@ _Devise an explanation for observations._
 
 - Coin or revise a concise term that carries the distinction.
 
-  - Propose how each relevant representation will use the term, its definition, and its constraints consistently.
+  - Map the term to its uses across representations.
 
 ---
 
@@ -57,7 +57,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the derived consequences against collected uses, counterexamples, and neighbouring concepts.
+- Test the classification against uses, counterexamples, and neighbouring concepts.
 
 - Retain a concept only when it preserves a necessary distinction.
 

@@ -15,7 +15,7 @@ _State the intended properties declaratively._
 
 - **Agreement:** Discrepancies resolved according to each side's role and the relationship between them.
 
-- **Conflicts:** Unresolved disagreements surfaced with the decisions or evidence needed to resolve them.
+- **Conflicts:** Unresolved disagreements and the decisions needed to resolve them.
 
 ---
 
@@ -29,7 +29,7 @@ _State the input categories and their roles._
 
 - **Constraints:** Purpose, boundaries, and authority governing permitted changes.
 
-- **Evidence:** Observations, intent, and change history explaining differences.
+- **History:** Changes and decisions explaining differences.
 
 ---
 
@@ -53,8 +53,6 @@ _Devise an explanation for observations._
 
   - Surface an unresolved conflict.
 
-- Explain the evidence and intended relationship supporting each proposal.
-
 ---
 
 ## Deduction
@@ -71,9 +69,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply the proposed changes.
-
-- Check both sides against their intended relationship and supporting evidence.
+- Apply the changes and check both sides against their intended relationship.
 
 - Retain resolutions supported by those checks and surface remaining conflicts.
 

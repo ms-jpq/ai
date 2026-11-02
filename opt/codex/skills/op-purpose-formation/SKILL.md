@@ -57,8 +57,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the purpose against the system, commitments, and affected parties' interests.
 
-- Retain a candidate purpose only when it has observable success conditions and survives those tests.
-
-- Revise the proposed purpose or boundary when evaluation exposes a conflict or gap.
+- Retain purposes with observable success conditions that satisfy the constraints.
 
 - Record whose intentions the proposed purpose reflects, who accepts or disputes it and its boundary, and what remains unresolved.

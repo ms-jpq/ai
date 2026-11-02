@@ -25,8 +25,6 @@ _State the input categories and their roles._
 
 - **Provisions:** What currently addresses that purpose.
 
-- **Evidence:** Observations and prior findings supporting coverage assessments.
-
 ---
 
 ## Abduction
@@ -59,13 +57,11 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Check the predictions against the material, cases, and evidence.
+- Check the predicted consequences in the identified cases.
 
 - Discard duplicates, already-covered needs, and additions without a consequential connection to the purpose.
 
 - Prioritize supported gaps by their consequences, distinguishing them from unverified possibilities.
-
-- Return no gaps when none are supported.
 
 ---
 

@@ -79,7 +79,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Check that elements are in their intended homes and references resolve to them.
 
-- Retain a change only when it reduces fragmentation without changing preserved meaning or behaviour.
+- Check that consolidation reduces fragmentation and preserves meaning and behaviour.
 
 ---
 

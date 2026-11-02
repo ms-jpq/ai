@@ -21,8 +21,6 @@ _State the input categories and their roles._
 
 - **Concerns:** What the user needs to understand, decide, or do.
 
-- **Evidence:** Sources supporting corrections and additions.
-
 ---
 
 ## Abduction
@@ -47,8 +45,6 @@ _Derive consequences of the explanation._
 
 - Check that proposed removals preserve necessary context, constraints, trade-offs, and uncertainty.
 
-- Identify evidence needed to verify replacements and additions.
-
 ---
 
 ## Induction
@@ -69,4 +65,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Use @../refine/SKILL.md to make the revised content concise and comprehensible.
 
-- Use @../qs/SKILL.md when deciding what to retain, remove, or add requires user input that existing answers and evidence cannot resolve.
+- Use @../qs/SKILL.md when deciding what to retain, remove, or add requires user input.

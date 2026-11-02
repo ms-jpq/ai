@@ -69,9 +69,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Apply the proposed revision.
-
-- Test the predicted outcome against competing readings, factual constraints, and the reader's goal.
+- Apply the revision and test it against competing readings, factual constraints, and the reader's goal.
 
   - Correct unsupported absolutes and unnecessary hedges exposed by the check.
 

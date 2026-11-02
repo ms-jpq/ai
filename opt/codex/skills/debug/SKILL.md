@@ -5,7 +5,7 @@ description: Trace a failure to an implementation discrepancy or its earliest de
 
 # Debug
 
-- Preserve evidence needed to reproduce or explain the failure before changing the system or its model.
+- Preserve failing inputs, logs, and system state before changing the system or its model.
 
 ---
 
@@ -27,7 +27,7 @@ _State the input categories and their roles._
 
 - **System:** The affected implementation and intended model.
 
-- **Evidence:** Observations and reproductions supporting or contradicting possible causes.
+- **Reproduction:** Inputs, environment, and steps that trigger the failure.
 
 ---
 
@@ -37,7 +37,7 @@ _Devise an explanation for observations._
 
 - Trace the failure through the implicated implementation and model dependencies.
 
-  - Inspect earlier model layers when evidence implicates them or the current explanation is insufficient.
+  - Inspect earlier model layers when the current explanation is insufficient.
 
   - Ask what would have made the failure impossible or detectable earlier.
 
@@ -69,7 +69,7 @@ _Derive consequences of the explanation._
 
 - Derive changes to the deficient artifact and its dependents.
 
-- Predict evidence that would falsify the diagnosis.
+- Derive a test that would falsify the diagnosis.
 
 ---
 
@@ -77,7 +77,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Test the correction against the failure evidence and relevant counterexamples.
+- Test the correction against the reproduction and relevant counterexamples.
 
 - Correct the implementation or update the deficient operator artifact and its dependents.
 
