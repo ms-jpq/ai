@@ -13,7 +13,7 @@ description: Gather and distil outstanding questions into a structured decision 
 
 - Use @../op-topology-recomposition/SKILL.md during abduction to put prerequisite decisions first and mark conditional follow-ups.
 
-- Use @../wat/SKILL.md during induction to explain each decision and its options' consequences in concrete terms, removing jargon, vague claims, and filler.
+- Use @../wat/SKILL.md during induction to explain each decision and its options' consequences in concrete terms.
 
 ---
 
@@ -49,9 +49,7 @@ _Devise an explanation for observations._
 
 - Propose which questions need user input and which available evidence or prior answers already resolve.
 
-- Retain enough questions to resolve every decision that still matters.
-
-  - Keep independent decisions separate when combining them would make answering harder.
+- Keep independent decisions separate when combining them would make answering harder.
 
 ---
 
@@ -89,7 +87,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Explain each option's trade-offs: what it gains, what it costs or gives up, and which constraints or uncertainties affect the choice.
 
-  - Compare options on the same relevant dimensions using specific effects rather than vague claims such as faster or simpler.
+  - Compare options on the same dimensions using specific effects.
 
 - State whether to choose one option or several.
 

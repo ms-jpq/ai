@@ -13,11 +13,13 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
   - Edges:
 
-    - Structural edges describe relationships in the system model.
+    - **Decomposition edges** describe what work belongs within other work.
 
-    - Ordering edges describe dependencies between units of work.
+    - **Ordering edges** describe what work must precede other work.
 
-    - A structural edge does not by itself imply an ordering edge.
+      - The concurrent **execution frontier** contains selected nodes with satisfied ordering constraints.
+
+    - A decomposition edge does not by itself imply an ordering edge.
 
   - Domain:
 
@@ -25,21 +27,17 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
     - Relationships may extend beyond this subset.
 
-    - External ordering dependencies still constrain the execution frontier.
-
 - `work graph + information → revised work graph`.
 
   1. Maintain the intended system model independently of the work graph.
 
-  2. Project the model into work-graph nodes, reconciling them with existing work.
+  2. Reconcile work-graph nodes with the model and existing work, updating their attributes.
 
-  3. Maximize the execution frontier by removing unnecessary sequencing and revising work boundaries.
+     - Project the intended system model into the work graph.
 
-  4. Assign labels to nodes for state, delivery target, and other relevant properties.
+  3. Maximize the concurrent execution frontier by removing unnecessary sequencing and revising work boundaries.
 
-     - Mark completed nodes as done based on completion evidence, and recompute the execution frontier when state changes.
-
-     - Derive views and clusters from labels as needed.
+  4. Derive views and clusters from node attributes and relationships.
 
 ---
 
@@ -47,17 +45,25 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
 _State the intended properties declaratively._
 
-- The revised work graph accounts for the work needed to reach the intended system, including integration and verification.
+- Nodes:
 
-  - Missing work is added, stale or inaccurate work units are corrected, unclear descriptions are clarified, and extraneous work is pruned.
+  - Together they account for the work needed to reach the intended system, including integration and verification. Missing work is added and extraneous work is pruned.
 
-- Dependencies express necessary ordering and explicit release conditions, leaving independent work able to proceed separately.
+  - Each node and its references specify the intended outcome, scope, and acceptance checks without requiring the originating conversation. Stale or inaccurate attributes are corrected and unclear descriptions are clarified.
 
-- Each work unit and its references explain what to do, what is out of scope, and how to check completion without the originating conversation.
+  - Completion state and work category are explicit. Identity, ownership, history, and evidence are preserved across revisions.
 
-- Pending, active, and closed work retains its identities, ownership, history, and evidence across revisions.
+- Decomposition edges:
 
-- Unresolved gaps and discrepancies remain explicit, including incomplete or stale claims.
+  - Children account for their parent's outcome, including the work needed to integrate and verify their results.
+
+- Ordering edges:
+
+  - Each edge expresses a necessary prerequisite and an explicit release condition.
+
+  - Unnecessary sequencing is removed so independent work can proceed concurrently.
+
+- Unresolved gaps and discrepancies remain explicit.
 
 ---
 
@@ -91,7 +97,7 @@ _Devise an explanation for observations._
 
   - Keep containment, classification, and execution dependencies distinct.
 
-- When findings challenge the intended system, make the design question explicit rather than silently changing the destination.
+- Surface design questions when findings challenge the intended system.
 
 ---
 
@@ -101,7 +107,7 @@ _Derive consequences of the explanation._
 
 - Trace the proposed revisions through active work, ownership, dependants, and the execution frontier.
 
-- Derive whether completing the revised work would produce the intended system, including the joins between independently produced results.
+- Derive whether the combined work outcomes would produce the intended system.
 
 - State what a fresh reader must recover from each unit and its references to carry out and verify the work.
 
@@ -113,7 +119,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Coordinate revisions with owners of active work, recording whether their attempt can continue, needs revision, or is superseded.
+- Coordinate revisions with owners of active work and record the effect on their attempt.
 
 - Verify completed work before relying on it as a prerequisite. Preserve its closure history when reopening it or adding follow-up work.
 
@@ -137,27 +143,19 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ---
 
-## Execution Frontier
-
-- The execution frontier is the set of selected nodes whose constraints on ordering edges are satisfied. Structural edges do not determine readiness.
-
-- Identify which selected work units can proceed together without conflicts over ownership, interfaces, or shared resources.
-
----
-
 ## Graph Representation
 
 - In a ticketing system:
 
   - Tickets represent nodes.
 
-  - Dependencies represent ordering edges, with conditions that release blocked work.
+  - Dependencies represent ordering edges.
 
   - Projects and milestones cluster nodes by scope or delivery target.
 
   - Labels classify nodes within or across clusters.
 
-  - Typed relationships represent structural edges. Cluster membership alone does not impose execution order.
+  - Parent–child relationships represent decomposition edges.
 
 ---
 

@@ -27,7 +27,7 @@ _State the input categories and their roles._
 
 - Source data or functions supply the values to plot, with units and missing observations informing their interpretation.
 
-- The destination and any format or interactive-terminal requirements constrain rendering.
+- The destination, format, and interactive-terminal requirements constrain rendering.
 
 ---
 
@@ -36,8 +36,6 @@ _State the input categories and their roles._
 _Devise an explanation for observations._
 
 - Choose axes, scales, series, and plot styles that expose the relevant comparison or relationship.
-
-  - Keep transformations, aggregation, and uncertainty explicit.
 
 ---
 

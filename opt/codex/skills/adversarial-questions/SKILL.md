@@ -9,7 +9,7 @@ description: Derive questions from a purpose and its concerns, building a reusab
 
 - Use @../op-problem-framing/SKILL.md to establish or revise the concerns and priorities from which questions are derived.
 
-- Use @../gap-analysis/SKILL.md to discover missing concerns or gaps in question coverage relative to the purpose.
+- Use @../gap-analysis/SKILL.md to discover missing concerns or gaps in question coverage.
 
 ---
 
@@ -47,7 +47,7 @@ _Devise an explanation for observations._
 
   - Let the concern determine whether to ask about understanding, options, evidence, coordination, simplification, or another response.
 
-- Derive questions from consequential gaps and known concerns to help the caller address them. Missing coverage is not a prerequisite for questioning.
+- Derive questions from consequential gaps and known concerns.
 
 - Adapt relevant bank entries and generate questions where the bank provides no suitable mapping.
 
@@ -87,7 +87,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ## Application
 
-- Apply as work develops, including before action, after material changes, and before completion. A failure or suspected defect is not required.
+- Apply before action, after material changes, and before completion.
 
 - Direct questions to the working agent or caller, including yourself during self-review.
 

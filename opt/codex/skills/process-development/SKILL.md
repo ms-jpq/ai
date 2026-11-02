@@ -55,13 +55,13 @@ _Devise an explanation for observations._
 
 - Seek established processes for the same or analogous problems before inventing one.
 
-- Propose a common core that explains recurring work, distinguishing genuine commonality from superficial resemblance.
+- Propose a common core that explains recurring work.
 
   - Compare attempts for recurring outcomes and transformations beneath differences in terminology, methods, and task details.
 
-  - Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required rather than building exceptions into every shared stage.
+  - Parameterize differences when the transformation remains the same. Otherwise attach task-specific work where its outcomes are required.
 
-- Apply a fork–join lens to widen the pipeline: independent parts proceed together, and each join waits only for its required outcomes, not every outstanding task.
+- Apply a fork–join lens to widen the pipeline: independent parts proceed together, and each join waits only for its required outcomes.
 
 ---
 

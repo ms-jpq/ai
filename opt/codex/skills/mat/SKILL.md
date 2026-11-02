@@ -37,7 +37,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose dimensions, their value domains, table axes, and related views that represent the relevant state space compactly.
+- Propose dimensions, their value domains, table axes, and views that represent the relevant state space compactly.
 
   - Define the notation using emoji, symbols, and short labels in a legend.
 

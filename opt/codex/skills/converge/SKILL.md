@@ -79,13 +79,13 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - First assess whether each candidate satisfies the relevant operator's retention criteria. Add necessary complexity when the current model is insufficient.
 
-  - Among sufficient candidates, prefer the one requiring less effort to understand, change, and verify. Fewer components alone do not establish improvement.
+  - Among sufficient candidates, prefer the one requiring less effort to understand, change, and verify.
 
 - Record unresolved assumptions or contradictions and re-enter the affected operators when findings change their inputs.
 
-- Treat the model as provisionally stable when another pass with unchanged purpose, constraints, and evidence yields no justified revision.
+- Stop when another pass with unchanged inputs yields no justified revision.
 
-  - Investigate oscillating choices rather than repeatedly rewriting them. Stability alone does not establish correctness or a globally simplest model.
+  - Investigate oscillating choices. Stability does not establish correctness or global simplicity.
 
 ---
 

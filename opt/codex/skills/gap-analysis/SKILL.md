@@ -69,7 +69,7 @@ _Derive consequences of the explanation._
 
 _Test those consequences and provisionally retain or revise the explanation._
 
-- Check the predictions against the actual material, relevant cases, and available evidence.
+- Check the predictions against the material, cases, and evidence.
 
 - Discard duplicates, already-covered needs, and additions without a consequential connection to the purpose.
 
@@ -81,7 +81,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 ## Application
 
-- Re-invoke `gap-analysis` to reassess coverage, using prior findings to explore overlooked areas rather than repeat unresolved items or manufacture new ones.
+- Re-invoke `gap-analysis` to explore areas overlooked in prior findings.
 
 - Reconsider dismissed gaps when their premises change. Report newly found or revised gaps and material uncertainties.
 

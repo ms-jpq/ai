@@ -5,7 +5,7 @@ description: Discover and remove unnecessary complexity, implementing and testin
 
 # Refactor
 
-- Use @../adversarial-questions/SKILL.md throughout each pass to derive questions from the refactor's purpose and concerns, answering them through the comparisons and tests below.
+- Use @../adversarial-questions/SKILL.md throughout each pass to derive questions from the refactor's purpose and concerns.
 
 - Use @../converge/SKILL.md when review requires revising the system purpose, problem frame, or design model.
 
@@ -97,7 +97,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Compare results with the derived expectations and reject unexplained differences.
 
-- Reject reductions that merely relocate complexity across callers, configuration, instructions, or operational work when comparing the affected system.
+- Reject reductions that merely relocate complexity to callers, configuration, instructions, or operational work.
 
 - When the claimed benefit is more local or verifiable subsequent changes, test that claim with a representative change.
 

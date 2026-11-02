@@ -65,7 +65,7 @@ _Devise an explanation for observations._
 
   - Mechanism Alignment: the proposed causal path or its preconditions failed to cover a salient concern.
 
-- Allow several interacting deficiencies, while keeping unsupported causal claims unresolved.
+- Consider interacting deficiencies.
 
 - Propose a correction to the implementation discrepancy or earliest deficient model layer.
 
@@ -89,7 +89,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the correction against the failure evidence and relevant counterexamples.
 
-- Correct the implementation or update the deficient operator artifact and its dependents, according to the diagnosis.
+- Correct the implementation or update the deficient operator artifact and its dependents.
 
 - Retain the diagnosis only when it explains the failure and its correction holds.
 

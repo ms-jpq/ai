@@ -35,7 +35,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Propose a decomposition into independently executable subtasks wherever possible.
+- Propose a decomposition into independently executable subtasks.
 
   - Optimize task boundaries and dependencies for parallelism, disregarding capacity constraints during decomposition.
 

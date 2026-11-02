@@ -7,7 +7,7 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 - Use @../op-purpose-formation/SKILL.md when a conflict requires revising the purpose or external boundary.
 
-- Seek prior art in the domain and adjacent disciplines, recording material differences or the absence of relevant prior art.
+- Seek prior art in the domain and adjacent disciplines. Record material differences or its absence.
 
 ---
 
@@ -51,11 +51,11 @@ _Devise an explanation for observations._
 
   - Keep candidate problems distinct until their independent, coupled, or nested relationships are established.
 
-  - Treat prior art as a candidate frame, not a borrowed answer.
+  - Evaluate prior art as a candidate frame.
 
 - Enumerate and prioritize the concerns implied by each problem.
 
-  - State why each concern matters here and why it has its priority.
+  - Explain each concern's priority.
 
 ---
 

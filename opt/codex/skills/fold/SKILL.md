@@ -33,9 +33,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Explain what the current organization or notation cannot express and propose a revision that expresses repeated meaning once.
-
-  - Preserve differences in scope, conditions, and certainty.
+- Explain what the current organization or notation cannot express and propose a revision.
 
 ---
 

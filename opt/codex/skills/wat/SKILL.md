@@ -37,7 +37,7 @@ _State the input categories and their roles._
 
 _Devise an explanation for observations._
 
-- Identify undefined terms, claims without mechanisms, and missing explanatory steps, distinguishing observed behaviour, intended behaviour, and inference.
+- Identify undefined terms, claims without mechanisms, and missing explanatory steps.
 
 - Propose the simplest explanation that accounts for the evidence.
 
@@ -70,5 +70,3 @@ _Test those consequences and provisionally retain or revise the explanation._
   - Include the concrete case when it clarifies something the prose leaves abstract.
 
   - Remove throat-clearing, repeated conclusions, decorative terminology, and detail unrelated to the user's confusion.
-
-  - Preserve necessary distinctions. Shorter wording is useful only when the explanation remains sufficient.

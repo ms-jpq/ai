@@ -43,7 +43,7 @@ _State the input categories and their roles._
 
 - Applicable rules in `../../rules/`: global, path-specific, and embedded-language requirements governing the destination.
 
-- Deliberate differences and their rationale, where available: constraints on copying reference conventions.
+- Deliberate differences and their rationale: constraints on copying reference conventions.
 
 ---
 
@@ -56,8 +56,6 @@ _Devise an explanation for observations._
 - Explain each mismatch as a rule violation, inconsistent convention, necessary difference, or unresolved conflict.
 
 - Prefer explicit sources over inferred conventions, subject to applicable rules and semantic preservation.
-
-  - Do not copy rule violations shared by peers.
 
   - Resolve conflicting examples from context and repeated patterns. Leave unsupported conventions unresolved.
 
@@ -81,7 +79,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Apply the proposed changes to the destination.
 
-- Retain changes only when checks against applicable rules, references, and the original destination confirm the predicted conformity and preserved semantics.
+- Check the result against the rules, references, and original destination. Retain changes that conform and preserve semantics.
 
   - For code, run relevant checks.
 

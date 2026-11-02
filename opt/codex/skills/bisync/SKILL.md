@@ -25,7 +25,7 @@ _State the intended properties declaratively._
 
 - Reconciled claims satisfy the required correspondence without losing authorized changes or violating the system's purpose and constraints.
 
-- Remaining differences are authorized divergences or explicit unresolved conflicts, with their evidence and disposition.
+- Remaining differences are authorized divergences or unresolved conflicts, with their evidence and disposition.
 
   - Dispositions identify changes by representation and their supporting authority and intent.
 
@@ -69,7 +69,7 @@ _Devise an explanation for observations._
 
 - State the permission, evidence, and intended correspondence supporting the disposition. Defer when permission or intent remains unresolved.
 
-  - Explain how the proposed disposition accounts for the difference without losing an authorized change.
+  - Explain how the disposition preserves authorized changes.
 
 ---
 

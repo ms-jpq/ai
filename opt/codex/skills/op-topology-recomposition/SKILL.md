@@ -7,7 +7,7 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 - Use @../op-purpose-formation/SKILL.md when external boundaries need revision.
 
-- Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced, not merely where responsibilities reside or how parts connect.
+- Use @../op-mechanism-alignment/SKILL.md when a structural proposal changes how effects are produced.
 
 - When invoked independently, establish the concerns and constraints the topology must accommodate.
 
@@ -118,7 +118,5 @@ _Test those consequences and provisionally retain or revise the explanation._
   - Trace the same representative change through both topologies, comparing required context, coordinated changes, and verification effort.
 
   - Prefer the topology that makes the change easier to understand, carry out, and verify while preserving required outcomes.
-
-  - Fewer parts or flows alone do not establish an improvement.
 
 - Retain only necessary mappings, parts, containment relations, and flows, revising the topology when evidence contradicts the model.

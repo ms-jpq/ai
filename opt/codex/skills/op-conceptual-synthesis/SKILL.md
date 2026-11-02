@@ -33,7 +33,7 @@ _State the input categories and their roles._
 
 - Uses, counterexamples, neighbouring concepts, and representations constrain the meaning that names and views must preserve.
 
-- Existing concepts, terms, and models from the domain and adjacent disciplines offer candidates that may already express the distinction.
+- Existing concepts, terms, and models offer candidate names and definitions.
 
 ---
 
@@ -57,7 +57,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict how examples, counterexamples, and neighbouring concepts should be classified in relation to the synthesized concept.
+- Predict how the concept classifies examples, counterexamples, and neighbouring concepts.
 
 - Derive which meanings and distinctions must survive each proposed rename or model view.
 
@@ -73,4 +73,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Reuse retained concepts and terms across each relevant representation.
 
-- Normalize meaningless variation and update or retire a concept when evidence changes its grounded distinction.
+- Normalize meaningless variation and update or retire concepts when their underlying distinctions change.

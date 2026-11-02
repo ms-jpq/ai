@@ -49,8 +49,6 @@ _Devise an explanation for observations._
 
   - Distinguish obsolete content from older information that still explains a current constraint or decision.
 
-  - Support additions with evidence and keep unresolved questions explicit.
-
 - Organize the document around what matters most now.
 
 ---
@@ -75,4 +73,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Check the result against the user's concerns for remaining distractions and consequential omissions.
 
-- Refine the retained and added content without erasing distinctions needed for the user's decisions.
+- Refine the retained and added content.

@@ -13,7 +13,7 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
   - One mechanism may span several components, and one component may implement several mechanisms.
 
-  - Generalizing or splitting a mechanism does not by itself require merging or splitting the components that implement it.
+  - Generalizing or splitting a mechanism need not merge or split its implementing components.
 
 ---
 
@@ -91,8 +91,6 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Specialize, split, or replace a mechanism when evaluation exposes incompatible effects or preconditions.
 
-- Prefer the smallest tested mechanism basis that preserves required coverage.
-
-  - Remove a mechanism when testing confirms that its removal preserves required coverage under the stated assumptions.
+- Retain the smallest tested mechanism basis that preserves required coverage.
 
 - Revisit the mechanism mapping when changing the mechanism does not resolve the gap.

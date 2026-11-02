@@ -21,7 +21,7 @@ _State the intended properties declaratively._
 
 - Mapped facts and relationships agree across the shared model and its stricter representation, except for explicit unresolved discrepancies.
 
-- Queries and checks address the model's questions and possible gaps or contradictions.
+- Queries and checks address the model's questions, gaps, and contradictions.
 
   - Results trace to stated facts and distinguish them from derived conclusions.
 
@@ -93,4 +93,4 @@ _Test those consequences and provisionally retain or revise the explanation._
 
   - Derive views from the model's queries, keeping presentation separate from domain facts and inference rules.
 
-- See `./references/prolog.md` for one example representation of facts, inference rules, and queries.
+- See `./references/prolog.md` for an example representation of facts, inference rules, and queries.

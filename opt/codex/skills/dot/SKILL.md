@@ -21,7 +21,7 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The source representation supplies the graph to translate, whether encoded in filesystem entries, table rows, records, references, or another structure.
+- The source representation supplies the graph to translate.
 
 - Source conventions establish entity identity, relationship direction, and attribute meaning.
 
@@ -59,7 +59,7 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Compare node identities, edge endpoints, directions, and retained attributes with the source. Counts alone do not establish fidelity.
 
-- If rendering, inspect readability and adjust presentation without silently changing topology.
+- If rendering, inspect readability and adjust presentation while preserving topology.
 
 - Deliver the DOT and conversion command, with any unresolved mappings or omissions.
 

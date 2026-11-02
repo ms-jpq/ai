@@ -11,8 +11,6 @@ description: Open focused files, directories, and links only when explicitly inv
 
 - Otherwise, select at most three recent items from the immediate context: files just edited, paths just read, or URLs just discussed.
 
-  - Prefer recency over completeness of the session history.
-
 - For files and directories invoke `tmux-edit` with multiple arguments: `tmux-edit FILE|DIR [FILE|DIR]...`
 
   - Make each path absolute.

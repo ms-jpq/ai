@@ -37,7 +37,7 @@ _Devise an explanation for observations._
 
 - Select one reader-facing defect per pass.
 
-- Explain how the current wording or structure causes the reader-facing defect, then propose a revision.
+- Explain how the wording or structure causes the defect, then propose a revision.
 
 - Break prose into point form.
 
@@ -63,7 +63,7 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Predict how the revision changes the reader's interpretation, lookup, or decision without changing necessary meaning.
+- Predict how the revision changes the reader's interpretation, lookup, or decision.
 
 ---
 

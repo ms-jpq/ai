@@ -8,7 +8,7 @@
   comment('<subject>', "<explanation>").
   ```
 
-  - Replace the placeholders with a subject ID and its explanation. Query `comment('<subject>', Text)` to retrieve the explanation.
+  - Query `comment('<subject>', Text)` to retrieve the explanation.
 
 - Keep orchestration and presentation outside the model. Use JSON for interchange with other tools.
 
@@ -22,9 +22,9 @@
 
 - Use @../../gap-analysis/SKILL.md to identify consequential omissions and express them as queries over the model.
 
-- Enumerate the declared domain systematically rather than checking only selected examples.
+- Enumerate the declared domain.
 
-  - Look for missing relationships, uncovered cases, contradictory obligations, and unreachable outcomes where applicable.
+  - Look for missing relationships, uncovered cases, contradictory obligations, and unreachable outcomes.
 
   - Return the entities and conditions witnessing each gap as JSON for review and reconciliation.
 

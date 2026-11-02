@@ -29,7 +29,7 @@ _State the intended properties declaratively._
 
 - When advancing, the process reaches the next principal state within the authorized scope, with evidence distinguishing completion from an attempt.
 
-  - If completion fails, the record describes the observed state and failed checks rather than claiming advancement.
+  - If completion fails, the record describes the observed state and failed checks.
 
   - When blocked or already complete, the record identifies the current state and why no transition was taken.
 
@@ -54,8 +54,6 @@ _Devise an explanation for observations._
 - When building or revising, propose observable principal states and transitions connecting the starting conditions to the desired outcome.
 
   - Specify each transition's prerequisites, actions, and completion conditions.
-
-  - Treat additions to an incomplete model as hypotheses.
 
 - When advancing, assess the current state against the procedure's observable conditions, then propose the next transition whose prerequisites fit.
 

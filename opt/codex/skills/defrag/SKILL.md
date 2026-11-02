@@ -25,7 +25,7 @@ _State the intended properties declaratively._
 
 - Related content shares canonical locations, and references resolve to the retained content.
 
-- Confirmed semantic duplicates have one retained form, and confirmed aliases have one canonical term.
+- Semantic duplicates have one retained form, and aliases have one canonical term.
 
   - Differences in scope, conditions, certainty, and required behaviour remain expressible.
 
@@ -65,13 +65,9 @@ _Devise an explanation for observations._
 
 - Propose consolidation of semantic duplicates: equivalent meaning or behaviour under the same scope and conditions, regardless of wording or form.
 
-  - Preserve differences in scope, conditions, certainty, and required behaviour.
-
   - Retain candidates whose equivalence is unresolved.
 
 - Propose one canonical term per confirmed alias set.
-
-  - Do not collapse distinct meanings or scopes.
 
 ---
 
