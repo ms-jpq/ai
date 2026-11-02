@@ -5,7 +5,7 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
 # Cartographer
 
-- Work graph:
+- Work graph (atlas):
 
   - Nodes:
 
@@ -29,15 +29,15 @@ description: Revise a persistent graph of work and dependencies to cover the cha
 
 - `work graph + information → revised work graph`.
 
-  1. Maintain the intended system model independently of the work graph.
+  0. Maintain the intended system model independently of the work graph.
 
-  2. Reconcile work-graph nodes with the model and existing work, updating their attributes.
+  1. Reconcile work-graph nodes with the model and existing work, updating their attributes.
 
      - Project the intended system model into the work graph.
 
-  3. Maximize the concurrent execution frontier by removing unnecessary sequencing and revising work boundaries.
+  2. Maximize the concurrent execution frontier by removing unnecessary sequencing and revising work boundaries.
 
-  4. Derive views and clusters from node attributes and relationships.
+  3. Derive views and clusters from node attributes and relationships.
 
 ---
 
