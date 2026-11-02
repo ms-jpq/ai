@@ -21,21 +21,9 @@ description: Cultivate a minimal basis of mechanisms that covers salient concern
 
 _State the intended properties declaratively._
 
-- A minimal basis of named mechanisms that covers salient concerns.
+- **Mechanisms:** A minimal basis of causal processes addressing salient concerns.
 
-  - Each mechanism produces effects that address its mapped concerns under stated assumptions.
-
-  - Shared mechanisms preserve coverage across their concerns without incompatible effects or preconditions.
-
-  - Redundant mechanisms are removed where testing supports preserved coverage.
-
-- An explicit many-to-many concern-to-mechanism mapping.
-
-  - Shared mappings state the causal path that covers their concerns.
-
-  - Mappings include expected effects, preconditions, and possible adverse effects.
-
-- An explicit gap for each salient concern without an understood mechanism.
+- **Coverage:** Which mechanisms address each concern, through what effects and under what conditions, including uncovered concerns.
 
 ---
 
@@ -43,13 +31,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Framed concerns and priorities define the coverage sought.
+- **Concerns:** What the mechanisms must address, ranked by salience.
 
-- Intended, operating, and proposed mechanisms provide candidates for reuse or revision.
+- **Mechanisms:** Existing and proposed causal processes to assess.
 
-- Existing coverage claims, expected effects, assumptions, and evidence provide the baseline for assessing mechanisms and discovering gaps.
-
-- The implementation and its intended mechanism model provide distinct accounts of actual and intended effects.
+- **Coverage:** Claimed effects, operating conditions, and evidence linking mechanisms to concerns.
 
 ---
 

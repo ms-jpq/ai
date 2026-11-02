@@ -13,15 +13,7 @@ description: Give consistent names that semantically compress ideas.
 
 _State the intended properties declaratively._
 
-- A lexicon consistently applied across relevant representations.
-
-  - Necessary distinctions have concise names with explicit definitions, scope, exclusions, and mappings to uses.
-
-  - Meaningless variation is normalized. Concepts are revised or retired when their underlying distinctions change.
-
-  - Unresolved aliases remain explicit.
-
-- Model views preserve necessary distinctions while hiding irrelevant detail.
+- **Lexicon:** Consistent names and definitions for necessary distinctions.
 
 ---
 
@@ -29,11 +21,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- A recurring distinction, relation, or constraint whose naming is absent, ambiguous, unstable, or inconsistent defines the scope.
+- **Lexicon:** Existing names and definitions to reuse or revise.
 
-- Uses, counterexamples, neighbouring concepts, and representations constrain the meaning that names and views must preserve.
+- **Distinctions:** Ideas, relationships, or constraints that need consistent names.
 
-- Existing concepts, terms, and models offer candidate names and definitions.
+- **Usage:** Examples and counterexamples that establish meaning.
 
 ---
 
@@ -49,8 +41,6 @@ _Devise an explanation for observations._
 
   - Propose a consistent mapping of the term, definition, and constraint across each relevant representation.
 
-- Propose a view of a model that preserves its necessary distinctions while hiding irrelevant detail.
-
 ---
 
 ## Deduction
@@ -59,7 +49,7 @@ _Derive consequences of the explanation._
 
 - Predict how the concept classifies examples, counterexamples, and neighbouring concepts.
 
-- Derive which meanings and distinctions must survive each proposed rename or model view.
+- Derive which meanings and distinctions must survive each proposed rename.
 
 ---
 

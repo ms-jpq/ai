@@ -9,15 +9,9 @@ description: Form and revise the system purpose that guides the remaining operat
 
 _State the intended properties declaratively._
 
-- A description of the encountered system and its external boundary.
+- **Boundary:** What belongs to the system and what is excluded.
 
-- A system purpose that explains why the system should change or be preserved, accounting for declared and unmet intentions.
-
-  - Observable success conditions define when the purpose is achieved.
-
-- The purpose accounts for existing commitments and affected parties' interests, with unresolved conflicts explicit.
-
-- Exclusions, unresolved questions, and acceptance or disagreement about the purpose and boundary are explicit.
+- **Purpose:** What the system is intended to achieve.
 
 ---
 
@@ -25,13 +19,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The encountered system, current behaviour, and external boundary establish what may change or be preserved.
+- **System:** What exists and how it behaves.
 
-- Declared and unmet intentions provide candidate reasons for the system's existence or revision.
+- **Intentions:** What people want the system to achieve or preserve.
 
-- Existing commitments and affected parties constrain acceptable purposes.
-
-- Competing purposes expose unresolved differences in intended effects.
+- **Constraints:** Commitments and affected parties' interests that limit acceptable purposes.
 
 ---
 

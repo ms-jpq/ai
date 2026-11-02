@@ -15,15 +15,9 @@ description: Classify a system's obstructing problems and prioritize their conce
 
 _State the intended properties declaratively._
 
-- A working hierarchy of named problems that covers and explains observed resistance to the system purpose.
+- **Problems:** A hierarchy explaining what obstructs the system's purpose.
 
-- An enumeration of concerns implied by each problem, prioritized by salience.
-
-  - Each concern explains observed resistance or could change the response to it or its consequences.
-
-  - Priorities reflect current evidence and each concern's relevance to the system.
-
-  - Deprioritized concerns remain recorded while relevant.
+- **Concerns:** What matters in addressing each problem, ranked by salience.
 
 ---
 
@@ -31,15 +25,11 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- The purpose, success conditions, boundary, commitments, and unresolved conflicts from Purpose Formation define what counts as resistance to the system purpose.
+- **Purpose and boundary:** What the system should achieve and what it includes.
 
-- Observed surprise, conflict, uncertainty, failure, or unmet intention provides evidence of resistance.
+- **Observations:** Evidence of what obstructs that purpose.
 
-- Candidate problems, their supporting observations, unknowns, and competing interpretations provide alternatives for classification.
-
-- Analogous problem frames, concern profiles, mechanisms, and material differences provide prior art for comparison.
-
-- Current concerns and their candidate relations to problems provide the baseline for reprioritization.
+- **Current framing:** Existing problems, concerns, and priorities to reassess.
 
 ---
 

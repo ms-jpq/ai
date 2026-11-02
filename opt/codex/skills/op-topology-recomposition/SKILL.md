@@ -17,23 +17,11 @@ description: Iteratively resolve structural problems in a concern hierarchy.
 
 _State the intended properties declaratively._
 
-- A decomposition of the desired outcome into intermediate outcomes, their dependencies, and explicit conditions for achieving or maintaining each outcome.
+- **Components:** Units of the system with defined responsibilities.
 
-  - Their combined achievement satisfies the desired outcome and each dependent outcome's prerequisites.
+- **Topology:** The components' boundaries, containment, and connections.
 
-- A named hierarchy of parts that achieves those outcomes and resolves structural problems in the concern hierarchy.
-
-  - Boundaries, containment relations, and flows are explicit.
-
-  - The organization makes representative changes easier to understand, carry out, and verify while preserving required outcomes.
-
-- An explicit mapping from framed concerns to outcomes and from outcomes to parts.
-
-  - Each part's boundary and placement are justified.
-
-  - Concerns needing no structural embodiment are identified and explained.
-
-- Cycles that prevent required ordering are resolved. Retained cycles have explicit sources and iteration or feedback semantics.
+- **Concern mapping:** Which components address which concerns.
 
 ---
 
@@ -41,15 +29,13 @@ _State the intended properties declaratively._
 
 _State the input categories and their roles._
 
-- Framed concerns, system purpose, desired outcome, and external boundary define the topology's obligations and scope.
+- **Purpose and boundary:** What the system should achieve and what it includes.
 
-- Current parts, boundaries, containment, flows, and ordering constraints provide the structure to revise.
+- **Concerns:** What the structure must accommodate.
 
-  - Evidence of achieved outcomes and addressed concerns supports assessment of existing coverage.
+- **Topology:** Existing components, responsibilities, and relationships to revise.
 
-- Representative changes and cross-part interactions provide evidence of structural coupling.
-
-- Known cycles, their sources, and observed behaviour support distinguishing ordering obstructions from iteration or feedback.
+- **Evidence:** Behaviour and representative changes that reveal coverage, coupling, and ordering constraints.
 
 ---
 
@@ -59,25 +45,25 @@ _Devise an explanation for observations._
 
 - Treat external boundaries as fixed for the pass.
 
-- Decompose the desired outcome into intermediate outcomes that together suffice to achieve it.
+- Decompose the system into components whose responsibilities together serve its purpose.
 
-  - Specify what must hold at each intermediate outcome before prescribing how to achieve it.
+  - Define each component's responsibilities before choosing its implementation.
 
   - Distinguish necessary dependencies from incidental sequencing.
 
-- Organize parts around those outcomes by exploring topology changes, including:
+- Organize components around their concerns and responsibilities by exploring topology changes:
 
   - Replace the topology with a distinct known pattern.
 
-  - Move a part upward, downward, or laterally in the hierarchy to give its primary concern the right scope.
+  - Move a component within the hierarchy to give its primary concern the right scope.
 
-  - Merge parts when a shared boundary reduces the context needed to understand or verify their responsibilities.
+  - Merge components when a shared boundary reduces the context needed to understand or verify their responsibilities.
 
-  - Split a part when separate boundaries allow its responsibilities to be understood and verified independently.
+  - Split a component when separate boundaries allow its responsibilities to be understood and verified independently.
 
-  - Enclose a system as a part within a larger topology.
+  - Enclose a system as a component within a larger topology.
 
-  - Resolve a cycle when it prevents a required order by changing the parts or flows that create it.
+  - Resolve a cycle when it prevents a required order by changing the components or connections that create it.
 
     - Retain other cycles only as explicit iterations or feedback loops.
 
@@ -85,7 +71,7 @@ _Devise an explanation for observations._
 
 - Recomposition may temporarily increase complexity.
 
-  - For deeply entangled subgraphs, temporarily aggregate parts sharing any concern across hierarchy levels, including non-primary concerns, until the aggregate exposes an emergent concern or clearer partition.
+  - For deeply entangled sub-graphs, temporarily aggregate components sharing concerns across hierarchy levels until the aggregate exposes an emergent concern or clearer partition.
 
 - Prefer a single event loop for events requiring shared ordering, unless independent ownership or progress requires separate loops.
 
@@ -97,9 +83,9 @@ _Devise an explanation for observations._
 
 _Derive consequences of the explanation._
 
-- Derive whether achieving the intermediate outcomes satisfies the desired outcome and each dependent outcome's prerequisites.
+- Derive whether the components' combined responsibilities cover the concerns and serve the system's purpose.
 
-- Trace a representative change through the proposed parts to predict which boundaries and flows it must cross.
+- Trace a representative change through the proposed components to predict which boundaries and connections it must cross.
 
 - Derive an execution order from precedence dependencies and identify remaining conflicts.
 
@@ -113,10 +99,10 @@ _Test those consequences and provisionally retain or revise the explanation._
 
 - Test the derived consequences by comparing the proposed topology with the current one.
 
-  - Check the intermediate outcomes and their combined sufficiency against representative cases and counterexamples.
+  - Check component responsibilities and their combined coverage against representative cases and counterexamples.
 
   - Trace the same representative change through both topologies, comparing required context, coordinated changes, and verification effort.
 
-  - Prefer the topology that makes the change easier to understand, carry out, and verify while preserving required outcomes.
+  - Prefer the topology that makes the change easier to understand, carry out, and verify while preserving required behaviour.
 
-- Retain only necessary mappings, parts, containment relations, and flows, revising the topology when evidence contradicts the model.
+- Retain only necessary concern mappings, components, containment relations, and connections, revising the topology when evidence contradicts the model.
