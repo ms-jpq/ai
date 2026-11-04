@@ -2,7 +2,9 @@
 
 ## **Golden Rule**
 
-- When asking the user to run multiple commands, provide a _single_ shell script that follows these guidelines.
+- When asking the user to run multiple commands, provide the _full path to a **single** shell script_ that follows these guidelines.
+
+  - i.e. `~/dev/project/.exp/debug.sh --prod`.
 
 ---
 
@@ -16,7 +18,7 @@
   set -o pipefail
   ```
 
-- Keep the redundant `set -o pipefail`. Shellcheck sees it.
+- Keep the redundant `set -o pipefail`. `shellcheck` sees it.
 
 - Declare mandatory variables at the entrypoint.
 
