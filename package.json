@@ -1,13 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
   "dependencies": {
-    "@opentelemetry/exporter-trace-otlp-http": "*",
-    "@opentelemetry/exporter-trace-otlp-proto": "*",
-    "@opentelemetry/sdk-trace-base": "*",
-    "@opentelemetry/semantic-conventions": "*",
     "ajv": "*",
     "ajv-draft-04": "*",
-    "langfuse-cli": "*",
     "prettier": "*",
     "yaml": "*"
   },

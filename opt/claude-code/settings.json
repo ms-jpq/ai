@@ -17,16 +17,7 @@
     "CLAUDE_CODE_ENHANCED_TELEMETRY_BETA": "0",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "DISABLE_UPGRADE_COMMAND": "1",
-    "ENABLE_TOOL_SEARCH": "auto:5",
-    "OTEL_LOGS_EXPORTER": "otlp",
-    "OTEL_LOGS_EXPORT_INTERVAL": "1000",
-    "OTEL_LOG_TOOL_CONTENT": "1",
-    "OTEL_LOG_TOOL_DETAILS": "1",
-    "OTEL_LOG_USER_PROMPTS": "1",
-    "OTEL_METRICS_EXPORTER": "otlp",
-    "OTEL_METRIC_EXPORT_INTERVAL": "1000",
-    "OTEL_TRACES_EXPORTER": "otlp",
-    "OTEL_TRACES_EXPORT_INTERVAL": "1000"
+    "ENABLE_TOOL_SEARCH": "auto:5"
   },
   "feedbackSurveyRate": 0,
   "hooks": {
@@ -68,17 +59,6 @@
         "hooks": [
           {
             "command": "~/.local/opt/ai/opt/claude-code/hooks/yes.sh",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "PostCompact": [
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/telemetry.sh",
             "type": "command"
           }
         ]
@@ -203,11 +183,6 @@
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
             "type": "command"
-          },
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/telemetry.sh",
-            "type": "command"
           }
         ]
       }
@@ -226,22 +201,6 @@
           {
             "async": true,
             "command": "~/.local/opt/ai/opt/claude-code/hooks/notification.sh",
-            "type": "command"
-          },
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/telemetry.sh",
-            "type": "command"
-          }
-        ]
-      }
-    ],
-    "SubagentStop": [
-      {
-        "hooks": [
-          {
-            "async": true,
-            "command": "~/.local/opt/ai/opt/claude-code/hooks/telemetry.sh",
             "type": "command"
           }
         ]
@@ -283,7 +242,6 @@
       }
     ]
   },
-  "otelHeadersHelper": "~/.local/opt/ai/opt/claude-code/libexec/otel-headers-helper.sh",
   "outputStyle": "concise",
   "permissions": {
     "allow": [
