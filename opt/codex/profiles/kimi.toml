@@ -1,0 +1,10 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+model              = "moonshot/kimi-k3.1-pro"
+model_catalog_json = "${CODEX_HOME}/model_catalog.json"
+model_provider     = "kimi"
+
+[model_providers.kimi]
+base_url         = "https://litellm.${MCP_DOMAIN}/v1"
+env_http_headers = { "x-api-key" = "MOONSHOT_API_KEY" }
+name             = "kimi"
