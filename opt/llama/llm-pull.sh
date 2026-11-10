@@ -5,19 +5,19 @@ set -o pipefail
 if (($#)); then
   MODEL="$*"
 else
-  URI='https://ollama.com/library'
+  URI='https://huggingface.co/models?library=gguf'
   printf -- '%s\n' "$URI" >&2
   exec -- open -- "$URI"
 fi
 
-: "${OLLAMA_API_BASE?}"
+: "${LLAMA_API_BASE?}"
 
 CURL=(
   curl.sh
-  'ollama'
+  'llama'
   --no-buffer
   --json @-
-  -- "$OLLAMA_API_BASE/api/pull"
+  -- "${LLAMA_API_BASE%/}/models"
 )
 
 PARSE=(

@@ -8,7 +8,7 @@ PATH="$DIR:$PATH"
 DIRS=(
   "$DIR"
   "$DIR/../chatty"
-  "$DIR/../ollama"
+  "$DIR/../llama"
   "$DIR/../anthropic"
   "$DIR/../openai"
 )

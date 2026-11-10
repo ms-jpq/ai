@@ -2,14 +2,13 @@
 
 set -o pipefail
 
-: "${OLLAMA_API_BASE?}"
+: "${LLAMA_API_BASE?}"
 
 CURL=(
   curl.sh
-  'ollama'
+  'llama'
   --
-  "$OLLAMA_API_BASE/api/ps"
-  "$OLLAMA_API_BASE/api/tags"
+  "${LLAMA_API_BASE%/}/models"
 )
 
 PARSE=(

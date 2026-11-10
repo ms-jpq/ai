@@ -2,17 +2,17 @@
 
 set -o pipefail
 
-: "${OLLAMA_API_BASE?}"
+: "${LLAMA_API_BASE?}"
 
 CURL=(
   curl.sh
-  'ollama'
+  'llama'
   --no-buffer
   --json @-
-  --url "$OLLAMA_API_BASE/api/chat"
+  --url "${LLAMA_API_BASE%/}/v1/chat/completions"
 )
 
-if [[ -n $LITELLM_API_KEY ]]; then
+if [[ -n ${LITELLM_API_KEY:-} ]]; then
   CURL+=(--header "X-Litellm-Api-Key: $LITELLM_API_KEY")
 fi
 
@@ -21,7 +21,7 @@ PARSE=(
   --exit-status
   --join-output
   --unbuffered
-  '.message // {} | .content // empty'
+  '.choices[]?.delta.content // empty'
 )
 
 "${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"

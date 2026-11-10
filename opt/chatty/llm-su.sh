@@ -104,7 +104,7 @@ gemini*)
 JQ
   ;;
 *)
-  COMP='ollama'
+  COMP='llama'
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   stream: true,
