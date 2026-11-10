@@ -1,5 +1,5 @@
-claude-opus-4-6
-gemini-2.5-pro-exp-03-25
-gpt-5.4
-grok-4
-qwen3:14b
+anthropic/claude-opus-5-5
+google/gemini-4-carbon
+openai/gpt-6-astra
+xai/grok-4.7
+llama/ggml-org/Qwen3.8-27B-GGUF:Q4_K_M

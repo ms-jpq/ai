@@ -49,8 +49,18 @@ fi
 ARGV=()
 
 case "$MODEL" in
-gpt*)
-  COMP='openai'
+*/?*)
+  COMP="${MODEL%%/*}"
+  MODEL="${MODEL#*/}"
+  ;;
+*)
+  set -x
+  exit 2
+  ;;
+esac
+
+case "$COMP" in
+openai)
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   stream: true,
@@ -60,8 +70,7 @@ gpt*)
 }
 JQ
   ;;
-grok*)
-  COMP='xai'
+xai | llama)
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   stream: true,
@@ -70,8 +79,7 @@ grok*)
 }
 JQ
   ;;
-claude*)
-  COMP='anthropic'
+anthropic)
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   stream: true,
@@ -83,7 +91,7 @@ claude*)
 }
 JQ
   ;;
-gemini*)
+google)
   COMP='deepmind'
   export -- GEMINI_MODEL="$MODEL"
   read -r -d '' -- JQ <<- 'JQ' || true
@@ -104,14 +112,8 @@ gemini*)
 JQ
   ;;
 *)
-  COMP='llama'
-  read -r -d '' -- JQ <<- 'JQ' || true
-{
-  stream: true,
-  model: $model,
-  messages: .
-}
-JQ
+  set -x
+  exit 2
   ;;
 esac
 
