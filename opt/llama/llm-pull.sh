@@ -17,6 +17,8 @@ CURL=(
   'llama'
   --no-buffer
   --json @-
+  --no-fail
+  --fail-with-body
   -- "${LLAMA_API_BASE%/}/models"
 )
 
