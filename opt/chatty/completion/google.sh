@@ -2,15 +2,15 @@
 
 set -o pipefail
 
-: "${GEMINI_MODEL?}"
+: "${GOOGLE_MODEL?}"
 : "${GOOGLE_API_KEY?}"
 
 CURL=(
   curl.sh
-  'deepmind'
+  'google'
   --no-buffer
   --json @-
-  --url "${GOOGLE_BASE_URL:-"https://generativelanguage.googleapis.com"}/v1beta/models/$GEMINI_MODEL:streamGenerateContent?key=$GOOGLE_API_KEY"
+  --url "${GOOGLE_BASE_URL:-"https://generativelanguage.googleapis.com"}/v1beta/models/$GOOGLE_MODEL:streamGenerateContent?key=$GOOGLE_API_KEY"
 )
 
 PREPARSE=(

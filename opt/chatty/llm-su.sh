@@ -49,13 +49,12 @@ fi
 ARGV=()
 
 case "$MODEL" in
-*/?*)
+openai/* | anthropic/* | google/* | xai/*)
   COMP="${MODEL%%/*}"
   MODEL="${MODEL#*/}"
   ;;
 *)
-  set -x
-  exit 2
+  COMP='llama'
   ;;
 esac
 
@@ -92,8 +91,7 @@ anthropic)
 JQ
   ;;
 google)
-  COMP='deepmind'
-  export -- GEMINI_MODEL="$MODEL"
+  export -- GOOGLE_MODEL="$MODEL"
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   safetySettings: [

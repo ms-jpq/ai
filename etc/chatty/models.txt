@@ -2,4 +2,4 @@ anthropic/claude-opus-5-5
 google/gemini-4-carbon
 openai/gpt-6-astra
 xai/grok-4.7
-llama/ggml-org/Qwen3.8-27B-GGUF:Q4_K_M
+ggml-org/Qwen3.8-27B-GGUF:Q4_K_M
