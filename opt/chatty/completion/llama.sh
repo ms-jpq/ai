@@ -11,7 +11,7 @@ CURL=(
   --no-buffer
   --json @-
   --header "X-Api-Key: $LLAMA_API_KEY"
-  --url "https://litellm.$MCP_DOMAIN/v1/chat/completions"
+  --url "https://litellm.$MCP_DOMAIN/v1/responses"
 )
 
 PARSE=(
@@ -19,7 +19,7 @@ PARSE=(
   --exit-status
   --join-output
   --unbuffered
-  '.choices[]?.delta.content // empty'
+  'select(.type == "response.output_text.delta") | .delta // empty'
 )
 
 "${CURL[@]}" | llm-pager.sh "$@" "${PARSE[@]}"

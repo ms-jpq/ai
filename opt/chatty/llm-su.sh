@@ -54,7 +54,7 @@ if [[ $COMP != llama ]]; then
 fi
 
 case "$COMP" in
-openai)
+openai | llama)
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   stream: true,
@@ -64,7 +64,7 @@ openai)
 }
 JQ
   ;;
-xai | llama)
+xai)
   read -r -d '' -- JQ <<- 'JQ' || true
 {
   stream: true,
