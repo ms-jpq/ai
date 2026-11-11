@@ -2,19 +2,17 @@
 
 set -o pipefail
 
-: "${LLAMA_API_BASE?}"
+: "${MCP_DOMAIN?}"
+: "${LLAMA_API_KEY?}"
 
 CURL=(
   curl.sh
   'llama'
   --no-buffer
   --json @-
-  --url "${LLAMA_API_BASE%/}/v1/chat/completions"
+  --header "X-Api-Key: $LLAMA_API_KEY"
+  --url "https://litellm.$MCP_DOMAIN/v1/chat/completions"
 )
-
-if [[ -n ${LITELLM_API_KEY:-} ]]; then
-  CURL+=(--header "X-Litellm-Api-Key: $LITELLM_API_KEY")
-fi
 
 PARSE=(
   jq

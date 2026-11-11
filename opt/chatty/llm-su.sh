@@ -48,15 +48,10 @@ fi
 
 ARGV=()
 
-case "$MODEL" in
-openai/* | anthropic/* | google/* | xai/*)
-  COMP="${MODEL%%/*}"
+COMP="${MODEL%%/*}"
+if [[ $COMP != llama ]]; then
   MODEL="${MODEL#*/}"
-  ;;
-*)
-  COMP='llama'
-  ;;
-esac
+fi
 
 case "$COMP" in
 openai)

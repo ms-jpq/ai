@@ -1,9 +1,9 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-model          = "ggml-org/Qwen3.8-27B-GGUF:Q4_K_M"
+model          = "llama/ggml-org/Qwen3.8-27B-GGUF:Q4_K_M"
 model_provider = "llama"
 
 [model_providers.llama]
-base_url = "${LLAMA_API_BASE}/v1"
-env_key  = "LLAMA_API_KEY"
-name     = "llama"
+base_url         = "https://litellm.${MCP_DOMAIN}/v1"
+env_http_headers = { "x-api-key" = "LLAMA_API_KEY" }
+name             = "llama"

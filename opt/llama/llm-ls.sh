@@ -2,13 +2,15 @@
 
 set -o pipefail
 
-: "${LLAMA_API_BASE?}"
+: "${MCP_DOMAIN?}"
+: "${LLAMA_API_KEY?}"
 
 CURL=(
   curl.sh
   'llama'
+  --header "X-Api-Key: $LLAMA_API_KEY"
   --
-  "${LLAMA_API_BASE%/}/models"
+  "https://litellm.${MCP_DOMAIN}/models"
 )
 
 PARSE=(

@@ -10,16 +10,18 @@ else
   exec -- open -- "$URI"
 fi
 
-: "${LLAMA_API_BASE?}"
+: "${MCP_DOMAIN?}"
+: "${LLAMA_API_KEY?}"
 
 CURL=(
   curl.sh
   'llama'
   --no-buffer
   --json @-
+  --header "X-Api-Key: $LLAMA_API_KEY"
   --no-fail
   --fail-with-body
-  -- "${LLAMA_API_BASE%/}/models"
+  -- "https://litellm.$MCP_DOMAIN/models"
 )
 
 PARSE=(
