@@ -121,11 +121,12 @@
 - Resolve nearby scripts from the current script path:
 
   ```bash
-  SELF="$(realpath -- "$0")"
-  BASE="${SELF%/*}"
+  BASE="${0%/*}"
 
   exec -- "$BASE/tool.sh" "$@"
   ```
+
+  - Use `realpath -- "$0"` only when an absolute path or symlink resolution is required.
 
 - `command -v --` or `hash --` to check command existence.
 
