@@ -4,7 +4,7 @@ set -o pipefail
 
 JSON="$(tee)"
 EVENT="$(jq -e --raw-output '.hook_event_name' <<< "$JSON")"
-BASE="$(realpath -- "${0%/*}/..")"
+BASE="${0%/*}/.."
 
 if jq -e '.agent_id' <<< "$JSON" > /dev/null; then
   exit

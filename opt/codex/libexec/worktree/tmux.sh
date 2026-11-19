@@ -2,9 +2,6 @@
 
 set -o pipefail
 
-SELF="$(realpath -- "$0")"
-SELF="${SELF%/*}"
-
 ACTION="$1"
 shift -- 1
 

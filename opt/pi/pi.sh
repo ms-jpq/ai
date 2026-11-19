@@ -5,7 +5,7 @@ shopt -s dotglob nullglob extglob globstar
 
 BASE="$(realpath -- "$0")"
 BASE="${BASE%/*}"
-ROOT="$(realpath -- "$BASE/../..")"
+ROOT="$BASE/../.."
 
 set -a
 # shellcheck disable=SC1091

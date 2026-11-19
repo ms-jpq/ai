@@ -2,8 +2,7 @@
 
 set -o pipefail
 
-SELF="$(realpath -- "$0")"
-SELF="${SELF%/*}"
+SELF="${0%/*}"
 
 ACTION="${1:-"list"}"
 if [[ ${1:-} == set-status ]] && [[ ${LOCKED:-} != 1 ]]; then

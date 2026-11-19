@@ -6,7 +6,6 @@ BASE="${0%/*}"
 SRC="$1"
 DST="$2"
 DST_DIR="${DST%/*}"
-DST_DIR="$(realpath -- "$DST_DIR")"
 ROOT="$(realpath -- "$BASE/../../..")"
 
 export -- CODEX_HOME="$ROOT/var/codex"
